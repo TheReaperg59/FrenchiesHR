@@ -1313,6 +1313,75 @@ body{
   .side button[data-view]:hover,.metric:hover{transform:none}
 }
 
+/* ===== Todo desk v2 + build marker ===== */
+.build-banner{
+  display:flex;flex-wrap:wrap;align-items:center;gap:10px 14px;
+  padding:12px 16px;border-radius:14px;margin:0;
+  background:linear-gradient(90deg, oklch(28% .05 155), oklch(34% .07 155));
+  color:oklch(96% .01 84);border:1px solid oklch(42% .06 155);
+  box-shadow:0 10px 28px oklch(20% .03 155 / .18);
+  font-size:.8rem;
+}
+.build-banner b{color:var(--gold);font-family:'Playfair Display',serif;font-size:1rem;font-weight:700}
+.build-banner .pill{margin-left:auto}
+.build-chip{
+  font:700 .68rem 'JetBrains Mono',monospace;padding:5px 9px;border-radius:8px;
+  background:var(--navy);color:var(--gold);border:1px solid oklch(40% .05 155);
+}
+.todo-card-v2{overflow:hidden}
+.todo-card-v2 .todo-head{align-items:flex-start;gap:12px;border-bottom:0;padding-bottom:10px}
+.todo-subhead{font-size:.72rem;color:var(--muted);margin-top:4px;line-height:1.4}
+.todo-head-actions{display:flex;flex-wrap:wrap;gap:6px;align-items:center;justify-content:flex-end}
+.todo-stats{
+  display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:8px;
+  padding:0 14px 12px;
+}
+.todo-stat{
+  background:oklch(97.5% .008 84);border:1px solid var(--line);border-radius:11px;
+  padding:10px 10px 8px;text-align:center;
+}
+.todo-stat label{display:block;font-size:.58rem;text-transform:uppercase;letter-spacing:.08em;color:var(--muted);font-weight:700}
+.todo-stat strong{display:block;margin-top:4px;font:700 1.05rem 'JetBrains Mono',monospace;color:var(--navy)}
+.todo-progress{
+  height:4px;margin:0 14px 10px;border-radius:999px;background:oklch(93% .01 84);overflow:hidden;
+}
+.todo-progress i{
+  display:block;height:100%;width:0%;border-radius:inherit;
+  background:linear-gradient(90deg, var(--gold), var(--navy));
+  transition:width .25s ease;
+}
+.todo-toolbar{
+  display:flex;flex-wrap:wrap;gap:8px;padding:0 14px 10px;align-items:center;
+}
+.todo-search,.todo-toolbar select,.todo-add-pri{
+  border:1px solid var(--line);background:var(--paper);border-radius:9px;
+  padding:8px 10px;font-size:.74rem;min-height:36px;
+}
+.todo-search{flex:1;min-width:140px}
+.todo-card-v2 .todo-filters{padding:0 12px 10px;border-bottom:0;background:transparent;gap:6px}
+.todo-chip-n{
+  display:inline-block;min-width:1.1em;margin-left:4px;padding:0 5px;border-radius:999px;
+  background:oklch(94% .01 155);color:var(--muted);font:700 .58rem 'JetBrains Mono',monospace;
+}
+.todo-chip.active .todo-chip-n{background:oklch(40% .05 155);color:var(--gold)}
+.todo-card-v2 .todo-panel{max-height:min(58vh,560px);padding:4px 8px 8px}
+.todo-card-v2 .todo-group{padding:4px 0 10px}
+.todo-card-v2 .todo-group-head{padding:8px 8px 6px}
+.todo-card-v2 .attn{
+  grid-template-columns:minmax(0,1fr) auto;gap:10px;
+  margin:0 4px 8px;padding:12px 13px;border-radius:12px;
+}
+.attn-kicker{font-size:.62rem;font-weight:700;letter-spacing:.06em;text-transform:uppercase;color:var(--muted)}
+.attn-title{font-size:.84rem}
+.attn-detail{font-size:.74rem}
+.todo-add{align-items:stretch}
+.todo-add-pri{width:108px;color:var(--navy);font-weight:600}
+.todo-card-v2.todo-focus-mode .attn:not(.tone-danger):not(.tone-warn){opacity:.45}
+@media(max-width:720px){
+  .todo-stats{grid-template-columns:repeat(2,minmax(0,1fr))}
+  .todo-add-pri{width:100%}
+}
+
 </style>
 </head>
 <body>
@@ -1388,6 +1457,7 @@ body{
       <option value="backup">Backup</option>
     </select>
     <button type="button" class="help-btn" id="helpShortcuts" title="Keyboard shortcuts" aria-haspopup="dialog" aria-controls="shortcutSheet">?</button>
+    <span class="build-chip" title="Desk build marker">v8</span>
     <span class="kbd-hint" title="Press ? for shortcuts">g then key</span>
     <div class="payday"><span id="saveBadge" title="Autosave status">Saved</span><span class="payday-sep" aria-hidden="true">·</span><span>Payday: Sunday, 9:00 AM</span></div>
   </div>
@@ -1396,6 +1466,11 @@ body{
 
 <!-- OVERVIEW -->
 <section class="view active" id="view-overview" role="region" aria-labelledby="title-overview" tabindex="-1">
+  <div class="build-banner" id="buildBanner" role="status">
+    <b>Desk build v8</b>
+    <span>Todo desk rebuilt · Sunday pay run · Probation review · Availability board</span>
+    <span class="pill green" id="buildStamp">LIVE</span>
+  </div>
   <div class="desk-hero">
     <div class="desk-hero-main">
       <div class="desk-hero-brand">Frenchie's Restaurant</div>
@@ -1458,21 +1533,51 @@ body{
       </div>
     </div>
     <div class="stack-col">
-      <div class="card todo-card"><div class="card-head"><b>To-do desk</b><span class="pill warn" id="attnCount">0</span></div>
-        <div class="todo-summary" id="todoSummary">Payday pings Fri–Sun · Sunday 9:00 AM</div>
-        <div class="todo-filters" id="todoFilters">
-          <button type="button" class="todo-chip active" data-todo-filter="all" aria-pressed="true">All</button>
-          <button type="button" class="todo-chip" data-todo-filter="urgent" aria-pressed="false">Urgent</button>
-          <button type="button" class="todo-chip" data-todo-filter="payroll" aria-pressed="false">Payroll</button>
-          <button type="button" class="todo-chip" data-todo-filter="hires" aria-pressed="false">Hires</button>
-          <button type="button" class="todo-chip" data-todo-filter="pipeline" aria-pressed="false">Pipeline</button>
-          <button type="button" class="todo-chip" data-todo-filter="desk" aria-pressed="false">Desk</button>
-          <button type="button" class="todo-chip" data-todo-filter="yours" aria-pressed="false">Yours</button>
+      <div class="card todo-card todo-card-v2">
+        <div class="card-head todo-head">
+          <div>
+            <b>To-do desk</b>
+            <div class="todo-subhead" id="todoSummary">Rebuilt queue · payday Fri–Sun</div>
+          </div>
+          <div class="todo-head-actions">
+            <span class="pill warn" id="attnCount">0</span>
+            <button type="button" class="btn tiny soft" id="todoFocusBtn" title="Show only urgent / due soon">Focus</button>
+            <button type="button" class="btn tiny" id="todoClearDismissed" title="Restore hidden system to-dos">Restore hidden</button>
+          </div>
         </div>
-        <div class="todo-panel" id="attn"></div>
+        <div class="todo-stats" id="todoStats" aria-label="To-do counts">
+          <div class="todo-stat"><label>Urgent</label><strong id="todoStatUrgent">0</strong></div>
+          <div class="todo-stat"><label>Open</label><strong id="todoStatOpen">0</strong></div>
+          <div class="todo-stat"><label>Due soon</label><strong id="todoStatDue">0</strong></div>
+          <div class="todo-stat"><label>Yours</label><strong id="todoStatYours">0</strong></div>
+        </div>
+        <div class="todo-progress" aria-hidden="true"><i id="todoProgressBar"></i></div>
+        <div class="todo-toolbar">
+          <input type="search" id="todoSearch" class="todo-search" placeholder="Search to-dos…" aria-label="Search to-dos" autocomplete="off">
+          <select id="todoSort" aria-label="Sort to-dos">
+            <option value="priority">Sort: Priority</option>
+            <option value="due">Sort: Due date</option>
+            <option value="group">Sort: Group</option>
+          </select>
+        </div>
+        <div class="todo-filters" id="todoFilters" role="toolbar" aria-label="Filter to-dos">
+          <button type="button" class="todo-chip active" data-todo-filter="all" aria-pressed="true">All <span class="todo-chip-n" data-count-for="all">0</span></button>
+          <button type="button" class="todo-chip" data-todo-filter="urgent" aria-pressed="false">Urgent <span class="todo-chip-n" data-count-for="urgent">0</span></button>
+          <button type="button" class="todo-chip" data-todo-filter="payroll" aria-pressed="false">Payroll <span class="todo-chip-n" data-count-for="payroll">0</span></button>
+          <button type="button" class="todo-chip" data-todo-filter="hires" aria-pressed="false">Hires <span class="todo-chip-n" data-count-for="hires">0</span></button>
+          <button type="button" class="todo-chip" data-todo-filter="pipeline" aria-pressed="false">Pipeline <span class="todo-chip-n" data-count-for="pipeline">0</span></button>
+          <button type="button" class="todo-chip" data-todo-filter="desk" aria-pressed="false">Desk <span class="todo-chip-n" data-count-for="desk">0</span></button>
+          <button type="button" class="todo-chip" data-todo-filter="yours" aria-pressed="false">Yours <span class="todo-chip-n" data-count-for="yours">0</span></button>
+        </div>
+        <div class="todo-panel" id="attn" role="list"></div>
         <div class="todo-add">
-          <input id="todoAddText" class="todo-add-text" placeholder="Add your own to-do…">
-          <input id="todoAddDue" class="todo-add-due" type="date" title="Optional due date">
+          <input id="todoAddText" class="todo-add-text" placeholder="Add your own to-do…" aria-label="New to-do text">
+          <input id="todoAddDue" class="todo-add-due" type="date" title="Optional due date" aria-label="Due date">
+          <select id="todoAddPri" class="todo-add-pri" aria-label="Priority" title="Priority">
+            <option value="1">Normal</option>
+            <option value="2">Soon</option>
+            <option value="3">Urgent</option>
+          </select>
           <button class="btn tiny primary" id="todoAddBtn">Add</button>
         </div>
       </div>
@@ -2730,7 +2835,8 @@ function migrate(raw) {
     text: String(t.text || '').trim(),
     due: t.due || '',
     done: !!t.done,
-    created: t.created || today()
+    created: t.created || today(),
+    priority: Math.min(3, Math.max(1, Number(t.priority) || 1))
   })).filter(t => t.text) : [];
   out.todoDismissed = (raw.todoDismissed && typeof raw.todoDismissed === 'object') ? { ...raw.todoDismissed } : {};
 
@@ -3455,7 +3561,7 @@ function buildTodos() {
             ? 'Probation ended ' + Math.abs(d) + ' day' + (Math.abs(d) === 1 ? '' : 's') + ' ago — review overdue.'
             : (d === 0 ? 'Probation ends today — review due.' : 'Probation ends in ' + d + ' day' + (d === 1 ? '' : 's') + '.'),
           due: e.probationEnd,
-          go: { type: 'emp', id: e.id }
+          go: { type: 'emp', id: e.id, tab: 'onboard' }
         });
       }
     }
@@ -3608,11 +3714,13 @@ function buildTodos() {
   (s.todos || []).filter(td => !td.done).forEach(td => {
     const overdue = td.due && daysBetween(t, td.due) < 0;
     const dueSoon = td.due && daysBetween(t, td.due) <= 2;
+    const pri = Math.min(3, Math.max(1, Number(td.priority) || 1));
+    const tone = overdue || pri >= 3 ? 'danger' : (dueSoon || pri >= 2 ? 'warn' : 'gray');
     push({
       id: 'manual-' + td.id,
       group: 'yours',
-      tone: overdue ? 'danger' : (dueSoon ? 'warn' : 'gray'),
-      priority: overdue ? 3 : (dueSoon ? 2 : 1),
+      tone,
+      priority: overdue ? 3 : Math.max(pri, dueSoon ? 2 : 1),
       tag: 'Yours',
       title: td.text,
       detail: td.due
@@ -3642,14 +3750,67 @@ const TODO_GROUPS = [
 ];
 const TODO_GROUP_ORDER = { payroll: 0, hires: 1, pipeline: 2, desk: 3, yours: 4 };
 let todoFilter = 'all';
+let todoSort = 'priority';
+let todoSearch = '';
+let todoFocusMode = false;
 
 function attentionItems() { return buildTodos(); }
 
+function todoDueScore(item) {
+  if (!item || !item.due) return 9999;
+  return daysBetween(today(), item.due);
+}
+
+function sortTodos(list) {
+  const arr = (list || []).slice();
+  if (todoSort === 'due') {
+    arr.sort((a, b) => {
+      const da = todoDueScore(a), db = todoDueScore(b);
+      if (da !== db) return da - db;
+      return (b.priority || 0) - (a.priority || 0);
+    });
+  } else if (todoSort === 'group') {
+    arr.sort((a, b) => {
+      const ga = TODO_GROUP_ORDER[a.group] != null ? TODO_GROUP_ORDER[a.group] : 9;
+      const gb = TODO_GROUP_ORDER[b.group] != null ? TODO_GROUP_ORDER[b.group] : 9;
+      if (ga !== gb) return ga - gb;
+      return (b.priority || 0) - (a.priority || 0);
+    });
+  } else {
+    arr.sort((a, b) => {
+      const pa = a.priority || 0, pb = b.priority || 0;
+      if (pa !== pb) return pb - pa;
+      return todoDueScore(a) - todoDueScore(b);
+    });
+  }
+  return arr;
+}
+
 function filteredTodos(items) {
-  const list = items || buildTodos();
-  if (todoFilter === 'all') return list;
-  if (todoFilter === 'urgent') return list.filter(i => i.tone === 'danger' || i.priority >= 3);
-  return list.filter(i => (i.group || 'desk') === todoFilter);
+  let list = (items || buildTodos()).slice();
+  if (todoFilter === 'urgent') list = list.filter(i => i.tone === 'danger' || i.priority >= 3);
+  else if (todoFilter !== 'all') list = list.filter(i => (i.group || 'desk') === todoFilter);
+  const q = String(todoSearch || '').trim().toLowerCase();
+  if (q) {
+    list = list.filter(i => {
+      const blob = [i.title, i.detail, i.tag, i.group, i.text].map(x => String(x || '').toLowerCase()).join(' ');
+      return blob.includes(q);
+    });
+  }
+  if (todoFocusMode) {
+    list = list.filter(i => i.tone === 'danger' || i.tone === 'warn' || (i.due && todoDueScore(i) <= 2) || (i.priority || 0) >= 2);
+  }
+  return sortTodos(list);
+}
+
+function countTodosByFilter(all) {
+  const counts = { all: all.length, urgent: 0, payroll: 0, hires: 0, pipeline: 0, desk: 0, yours: 0 };
+  all.forEach(i => {
+    if (i.tone === 'danger' || i.priority >= 3) counts.urgent++;
+    const g = i.group || 'desk';
+    if (counts[g] != null) counts[g]++;
+  });
+  return counts;
 }
 
 function goTodo(item) {
@@ -3666,7 +3827,12 @@ function goTodo(item) {
   }
   if (g.type === 'emp') {
     goView('employees');
-    setTimeout(() => editEmployee(g.id), 60);
+    setTimeout(() => {
+      editEmployee(g.id);
+      if (g.tab) setEmpFileTab(g.tab);
+      else if (String(item.id || '').indexOf('hire-probation-') === 0 || String(item.tag || '') === 'Probation') setEmpFileTab('onboard');
+      else if (String(item.tag || '') === 'Contract' || String(item.tag || '') === 'Packet') setEmpFileTab('file');
+    }, 60);
     return;
   }
   if (g.type === 'app') {
@@ -3696,39 +3862,80 @@ window.dismissTodo = function (idx) {
   toast('To-do cleared');
 };
 
-function addManualTodo(text, due) {
+function addManualTodo(text, due, priority) {
   const t = String(text || '').trim();
   if (!t) return toast('Write a to-do first');
   ensureMeta();
-  s.todos.unshift({ id: Date.now(), text: t, due: due || '', done: false, created: today() });
+  const pri = Math.min(3, Math.max(1, Number(priority) || 1));
+  s.todos.unshift({
+    id: Date.now(),
+    text: t,
+    due: due || '',
+    done: false,
+    created: today(),
+    priority: pri
+  });
   save();
   render();
   toast(due ? 'To-do added · due ' + due : 'To-do added');
+}
+
+function clearDismissedTodos() {
+  ensureMeta();
+  const n = Object.keys(s.todoDismissed || {}).length;
+  s.todoDismissed = {};
+  save();
+  render();
+  toast(n ? ('Restored ' + n + ' hidden to-do' + (n === 1 ? '' : 's')) : 'Nothing was hidden');
 }
 
 function renderAttention() {
   const all = buildTodos();
   window.__todoItems = all;
   const items = filteredTodos(all);
-  const urgent = all.filter(i => i.tone === 'danger').length;
+  const urgent = all.filter(i => i.tone === 'danger' || i.priority >= 3).length;
+  const dueSoon = all.filter(i => i.due && todoDueScore(i) <= 2).length;
+  const yours = all.filter(i => i.group === 'yours').length;
   const shown = items.length;
+  const counts = countTodosByFilter(all);
 
   if ($('attnCount')) {
     $('attnCount').textContent = String(all.length);
     $('attnCount').className = 'pill ' + (urgent ? 'danger' : (all.length ? 'warn' : 'green'));
   }
+  if ($('todoStatUrgent')) $('todoStatUrgent').textContent = String(urgent);
+  if ($('todoStatOpen')) $('todoStatOpen').textContent = String(all.length);
+  if ($('todoStatDue')) $('todoStatDue').textContent = String(dueSoon);
+  if ($('todoStatYours')) $('todoStatYours').textContent = String(yours);
+  if ($('todoProgressBar')) {
+    const weight = Math.min(100, urgent * 28 + dueSoon * 12 + Math.min(40, all.length * 4));
+    $('todoProgressBar').style.width = (all.length ? Math.max(8, weight) : 0) + '%';
+  }
   if ($('todoSummary')) {
     $('todoSummary').textContent = all.length
       ? (urgent ? urgent + ' urgent · ' : '') + all.length + ' open' +
-        (todoFilter !== 'all' ? ' · showing ' + shown : '') +
-        ' · payday pings Fri–Sun'
-      : 'Desk is clear · payday pings Fri–Sun · Sunday 9:00 AM';
+        (todoFilter !== 'all' || todoSearch || todoFocusMode ? ' · showing ' + shown : '') +
+        (todoFocusMode ? ' · focus on' : '') +
+        ' · payday Fri–Sun'
+      : 'Desk is clear · payday reminders Fri–Sun · Sunday 9:00 AM';
   }
   document.querySelectorAll('[data-todo-filter]').forEach(btn => {
     const on = btn.getAttribute('data-todo-filter') === todoFilter;
     btn.classList.toggle('active', on);
     btn.setAttribute('aria-pressed', on ? 'true' : 'false');
   });
+  document.querySelectorAll('[data-count-for]').forEach(el => {
+    const key = el.getAttribute('data-count-for');
+    el.textContent = String(counts[key] != null ? counts[key] : 0);
+  });
+  if ($('todoFocusBtn')) {
+    $('todoFocusBtn').classList.toggle('primary', !!todoFocusMode);
+    $('todoFocusBtn').textContent = todoFocusMode ? 'Focus on' : 'Focus';
+  }
+  if ($('todo-card') || document.querySelector('.todo-card-v2')) {
+    const card = document.querySelector('.todo-card-v2');
+    if (card) card.classList.toggle('todo-focus-mode', !!todoFocusMode);
+  }
 
   const badge = $('navTodoBadge');
   if (badge) {
@@ -3743,45 +3950,68 @@ function renderAttention() {
   }
 
   if (!all.length) {
-    $('attn').innerHTML = '<div class="todo-empty"><b>Desk is clear</b>Nothing due right now.<br>Payroll reminders appear Friday–Sunday.</div>';
+    $('attn').innerHTML = '<div class="todo-empty"><b>Desk is clear</b>Nothing due right now.<br>Payroll reminders appear Friday–Sunday. Add your own below anytime.</div>';
     return;
   }
   if (!items.length) {
-    $('attn').innerHTML = '<div class="todo-empty"><b>Nothing in this filter</b>Try All or Urgent — ' + all.length + ' item' + (all.length === 1 ? '' : 's') + ' still open.</div>';
+    $('attn').innerHTML = '<div class="todo-empty"><b>Nothing in this view</b>Try All, clear search, or turn Focus off — ' + all.length + ' item' + (all.length === 1 ? '' : 's') + ' still open.</div>';
     return;
   }
 
   let html = '';
-  TODO_GROUPS.forEach(g => {
-    const rows = items.map((item, idx) => {
-      /* idx must map to full __todoItems for dismiss/open */
-      const fullIdx = all.indexOf(item);
-      return { item, idx: fullIdx >= 0 ? fullIdx : idx };
-    }).filter(x => (x.item.group || 'desk') === g.key);
-    if (!rows.length) return;
-    const urgentN = rows.filter(r => r.item.tone === 'danger').length;
-    html += '<div class="todo-group"><div class="todo-group-head"><b>' + esc(g.title) + '</b>' +
-      '<span class="todo-group-count">' + rows.length + (urgentN ? ' · ' + urgentN + ' urgent' : '') + '</span></div>';
-    rows.forEach(({ item: i, idx }) => {
-      const title = i.title || i.text || 'To-do';
-      const detail = i.detail || (i.title && i.text && i.text !== i.title ? i.text : '');
-      const dueCls = i.due && daysBetween(today(), i.due) < 0 ? ' overdue' : '';
-      html +=
-        '<div class="attn tone-' + esc(i.tone || 'gray') + '">' +
-          '<div class="attn-main">' +
-            '<div class="attn-top"><span class="pill ' + (i.tone || 'gray') + '">' + esc(i.tag || 'To-do') + '</span></div>' +
-            '<div class="attn-title">' + esc(title) + '</div>' +
-            (detail ? '<div class="attn-detail">' + esc(detail) + '</div>' : '') +
-            (i.due ? '<div class="attn-meta"><span class="attn-due' + dueCls + '">Due ' + esc(i.due) + '</span></div>' : '') +
+  const useGroups = todoSort === 'group' || todoFilter === 'all';
+  const paintRow = (i, idx) => {
+    const title = i.title || i.text || 'To-do';
+    const detail = i.detail || (i.title && i.text && i.text !== i.title ? i.text : '');
+    const dueLeft = i.due ? todoDueScore(i) : null;
+    const dueCls = dueLeft != null && dueLeft < 0 ? ' overdue' : '';
+    const dueLabel = dueLeft == null ? '' :
+      (dueLeft < 0 ? 'Overdue ' + Math.abs(dueLeft) + 'd' :
+        dueLeft === 0 ? 'Due today' :
+          dueLeft === 1 ? 'Due tomorrow' : 'Due in ' + dueLeft + 'd');
+    return (
+      '<div class="attn tone-' + esc(i.tone || 'gray') + '" role="listitem">' +
+        '<div class="attn-main">' +
+          '<div class="attn-top">' +
+            '<span class="pill ' + (i.tone || 'gray') + '">' + esc(i.tag || 'To-do') + '</span>' +
+            (i.priority >= 3 ? '<span class="attn-kicker">Priority</span>' : '') +
           '</div>' +
-          '<span class="attn-actions">' +
-            (i.go ? '<button class="btn tiny" onclick="goTodoAction(' + idx + ')">Open</button>' : '') +
-            '<button class="btn tiny soft" onclick="dismissTodo(' + idx + ')">Done</button>' +
-          '</span>' +
-        '</div>';
+          '<div class="attn-title">' + esc(title) + '</div>' +
+          (detail ? '<div class="attn-detail">' + esc(detail) + '</div>' : '') +
+          ((i.due || dueLabel) ? '<div class="attn-meta"><span class="attn-due' + dueCls + '">' +
+            esc(dueLabel || ('Due ' + i.due)) +
+            (i.due && dueLabel ? ' · ' + esc(i.due) : '') +
+          '</span></div>' : '') +
+        '</div>' +
+        '<span class="attn-actions">' +
+          (i.go ? '<button class="btn tiny primary" onclick="goTodoAction(' + idx + ')">Open</button>' : '') +
+          '<button class="btn tiny soft" onclick="dismissTodo(' + idx + ')">Done</button>' +
+        '</span>' +
+      '</div>'
+    );
+  };
+
+  if (useGroups) {
+    TODO_GROUPS.forEach(g => {
+      const rows = items.map(item => {
+        const fullIdx = all.indexOf(item);
+        return { item, idx: fullIdx >= 0 ? fullIdx : 0 };
+      }).filter(x => (x.item.group || 'desk') === g.key);
+      if (!rows.length) return;
+      const urgentN = rows.filter(r => r.item.tone === 'danger' || r.item.priority >= 3).length;
+      html += '<div class="todo-group"><div class="todo-group-head"><b>' + esc(g.title) + '</b>' +
+        '<span class="todo-group-count">' + rows.length + (urgentN ? ' · ' + urgentN + ' urgent' : '') + '</span></div>';
+      rows.forEach(({ item: i, idx }) => { html += paintRow(i, idx); });
+      html += '</div>';
+    });
+  } else {
+    html += '<div class="todo-group"><div class="todo-group-head"><b>Sorted queue</b><span class="todo-group-count">' + items.length + '</span></div>';
+    items.forEach(item => {
+      const idx = all.indexOf(item);
+      html += paintRow(item, idx >= 0 ? idx : 0);
     });
     html += '</div>';
-  });
+  }
   $('attn').innerHTML = html || '<div class="todo-empty">Desk is clear.</div>';
 }
 
@@ -8493,9 +8723,14 @@ $('period').onchange = () => { flushPeriodNotes(); notesDirty = false; syncStubT
 if ($('reportYear')) $('reportYear').onchange = () => renderMonthly();
 
 $('todoAddBtn').onclick = () => {
-  addManualTodo($('todoAddText').value, ($('todoAddDue') && $('todoAddDue').value) || '');
+  addManualTodo(
+    $('todoAddText').value,
+    ($('todoAddDue') && $('todoAddDue').value) || '',
+    ($('todoAddPri') && $('todoAddPri').value) || 1
+  );
   $('todoAddText').value = '';
   if ($('todoAddDue')) $('todoAddDue').value = '';
+  if ($('todoAddPri')) $('todoAddPri').value = '1';
   $('todoAddText').focus();
 };
 $('todoAddText').onkeydown = ev => {
@@ -8511,6 +8746,27 @@ document.querySelectorAll('[data-todo-filter]').forEach(btn => {
     renderAttention();
   };
 });
+if ($('todoSearch')) {
+  $('todoSearch').oninput = () => {
+    todoSearch = $('todoSearch').value || '';
+    renderAttention();
+  };
+}
+if ($('todoSort')) {
+  $('todoSort').onchange = () => {
+    todoSort = $('todoSort').value || 'priority';
+    renderAttention();
+  };
+}
+if ($('todoFocusBtn')) {
+  $('todoFocusBtn').onclick = () => {
+    todoFocusMode = !todoFocusMode;
+    renderAttention();
+  };
+}
+if ($('todoClearDismissed')) {
+  $('todoClearDismissed').onclick = () => clearDismissedTodos();
+}
 $('stubPeriod').onchange = () => { syncOverviewToStub(); render(); };
 $('stubEmployee').onchange = () => renderPayStubs();
 if ($('stubFilter')) $('stubFilter').onchange = () => renderPayStubs();
