@@ -1382,6 +1382,98 @@ body{
   .todo-add-pri{width:100%}
 }
 
+/* ===== Desk v10 — clean UI ===== */
+.fold{
+  border:1px solid var(--line);border-radius:12px;background:var(--paper);
+  margin:0 0 10px;overflow:hidden;
+}
+.fold > summary{
+  list-style:none;cursor:pointer;display:flex;align-items:center;gap:10px;
+  padding:11px 14px;font-weight:700;font-size:.8rem;color:var(--navy);
+  user-select:none;
+}
+.fold > summary::-webkit-details-marker{display:none}
+.fold > summary:after{
+  content:'';margin-left:auto;width:7px;height:7px;border-right:2px solid var(--muted);border-bottom:2px solid var(--muted);
+  transform:rotate(-45deg);transition:transform .15s;
+}
+.fold[open] > summary:after{transform:rotate(45deg)}
+.fold > summary .pill{font-weight:600}
+.fold-body{padding:0 14px 14px}
+.fold.quiet{background:oklch(98.5% .005 84)}
+.dialog.xl{max-width:min(920px,96vw);max-height:min(92vh,900px);display:flex;flex-direction:column}
+.dialog.wide{max-width:min(720px,96vw);max-height:min(92vh,860px);display:flex;flex-direction:column}
+.dialog{max-height:min(92vh,820px);display:flex;flex-direction:column}
+.dialog > h2{flex:none}
+.dialog-scroll{flex:1;min-height:0;overflow:auto;padding-right:2px;margin:0 -2px}
+.dialog-foot{flex:none;position:sticky;bottom:0;background:linear-gradient(180deg, transparent, var(--paper) 28%);padding-top:16px;margin-top:8px;z-index:2}
+.file-section{margin:0 0 16px}
+.file-section > h3{
+  margin:0 0 10px;font:700 .72rem 'DM Sans',sans-serif;letter-spacing:.08em;
+  text-transform:uppercase;color:var(--muted);
+}
+.doc-list{display:flex;flex-direction:column;gap:8px}
+.doc-row{
+  display:grid;grid-template-columns:minmax(0,1fr) auto;gap:10px;align-items:center;
+  padding:12px 14px;border:1px solid var(--line);border-radius:11px;background:oklch(99% .004 84);
+}
+.doc-row b{display:block;font-size:.84rem;color:var(--navy)}
+.doc-row .paper-sub{margin-top:2px}
+.doc-row .paper-actions{display:flex;flex-wrap:wrap;gap:6px;justify-content:flex-end}
+.doc-next{
+  display:flex;flex-wrap:wrap;gap:8px;align-items:center;
+  margin-top:12px;padding:12px 14px;border-radius:11px;
+  background:var(--sage);border:1px solid transparent;
+}
+.doc-next .hint{font-size:.74rem;color:var(--muted);flex:1;min-width:160px;line-height:1.4}
+.hire-path{flex-wrap:wrap;gap:6px;margin-bottom:12px}
+.content .header{margin-bottom:18px;padding-bottom:14px}
+.view .subtitle{max-width:36rem}
+
+.ui-hint{font-size:.72rem;color:var(--muted);line-height:1.45;margin:0 0 10px}
+.compact-banner{
+  display:flex;flex-wrap:wrap;align-items:center;gap:8px 12px;
+  padding:8px 12px;border-radius:10px;margin:0 0 12px;
+  background:oklch(97% .01 84);border:1px solid var(--line);font-size:.74rem;color:var(--muted);
+}
+.compact-banner b{color:var(--navy);font-family:'Playfair Display',serif;font-size:.9rem}
+.overview-tools{
+  display:flex;flex-wrap:wrap;gap:8px;align-items:center;
+  margin:0 0 14px;padding:10px 12px;border:1px solid var(--line);border-radius:12px;background:var(--paper);
+}
+.overview-tools > b{font-size:.72rem;color:var(--muted);text-transform:uppercase;letter-spacing:.06em}
+.overview-tools select,#period{
+  border:1px solid var(--line);background:var(--cream);border-radius:8px;padding:7px 10px;font-size:.74rem;min-height:34px;
+}
+.overview-tools .period-tip{display:inline-flex;align-items:center;gap:6px;font-size:.74rem;color:var(--muted)}
+.overview-tools .period-tip input{width:88px;border:1px solid var(--line);border-radius:8px;padding:6px 8px;background:var(--cream)}
+.health-strip{margin-bottom:14px}
+.fold-body.policy h4{margin:14px 0 6px;font-size:.78rem;color:var(--navy)}
+.fold-body.policy h4:first-child{margin-top:0}
+.fold-body.policy p,.fold-body.policy li{font-size:.76rem;line-height:1.5;color:var(--ink)}
+.fold-body.policy ul{margin:6px 0 10px;padding-left:1.1rem}
+.modal .dialog{overflow:hidden}
+
+.compare-strip{display:none} /* merged into overview-tools */
+
+.strip-row{display:flex;flex-wrap:wrap;gap:8px 14px;align-items:center;font-size:.74rem;color:var(--muted)}
+.strip-row strong{font-family:'JetBrains Mono',monospace;color:var(--navy)}
+.panel-note{font-size:.72rem}
+.callout.fold-call{padding:0;border:0;background:transparent}
+body.desk-clean .desk-hero{display:none}
+body.desk-clean .feature-banner{display:none}
+body.desk-clean .build-banner{display:none}
+.apps-table th:nth-child(7),
+.apps-table th:nth-child(8),
+.apps-table td:nth-child(7),
+.apps-table td:nth-child(8){display:none}
+@media(min-width:1100px){
+  .apps-table th:nth-child(7),
+  .apps-table th:nth-child(8),
+  .apps-table td:nth-child(7),
+  .apps-table td:nth-child(8){display:table-cell}
+}
+
 /* ===== Desk v9 — 50 major upgrades ===== */
 body.quiet-mode .metric:hover,body.quiet-mode .card:hover,body.quiet-mode .btn:hover{transform:none;box-shadow:none}
 .metric-btn{appearance:none;border:1px solid var(--line);background:var(--paper);text-align:left;cursor:pointer;font:inherit;color:inherit;padding:14px 16px;border-radius:12px;transition:border-color .15s,box-shadow .15s}
@@ -1395,7 +1487,7 @@ body.quiet-mode .metric:hover,body.quiet-mode .card:hover,body.quiet-mode .btn:h
 body.compact-todos .attn{padding:8px 10px}
 body.compact-todos .attn-detail{display:none}
 body.print-dense .card{box-shadow:none;border-color:#ccc}
-@media print{body.print-dense .desk-hero,body.print-dense .build-banner,body.print-dense .nba-card,body.print-dense .compare-strip,body.print-dense .health-strip,body.print-dense .todo-card{display:none!important}}
+@media print{body.print-dense .desk-hero,body.print-dense .build-banner,body.print-dense .compact-banner,body.print-dense .nba-card,body.print-dense .compare-strip,body.print-dense .health-strip,body.print-dense .todo-card,body.print-dense .fold{display:none!important}}
 
 body.compact-todos .todo-card-v2 .attn{padding:8px 10px;margin-bottom:5px}
 body.compact-todos .attn-detail{display:none}
@@ -1519,7 +1611,7 @@ body.compact-todos .attn-detail{display:none}
       <option value="backup">Backup</option>
     </select>
     <button type="button" class="help-btn" id="helpShortcuts" title="Keyboard shortcuts" aria-haspopup="dialog" aria-controls="shortcutSheet">?</button>
-    <span class="build-chip" title="Desk build marker">v9</span>
+    <span class="build-chip" title="Desk build marker">v10</span>
     <button type="button" class="btn tiny soft" id="openSettingsBtn" title="Desk settings">Settings</button>
     <button type="button" class="btn tiny" id="openCmdBtn" title="Command palette (Ctrl+K)">⌘K</button>
     <span class="kbd-hint" title="Press ? for shortcuts">g then key</span>
@@ -1530,65 +1622,69 @@ body.compact-todos .attn-detail{display:none}
 
 <!-- OVERVIEW -->
 <section class="view active" id="view-overview" role="region" aria-labelledby="title-overview" tabindex="-1">
-  <div class="build-banner" id="buildBanner" role="status">
-    <b>Desk build v9</b>
-    <span>50 major upgrades · settings · command palette · weighted tips · bulk hours · undo</span>
-    <button type="button" class="btn tiny soft" id="openChangelogBtn" style="margin-left:auto">What&apos;s new</button>
+  <div class="compact-banner" id="buildBanner" role="status">
+    <b>Desk v10</b>
+    <span>Clean UI · collapse panels · organized files</span>
+    <button type="button" class="btn tiny soft" id="openChangelogBtn">What&apos;s new</button>
+    <button type="button" class="btn tiny soft" id="toggleHeroBtn" title="Show or hide brand hero">Hero</button>
     <span class="pill green" id="buildStamp">LIVE</span>
   </div>
+  <details class="fold quiet" id="heroFold" style="margin-bottom:12px">
+    <summary>Frenchie&apos;s desk <span class="pill gray" id="heroPeriodPill">Period</span></summary>
+    <div class="fold-body">
+      <div class="desk-hero" style="margin:0">
+        <div class="desk-hero-main">
+          <div class="desk-hero-brand">Frenchie's Restaurant</div>
+          <h2>HR &amp; Payroll desk</h2>
+          <p>Kenzie Long · Legion Square · Payday Sunday 9:00 AM from the house.</p>
+          <div class="desk-hero-actions">
+            <button class="btn primary" type="button" id="copySundayRun">Copy Sunday pay run</button>
+            <button class="btn soft" type="button" id="gotoStubs">Open stubs</button>
+            <button class="btn" type="button" id="downloadCsv">Download CSV</button>
+            <button class="btn" type="button" id="addEmployee">Add employee</button>
+          </div>
+        </div>
+        <div class="desk-hero-side">
+          <b>This week</b>
+          <span id="heroGlance">Open the current period below.</span>
+        </div>
+      </div>
+    </div>
+  </details>
   <div class="nba-card" id="nbaCard">
     <div><b>Next best action</b><div id="nbaText" class="mini-note" style="margin:4px 0 0">Scanning the desk…</div></div>
     <button type="button" class="btn tiny primary" id="nbaGoBtn">Do it</button>
-  </div>
-  <div class="compare-strip" id="compareStrip" aria-label="Period comparison">
-    <span>vs last period:</span>
-    <span>Gross <strong id="cmpGross">—</strong></span>
-    <span>Hours <strong id="cmpHours">—</strong></span>
-    <span>Tips <strong id="cmpTips">—</strong></span>
-    <span>Health <strong id="periodHealthScore">—</strong></span>
-  </div>
-  <div class="desk-hero">
-    <div class="desk-hero-main">
-      <div class="desk-hero-brand">Frenchie's Restaurant</div>
-      <h2>HR &amp; Payroll desk</h2>
-      <p>Kenzie Long · Legion Square · Payday Sunday 9:00 AM from the house. Close the week, clear the unpaid queue, and keep hiring paperwork moving.</p>
-      <div class="desk-hero-actions">
-        <button class="btn primary" type="button" id="copySundayRun">Copy Sunday pay run</button>
-        <button class="btn soft" type="button" id="gotoStubs">Open stubs</button>
-        <button class="btn" type="button" id="downloadCsv">Download CSV</button>
-        <button class="btn" type="button" id="addEmployee">Add employee</button>
-      </div>
-    </div>
-    <div class="desk-hero-side">
-      <b>This week at a glance</b>
-      <span id="heroGlance">Open the current period, tip pool, and unpaid queue below.</span>
-      <span class="pill gray" id="heroPeriodPill">Period</span>
-    </div>
   </div>
   <div class="header">
     <div><div class="eyebrow">Payroll</div><h1 class="title" id="title-overview">Overview</h1><div class="subtitle">Current period, Sunday closeout, and desk priorities.</div></div>
     <div class="actions">
       <button class="btn soft" type="button" id="previewSundayRun">Preview pay run</button>
-      <button class="btn primary" type="button" id="closePeriodTop">Close &amp; roll next</button>
+      <button class="btn primary" type="button" id="closePeriod">Close &amp; roll next</button>
     </div>
   </div>
-  <div class="period">
-    <b>Current period</b>
+  <div class="overview-tools">
+    <b>Period</b>
     <label class="sr-only" for="period">Pay period</label>
     <select id="period" aria-label="Pay period"></select>
     <label class="period-tip">Tip pool $
       <input id="tipPool" type="number" min="0" step="1" aria-label="Tip pool amount">
     </label>
-    <button class="btn" id="newPeriod">New period</button>
-    <button class="btn soft" id="bulkHoursBtn" type="button">Bulk hours</button>
-    <button class="btn" id="markAllPaid">Mark all paid</button>
-    <button class="btn primary" id="closePeriod">Close &amp; roll next</button>
+    <button class="btn tiny" id="newPeriod">New</button>
+    <button class="btn tiny soft" id="bulkHoursBtn" type="button">Bulk hours</button>
+    <button class="btn tiny" id="markAllPaid">Mark all paid</button>
+    <span class="strip-row" id="compareStrip" aria-label="Period comparison" style="margin-left:auto">
+      <span>vs last:</span>
+      <span>Gross <strong id="cmpGross">—</strong></span>
+      <span>Hrs <strong id="cmpHours">—</strong></span>
+      <span>Tips <strong id="cmpTips">—</strong></span>
+      <span>Health <strong id="periodHealthScore">—</strong></span>
+      <button type="button" class="btn tiny soft" id="undoBtn" title="Undo last desk action">Undo</button>
+    </span>
   </div>
   <div class="health-strip" id="healthStrip">
     <span>Period health</span>
     <strong id="healthScoreLabel">—</strong>
     <span id="healthHints" class="mini-note" style="margin:0">—</span>
-    <button type="button" class="btn tiny soft" id="undoBtn" title="Undo last desk action">Undo</button>
   </div>
   <div class="tip-warn" id="tipWarn" role="status">Tip pool is set, but no Waiter / Hostess / Cook with hours is eligible to share it.</div>
   <div class="metrics">
@@ -1598,25 +1694,29 @@ body.compact-todos .attn-detail{display:none}
     <div class="metric"><label>Paid out</label><strong id="paidOutMetric">$0</strong><span>Marked paid this period</span></div>
   </div>
   <div class="toolbar jump-row" aria-label="Quick links">
-    <button class="btn tiny soft" type="button" id="ovGotoReports">Year reports</button>
-    <button class="btn tiny soft" type="button" id="ovGotoExpenses">Expense rebates</button>
     <button class="btn tiny soft" type="button" id="ovGotoUnpaidStubs">Unpaid stubs</button>
+    <button class="btn tiny soft" type="button" id="ovGotoExpenses">Expenses</button>
+    <button class="btn tiny soft" type="button" id="ovGotoReports">Reports</button>
     <button class="btn tiny soft" type="button" id="exportTodosBtn">Export to-dos</button>
-    <button class="btn tiny" type="button" id="todoCompactBtn">Compact to-dos</button>
-    <button class="btn tiny" type="button" id="batchClearTodosBtn">Clear visible</button>
+    <button class="btn tiny" type="button" id="todoCompactBtn">Compact</button>
+    <button class="btn tiny" id="batchClearTodosBtn" type="button">Clear visible</button>
   </div>
   <div class="grid desk-split">
     <div class="stack-col">
       <div class="card unpaid-desk"><div class="card-head"><b>Unpaid desk</b><span class="pill warn" id="unpaidDeskCount">0</span><button class="btn tiny soft" type="button" id="copySundayRun2">Copy Sunday run</button></div>
-        <div class="panel-note">Sunday queue — everyone still owed for this period.</div>
+        <div class="panel-note">Still owed this period.</div>
         <div class="table-scroll"><table><thead><tr><th>Employee</th><th class="r">Hours</th><th class="r">Gross</th><th class="r">Action</th></tr></thead><tbody id="unpaidDesk"></tbody></table></div>
       </div>
       <div class="card"><div class="card-head"><b>Current period</b><span class="pill" id="state">OPEN</span></div>
         <div class="table-scroll"><table><thead><tr><th>Employee</th><th>Role</th><th class="r">Hours</th><th class="r">Bonus</th><th class="r">Tips</th><th class="r">Gross</th><th class="r">Paid</th><th class="r">Action</th></tr></thead><tbody id="payroll"></tbody></table></div>
       </div>
-      <div class="card"><div class="card-head"><b>Period notes</b><button class="btn tiny" id="savePeriodNotes">Save notes</button></div>
-        <div class="card-body"><textarea id="periodNotes" placeholder="Notes for this pay period — coverage, closures, Sunday pay remarks..."></textarea></div>
-      </div>
+      <details class="fold">
+        <summary>Period notes</summary>
+        <div class="fold-body">
+          <textarea id="periodNotes" placeholder="Coverage, closures, Sunday pay remarks…"></textarea>
+          <div style="margin-top:8px"><button class="btn tiny" id="savePeriodNotes" type="button">Save notes</button></div>
+        </div>
+      </details>
     </div>
     <div class="stack-col">
       <div class="card todo-card todo-card-v2">
@@ -1670,23 +1770,25 @@ body.compact-todos .attn-detail{display:none}
         </div>
       </div>
       <div class="card"><div class="card-head"><b>Sunday closeout</b><span class="pill gray">9 AM</span></div><div class="closeout-body" id="checks"></div></div>
-      <div class="card"><div class="card-head"><b>Recent activity</b></div><div class="log" id="activity"></div></div>
+      <details class="fold quiet">
+        <summary>Recent activity</summary>
+        <div class="fold-body"><div class="log" id="activity"></div></div>
+      </details>
     </div>
   </div>
 </section>
 
 <!-- HIRING -->
 <section class="view" id="view-hiring" role="region" aria-labelledby="title-hiring" tabindex="-1">
-  <div class="feature-banner"><b>Desk upgrade:</b> Offer-gated hire, paper path, and employee sync stay in force — use Preview / Import for Discord forms.<span class="pill gray">Hiring</span></div>
   <div class="header">
-    <div><div class="eyebrow">Recruitment</div><h1 class="title" id="title-hiring">Hiring</h1><div class="subtitle">Application → eligibility → interview → offer → hire → contract → packet.</div></div>
+    <div><div class="eyebrow">Recruitment</div><h1 class="title" id="title-hiring">Hiring</h1><div class="subtitle">Application → interview → offer → hire → contract → packet.</div></div>
     <div class="actions hire-forms">
       <button class="btn soft" id="importReplyBtn">Import reply</button>
       <button class="btn primary" id="addApp">New application</button>
     </div>
   </div>
   <div class="action-bar">
-    <span class="bar-label">Send</span>
+    <span class="bar-label">Forms</span>
     <button class="btn tiny" id="formApp" title="Download Application">Application</button>
     <button class="btn tiny" id="formInvite" title="Download Interview invitation">Invitation</button>
     <button class="btn tiny" id="formQuestions" title="Download Interviewer questions">Questions</button>
@@ -1697,12 +1799,13 @@ body.compact-todos .attn-detail{display:none}
     <span class="bar-sep"></span>
     <input type="file" class="file-mini" id="importReplyFile" accept=".html,.htm,.json,text/html,application/json" title="Import reply file">
   </div>
-  <div class="callout">
-    <b>Hiring standards</b>
-    Every applicant fills the Application, interviews with HR, and starts on a seven-day probation as a New Hire.
-    Applicants must be in good standing with the city and clear of recent felony convictions.
-    Terrorism charges or the murder of a government employee are a hard bar.
-  </div>
+  <details class="fold quiet">
+    <summary>Hiring standards &amp; paper path</summary>
+    <div class="fold-body">
+      <p class="ui-hint">Every applicant fills the Application, interviews with HR, and starts on seven-day probation. City standing + no recent felony required. Terrorism or gov-employee murder is a hard bar.</p>
+      <p class="ui-hint"><b>Before hire:</b> Application → Invitation → Questions → Offer → Hire. <b>After hire:</b> Send contract (you sign first) → Import reply → New-hire packet.</p>
+    </div>
+  </details>
   <div class="metrics" id="hireMetrics">
     <button type="button" class="metric metric-btn" data-hire-metric="pipeline" title="Show pipeline"><label>In pipeline</label><strong id="mPipe">0</strong><span>Not yet hired</span></button>
     <button type="button" class="metric metric-btn" data-hire-metric="elig" title="Show eligibility holds"><label>Eligibility hold</label><strong id="mElig">0</strong><span>Awaiting clearance</span></button>
@@ -1719,12 +1822,14 @@ body.compact-todos .attn-detail{display:none}
     <i></i><span data-step="packet">Packet</span>
   </div>
   <div class="grid-2" style="margin-bottom:12px">
-    <div class="card"><div class="card-head"><b>Interview agenda</b><span class="pill gray" id="agendaCount">0</span></div>
-      <div class="card-body" id="interviewAgenda"><div class="mini-note">No interviews scheduled.</div></div>
-    </div>
-    <div class="card"><div class="card-head"><b>Ready to hire</b><span class="pill gold" id="readyHireCount">0</span></div>
-      <div class="card-body" id="readyHireSpotlight"><div class="mini-note">Nobody waiting on Hire yet.</div></div>
-    </div>
+    <details class="fold" open>
+      <summary>Interview agenda <span class="pill gray" id="agendaCount">0</span></summary>
+      <div class="fold-body" id="interviewAgenda"><div class="ui-hint">No interviews scheduled.</div></div>
+    </details>
+    <details class="fold" open>
+      <summary>Ready to hire <span class="pill gold" id="readyHireCount">0</span></summary>
+      <div class="fold-body" id="readyHireSpotlight"><div class="ui-hint">Nobody waiting on Hire.</div></div>
+    </details>
   </div>
   <div class="toolbar filter-rail">
     <input class="search" id="hireSearch" placeholder="Search applicant" aria-label="Search applicants">
@@ -1736,26 +1841,23 @@ body.compact-todos .attn-detail{display:none}
   </div>
   <div class="split-desk">
     <div class="card"><div class="card-head"><b>Applications</b><span class="pill gray" id="appCount"></span></div>
-      <div class="table-scroll"><table><thead><tr><th>Applicant</th><th>Stage</th><th>Applied</th><th>Age</th><th>Papers</th><th>Rate</th><th>Standing</th><th>Record</th><th>Paperwork</th><th class="r">Move</th><th class="r">Action</th></tr></thead><tbody id="apps"></tbody></table></div>
+      <div class="table-scroll"><table class="apps-table"><thead><tr><th>Applicant</th><th>Stage</th><th>Applied</th><th>Age</th><th>Papers</th><th>Rate</th><th>Standing</th><th>Record</th><th>Paperwork</th><th class="r">Move</th><th class="r">Action</th></tr></thead><tbody id="apps"></tbody></table></div>
     </div>
     <div class="card"><div class="card-head"><b>Filed replies</b><span class="pill gray" id="filedCount"></span></div>
-      <div class="panel-note">Completed forms land here after Import reply.</div>
+      <div class="panel-note">Imported Discord replies.</div>
       <div class="table-scroll"><table><thead><tr><th>Returned</th><th>Applicant</th><th>Document</th><th>Decision</th><th>Signed by</th><th class="r">Action</th></tr></thead><tbody id="filedReplies"></tbody></table></div>
     </div>
   </div>
-  <div class="card"><div class="card-head"><b>Paper path</b></div>
-    <div class="card-body policy">
+  <details class="fold quiet">
+    <summary>How Discord forms work</summary>
+    <div class="fold-body">
       <ol class="paper-steps">
-        <li><b>Send</b> downloads a fillable form — post that file on Discord. You don’t fill it on this desk.</li>
-        <li>They complete the starred fields, sign, hit <b>Download reply</b>, and send that file back.</li>
-        <li>You hit <b>Import reply</b>. It files under Filed replies, on their application, and onto the employee file after hire.</li>
+        <li><b>Send</b> downloads a fillable form for Discord — you don’t fill it here.</li>
+        <li>They complete starred fields, sign, hit <b>Download reply</b>, and send it back.</li>
+        <li><b>Import reply</b> files it under Filed replies and onto the employee after hire.</li>
       </ol>
-      <p class="paper-order"><b>Before hire:</b> Application → Invitation → Questions → Offer (accept) → Hire.</p>
-      <p class="paper-order"><b>After hire:</b> employee file → Send contract (you sign first) → Import signed reply → File &amp; send new-hire packet.</p>
-      <p class="paper-order muted">Screening and Interviewer notes stay in the office. Contract and packet unlock only after hire.</p>
-      <p class="paper-order muted">Letter preview fills name, role, rate, start, manager, phone, and probation dates before you Send — import the reply to file it on the employee.</p>
     </div>
-  </div>
+  </details>
 </section>
 
 <!-- EMPLOYEES -->
@@ -1775,7 +1877,7 @@ body.compact-todos .attn-detail{display:none}
       <div class="table-scroll"><table><thead><tr><th>Name</th><th>Role</th><th>Status</th><th class="r">Rate</th><th class="r">Hired</th><th class="r">Strikes</th><th class="r">Action</th></tr></thead><tbody id="employees"></tbody></table></div>
     </div>
     <div class="card"><div class="card-head"><b>Staff documents on file</b><span class="pill gray" id="empDocCount"></span></div>
-      <div class="panel-note">Offer letters, contracts, and new-hire packets — open a row to read.</div>
+      <div class="panel-note">Offer, contract, and packet files.</div>
       <div class="table-scroll"><table><thead><tr><th>Date</th><th>Employee</th><th>Document</th><th class="r">Action</th></tr></thead><tbody id="empDocsIndex"></tbody></table></div>
     </div>
   </div>
@@ -1862,10 +1964,13 @@ body.compact-todos .attn-detail{display:none}
       <table><thead><tr><th>Paid by</th><th class="r">Entries</th><th class="r">Total</th><th class="r">Reimbursable</th></tr></thead><tbody id="expByPaid"></tbody></table>
     </div>
   </div>
-  <div class="card" style="margin-top:12px"><div class="card-head"><b>Rebate aging</b><span class="pill warn" id="rebateAgeCount">0</span></div>
-    <div class="panel-note">Open reimbursables sorted by age — oldest first for chase-up.</div>
-    <div class="table-scroll"><table><thead><tr><th>Age</th><th>Date</th><th>Vendor</th><th class="r">Amount</th><th>Status</th><th class="r"></th></tr></thead><tbody id="rebateAgingBody"></tbody></table></div>
-  </div>
+  <details class="fold" style="margin-top:12px">
+    <summary>Rebate aging <span class="pill warn" id="rebateAgeCount">0</span></summary>
+    <div class="fold-body">
+      <div class="panel-note">Open reimbursables — oldest first.</div>
+      <div class="table-scroll"><table><thead><tr><th>Age</th><th>Date</th><th>Vendor</th><th class="r">Amount</th><th>Status</th><th class="r"></th></tr></thead><tbody id="rebateAgingBody"></tbody></table></div>
+    </div>
+  </details>
 </section>
 
 <!-- PAY STUBS -->
@@ -1923,11 +2028,10 @@ body.compact-todos .attn-detail{display:none}
     <div class="actions"><button class="btn soft" id="pdfRelations">Export file PDF</button><button class="btn primary" id="addRelation">New entry</button></div>
   </div>
   <div class="toolbar filter-rail"><input class="search" id="relSearch" placeholder="Search employee or reason" aria-label="Search relations"></div>
-  <div class="callout">
-    <b>Three-strike system</b> &mdash; Strike one is a verbal warning noted in the file. Strike two is a written warning with a follow-up date.
-    Strike three is termination. Suspension may be issued at any point while a matter is under review. Commendations are logged the same way
-    and are weighed at promotion time.
-  </div>
+  <details class="fold quiet">
+    <summary>Three-strike system</summary>
+    <div class="fold-body"><p class="ui-hint">Strike one: verbal. Strike two: written with follow-up. Strike three: termination. Suspension can land anytime under review. Commendations count at promotion time.</p></div>
+  </details>
   <div class="metrics">
     <div class="metric"><label>Open follow-ups</label><strong id="mFollow">0</strong><span>Due for review</span></div>
     <div class="metric"><label>Warnings on file</label><strong id="mWarn">0</strong><span>Verbal + written</span></div>
@@ -1950,14 +2054,13 @@ body.compact-todos .attn-detail{display:none}
     <div><div class="eyebrow">People</div><h1 class="title" id="title-shifts">Shifts</h1><div class="subtitle">Weekly station board — bar, kitchen, and floor.</div></div>
     <div class="actions"><button class="btn" id="shiftPrev">&larr; Prev week</button><button class="btn" id="shiftThis">This week</button><button class="btn" id="shiftNext">Next week &rarr;</button><button class="btn soft" id="copyLastWeekShifts" type="button">Copy last week</button><button class="btn soft" id="pdfShifts" title="Print Discord week sheet">Print week sheet</button></div>
   </div>
-  <div class="feature-banner"><b>New:</b> Availability board pulls days and shift windows from hired applications — edit them on the employee file.<span class="pill green">Coverage</span></div>
-  <div class="callout plain">Week of <b id="shiftWeekLabel">—</b> &mdash; clock in on radio with 10-1 and clock out with 10-2. Shift Lead posts coverage before open.</div>
+  <div class="compact-banner">Week of <b id="shiftWeekLabel">—</b> · radio 10-1 in / 10-2 out · Shift Lead posts coverage before open</div>
   <div class="tip-warn" id="coverageGapWarn" role="status" style="display:none">Coverage gaps this week.</div>
   <div class="card"><div class="card-head"><b>Week board</b><span class="pill gray" id="shiftWeekPill">Week</span></div><div class="table-scroll"><table><thead><tr><th>Employee</th><th>Mon</th><th>Tue</th><th>Wed</th><th>Thu</th><th>Fri</th><th>Sat</th><th>Sun</th><th class="r">On</th></tr></thead><tbody id="shiftBoard"></tbody></table></div></div>
-  <div class="card"><div class="card-head"><b>Availability &amp; coverage</b><span class="pill gray" id="availCount">0</span></div>
-    <div class="panel-note">From applications and employee files — use this when building the week board.</div>
-    <div class="avail-grid" id="availBoard"></div>
-  </div>
+  <details class="fold" open>
+    <summary>Availability &amp; coverage <span class="pill gray" id="availCount">0</span></summary>
+    <div class="fold-body"><div class="avail-grid" id="availBoard"></div></div>
+  </details>
 </section>
 
 <!-- COMPLIANCE -->
@@ -1967,12 +2070,13 @@ body.compact-todos .attn-detail{display:none}
     <div class="actions"><button class="btn primary" id="addLicense">Add license / note</button></div>
   </div>
   <div class="toolbar filter-rail"><label class="sr-only" for="licFilter">License filter</label><select id="licFilter" aria-label="License filter"><option value="">All licenses</option><option value="active">Active</option><option value="pending">Pending</option><option value="expired">Expired / due soon</option><option value="note">Notes</option></select></div>
-  <div class="callout">Business direction: restaurant operations first, then raffle nights, then adult entertainment. Keep every license current &mdash; the office does not run an unlicensed floor.</div>
-  <div class="card"><div class="table-scroll"><table><thead><tr><th>Item</th><th>Status</th><th>Issued</th><th>Expires</th><th>Notes</th><th class="r">Action</th></tr></thead><tbody id="licenses"></tbody></table></div></div>
+  <div class="compact-banner">Restaurant first, then raffles, then adult entertainment — keep licenses current.</div>
+  <div class="card"><div class="card-head"><b>Licenses</b></div><div class="table-scroll"><table><thead><tr><th>Item</th><th>Status</th><th>Issued</th><th>Expires</th><th>Notes</th><th class="r">Action</th></tr></thead><tbody id="licenses"></tbody></table></div></div>
 
   <div class="grid-2">
-    <div class="card"><div class="card-head"><b>Employee handbook &mdash; excerpts</b></div>
-      <div class="card-body policy">
+    <details class="fold">
+      <summary>Employee handbook — excerpts</summary>
+      <div class="fold-body policy">
         <h4>Welcome to Frenchie's</h4>
         <p>Welcome to the family. Frenchie's is a working restaurant at 8 Elgin Ave in Legion Square. You are expected to show up in uniform, on time,
         and ready to look after the guests. Treat the staff beside you the way you would treat a paying customer. Anything you cannot solve on the floor,
@@ -2017,26 +2121,20 @@ body.compact-todos .attn-detail{display:none}
         <p>Payroll runs Sunday at 9:00 AM. Payments go out from the house. Hours are logged by HR through the week &mdash;
         if your hours look wrong, raise it before Sunday, not after.</p>
       </div>
-    </div>
+    </details>
     <div>
-      <div class="card"><div class="card-head"><b>Office library</b></div>
-        <div class="card-body linklist">
-          <a href="https://docs.google.com/document/d/11gAskCqa9xXbTfopR7q1RmLu_pdVenVh-qVK4Rcyd8c/edit?usp=sharing" target="_blank" rel="noopener">Employee handbook</a>
+      <details class="fold quiet" open>
+        <summary>Office library &amp; house rules</summary>
+        <div class="fold-body">
+          <p class="ui-hint"><a href="https://docs.google.com/document/d/11gAskCqa9xXbTfopR7q1RmLu_pdVenVh-qVK4Rcyd8c/edit?usp=sharing" target="_blank" rel="noopener">Full employee handbook</a></p>
+          <p class="ui-hint">Restaurant first, then raffles and adult entertainment as licenses allow.</p>
+          <p class="ui-hint">Hiring bar: city standing + no recent felony. Terrorism or gov-employee murder is a hard bar.</p>
         </div>
+      </details>
+      <div class="card" style="margin-top:12px"><div class="card-head"><b>Activity log</b></div>
+        <div class="toolbar filter-rail" style="margin-bottom:8px;padding:0 12px"><input class="search" id="activitySearch" placeholder="Filter activity…" aria-label="Filter activity"></div>
+        <div class="log" id="fullActivity" style="padding:0 12px 12px"></div>
       </div>
-      <div class="card"><div class="card-head"><b>House standing</b></div>
-        <div class="card-body policy">
-          <p>Frenchie's is a hospitality house — restaurant first, then raffles and adult entertainment as licenses allow.</p>
-        </div>
-      </div>
-      <div class="card"><div class="card-head"><b>Hiring bar</b></div>
-        <div class="card-body policy">
-          <p>Applicants must be in good standing with the city and clear of recent felony convictions. We will not employ anyone carrying
-          a terrorism charge or the murder of a government employee.</p>
-        </div>
-      </div>
-      <div class="card"><div class="card-head"><b>Activity log</b></div><div class="toolbar filter-rail" style="margin-bottom:8px"><input class="search" id="activitySearch" placeholder="Filter activity…" aria-label="Filter activity"></div>
-  <div class="log" id="fullActivity"></div></div>
     </div>
   </div>
 </section>
@@ -2110,7 +2208,7 @@ body.compact-todos .attn-detail{display:none}
     <div><div class="eyebrow">Payroll</div><h1 class="title" id="title-roles">Role rates</h1><div class="subtitle">House ladder — rates save as you type.</div></div>
     <div class="actions"><button class="btn soft" id="pdfRoles">Export rates PDF</button></div>
   </div>
-  <div class="callout plain">Changing a rate here sets the standard for future hires and new hour entries. Use <b>Apply to all</b> to push a rate onto everyone currently holding that role. Already-saved period entries keep the rate they were logged at.</div>
+  <details class="fold quiet"><summary>About role rates</summary><div class="fold-body"><p class="ui-hint">Changing a rate sets the standard for future hires and new hour entries. <b>Apply to all</b> pushes it onto everyone in that role. Saved period entries keep the rate they were logged at.</p></div></details>
   <div class="card"><div class="card-head"><b>House ladder</b></div><div class="table-scroll"><table><thead><tr><th>Role</th><th class="r">Staff</th><th class="r">Avg logged / yr</th><th class="r">Standard rate / hr</th><th class="r">Action</th></tr></thead><tbody id="roles"></tbody></table></div></div>
 </section>
 
@@ -2133,7 +2231,7 @@ body.compact-todos .attn-detail{display:none}
       </div>
     </div>
   </div>
-  <div class="callout plain">Autosave keeps the roster, hours, applications, expenses, relations, shifts, licenses, pay log, and activity history. Export a JSON file after big days — that copy is yours even if the browser is cleared.</div>
+  <details class="fold quiet"><summary>About backups</summary><div class="fold-body"><p class="ui-hint">Autosave keeps the office file in this browser. Export JSON after busy days — that copy survives a cleared browser.</p></div></details>
   <div class="grid-2 backup-actions">
     <div class="card"><div class="card-head"><b>Export</b></div><div class="card-body">
       <p class="subtitle" style="margin-bottom:14px">Download a full backup of employees, applications, periods, events, expenses, relations, shifts, licenses, pay log, and activity.</p>
@@ -2159,6 +2257,7 @@ body.compact-todos .attn-detail{display:none}
 <!-- Employee modal -->
 <div class="modal" id="employeeModal" role="dialog" aria-modal="true" aria-labelledby="modalTitle" hidden><div class="dialog xl" role="document" tabindex="-1">
   <h2 id="modalTitle">Add employee</h2>
+  <div class="dialog-scroll">
   <div class="field-row">
     <div class="field"><label>Name</label><input id="name"></div>
     <div class="field"><label>Phone</label><input id="phone" placeholder="e.g. 636"></div>
@@ -2176,74 +2275,97 @@ body.compact-todos .attn-detail{display:none}
   <div class="field" id="promoField" style="display:none"><label>Change note</label><input id="promoReason" placeholder="Why this change? (role, rate, status, etc.)"></div>
 
   <div class="file-tabs" id="empFileTabs" role="tablist" aria-label="Employee file sections">
-    <button type="button" class="file-tab active" data-emp-tab="onboard" role="tab" aria-selected="true">Onboarding</button>
-    <button type="button" class="file-tab" data-emp-tab="avail" role="tab" aria-selected="false">Availability</button>
-    <button type="button" class="file-tab" data-emp-tab="file" role="tab" aria-selected="false" id="empTabFile" style="display:none">File &amp; pay</button>
+    <button type="button" class="file-tab active" data-emp-tab="onboard" role="tab" aria-selected="true">Profile</button>
+    <button type="button" class="file-tab" data-emp-tab="avail" role="tab" aria-selected="false">Floor</button>
+    <button type="button" class="file-tab" data-emp-tab="file" role="tab" aria-selected="false" id="empTabFile" style="display:none">Pay &amp; papers</button>
   </div>
 
   <div class="file-panel active" data-emp-panel="onboard">
-  <h3>Onboarding</h3>
-  <div class="field-row">
-    <label class="checkline"><input type="checkbox" id="obUniform"><span>Uniform issued</span></label>
-    <label class="checkline"><input type="checkbox" id="obStation"><span>Station trained</span></label>
-  </div>
-  <div class="field-row">
-    <label class="checkline"><input type="checkbox" id="obMenu"><span>Menu learned</span></label>
-    <label class="checkline"><input type="checkbox" id="obShadow"><span>Shadow shift completed</span></label>
-  </div>
-  <div class="field-row">
-    <label class="checkline"><input type="checkbox" id="obLead"><span>Met Shift Lead</span></label>
-  </div>
-  <div class="probation-box" id="probationBox" style="display:none">
-    <h3>Probation review</h3>
-    <div class="mini-note" id="probationBoxNote">Pass them into a house role, or end probation.</div>
-    <div class="field-row">
-      <div class="field"><label>Pass into role</label><select id="probPassRole"></select></div>
-      <div class="field"><label>Review notes</label><input id="probNotes" placeholder="Floor notes, radio comfort, reliability…"></div>
+    <div class="file-section">
+      <h3>Onboarding</h3>
+      <div class="field-row">
+        <label class="checkline"><input type="checkbox" id="obUniform"><span>Uniform issued</span></label>
+        <label class="checkline"><input type="checkbox" id="obStation"><span>Station trained</span></label>
+        <label class="checkline"><input type="checkbox" id="obMenu"><span>Menu learned</span></label>
+      </div>
+      <div class="field-row">
+        <label class="checkline"><input type="checkbox" id="obShadow"><span>Shadow shift</span></label>
+        <label class="checkline"><input type="checkbox" id="obLead"><span>Met Shift Lead</span></label>
+      </div>
     </div>
-    <div class="actions" style="margin-top:8px">
-      <button type="button" class="btn primary" id="probPassBtn">Pass probation</button>
-      <button type="button" class="btn danger" id="probFailBtn">End / fail probation</button>
+    <div class="probation-box" id="probationBox" style="display:none">
+      <h3 style="margin:0 0 6px;font:700 .72rem 'DM Sans',sans-serif;letter-spacing:.08em;text-transform:uppercase;color:var(--muted)">Probation review</h3>
+      <div class="mini-note" id="probationBoxNote">Pass them into a house role, or end probation.</div>
+      <div class="field-row">
+        <div class="field"><label>Pass into role</label><select id="probPassRole"></select></div>
+        <div class="field"><label>Review notes</label><input id="probNotes" placeholder="Floor notes, radio comfort…"></div>
+      </div>
+      <div class="actions" style="margin-top:8px">
+        <button type="button" class="btn primary" id="probPassBtn">Pass probation</button>
+        <button type="button" class="btn danger" id="probFailBtn">End / fail</button>
+      </div>
     </div>
-  </div>
   </div>
 
   <div class="file-panel" data-emp-panel="avail">
-    <h3>Availability &amp; floor profile</h3>
-    <div class="mini-note">Copied from the application when hired — edit anytime for the coverage board.</div>
-    <div class="field"><label>Days available (comma or checklist text)</label><input id="availDays" placeholder="Monday, Wednesday, Friday"></div>
-    <div class="field"><label>Shift window</label><input id="availWindow" placeholder="e.g. Evenings / after 6 PM"></div>
-    <div class="field"><label>Station preference</label><select id="stationPref"><option value="">—</option><option>Bar</option><option>Kitchen</option><option>Floor</option><option>Any</option></select></div>
+    <p class="ui-hint">Used on the shifts coverage board. Copied from the application when hired.</p>
     <div class="field-row">
-      <div class="field"><label>Uniform size</label><input id="uniformSize" placeholder="e.g. M / L"></div>
-      <div class="field"><label>Emergency contact</label><input id="emergencyName" placeholder="Name"></div>
+      <div class="field"><label>Days available</label><input id="availDays" placeholder="Mon, Wed, Fri"></div>
+      <div class="field"><label>Shift window</label><input id="availWindow" placeholder="Evenings / after 6 PM"></div>
     </div>
-    <div class="field"><label>Emergency phone</label><input id="emergencyPhone" placeholder="Phone"></div>
-    <div class="field"><label>Coverage notes</label><textarea id="availNotes" placeholder="Timezone, peak hours, station preference…"></textarea></div>
+    <div class="field-row3">
+      <div class="field"><label>Station</label><select id="stationPref"><option value="">—</option><option>Bar</option><option>Kitchen</option><option>Floor</option><option>Any</option></select></div>
+      <div class="field"><label>Uniform</label><input id="uniformSize" placeholder="M / L"></div>
+      <div class="field"><label>Emergency</label><input id="emergencyName" placeholder="Name"></div>
+    </div>
+    <div class="field-row">
+      <div class="field"><label>Emergency phone</label><input id="emergencyPhone" placeholder="Phone"></div>
+      <div class="field"><label>Coverage notes</label><input id="availNotes" placeholder="Peak hours, timezone…"></div>
+    </div>
   </div>
 
   <div id="fileExtras" class="file-panel" data-emp-panel="file" style="display:none">
-    <h3>Earnings</h3>
-    <div class="emp-metrics" id="empPayMetrics"></div>
-    <div style="margin-bottom:12px"><button class="btn tiny soft" type="button" id="empOpenStub">Open latest stub</button></div>
-    <h3>File timeline</h3>
-    <div class="mini-note">Promotions, demotions, raises, bonuses, status moves, and onboarding — everything that touches this file.</div>
-    <div class="emp-log-filters" id="empLogFilters"></div>
-    <div id="empHistory" class="emp-log"></div>
-    <h3>Pay periods</h3>
-    <div style="max-height:200px;overflow:auto"><table><thead><tr><th>Period</th><th class="r">Hours</th><th class="r">Rate</th><th class="r">Bonus</th><th class="r">Tips</th><th class="r">Gross</th><th>Paid</th></tr></thead><tbody id="empPayHistory"></tbody></table></div>
-    <h3>Discipline</h3>
-    <div id="empStrikes" class="mini-note"></div>
-    <h3>Documents</h3>
-    <div class="mini-note" style="margin-bottom:8px">After hire: <b>Send contract</b> (you sign first, they sign and reply) → then <b>New-hire packet</b> (file it here and download a copy for them to keep).</div>
-    <div id="empDocs"></div>
-    <div id="empDocActions" style="margin-top:10px;display:flex;gap:8px;flex-wrap:wrap">
-      <button class="btn tiny soft" id="sendEmpContract">Send contract for signature</button>
-      <button class="btn tiny soft" id="sendEmpPacket">File &amp; send new-hire packet</button>
-      <button class="btn tiny" id="genOffer" style="display:none">View offer letter</button>
-      <button class="btn tiny" id="genContract" style="display:none">View contract</button>
-      <button class="btn tiny" id="genPacket" style="display:none">View new-hire packet</button>
-    </div>
+    <details class="fold" open>
+      <summary>Earnings</summary>
+      <div class="fold-body">
+        <div class="emp-metrics" id="empPayMetrics"></div>
+        <div style="margin-top:10px"><button class="btn tiny soft" type="button" id="empOpenStub">Open latest stub</button></div>
+      </div>
+    </details>
+    <details class="fold">
+      <summary>File timeline</summary>
+      <div class="fold-body">
+        <div class="emp-log-filters" id="empLogFilters"></div>
+        <div id="empHistory" class="emp-log"></div>
+      </div>
+    </details>
+    <details class="fold">
+      <summary>Pay periods</summary>
+      <div class="fold-body">
+        <div style="max-height:180px;overflow:auto"><table><thead><tr><th>Period</th><th class="r">Hours</th><th class="r">Rate</th><th class="r">Bonus</th><th class="r">Tips</th><th class="r">Gross</th><th>Paid</th></tr></thead><tbody id="empPayHistory"></tbody></table></div>
+      </div>
+    </details>
+    <details class="fold">
+      <summary>Discipline <span class="pill gray" id="empStrikePill">0</span></summary>
+      <div class="fold-body"><div id="empStrikes" class="mini-note"></div></div>
+    </details>
+    <details class="fold" open>
+      <summary>Documents <span class="pill gray" id="empDocPill">0</span></summary>
+      <div class="fold-body">
+        <div id="empDocs" class="doc-list"></div>
+        <div class="doc-next" id="empDocActions">
+          <span class="hint" id="empDocHint">Next: send contract, then new-hire packet.</span>
+          <button class="btn tiny soft" id="sendEmpContract">Send contract</button>
+          <button class="btn tiny soft" id="sendEmpPacket">Send packet</button>
+          <button class="btn tiny" id="openHirePapersBtn" type="button" style="display:none">Hiring file</button>
+        </div>
+        <!-- kept for wiring compatibility; hidden -->
+        <button class="btn tiny" id="genOffer" hidden>View offer</button>
+        <button class="btn tiny" id="genContract" hidden>View contract</button>
+        <button class="btn tiny" id="genPacket" hidden>View packet</button>
+      </div>
+    </details>
+  </div>
   </div>
 
   <div class="dialog-foot">
@@ -2270,6 +2392,7 @@ body.compact-todos .attn-detail{display:none}
 <!-- Application modal -->
 <div class="modal" id="appModal" role="dialog" aria-modal="true" aria-labelledby="appTitle" hidden><div class="dialog wide" role="document" tabindex="-1">
   <h2 id="appTitle">New application</h2>
+  <div class="dialog-scroll">
   <div class="field"><label>Applicant name</label><input id="appName"></div>
   <div class="field-row">
     <div class="field"><label>Applied date</label><input id="appDate" type="date"></div>
@@ -2281,34 +2404,42 @@ body.compact-todos .attn-detail{display:none}
       <option value="rejected">Rejected</option>
     </select></div>
   </div>
-  <div class="mini-note" id="appHiredNote" style="display:none;margin:-4px 0 10px">This file is already <b>Hired</b> — open the employee file for contract &amp; packet.</div>
-  <h3>Eligibility</h3>
-  <label class="checkline"><input type="checkbox" id="appAdmin"><span>City standing clear</span></label>
-  <label class="checkline"><input type="checkbox" id="appFelony"><span>No recent felony convictions</span></label>
-  <label class="checkline"><input type="checkbox" id="appNoTerror" checked><span>No terrorism charge (hard bar)</span></label>
-  <label class="checkline"><input type="checkbox" id="appNoGovMurder" checked><span>No murder of a government employee (hard bar)</span></label>
-  <div class="field-row" style="margin-top:12px">
+  <div class="mini-note" id="appHiredNote" style="display:none;margin:-4px 0 10px">Already <b>Hired</b> — open the employee file for contract &amp; packet.</div>
+  <details class="fold" open>
+    <summary>Eligibility</summary>
+    <div class="fold-body">
+      <label class="checkline"><input type="checkbox" id="appAdmin"><span>City standing clear</span></label>
+      <label class="checkline"><input type="checkbox" id="appFelony"><span>No recent felony convictions</span></label>
+      <label class="checkline"><input type="checkbox" id="appNoTerror" checked><span>No terrorism charge (hard bar)</span></label>
+      <label class="checkline"><input type="checkbox" id="appNoGovMurder" checked><span>No murder of a government employee (hard bar)</span></label>
+    </div>
+  </details>
+  <div class="field-row">
     <div class="field"><label>Interview date</label><input id="appInterview" type="date"></div>
     <div class="field"><label>Interview time</label><input id="appInterviewTime" type="time"></div>
   </div>
   <div class="field-row">
-    <div class="field"><label>Time slot label (optional)</label><input id="appInterviewSlot" placeholder="e.g. Evening service"></div>
+    <div class="field"><label>Time slot (optional)</label><input id="appInterviewSlot" placeholder="Evening service"></div>
     <div class="field"><label>Offer role</label><select id="appRole"></select></div>
   </div>
   <div class="field-row">
-    <div class="field"><label>Applicant rating (1–5)</label><input id="appRating" type="number" min="1" max="5" step="1" placeholder="Optional"></div>
+    <div class="field"><label>Rating (1–5)</label><input id="appRating" type="number" min="1" max="5" step="1" placeholder="Optional"></div>
     <div class="field"><label>Decline reason</label><input id="appDeclineReason" placeholder="Required when rejecting"></div>
   </div>
-  <div class="field"><label>Notes</label><textarea id="appNotes" placeholder="Interview notes, references, availability..."></textarea></div>
+  <div class="field"><label>Notes</label><textarea id="appNotes" placeholder="Interview notes, references…"></textarea></div>
   <div id="appPaperWrap" style="display:none">
-    <h3>Paperwork status</h3>
-    <div class="paper-actions" id="appPaperBadges" style="margin-bottom:10px"></div>
-    <div class="paper-actions">
-      <button class="btn tiny" id="appPaperOpen">Open paperwork pack</button>
-      <button class="btn tiny" id="appPaperApp">Application</button>
-      <button class="btn tiny" id="appPaperScreen">Screening sheet</button>
-    </div>
-    <div class="mini-note">Preview opens the fillable sheet. Send downloads it for Discord. Returned replies land under Filed replies on the Hiring desk.</div>
+    <details class="fold" open>
+      <summary>Paperwork</summary>
+      <div class="fold-body">
+        <div class="paper-actions" id="appPaperBadges" style="margin-bottom:10px"></div>
+        <div class="paper-actions">
+          <button class="btn tiny soft" id="appPaperOpen">Open pack</button>
+          <button class="btn tiny" id="appPaperApp">Application</button>
+          <button class="btn tiny" id="appPaperScreen">Screening</button>
+        </div>
+      </div>
+    </details>
+  </div>
   </div>
   <div class="dialog-foot">
     <button class="btn danger" id="deleteApp" style="margin-right:auto;display:none">Delete</button>
@@ -2342,6 +2473,7 @@ body.compact-todos .attn-detail{display:none}
 <!-- Expense modal -->
 <div class="modal" id="expenseModal" role="dialog" aria-modal="true" aria-labelledby="expenseTitle" hidden><div class="dialog wide" role="document" tabindex="-1">
   <h2 id="expenseTitle">Log expense</h2>
+  <div class="dialog-scroll">
   <div class="field-row">
     <div class="field"><label>Date</label><input id="exDate" type="date"></div>
     <div class="field"><label>Category</label><select id="exCategory"></select></div>
@@ -2364,6 +2496,7 @@ body.compact-todos .attn-detail{display:none}
   </div>
   <label class="checkline"><input type="checkbox" id="exReimb" checked><span>Reimbursable / for rebate report</span></label>
   <div class="field"><label>Internal notes</label><textarea id="exNotes" placeholder="Optional — not printed on the rebate report"></textarea></div>
+  </div>
   <div class="dialog-foot">
     <button class="btn danger" id="deleteExpense" style="margin-right:auto;display:none">Delete</button>
     <button class="btn" id="cancelExpense">Cancel</button>
@@ -2590,7 +2723,7 @@ body.compact-todos .attn-detail{display:none}
 <!-- Changelog -->
 <div class="modal" id="changelogModal" role="dialog" aria-modal="true" aria-labelledby="changelogTitle" hidden>
   <div class="dialog xl" role="document" tabindex="-1">
-    <h2 id="changelogTitle">Desk build v9 — 50 major upgrades</h2>
+    <h2 id="changelogTitle">Desk build v10 — clean UI + 50 upgrades</h2>
     <div class="upgrade-grid" id="upgradeGrid"></div>
     <div class="dialog-foot"><button type="button" class="btn primary" id="closeChangelog">Got it</button></div>
   </div>
@@ -2677,7 +2810,7 @@ const LOG_TYPES = {
 };
 const TIP_ROLES_DEFAULT = ['Waiter', 'Hostess', 'Cook'];
 const TIP_ROLES = TIP_ROLES_DEFAULT; /* legacy alias — use tipRoles() */
-const DESK_BUILD = 'v9';
+const DESK_BUILD = 'v10';
 const UPGRADE_LIST = [
   'Weighted tip split','Editable tip roles','Period vs last week','High-hours warnings','Bulk hours grid','Pay method on mark-paid','Auto closeout check','Per-stub Discord blurb','Period health score','Close notes warning',
   'Applicant rating','Decline reason required','Paperwork % column','Pipeline aging badge','Interview agenda card','Ready-to-hire spotlight','Duplicate hard warn','Hire checklist','Awaiting-reply filter','Clickable stage metrics',
@@ -4662,7 +4795,7 @@ function saveSettings() {
 
 function openChangelog() {
   const grid = $('upgradeGrid');
-  if (grid) grid.innerHTML = UPGRADE_LIST.map((t, i) => '<div class="upgrade-item"><b>' + (i + 1) + '. ' + esc(t) + '</b>Shipped in build v9</div>').join('');
+  if (grid) grid.innerHTML = UPGRADE_LIST.map((t, i) => '<div class="upgrade-item"><b>' + (i + 1) + '. ' + esc(t) + '</b>Shipped · build v10 clean UI</div>').join('');
   $('changelogModal').classList.add('open');
   $('changelogModal').removeAttribute('hidden');
 }
@@ -9165,79 +9298,80 @@ function renderEmployeeFile(e) {
   $('empPayHistory').innerHTML = rows.join('') || '<tr><td colspan="7" class="empty">No pay recorded yet.</td></tr>';
 
   const rel = s.relations.filter(r => String(r.empId) === String(e.id));
-  $('empStrikes').innerHTML = '<div><b>' + e.strikes + '</b> strike(s) on file.</div>' + (rel.length
-    ? rel.map(r => '<div>' + esc(r.date) + ' &middot; ' + esc(REL_TYPES[r.type] || r.type) + (r.reason ? ' — ' + esc(r.reason) : '') + '</div>').join('')
-    : '<div>No relations entries.</div>');
+  if ($('empStrikePill')) $('empStrikePill').textContent = String(e.strikes || 0);
+  $('empStrikes').innerHTML = '<div><b>' + e.strikes + '</b> strike' + (e.strikes === 1 ? '' : 's') + ' on file.</div>' + (rel.length
+    ? rel.map(r => '<div style="margin-top:6px">' + esc(r.date) + ' · ' + esc(REL_TYPES[r.type] || r.type) + (r.reason ? ' — ' + esc(r.reason) : '') + '</div>').join('')
+    : '<div class="ui-hint" style="margin-top:6px">No relations entries.</div>');
 
   const linkedApp = appForEmployee(e);
   const docs = e.documents || [];
-  const ordered = EMP_ARCHIVE_KINDS.map(k => docs.find(d => d.kind === k)).filter(Boolean)
-    .concat(docs.filter(d => EMP_ARCHIVE_KINDS.indexOf(d.kind) < 0));
+  const kinds = ['offer', 'contract', 'packet'];
+  const extras = docs.filter(d => kinds.indexOf(d.kind) < 0);
   let docsHtml = '';
-  if (ordered.length) {
-    docsHtml = ordered.map(d =>
-      '<div class="paper-row docrow"><div class="paper-name"><b>' + esc(d.title) + '</b>' +
-      '<div class="paper-sub">' + esc(d.date || '—') +
-      (d.kind ? ' · ' + esc((PAPER_KINDS[d.kind] && PAPER_KINDS[d.kind].short) || d.kind) : '') +
-      ' · from hiring file</div></div>' +
-      '<div class="paper-actions">' +
-      (d.status ? '<span class="pill ' + empDocStatusPill(d.status) + '">' + esc(d.status) + '</span> ' : '') +
-      (d.html ? '<button class="btn tiny" onclick="viewDoc(' + e.id + ',' + d.id + ')">View</button> ' : '<button class="btn tiny" disabled title="Not on file yet">View</button> ') +
-      (d.html ? '<button class="btn tiny" onclick="printEmpDoc(' + e.id + ',' + d.id + ')">Print</button> ' : '') +
-      '<button class="btn tiny danger" onclick="deleteDoc(' + e.id + ',' + d.id + ')">Delete</button></div></div>'
-    ).join('');
-  } else {
-    docsHtml = '<div class="mini-note">No paperwork on file yet — after hire, Send contract (you sign first), then File &amp; send the new-hire packet.</div>';
-  }
-  ['offer', 'contract', 'packet'].forEach(k => {
-    if (findEmpDoc(e, k)) return;
-    const label = (PAPER_KINDS[k] && PAPER_KINDS[k].title) || k;
-    docsHtml += '<div class="paper-row docrow"><div class="paper-name"><b>' + esc(label) + '</b>' +
-      '<div class="paper-sub">Not on file yet</div></div>' +
-      '<div class="paper-actions"><span class="pill gray">missing</span> ' +
-      '<button class="btn tiny" disabled title="Send or file this document first">View</button></div></div>';
-  });
-  if (linkedApp) {
-    docsHtml += '<div class="mini-note" style="margin-top:8px"><button class="btn tiny" type="button" onclick="openLinkedAppPaper(' + linkedApp.id + ')">Open hiring paperwork</button> for ' + esc(linkedApp.name) + '</div>';
-  }
   if (e.status === 'probation' && e.probationEnd) {
     const left = daysBetween(today(), e.probationEnd);
-    docsHtml = '<div class="mini-note" style="margin-bottom:8px">Probation ends <b>' + esc(e.probationEnd) + '</b> · ' +
-      (left < 0 ? 'overdue' : (left === 0 ? 'due today' : left + ' day' + (left === 1 ? '' : 's') + ' left')) + '</div>' + docsHtml;
+    docsHtml += '<div class="ui-hint">Probation ends <b>' + esc(e.probationEnd) + '</b> · ' +
+      (left < 0 ? 'overdue' : (left === 0 ? 'due today' : left + 'd left')) + '</div>';
   }
-  $('empDocs').innerHTML = docsHtml;
+  kinds.forEach(k => {
+    const d = findEmpDoc(e, k);
+    const label = (PAPER_KINDS[k] && PAPER_KINDS[k].title) || k;
+    if (d) {
+      docsHtml += '<div class="doc-row"><div><b>' + esc(d.title || label) + '</b>' +
+        '<div class="paper-sub">' + esc(d.date || '—') + (d.status ? ' · ' + esc(d.status) : '') + '</div></div>' +
+        '<div class="paper-actions">' +
+        '<span class="pill ' + empDocStatusPill(d.status || 'draft') + '">' + esc(d.status || 'on file') + '</span>' +
+        (d.html ? '<button class="btn tiny" onclick="viewDoc(' + e.id + ',' + d.id + ')">Open</button>' : '') +
+        (d.html ? '<button class="btn tiny soft" onclick="printEmpDoc(' + e.id + ',' + d.id + ')">Print</button>' : '') +
+        '<button class="btn tiny danger" onclick="deleteDoc(' + e.id + ',' + d.id + ')">Delete</button>' +
+        '</div></div>';
+    } else {
+      const next = k === 'contract' ? 'Use Send contract below' : (k === 'packet' ? 'Use Send packet below' : 'Comes from hiring file');
+      docsHtml += '<div class="doc-row"><div><b>' + esc(label) + '</b><div class="paper-sub">' + next + '</div></div>' +
+        '<div class="paper-actions"><span class="pill gray">needed</span></div></div>';
+    }
+  });
+  extras.forEach(d => {
+    docsHtml += '<div class="doc-row"><div><b>' + esc(d.title || d.kind) + '</b>' +
+      '<div class="paper-sub">' + esc(d.date || '—') + '</div></div>' +
+      '<div class="paper-actions">' +
+      (d.html ? '<button class="btn tiny" onclick="viewDoc(' + e.id + ',' + d.id + ')">Open</button>' : '') +
+      '<button class="btn tiny danger" onclick="deleteDoc(' + e.id + ',' + d.id + ')">Delete</button></div></div>';
+  });
+  $('empDocs').innerHTML = docsHtml || '<div class="ui-hint">No documents yet.</div>';
+  if ($('empDocPill')) {
+    const onFile = kinds.filter(k => findEmpDoc(e, k)).length;
+    $('empDocPill').textContent = onFile + '/3';
+  }
 
   const hasOffer = !!findEmpDoc(e, 'offer');
   const hasContract = !!findEmpDoc(e, 'contract');
   const hasPacket = !!findEmpDoc(e, 'packet');
   const signedContract = empHasSignedContract(e);
-  if ($('genOffer')) {
-    $('genOffer').style.display = '';
-    $('genOffer').disabled = !hasOffer;
-    $('genOffer').title = hasOffer ? 'View offer letter' : 'Not on file yet';
-    $('genOffer').textContent = hasOffer ? 'View offer letter' : 'View offer (missing)';
-  }
-  if ($('genContract')) {
-    $('genContract').style.display = '';
-    $('genContract').disabled = !hasContract;
-    $('genContract').title = hasContract ? 'View contract' : 'Send contract first';
-    $('genContract').textContent = hasContract ? 'View contract' : 'View contract (missing)';
-  }
-  if ($('genPacket')) {
-    $('genPacket').style.display = '';
-    $('genPacket').disabled = !hasPacket;
-    $('genPacket').title = hasPacket ? 'View new-hire packet' : 'File & send packet first';
-    $('genPacket').textContent = hasPacket ? 'View new-hire packet' : 'View packet (missing)';
-  }
+  if ($('genOffer')) { $('genOffer').hidden = true; $('genOffer').disabled = !hasOffer; }
+  if ($('genContract')) { $('genContract').hidden = true; $('genContract').disabled = !hasContract; }
+  if ($('genPacket')) { $('genPacket').hidden = true; $('genPacket').disabled = !hasPacket; }
   if ($('sendEmpContract')) {
-    $('sendEmpContract').style.display = '';
-    $('sendEmpContract').textContent = signedContract ? 'Re-send contract' : 'Send contract for signature';
-    $('sendEmpContract').className = signedContract ? 'btn tiny' : 'btn tiny soft';
+    $('sendEmpContract').textContent = signedContract ? 'Re-send contract' : 'Send contract';
+    $('sendEmpContract').className = signedContract ? 'btn tiny' : 'btn tiny primary';
   }
   if ($('sendEmpPacket')) {
-    $('sendEmpPacket').style.display = '';
-    $('sendEmpPacket').textContent = hasPacket ? 'Re-file & send packet' : 'File & send new-hire packet';
-    $('sendEmpPacket').className = hasPacket ? 'btn tiny' : 'btn tiny soft';
+    $('sendEmpPacket').textContent = hasPacket ? 'Re-send packet' : 'Send packet';
+    $('sendEmpPacket').className = (!signedContract || hasPacket) ? 'btn tiny' : 'btn tiny soft';
+    $('sendEmpPacket').disabled = false;
+  }
+  if ($('empDocHint')) {
+    if (!signedContract) $('empDocHint').textContent = 'Next: send contract (you sign first), then import their reply.';
+    else if (!hasPacket) $('empDocHint').textContent = 'Contract signed — send the new-hire packet next.';
+    else $('empDocHint').textContent = 'Hire papers on file. Re-send only if needed.';
+  }
+  if ($('openHirePapersBtn')) {
+    if (linkedApp) {
+      $('openHirePapersBtn').style.display = '';
+      $('openHirePapersBtn').onclick = () => openLinkedAppPaper(linkedApp.id);
+    } else {
+      $('openHirePapersBtn').style.display = 'none';
+    }
   }
 }
 
@@ -9919,6 +10053,12 @@ bindClick('previewSundayRun', openSundayRunPreview);
 bindClick('copySundayRunModal', () => { copySundayRun(); });
 bindClick('closeSundayRun', () => { if ($('sundayRunModal')) $('sundayRunModal').classList.remove('open'); });
 bindClick('closePeriodTop', () => closePeriodAndRoll(current()));
+bindClick('toggleHeroBtn', () => {
+  const fold = $('heroFold');
+  if (!fold) return;
+  fold.open = !fold.open;
+});
+if ($('openHirePapersBtn')) { /* wired in renderEmployeeFile */ }
 bindClick('probPassBtn', () => completeProbation(true));
 bindClick('probFailBtn', () => completeProbation(false));
 
