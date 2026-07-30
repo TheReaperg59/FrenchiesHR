@@ -1471,6 +1471,106 @@ body{
   background:linear-gradient(90deg,var(--gold),var(--navy));border-radius:inherit;
 }
 
+
+/* ===== Employees revamp ===== */
+#view-employees{max-width:100%}
+.emp-stage{
+  margin:0 0 18px;border-radius:18px;border:1px solid var(--line);overflow:hidden;
+  background:
+    linear-gradient(180deg, oklch(99.2% .007 84), var(--paper) 60%),
+    radial-gradient(820px 220px at 0% 0%, oklch(92% .04 155 / .45), transparent 70%);
+  box-shadow:0 10px 28px oklch(22% .02 155 / .06);
+}
+.emp-hero{
+  display:flex;flex-wrap:wrap;gap:16px 24px;align-items:end;justify-content:space-between;
+  padding:24px 26px 18px;position:relative;
+}
+.emp-hero:before{
+  content:'';position:absolute;left:0;top:0;bottom:0;width:4px;
+  background:linear-gradient(180deg, var(--gold), var(--navy));
+}
+.emp-hero-copy{min-width:0;padding-left:10px}
+.emp-brand{
+  margin:0 0 8px;font:700 .66rem/1 'DM Sans',sans-serif;letter-spacing:.16em;
+  text-transform:uppercase;color:oklch(46% .06 155);
+}
+.emp-title{
+  margin:0 0 8px;font:700 clamp(1.7rem,2.4vw,2.15rem)/1.05 'Playfair Display',serif;
+  color:var(--navy);letter-spacing:-.02em;
+}
+.emp-lede{margin:0;color:var(--muted);font-size:.8rem;line-height:1.45;max-width:36rem}
+.emp-hero-actions{display:flex;flex-wrap:wrap;gap:8px;align-items:center}
+.emp-glance{
+  display:flex;flex-wrap:wrap;gap:10px 18px;align-items:center;
+  padding:12px 26px 16px 36px;border-top:1px solid oklch(90% .02 84);
+  background:oklch(98.5% .005 84);
+}
+.emp-stat{display:flex;align-items:baseline;gap:8px;min-width:0}
+.emp-stat-n{font:700 1.05rem 'JetBrains Mono',monospace;color:var(--navy)}
+.emp-stat-l{font-size:.68rem;font-weight:700;letter-spacing:.04em;text-transform:uppercase;color:var(--muted)}
+.emp-glance-note{margin-left:auto}
+.emp-toolbar{
+  display:flex;flex-wrap:wrap;gap:10px 12px;align-items:center;
+  margin:0 0 16px;padding:12px 14px;border:1px solid var(--line);border-radius:14px;background:var(--paper);
+}
+.emp-search{flex:1 1 220px;min-width:180px;min-height:40px}
+.emp-toolbar-end{display:flex;flex-wrap:wrap;gap:8px;align-items:center;margin-left:auto}
+.emp-shown{font-size:.72rem;color:var(--muted);font-weight:600}
+.emp-roster-card{margin:0 0 14px;overflow:hidden}
+.emp-roster-head{align-items:flex-start}
+.emp-roster-sub{margin-top:4px;font-size:.72rem;color:var(--muted)}
+#view-employees .emp-table{
+  min-width:720px;width:100%;border-collapse:separate;border-spacing:0;
+}
+#view-employees .emp-table th{
+  font-size:.62rem;letter-spacing:.08em;text-transform:uppercase;color:var(--muted);
+  padding:12px 16px;background:oklch(97.5% .008 84);border-bottom:1px solid var(--line);
+}
+#view-employees .emp-table td{
+  padding:14px 16px;border-bottom:1px solid oklch(93% .01 84);vertical-align:middle;
+}
+#view-employees .emp-table tbody tr{transition:background .12s}
+#view-employees .emp-table tbody tr:hover td{background:oklch(98.5% .006 84)}
+#view-employees .emp-table td.staff-cell{min-width:160px}
+#view-employees .emp-table .staff-name{
+  display:block;font-weight:700;color:var(--navy);font-size:.88rem;text-align:left;
+  background:none;border:0;padding:0;cursor:pointer;font:inherit;
+}
+#view-employees .emp-table .staff-name:hover{color:oklch(34% .06 155);text-decoration:underline}
+#view-employees .emp-table .staff-meta{margin-top:3px;font-size:.7rem;color:var(--muted)}
+.emp-paper{
+  display:inline-flex;align-items:center;gap:6px;
+  padding:5px 9px;border-radius:999px;font-size:.66rem;font-weight:700;
+  background:oklch(96% .01 84);color:var(--muted);border:1px solid transparent;
+}
+.emp-paper.ok{background:oklch(93% .04 155);color:var(--green)}
+.emp-paper.warn{background:var(--warnwash);color:var(--warn)}
+.emp-paper.danger{background:var(--dangerwash);color:var(--danger)}
+.emp-paper.muted{background:oklch(95% .008 84);color:var(--muted)}
+#view-employees th.action-col,
+#view-employees td.action-col{
+  position:sticky;right:0;z-index:2;
+  min-width:118px;width:118px;
+  background:var(--paper);
+  box-shadow:-8px 0 12px oklch(20% .02 155 / .04);
+  text-align:right;
+}
+#view-employees thead th.action-col{background:oklch(97.5% .008 84);z-index:3}
+#view-employees tbody tr:hover td.action-col{background:oklch(98.5% .006 84)}
+#view-employees .open-file-btn{
+  min-width:96px;padding:8px 12px !important;
+}
+.emp-docs-fold{margin:0 0 8px}
+@media(max-width:900px){
+  .emp-hero{padding:18px 16px 14px}
+  .emp-glance{padding:12px 16px 14px 26px}
+  .emp-glance-note{margin-left:0;width:100%}
+  .emp-toolbar-end{margin-left:0;width:100%}
+  .emp-hero-actions{width:100%}
+  .emp-hero-actions .btn{flex:1}
+}
+/* ===== Employees revamp end ===== */
+
 /* Dossier modal */
 #employeeModal .dialog.dossier{
   width:min(980px,96vw);padding:0;overflow:hidden;display:flex;flex-direction:column;max-height:92vh;
@@ -2578,18 +2678,29 @@ body.compact-todos .attn-detail{display:none}
 
 <!-- EMPLOYEES -->
 <section class="view" id="view-employees" role="region" aria-labelledby="title-employees" tabindex="-1">
-  <div class="header">
-    <div><div class="eyebrow">Roster</div><h1 class="title" id="title-employees">Employees</h1><div class="subtitle">Staff files, timeline, probation, and hire paperwork — open a dossier to work the file.</div></div>
-    <div class="actions"><button class="btn soft" id="pdfEmployees">Export roster PDF</button><button class="btn primary" id="addEmployee2">Add employee</button></div>
+  <div class="emp-stage">
+    <div class="emp-hero">
+      <div class="emp-hero-copy">
+        <div class="emp-brand">Frenchie&apos;s Restaurant</div>
+        <h1 class="emp-title" id="title-employees">Staff roster</h1>
+        <p class="emp-lede">Personnel files, probation, and hire paperwork. Open a file to work the dossier.</p>
+      </div>
+      <div class="emp-hero-actions">
+        <button class="btn primary" id="addEmployee2" type="button">Add employee</button>
+        <button class="btn soft" id="pdfEmployees" type="button">Export PDF</button>
+      </div>
+    </div>
+    <div class="emp-glance" id="rosterMetrics" aria-label="Roster snapshot">
+      <div class="emp-stat"><span class="emp-stat-n" id="rosterActive">0</span><span class="emp-stat-l">On roster</span></div>
+      <div class="emp-stat"><span class="emp-stat-n" id="rosterProbation">0</span><span class="emp-stat-l">On probation</span></div>
+      <div class="emp-stat"><span class="emp-stat-n" id="rosterDocsGap">0</span><span class="emp-stat-l">Paper gaps</span></div>
+      <div class="emp-stat"><span class="emp-stat-n" id="rosterStrikes">0</span><span class="emp-stat-l">Strikes open</span></div>
+      <div class="emp-glance-note"><span class="pill gray" id="rosterFileHint">Open a file to edit</span></div>
+    </div>
   </div>
-  <div class="roster-metrics" id="rosterMetrics" aria-label="Roster snapshot">
-    <div class="metric"><label>On roster</label><strong id="rosterActive">0</strong><span>Active + probation</span></div>
-    <div class="metric"><label>On probation</label><strong id="rosterProbation">0</strong><span>Review window open</span></div>
-    <div class="metric"><label>Docs missing</label><strong id="rosterDocsGap">0</strong><span>Contract / packet gaps</span></div>
-    <div class="metric"><label>Strikes open</label><strong id="rosterStrikes">0</strong><span>Across the house</span></div>
-  </div>
-  <div class="toolbar filter-rail">
-    <input class="search" id="search" placeholder="Search name, role, or phone" aria-label="Search employees">
+
+  <div class="emp-toolbar" aria-label="Roster filters">
+    <input class="search emp-search" id="search" placeholder="Search name, role, or phone" aria-label="Search employees">
     <select id="statusFilter" class="sr-only" aria-hidden="true" tabindex="-1"><option value="">All statuses</option><option value="active">Active</option><option value="probation">Probation</option><option value="suspended">Suspended</option><option value="terminated">Terminated</option></select>
     <div class="status-chips" id="statusChips" role="group" aria-label="Filter by status">
       <button type="button" class="active" data-status="">All</button>
@@ -2598,18 +2709,49 @@ body.compact-todos .attn-detail{display:none}
       <button type="button" data-status="suspended">Suspended</button>
       <button type="button" data-status="terminated">Terminated</button>
     </div>
-    <button type="button" class="btn tiny soft" id="massOnboardBtn" title="Tick one onboarding item for everyone on probation">Mass onboarding tick</button>
-    <span class="pill gray" id="shown"></span>
-  </div>
-  <div class="split-desk">
-    <div class="card roster-card"><div class="card-head"><b>Roster</b><span class="pill gray" id="rosterFileHint">Open a file to edit</span></div>
-      <div class="table-scroll"><table><thead><tr><th>Name</th><th>Role</th><th>Status</th><th class="r">Rate</th><th class="r">Hired</th><th class="r">Strikes</th><th class="r action-col">File</th></tr></thead><tbody id="employees"></tbody></table></div>
-    </div>
-    <div class="card"><div class="card-head"><b>Staff documents on file</b><span class="pill gray" id="empDocCount"></span></div>
-      <div class="panel-note">Offer letters, contracts, and new-hire packets — open a row to read the paper.</div>
-      <div class="table-scroll"><table><thead><tr><th>Date</th><th>Employee</th><th>Document</th><th class="r action-col">Action</th></tr></thead><tbody id="empDocsIndex"></tbody></table></div>
+    <div class="emp-toolbar-end">
+      <button type="button" class="btn tiny soft" id="massOnboardBtn" title="Tick one onboarding item for everyone on probation">Mass onboarding</button>
+      <span class="emp-shown" id="shown"></span>
     </div>
   </div>
+
+  <div class="card emp-roster-card roster-card">
+    <div class="card-head emp-roster-head">
+      <div>
+        <b>Roster</b>
+        <div class="emp-roster-sub">Click a name or Open to work the personnel file</div>
+      </div>
+    </div>
+    <div class="table-scroll">
+      <table class="emp-table">
+        <thead>
+          <tr>
+            <th>Staff</th>
+            <th>Role</th>
+            <th>Status</th>
+            <th>Paper</th>
+            <th class="r">Rate</th>
+            <th class="r">Hired</th>
+            <th class="r action-col">File</th>
+          </tr>
+        </thead>
+        <tbody id="employees"></tbody>
+      </table>
+    </div>
+  </div>
+
+  <details class="fold quiet emp-docs-fold">
+    <summary>Staff documents on file <span class="pill gray" id="empDocCount">0 on file</span></summary>
+    <div class="fold-body">
+      <p class="panel-note">Offer letters, contracts, and new-hire packets — open a row to read the paper.</p>
+      <div class="table-scroll">
+        <table>
+          <thead><tr><th>Date</th><th>Employee</th><th>Document</th><th class="r action-col">Action</th></tr></thead>
+          <tbody id="empDocsIndex"></tbody>
+        </table>
+      </div>
+    </div>
+  </details>
 </section>
 
 <!-- TIME & PAY -->
@@ -7189,6 +7331,15 @@ function renderAppPaperBadges(a) {
   }).join('');
 }
 
+function empPaperChip(e) {
+  if (!e || e.status === 'terminated') return '<span class="emp-paper muted">Closed file</span>';
+  if (!empHasSignedContract(e)) return '<span class="emp-paper danger">Needs contract</span>';
+  if (!empHasPacket(e) && e.status === 'probation') return '<span class="emp-paper warn">Needs packet</span>';
+  if (!empHasLoginAccess(e)) return '<span class="emp-paper warn">Needs login</span>';
+  const docs = (e.documents || []).length;
+  return '<span class="emp-paper ok">' + (docs ? 'Paper ready' : 'Clear') + '</span>';
+}
+
 function renderEmployees() {
   const q = ($('search').value || '').toLowerCase();
   const st = $('statusFilter').value;
@@ -7197,7 +7348,7 @@ function renderEmployees() {
     const hay = (e.name + ' ' + e.role + ' ' + (e.phone || '') + ' ' + (e.emergencyPhone || '') + ' ' + (e.loginUsername || '')).toLowerCase();
     return hay.includes(q) && (st ? e.status === st : true);
   });
-  $('shown').textContent = list.length + ' shown';
+  if ($('shown')) $('shown').textContent = list.length + ' shown';
   const activeN = s.employees.filter(e => e.status === 'active' || e.status === 'probation').length;
   const probN = s.employees.filter(e => e.status === 'probation').length;
   const docsGap = s.employees.filter(e => e.status !== 'terminated' && (!empHasSignedContract(e) || !empHasPacket(e) || !empHasLoginAccess(e))).length;
@@ -7217,38 +7368,26 @@ function renderEmployees() {
     });
   }
   $('employees').innerHTML = list.length ? list.map(e => {
-    const recent = (e.history || []).map(normalizeHistEntry).filter(h => h.type !== 'hire').slice(-2);
-    const hist = recent.map(h => {
-      if (h.summary) return h.date + ': ' + h.summary + (h.detail ? ' (' + h.detail + ')' : '');
-      return h.date + ': ' + (h.from || 'new') + ' → ' + (h.to || '') + (h.detail ? ' (' + h.detail + ')' : '');
-    }).join(' · ');
-    const prob = e.status === 'probation' && e.probationEnd ? '<div class="history">Probation ends ' + esc(e.probationEnd) + '</div>' : '';
-    const docs = (e.documents || []).length;
-    const comp = empFileCompleteness(e);
-    const badges = [];
-    if (!empHasSignedContract(e) && e.status !== 'terminated') badges.push('<span class="pill danger">Contract open</span>');
-    else if (!empHasPacket(e) && e.status === 'probation') badges.push('<span class="pill warn">Packet open</span>');
-    else if (!empHasLoginAccess(e) && e.status !== 'terminated') badges.push('<span class="pill warn">Login closed</span>');
-    else if (empHasLoginAccess(e)) badges.push('<span class="pill green">Login</span>');
-    if (docs) badges.push('<span class="pill gray">' + docs + ' doc' + (docs === 1 ? '' : 's') + '</span>');
-    const quick = e.status === 'terminated'
-      ? '<button class="btn tiny soft" onclick="rehireEmployee(' + e.id + ')">Rehire</button> '
-      : '<select class="input" style="width:auto;min-height:28px;padding:2px 6px" onchange="quickEmpStatus(' + e.id + ',this.value)" aria-label="Status for ' + esc(e.name) + '">' +
-        ['active','probation','suspended','terminated'].map(stt => '<option value="' + stt + '"' + (e.status === stt ? ' selected' : '') + '>' + stt + '</option>').join('') +
-        '</select> ';
+    const strikes = Number(e.strikes) || 0;
+    const metaBits = [];
+    if (e.phone) metaBits.push(esc(e.phone));
+    if (e.status === 'probation' && e.probationEnd) metaBits.push('Probation ends ' + esc(e.probationEnd));
+    if (strikes) metaBits.push(strikes + ' strike' + (strikes === 1 ? '' : 's'));
+    const fileBtn = e.status === 'terminated'
+      ? '<button class="btn tiny soft" type="button" onclick="rehireEmployee(' + e.id + ')">Rehire</button> ' +
+        '<button class="btn tiny open-file-btn" type="button" onclick="editEmployee(' + e.id + ')" title="Open personnel file">' + folderIconHtml() + ' Open</button>'
+      : '<button class="btn tiny open-file-btn" type="button" onclick="editEmployee(' + e.id + ')" title="Open personnel file">' + folderIconHtml() + ' Open</button>';
     return '<tr class="emp-roster-row" data-emp-id="' + e.id + '">' +
-      '<td class="name"><button type="button" class="linkish" onclick="editEmployee(' + e.id + ')">' + esc(e.name) + '</button>' +
-      (e.phone ? ' <span class="pill gray">' + esc(e.phone) + '</span>' : '') +
-      (hist ? '<div class="history">' + esc(hist) + '</div>' : '') + prob +
-      (badges.length ? '<div class="emp-row-badges">' + badges.join('') + '</div>' : '') +
-      '<div class="file-complete" title="' + esc(comp.label) + '"><i style="--pct:' + comp.pct + '%"></i> ' + comp.pct + '%</div></td>' +
+      '<td class="staff-cell">' +
+        '<button type="button" class="staff-name" onclick="editEmployee(' + e.id + ')">' + esc(e.name) + '</button>' +
+        (metaBits.length ? '<div class="staff-meta">' + metaBits.join(' · ') + '</div>' : '') +
+      '</td>' +
       '<td>' + esc(e.role) + '</td>' +
       '<td>' + pillStatus(e.status) + '</td>' +
+      '<td>' + empPaperChip(e) + '</td>' +
       '<td class="r mono">' + money(e.rate) + '</td>' +
       '<td class="r">' + esc(e.hire) + '</td>' +
-      '<td class="r">' + (e.strikes ? '<span class="pill ' + (e.strikes >= 3 ? 'danger' : 'warn') + '">' + e.strikes + '</span>' : '<span class="pill green">0</span>') + '</td>' +
-      '<td class="r action-col">' + quick + '<button class="btn tiny open-file-btn" type="button" onclick="editEmployee(' + e.id + ')" title="Open personnel file">' +
-      folderIconHtml() + ' Open file</button></td>' +
+      '<td class="r action-col">' + fileBtn + '</td>' +
       '</tr>';
   }).join('') : '<tr><td colspan="7" class="empty">No staff match that search.</td></tr>';
 
