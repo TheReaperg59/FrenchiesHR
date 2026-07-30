@@ -1457,7 +1457,7 @@ body{
       <option value="backup">Backup</option>
     </select>
     <button type="button" class="help-btn" id="helpShortcuts" title="Keyboard shortcuts" aria-haspopup="dialog" aria-controls="shortcutSheet">?</button>
-    <span class="build-chip" title="Desk build marker">v8</span>
+    <span class="build-chip" title="Desk build marker">v9</span>
     <span class="kbd-hint" title="Press ? for shortcuts">g then key</span>
     <div class="payday"><span id="saveBadge" title="Autosave status">Saved</span><span class="payday-sep" aria-hidden="true">·</span><span>Payday: Sunday, 9:00 AM</span></div>
   </div>
@@ -1467,7 +1467,7 @@ body{
 <!-- OVERVIEW -->
 <section class="view active" id="view-overview" role="region" aria-labelledby="title-overview" tabindex="-1">
   <div class="build-banner" id="buildBanner" role="status">
-    <b>Desk build v8</b>
+    <b>Desk build v9</b>
     <span>Todo desk rebuilt · Sunday pay run · Probation review · Availability board</span>
     <span class="pill green" id="buildStamp">LIVE</span>
   </div>
@@ -2137,12 +2137,14 @@ body{
 <div class="modal" id="hoursModal" role="dialog" aria-modal="true" aria-labelledby="hoursModalTitle" hidden><div class="dialog" role="document" tabindex="-1">
   <h2 id="hoursModalTitle">Record hours &amp; bonus</h2>
   <div class="field"><label>Employee</label><input id="hoursName" disabled></div>
+  <div class="mini-note" id="hoursPaidLock" style="display:none;margin-bottom:10px"></div>
   <div class="field-row">
     <div class="field"><label>Hours</label><input id="hoursValue" type="number" step=".01" min="0"></div>
     <div class="field"><label>Period bonus ($)</label><input id="bonusValue" type="number" step="1" min="0"></div>
   </div>
   <div class="field"><label>Rate snapshot ($/hr)</label><input id="rateSnapshot" type="number" step="1" min="0"></div>
   <div class="mini-note">The rate is stamped onto this entry when saved, so later ladder changes do not rewrite old pay.</div>
+  <div class="mini-note" id="hoursTipsRead" style="display:none"></div>
   <label class="checkline"><input type="checkbox" id="paidOut"><span>Paid out (Sunday run complete)</span></label>
   <div class="dialog-foot"><button class="btn" id="cancelHours">Cancel</button><button class="btn primary" id="saveHours">Save</button></div>
 </div></div>
@@ -2605,11 +2607,44 @@ const OOC_QUESTIONS = [
 ];
 const LINK_HANDBOOK = 'https://docs.google.com/document/d/11gAskCqa9xXbTfopR7q1RmLu_pdVenVh-qVK4Rcyd8c/edit?usp=sharing';
 
-const today = () => new Date().toISOString().slice(0, 10);
-const addDays = (iso, n) => { const d = new Date(iso + 'T00:00:00'); d.setDate(d.getDate() + n); return d.toISOString().slice(0, 10); };
+const today = () => {
+  const d = new Date();
+  return d.getFullYear() + '-' + String(d.getMonth() + 1).padStart(2, '0') + '-' + String(d.getDate()).padStart(2, '0');
+};
+const addDays = (iso, n) => { const d = new Date(iso + 'T00:00:00'); d.setDate(d.getDate() + n); return d.getFullYear() + '-' + String(d.getMonth() + 1).padStart(2, '0') + '-' + String(d.getDate()).padStart(2, '0'); };
 const daysBetween = (a, b) => Math.round((new Date(b + 'T00:00:00') - new Date(a + 'T00:00:00')) / 86400000);
 
 function emptyOnboarding() { return { uniform: false, station: false, menu: false, shadow: false, lead: false }; }
+function emptyEntry(emp) {
+  return { hours: 0, bonus: 0, tips: 0, rate: emp ? Number(emp.rate || 0) : 0, paidOut: false };
+}
+function samePersonName(a, b) {
+  return String(a || '').trim().toLowerCase() === String(b || '').trim().toLowerCase();
+}
+function findAppByName(name, opts) {
+  opts = opts || {};
+  const needle = String(name || '').trim();
+  if (!needle) return null;
+  return (s.applications || []).find(x => {
+    if (!samePersonName(x.name, needle)) return false;
+    if (opts.excludeRejected && x.stage === 'rejected') return false;
+    if (opts.stage && x.stage !== opts.stage) return false;
+    return true;
+  }) || null;
+}
+function empForApp(a) {
+  if (!a) return null;
+  if (a.employeeId) {
+    const linked = empById(a.employeeId);
+    if (linked) return linked;
+  }
+  let e = (s.employees || []).find(x => String(x.applicationId) === String(a.id));
+  if (e) return e;
+  if (a.stage === 'hired') {
+    e = (s.employees || []).find(x => samePersonName(x.name, a.name) && x.status !== 'terminated');
+  }
+  return e || null;
+}
 
 function seedState() {
   return {
@@ -2653,7 +2688,7 @@ function seedState() {
     meta: { lastSaved: '', lastExport: '', saveCount: 0 },
     todos: [],
     todoDismissed: {},
-    nextId: 7, nextAppId: 1, nextEventId: 1, nextLicId: 4, nextRelId: 1, nextDocId: 1, nextPacketId: 1, nextExpenseId: 1
+    nextId: 7, nextAppId: 1, nextEventId: 1, nextLicId: 4, nextRelId: 1, nextDocId: 1, nextPacketId: 1, nextExpenseId: 1, nextPeriodId: 2, nextTodoId: 1
   };
 }
 
@@ -2666,6 +2701,7 @@ function normalizeApplication(a) {
   a.interviewDate = a.interviewDate || '';
   a.interviewTime = a.interviewTime || '';
   a.interviewSlot = a.interviewSlot || '';
+  if (!a.stageChangedAt) a.stageChangedAt = a.applied || today();
   if (!a.paperwork || typeof a.paperwork !== 'object') a.paperwork = {};
   if (!a.formData || typeof a.formData !== 'object') a.formData = {};
   Object.keys(a.paperwork).forEach(k => {
@@ -2802,7 +2838,9 @@ function migrate(raw) {
     nextRelId: raw.nextRelId || 1,
     nextDocId: raw.nextDocId || 1,
     nextPacketId: raw.nextPacketId || 1,
-    nextExpenseId: raw.nextExpenseId || 1
+    nextExpenseId: raw.nextExpenseId || 1,
+    nextPeriodId: raw.nextPeriodId || 1,
+    nextTodoId: raw.nextTodoId || 1
   };
 
   (raw.employees || []).forEach(e => out.employees.push(normalizeEmployee({ ...e }, today())));
@@ -2814,7 +2852,7 @@ function migrate(raw) {
       entries[id] = normalizeEntry(x, emp);
     });
     out.periods.push({
-      id: p.id || Date.now() + Math.random(),
+      id: p.id != null ? p.id : (out.nextPeriodId++),
       start: p.start, end: p.end, status: p.status || 'open',
       entries,
       tipPool: Number(p.tipPool || 0),
@@ -2831,7 +2869,7 @@ function migrate(raw) {
   out.expenses = (out.expenses || []).map(normalizeExpense).filter(Boolean);
   out.relations.forEach(r => { r.resolved = !!r.resolved; });
   out.todos = Array.isArray(raw.todos) ? raw.todos.map(t => ({
-    id: t.id || ('todo-' + Date.now() + '-' + Math.random().toString(36).slice(2, 7)),
+    id: t.id != null ? t.id : (out.nextTodoId++),
     text: String(t.text || '').trim(),
     due: t.due || '',
     done: !!t.done,
@@ -2849,19 +2887,23 @@ function migrate(raw) {
   const maxLic = (out.licenses || []).reduce((m, l) => Math.max(m, Number(l.id) || 0), 0);
   const maxRel = out.relations.reduce((m, r) => Math.max(m, Number(r.id) || 0), 0);
   const maxExp = out.expenses.reduce((m, x) => Math.max(m, Number(x.id) || 0), 0);
+  const maxPeriod = out.periods.reduce((m, p) => Math.max(m, Number(p.id) || 0), 0);
+  const maxTodo = (out.todos || []).reduce((m, t) => Math.max(m, Number(t.id) || 0), 0);
   let maxDoc = 0, maxPacket = 0;
+  const bumpPacket = (pid) => {
+    if (!pid) return;
+    const n = Number(String(pid).replace(/\D/g, '')) || 0;
+    maxPacket = Math.max(maxPacket, n);
+  };
   out.employees.forEach(e => (e.documents || []).forEach(d => {
     maxDoc = Math.max(maxDoc, Number(d.id) || 0);
-    if (d.packetId) {
-      const n = Number(String(d.packetId).replace(/\D/g, '')) || 0;
-      maxPacket = Math.max(maxPacket, n);
-    }
+    bumpPacket(d.packetId);
+    if (d.reply && d.reply.packetId) bumpPacket(d.reply.packetId);
   }));
   out.applications.forEach(a => Object.values(a.paperwork || {}).forEach(r => {
-    if (r && r.packetId) {
-      const n = Number(String(r.packetId).replace(/\D/g, '')) || 0;
-      maxPacket = Math.max(maxPacket, n);
-    }
+    if (!r) return;
+    bumpPacket(r.packetId);
+    if (r.reply && r.reply.packetId) bumpPacket(r.reply.packetId);
   }));
   out.nextId = Math.max(Number(out.nextId) || 1, maxEmp + 1);
   out.nextAppId = Math.max(Number(out.nextAppId) || 1, maxApp + 1);
@@ -2871,6 +2913,8 @@ function migrate(raw) {
   out.nextExpenseId = Math.max(Number(out.nextExpenseId) || 1, maxExp + 1);
   out.nextDocId = Math.max(Number(out.nextDocId) || 1, maxDoc + 1);
   out.nextPacketId = Math.max(Number(out.nextPacketId) || 1, maxPacket + 1);
+  out.nextPeriodId = Math.max(Number(out.nextPeriodId) || 1, maxPeriod + 1);
+  out.nextTodoId = Math.max(Number(out.nextTodoId) || 1, maxTodo + 1);
 
   const wasOld = !raw.version || raw.version < 7;
   if (wasOld) out.activity.unshift({ text: 'Office file upgraded to v7 — relations, shifts, tips, and paperwork added', date: today() });
@@ -2936,6 +2980,7 @@ let hireFilter = 'pipeline';
 let replyViewCtx = null;
 let notesTimer = null;
 let notesDirty = false;
+let notesPeriodIndex = null;
 
 const $ = id => document.getElementById(id);
 const money = n => '$' + Math.round(Number(n || 0)).toLocaleString();
@@ -3038,7 +3083,8 @@ function log(text) {
 function flushPeriodNotes() {
   const notesEl = $('periodNotes');
   if (!notesEl || !notesDirty) return;
-  const p = current();
+  const idx = notesPeriodIndex != null ? notesPeriodIndex : selectedPeriodIndex();
+  const p = s.periods[idx];
   if (!p) return;
   p.notes = notesEl.value;
   notesDirty = false;
@@ -3059,7 +3105,7 @@ function mondayOf(iso) {
   const d = new Date(iso + 'T00:00:00');
   const day = (d.getDay() + 6) % 7;
   d.setDate(d.getDate() - day);
-  return d.toISOString().slice(0, 10);
+  return d.getFullYear() + '-' + String(d.getMonth() + 1).padStart(2, '0') + '-' + String(d.getDate()).padStart(2, '0');
 }
 function current() { return s.periods[selectedPeriodIndex()] || s.periods[0]; }
 function selectedPeriodIndex() {
@@ -3097,7 +3143,15 @@ function openPayStubs(periodIndex, empId) {
   if (btn) btn.click();
   else render();
 }
-function entry(p, id) { return (p && p.entries[id]) || { hours: 0, bonus: 0, tips: 0, paidOut: false, rate: 0 }; }
+function entry(p, id) {
+  if (p && p.entries && p.entries[id]) return p.entries[id];
+  return emptyEntry(empById(id));
+}
+function ensureEntry(p, id) {
+  if (!p.entries) p.entries = {};
+  if (!p.entries[id]) p.entries[id] = emptyEntry(empById(id));
+  return p.entries[id];
+}
 function empById(id) { return s.employees.find(e => String(e.id) === String(id)); }
 function entryRate(e, x) { return Number(x.rate || (e ? e.rate : 0)); }
 function lineGross(e, x) { return entryRate(e, x) * Number(x.hours || 0) + Number(x.bonus || 0) + Number(x.tips || 0); }
@@ -3106,18 +3160,13 @@ function wagesOf(p) { return Object.entries(p.entries).reduce((a, [id, x]) => { 
 function bonusOf(p) { return Object.values(p.entries).reduce((a, x) => a + Number(x.bonus || 0), 0); }
 function tipsOf(p) { return Object.values(p.entries).reduce((a, x) => a + Number(x.tips || 0), 0); }
 function grossOf(p) { return Object.entries(p.entries).reduce((a, [id, x]) => { const e = empById(id); return a + (e ? lineGross(e, x) : 0); }, 0); }
-function unpaidCount(p) {
-  return payableEmployees().filter(e => {
-    const x = entry(p, e.id);
-    return lineGross(e, x) > 0 && !x.paidOut;
-  }).length;
-}
 function unpaidPayable(p) {
   return payableEmployees().filter(e => {
     const x = entry(p, e.id);
     return lineGross(e, x) > 0 && !x.paidOut;
   }).sort((a, b) => a.name.localeCompare(b.name));
 }
+function unpaidCount(p) { return unpaidPayable(p).length; }
 function paidGrossOf(p) {
   return payableEmployees().reduce((a, e) => {
     const x = entry(p, e.id);
@@ -3188,6 +3237,18 @@ function yearYtdThrough(year, throughPeriod) {
   (s.periods || []).forEach(p => {
     if (periodYear(p) !== year) return;
     if (throughStart && String(p.start) > String(throughStart)) return;
+    addPeriodToBucket(bucket, p);
+  });
+  return bucket;
+}
+function yearYtdThroughDate(year, isoDate) {
+  const mmdd = String(isoDate || '').slice(5);
+  if (!mmdd || mmdd.length < 5) return yearYtdThrough(year, null);
+  const cutoff = year + '-' + mmdd;
+  const bucket = emptyMonthBucket();
+  (s.periods || []).forEach(p => {
+    if (periodYear(p) !== year) return;
+    if (String(p.start) > cutoff) return;
     addPeriodToBucket(bucket, p);
   });
   return bucket;
@@ -3331,15 +3392,21 @@ function distributeTips(p) {
   let remainder = remaining - share * eligibleIds.length;
   eligibleIds.forEach((id, i) => { p.entries[id].tips = share + (i < remainder ? 1 : 0); });
   Object.keys(lockedTips).forEach(id => { p.entries[id].tips = lockedTips[id]; });
-  return { ok: true, eligible: eligibleIds.length, locked: Object.keys(lockedTips).length, remaining };
+  return { ok: true, eligible: eligibleIds.length, locked: Object.keys(lockedTips).length, remaining, lockedSum, pool, overLocked: lockedSum > pool };
 }
 function updateTipWarn(p) {
   const el = $('tipWarn');
   if (!el || !p) return;
   const pool = Number(p.tipPool || 0);
   const eligible = tipEligibleIds(p);
-  const show = p.status === 'open' && pool > 0 && !eligible.length;
-  el.classList.toggle('show', show);
+  const lockedSum = Object.keys(p.entries || {}).reduce((a, id) => {
+    return a + (p.entries[id].paidOut ? Number(p.entries[id].tips || 0) : 0);
+  }, 0);
+  const noElig = p.status === 'open' && pool > 0 && !eligible.length;
+  const over = p.status === 'open' && pool > 0 && lockedSum > pool;
+  el.classList.toggle('show', noElig || over);
+  if (over) el.textContent = 'Paid stubs already hold ' + money(lockedSum) + ' in tips — above the pool of ' + money(pool) + '. Unpaid tip roles get $0 until you adjust.';
+  else if (noElig) el.textContent = 'Tip pool is set but no tip-role staff have hours this period yet.';
 }
 
 /* ---------------- pay log ---------------- */
@@ -3373,8 +3440,7 @@ function setPaidStatus(p, empId, paid, opts) {
   opts = opts || {};
   const e = empById(empId);
   if (!e || !p) return false;
-  if (!p.entries[empId]) p.entries[empId] = { hours: 0, bonus: 0, tips: 0, rate: e.rate, paidOut: false };
-  const x = p.entries[empId];
+  const x = ensureEntry(p, empId);
   const g = lineGross(e, x);
   if (paid && g <= 0) return false;
   if (!!x.paidOut === !!paid) return false;
@@ -3396,8 +3462,12 @@ function isTodoDismissed(id) {
 }
 
 function empHasSignedContract(e) {
+  if (!e) return false;
   if (e.contractSignedAt) return true;
-  return (e.documents || []).some(d => d.kind === 'contract' && (d.status === 'signed' || /signed/i.test(d.title || '')));
+  return (e.documents || []).some(d => d.kind === 'contract' && (
+    d.status === 'signed' || d.status === 'accepted' || d.status === 'confirmed' ||
+    /signed|accepted/i.test(d.title || '')
+  ));
 }
 
 function empHasPacket(e) {
@@ -3486,9 +3556,10 @@ function buildTodos() {
     }
   }
 
-  /* New-hire paperwork — split into clear single-purpose rows */
-  (s.employees || []).filter(e => e.status === 'probation').forEach(e => {
+  /* New-hire paperwork — contract/packet for any non-terminated staff missing them; onboarding/probation for probation only */
+  (s.employees || []).filter(e => e.status !== 'terminated').forEach(e => {
     const a = appForEmployee(e);
+    const onProbation = e.status === 'probation';
     if (!empHasSignedContract(e)) {
       const st = a ? appContractStatus(a) : 'none';
       if (st === 'sent') {
@@ -3533,6 +3604,8 @@ function buildTodos() {
         go: { type: 'emp', id: e.id }
       });
     }
+
+    if (!onProbation) return;
 
     const onb = e.onboarding || {};
     const missing = ['uniform', 'station', 'menu', 'shadow', 'lead'].filter(k => !onb[k]);
@@ -3590,7 +3663,8 @@ function buildTodos() {
       });
     });
     if (a.stage === 'hired') return;
-    const d = a.applied ? daysBetween(a.applied, t) : 0;
+    const stageAgeFrom = a.stageChangedAt || a.applied;
+    const d = stageAgeFrom ? daysBetween(stageAgeFrom, t) : 0;
     if (d >= 7) {
       push({
         id: 'stale-app-' + a.id,
@@ -3599,14 +3673,12 @@ function buildTodos() {
         tag: 'Stale',
         title: a.name,
         detail: 'Still at ' + (STAGES[a.stage] || a.stage) + ' for ' + d + ' days.',
-        due: a.applied,
+        due: stageAgeFrom,
         go: { type: 'app', id: a.id }
       });
     }
     if (a.stage === 'offer') {
-      const offer = a.paperwork.offer;
-      const accepted = offer && (offer.sendStatus === 'accepted' || (offer.reply && offer.reply.decision === 'accept'));
-      if (accepted) {
+      if (offerAccepted(a)) {
         push({
           id: 'ready-hire-' + a.id,
           group: 'pipeline',
@@ -3867,8 +3939,9 @@ function addManualTodo(text, due, priority) {
   if (!t) return toast('Write a to-do first');
   ensureMeta();
   const pri = Math.min(3, Math.max(1, Number(priority) || 1));
+  if (!s.nextTodoId) s.nextTodoId = 1;
   s.todos.unshift({
-    id: Date.now(),
+    id: s.nextTodoId++,
     text: t,
     due: due || '',
     done: false,
@@ -4048,7 +4121,10 @@ function render() {
   $('state').textContent = String(p.status).toUpperCase();
   $('state').className = 'pill ' + (p.status === 'closed' ? 'gray' : 'green');
   $('tipPool').value = Number(p.tipPool || 0);
-  if (!notesDirty) $('periodNotes').value = p.notes || '';
+  if (!notesDirty) {
+    $('periodNotes').value = p.notes || '';
+    notesPeriodIndex = selectedPeriodIndex();
+  }
   if ($('activeStaff')) $('activeStaff').textContent = activeEmployees().length;
 
   renderUnpaidDesk(p);
@@ -5091,7 +5167,12 @@ function renderMonthly() {
     ? yearYtdThrough(year, through)
     : row;
   const prior = ledger[year - 1];
-  const yoy = prior && prior.g ? ((ytdBucket.g - prior.g) / prior.g * 100) : null;
+  const priorCmp = prior
+    ? ((through && periodYear(through) === year)
+      ? yearYtdThroughDate(year - 1, through.end || through.start)
+      : prior)
+    : null;
+  const yoy = priorCmp && priorCmp.g ? ((ytdBucket.g - priorCmp.g) / priorCmp.g * 100) : null;
 
   $('ytd').textContent = money(ytdBucket.g);
   if ($('ytdSub')) {
@@ -5102,7 +5183,8 @@ function renderMonthly() {
   if ($('yearPaid')) $('yearPaid').textContent = money(ytdBucket.paid);
   if ($('yoySub')) {
     $('yoySub').textContent = yoy == null ? 'No prior year' :
-      ((yoy >= 0 ? '+' : '') + yoy.toFixed(0) + '% vs ' + (year - 1));
+      ((yoy >= 0 ? '+' : '') + yoy.toFixed(0) + '% vs ' + (year - 1) +
+        ((through && periodYear(through) === year) ? ' YTD' : ''));
   }
   if ($('yearOwed')) $('yearOwed').textContent = money(ytdBucket.owed);
   if ($('yearWages')) $('yearWages').textContent = money(row.w);
@@ -5573,9 +5655,30 @@ function copyText(text, msg) {
   } else { fallbackCopy(text); toast(msg); }
 }
 function discordPostBlurb(name, kind, packetId) {
+  const who = name || 'you';
+  const idPart = packetId ? ' (' + packetId + ')' : '';
+  if (kind === 'contract') {
+    return "Frenchie's HR — Employment contract for " + who + idPart +
+      '. House already signed. Open the .html, review terms, sign, hit Download reply, and send that file back to HR.';
+  }
+  if (kind === 'invite') {
+    return "Frenchie's HR — Interview invitation for " + who + idPart +
+      '. Open the .html, confirm or propose a time, sign, hit Download reply, and send that completed file back to HR.';
+  }
+  if (kind === 'decline') {
+    return "Frenchie's HR — Decline letter for " + who + idPart +
+      '. Open the .html, acknowledge, sign, hit Download reply, and send that completed file back to HR.';
+  }
+  if (kind === 'packet') {
+    return "Frenchie's HR — New-hire packet for " + who + idPart +
+      '. Open the .html, complete every starred field and declarations, sign, hit Download reply, and send that acknowledgement back to HR.';
+  }
+  if (kind === 'offer') {
+    return "Frenchie's HR — Offer letter for " + who + idPart +
+      '. Open the .html, accept or decline, sign, hit Download reply, and send that completed file back to HR.';
+  }
   const title = (PAPER_KINDS[kind] && PAPER_KINDS[kind].title) || kind;
-  return "Frenchie's HR — " + title + ' for ' + (name || 'you') +
-    (packetId ? ' (' + packetId + ')' : '') +
+  return "Frenchie's HR — " + title + ' for ' + who + idPart +
     '. Open the .html, fill every starred field, sign, hit Download reply, and send that completed file back to HR.';
 }
 function offerHireFollowUp(a) {
@@ -5596,26 +5699,44 @@ function mapPacketOnboarding(emp, fields) {
   });
   return changed;
 }
-function ensureAppFromReply(writtenName, kind, reply) {
-  const stageGuess = kind === 'offer' ? 'offer' : (kind === 'interviewIc' || kind === 'invite' ? 'interview' : 'application');
-  const a = normalizeApplication({
+function ensureOpenApplication(name, kind, meta) {
+  meta = meta || {};
+  const writtenName = String(name || '').trim();
+  if (!writtenName) return null;
+  let a = findAppByName(writtenName, { excludeRejected: true });
+  if (a) return a;
+  const stageGuess = meta.stage || (
+    kind === 'offer' ? 'offer' :
+    (kind === 'interviewIc' || kind === 'invite' ? 'interview' :
+    (kind === 'decline' ? 'rejected' : 'application'))
+  );
+  a = normalizeApplication({
     id: s.nextAppId++,
     name: writtenName,
     applied: today(),
     stage: stageGuess,
+    stageChangedAt: today(),
     adminClear: false,
     felonyClear: false,
-    interviewDate: '',
-    interviewTime: '',
-    interviewSlot: '',
-    offerRole: (reply && reply.fields && reply.fields.roleSought) || 'New Hire',
-    notes: 'Opened from ' + ((PAPER_KINDS[kind] && PAPER_KINDS[kind].title) || kind) + ' reply (TMP / off-desk send).',
+    interviewDate: meta.interviewDate || '',
+    interviewTime: meta.interviewTime || '',
+    interviewSlot: meta.interviewSlot || '',
+    offerRole: meta.offerRole || (meta.reply && meta.reply.fields && meta.reply.fields.roleSought) || 'New Hire',
+    notes: meta.notes || ('Opened from ' + ((PAPER_KINDS[kind] && PAPER_KINDS[kind].title) || kind) + (meta.offDesk ? ' (TMP / off-desk send).' : '.')),
     paperwork: {},
     formData: {}
   });
   s.applications.unshift(a);
-  log('Application opened from ' + kind + ' reply — ' + writtenName);
+  log(meta.logText || ('Application opened from ' + kind + ' — ' + writtenName));
   return a;
+}
+function ensureAppFromReply(writtenName, kind, reply) {
+  return ensureOpenApplication(writtenName, kind, {
+    reply,
+    offDesk: true,
+    notes: 'Opened from ' + ((PAPER_KINDS[kind] && PAPER_KINDS[kind].title) || kind) + ' reply (TMP / off-desk send).',
+    logText: 'Application opened from ' + kind + ' reply — ' + writtenName
+  });
 }
 
 /* ---------------- documents ---------------- */
@@ -6156,7 +6277,7 @@ function appForEmployee(e) {
   }
   let a = (s.applications || []).find(x => String(x.employeeId) === String(e.id));
   if (a) return a;
-  a = (s.applications || []).find(x => x.stage === 'hired' && String(x.name).trim().toLowerCase() === String(e.name).trim().toLowerCase());
+  a = findAppByName(e.name, { stage: 'hired' });
   return a || null;
 }
 
@@ -6363,27 +6484,15 @@ function downloadChosenPacket(chosen, kind, opts) {
   const name = String(stub.name || '').trim();
   if (!name) return toast('Pick an applicant or type a name first');
   /* Prefer a real desk application so TMP replies can be filed later */
-  let a = (s.applications || []).find(x => String(x.name).trim().toLowerCase() === name.toLowerCase() && x.stage !== 'rejected');
-  if (!a) {
-    const stageGuess = kind === 'offer' ? 'offer' : (kind === 'invite' || kind === 'interviewIc' ? 'interview' : (kind === 'decline' ? 'rejected' : 'application'));
-    a = normalizeApplication({
-      id: s.nextAppId++,
-      name,
-      applied: today(),
-      stage: stageGuess,
-      adminClear: false,
-      felonyClear: false,
-      interviewDate: stub.interviewDate || '',
-      interviewTime: stub.interviewTime || '',
-      interviewSlot: stub.interviewSlot || '',
-      offerRole: stub.offerRole || 'New Hire',
-      notes: 'Opened when sending ' + ((PAPER_KINDS[kind] && PAPER_KINDS[kind].title) || kind) + ' off the desk.',
-      paperwork: {},
-      formData: {}
-    });
-    s.applications.unshift(a);
-    log('Application opened for send — ' + name);
-  }
+  const a = ensureOpenApplication(name, kind, {
+    interviewDate: stub.interviewDate || '',
+    interviewTime: stub.interviewTime || '',
+    interviewSlot: stub.interviewSlot || '',
+    offerRole: stub.offerRole || 'New Hire',
+    offDesk: true,
+    notes: 'Opened when sending ' + ((PAPER_KINDS[kind] && PAPER_KINDS[kind].title) || kind) + ' off the desk.',
+    logText: 'Application opened for send — ' + name
+  });
   if (opts.houseSign) a._houseSign = opts.houseSign;
   finishDownloadSendPacket(a, kind, opts);
 }
@@ -6511,13 +6620,17 @@ p{margin:0 0 12px}
 .pk-f>span{display:block;font:600 11px/1.4 Arial,sans-serif;text-transform:uppercase;letter-spacing:.07em;color:var(--muted);margin-bottom:5px}
 .pk-f input,.pk-f textarea{width:100%;border:1px solid var(--line);border-radius:7px;padding:10px 11px;background:var(--cream);font:15px/1.55 Georgia,serif;color:var(--ink)}
 .pk-f textarea{resize:vertical;min-height:78px}
+.pk-f input:focus,.pk-f textarea:focus{outline:2px solid var(--gold);outline-offset:1px}
+.pk-f.miss input,.pk-f.miss textarea,.pk-boxes.miss,.pk-choice.miss{outline:2px solid var(--danger);outline-offset:1px}
 .pk-grid{display:grid;grid-template-columns:1fr 1fr;gap:0 16px}
 .pk-hint{margin:0 0 8px;font-size:14px;color:var(--muted)}
 .pk-boxes{display:flex;flex-direction:column;gap:8px;margin-bottom:10px}
 .pk-boxes .pk-opt,.pk-boxes label{display:flex;gap:10px;align-items:flex-start;font-size:14px;cursor:pointer;padding:10px 12px;border:1px solid var(--line);border-radius:8px;background:var(--cream);user-select:none}
+.pk-boxes .pk-opt:hover,.pk-boxes label:hover{border-color:var(--gold);background:#fff}
 .pk-boxes input{margin-top:3px;flex:none;width:18px;height:18px;cursor:pointer}
 .pk-writein{margin-top:4px;margin-bottom:16px}
 .pk-choice{display:flex;gap:11px;align-items:flex-start;border:1px solid var(--line);border-radius:8px;padding:12px 14px;margin-bottom:10px;background:var(--cream);cursor:pointer;user-select:none}
+.pk-choice:hover{border-color:var(--gold);background:#fff}
 .pk-choice input{margin-top:4px;flex:none;width:18px;height:18px;cursor:pointer}
 .pk-choice b{display:block;font-size:15px}
 .pk-choice small{color:var(--muted);font-size:12.5px}
@@ -6981,56 +7094,7 @@ function buildSendPacket(a, kind, packetId, opts) {
   return `<!doctype html>
 <html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
 <title>Frenchie's — ${esc(def.title)} — ${esc(a.name)}</title>
-<style>
-:root{--ink:#1e2a24;--muted:#6c7873;--cream:#faf6ee;--paper:#fffdf8;--line:#e3daC6;--navy:#22322b;--gold:#b18a3e;--green:#3f7a56;--danger:#a33127}
-*{box-sizing:border-box}
-body{margin:0;background:var(--cream);color:var(--ink);font:15px/1.68 Georgia,'Times New Roman',serif;padding:26px 14px 60px}
-.sheet{max-width:790px;margin:0 auto;background:var(--paper);border:1px solid var(--line);border-radius:10px;padding:34px 40px;box-shadow:0 2px 16px rgba(34,50,43,.08)}
-.head{display:flex;justify-content:space-between;align-items:flex-end;gap:18px;border-bottom:2px solid var(--gold);padding-bottom:14px;margin-bottom:22px;flex-wrap:wrap}
-.head svg{width:208px;height:auto}
-.head .meta{text-align:right;font-size:12px;color:var(--muted);line-height:1.5}
-.head .meta b{display:block;color:var(--navy);font-size:13.5px}
-h1{font:700 24px Georgia,serif;margin:0 0 4px;color:var(--navy)}
-.stamp{font:600 11px/1.5 'Courier New',monospace;color:var(--muted);text-transform:uppercase;letter-spacing:.09em;margin-bottom:20px}
-.stamp.done{color:var(--green)}
-h2{font:700 15px Georgia,serif;margin:26px 0 10px;color:var(--navy);border-bottom:1px solid var(--line);padding-bottom:5px}
-p{margin:0 0 12px}
-.terms{list-style:none;padding:0;margin:0 0 15px}
-.terms li{display:flex;gap:12px;padding:7px 0;border-bottom:1px dotted var(--line);font-size:14px}
-.terms li span:first-child{flex:none;min-width:168px;color:var(--muted);font:600 11px Arial,sans-serif;text-transform:uppercase;letter-spacing:.06em;padding-top:3px}
-.note{background:#f7f1e2;border-left:3px solid var(--gold);padding:10px 13px;font-size:14px;margin:0 0 16px;border-radius:0 6px 6px 0}
-.note.ooc{background:#f2f3f1;border-left-color:var(--muted);font-style:italic;color:var(--muted)}
-.pk-f{display:block;margin-bottom:14px}
-.pk-f>span{display:block;font:600 11px/1.4 Arial,sans-serif;text-transform:uppercase;letter-spacing:.07em;color:var(--muted);margin-bottom:5px}
-.pk-f input,.pk-f textarea{width:100%;border:1px solid var(--line);border-radius:7px;padding:10px 11px;background:var(--cream);font:15px/1.55 Georgia,serif;color:var(--ink)}
-.pk-f textarea{resize:vertical;min-height:78px}
-.pk-f input:focus,.pk-f textarea:focus{outline:2px solid var(--gold);outline-offset:1px}
-.pk-f.miss input,.pk-f.miss textarea,.pk-boxes.miss,.pk-choice.miss{outline:2px solid var(--danger);outline-offset:1px}
-.pk-grid{display:grid;grid-template-columns:1fr 1fr;gap:0 16px}
-.pk-hint{margin:0 0 8px;font-size:14px;color:var(--muted)}
-.pk-boxes{display:flex;flex-direction:column;gap:8px;margin-bottom:10px}
-.pk-boxes .pk-opt,.pk-boxes label{display:flex;gap:10px;align-items:flex-start;font-size:14px;cursor:pointer;padding:10px 12px;border:1px solid var(--line);border-radius:8px;background:var(--cream);user-select:none}
-.pk-boxes .pk-opt:hover,.pk-boxes label:hover{border-color:var(--gold);background:#fff}
-.pk-boxes input{margin-top:3px;flex:none;width:18px;height:18px;cursor:pointer}
-.pk-writein{margin-top:4px;margin-bottom:16px}
-.pk-choice{display:flex;gap:11px;align-items:flex-start;border:1px solid var(--line);border-radius:8px;padding:12px 14px;margin-bottom:10px;background:var(--cream);cursor:pointer;user-select:none}
-.pk-choice:hover{border-color:var(--gold);background:#fff}
-.pk-choice input{margin-top:4px;flex:none;width:18px;height:18px;cursor:pointer}
-.pk-choice b{display:block;font-size:15px}
-.pk-choice small{color:var(--muted);font-size:12.5px}
-.sign{display:grid;grid-template-columns:1fr 1fr;gap:0 16px}
-.pk-sign-cursive{font-family:'Segoe Script','Bradley Hand ITC','Apple Chancery','Snell Roundhand','Lucida Handwriting',cursive!important;font-size:28px!important;line-height:1.35;color:#1e3a52;letter-spacing:.02em;min-height:52px;padding-top:12px!important;padding-bottom:12px!important}
-.actions{display:flex;gap:10px;flex-wrap:wrap;align-items:center;margin-top:22px;border-top:1px solid var(--line);padding-top:20px}
-button{font:600 14px Arial,sans-serif;padding:11px 18px;border-radius:8px;border:1px solid var(--navy);background:var(--navy);color:var(--gold);cursor:pointer}
-button.ghost{background:transparent;color:var(--navy);border-color:var(--line)}
-.msg{font:600 13px Arial,sans-serif}
-.msg.err{color:var(--danger)}
-.msg.ok{color:var(--green)}
-.foot{margin-top:26px;border-top:1px solid var(--line);padding-top:16px;font-size:12.5px;color:var(--muted)}
-.foot b{display:block;color:var(--navy);font:700 14px Georgia,serif}
-@media print{body{background:#fff;padding:0}.sheet{border:0;box-shadow:none;border-radius:0;max-width:none;padding:0}.actions{display:none}}
-@media(max-width:620px){.pk-grid,.sign{grid-template-columns:1fr}.sheet{padding:22px 18px}}
-</style></head>
+<style>${packetStylesCss()}</style></head>
 <body>
 ${sheet}
 <script id="packet-meta" type="application/json">${metaJson}<\/script>
@@ -7303,7 +7367,7 @@ function applyReply(reply) {
     a = s.applications.find(x => x.paperwork && Object.keys(x.paperwork).some(k => x.paperwork[k] && x.paperwork[k].packetId === reply.packetId));
   }
   if (!a && writtenName) {
-    a = s.applications.find(x => String(x.name).trim().toLowerCase() === writtenName.toLowerCase());
+    a = findAppByName(writtenName);
   }
   if (!a && writtenName) {
     a = ensureAppFromReply(writtenName, kind, reply);
@@ -7355,7 +7419,10 @@ function applyReply(reply) {
     extra = 'interview answers returned';
   } else if (kind === 'offer') {
     if (status === 'accepted') {
-      if (STAGE_ORDER.indexOf(a.stage) > -1 && STAGE_ORDER.indexOf(a.stage) < STAGE_ORDER.indexOf('offer')) a.stage = 'offer';
+      if (STAGE_ORDER.indexOf(a.stage) > -1 && STAGE_ORDER.indexOf(a.stage) < STAGE_ORDER.indexOf('offer')) {
+        a.stage = 'offer';
+        a.stageChangedAt = today();
+      }
       extra = 'offer accepted — ready to hire';
     } else if (status === 'declined') {
       extra = 'offer declined';
@@ -7376,9 +7443,7 @@ function applyReply(reply) {
   }
 
   /* Smart sync onto employee Documents whenever linked (or name-matched after hire) */
-  let emp = (a.employeeId && empById(a.employeeId)) ||
-    (s.employees || []).find(x => String(x.applicationId) === String(a.id)) ||
-    (a.stage === 'hired' ? (s.employees || []).find(x => String(x.name).trim().toLowerCase() === String(a.name).trim().toLowerCase() && x.status !== 'terminated') : null);
+  let emp = empForApp(a);
   if (emp) {
     a.employeeId = emp.id;
     emp.applicationId = a.id;
@@ -7400,6 +7465,7 @@ function applyReply(reply) {
       if (a.stage === 'rejected' || a.stage === 'hired') return;
       if (confirm(a.name + ' declined the offer. Mark the application rejected and keep the decline letter?')) {
         a.stage = 'rejected';
+        a.stageChangedAt = today();
         ensurePaperwork(a);
         if (!a.paperwork.decline) setPaper(a, 'decline', letterDecline(a));
         log('Application rejected after offer decline: ' + a.name);
@@ -7503,12 +7569,13 @@ function createNextPeriod() {
   const a = new Date((last ? last.end : today()) + 'T00:00:00');
   a.setDate(a.getDate() + 1);
   const b = new Date(a); b.setDate(b.getDate() + 6);
+  if (!s.nextPeriodId) s.nextPeriodId = 1;
   const p = {
-    id: Date.now(),
-    start: a.toISOString().slice(0, 10),
-    end: b.toISOString().slice(0, 10),
+    id: s.nextPeriodId++,
+    start: a.getFullYear() + '-' + String(a.getMonth() + 1).padStart(2, '0') + '-' + String(a.getDate()).padStart(2, '0'),
+    end: b.getFullYear() + '-' + String(b.getMonth() + 1).padStart(2, '0') + '-' + String(b.getDate()).padStart(2, '0'),
     status: 'open',
-    entries: Object.fromEntries(payableEmployees().map(e => [e.id, { hours: 0, bonus: 0, tips: 0, rate: e.rate, paidOut: false }])),
+    entries: Object.fromEntries(payableEmployees().map(e => [e.id, emptyEntry(e)])),
     tipPool: 0,
     notes: '',
     checks: { verifyHours: false, confirmRates: false, markPaid: false, approvePayment: false, closeRecord: false }
@@ -7608,11 +7675,25 @@ window.openHours = function (id) {
   hourId = id;
   const e = empById(id);
   const x = entry(p, id);
+  const locked = !!x.paidOut;
   $('hoursName').value = e ? e.name : '';
   $('hoursValue').value = x.hours;
   $('bonusValue').value = x.bonus || 0;
   $('rateSnapshot').value = entryRate(e, x) || (e ? e.rate : 0);
-  $('paidOut').checked = !!x.paidOut;
+  $('paidOut').checked = locked;
+  $('hoursValue').disabled = locked;
+  $('bonusValue').disabled = locked;
+  $('rateSnapshot').disabled = locked;
+  if ($('hoursPaidLock')) {
+    $('hoursPaidLock').style.display = locked ? 'block' : 'none';
+    $('hoursPaidLock').textContent = locked
+      ? 'Paid stub locked — hours, rate, bonus, and tips stay as paid. Uncheck Paid out to edit.'
+      : '';
+  }
+  if ($('hoursTipsRead')) {
+    $('hoursTipsRead').style.display = 'block';
+    $('hoursTipsRead').textContent = 'Tips this period: ' + money(x.tips || 0) + ' (from tip pool — edit pool on Overview).';
+  }
   $('hoursModal').classList.add('open');
 };
 
@@ -7733,13 +7814,11 @@ window.advanceApp = function (id) {
     if (!confirm('No interviewer notes on file for ' + a.name + '. Move to offer anyway?')) return;
   }
   if (next === 'hired') {
-    if (!offerAccepted(a)) {
-      if (!confirm('Offer is not marked accepted for ' + a.name + '. Hire anyway?')) return;
-    }
     hireApplicant(a);
     return;
   }
   a.stage = next;
+  a.stageChangedAt = today();
   log(a.name + ' moved to ' + STAGES[next]);
   save(); render(); toast(a.name + ' → ' + STAGES[next]);
 };
@@ -7749,6 +7828,7 @@ window.rejectApp = function (id) {
   if (!a) return;
   if (!confirmDanger('Reject ' + a.name + '?', 'A decline letter will be drafted on their hiring file.')) return;
   a.stage = 'rejected';
+  a.stageChangedAt = today();
   ensurePaperwork(a);
   if (!a.paperwork.decline) setPaper(a, 'decline', letterDecline(a));
   log('Application rejected: ' + a.name);
@@ -7896,8 +7976,7 @@ window.resetPaperDoc = function (id, kind) {
   if (!a || !a.paperwork || !a.paperwork[kind]) return;
   if (!confirmDanger('Reset ' + PAPER_KINDS[kind].title + ' back to the standard wording?', 'Edits, send status, and any imported reply are lost.')) return;
   delete a.paperwork[kind];
-  const emp = (a.employeeId && empById(a.employeeId)) ||
-    (s.employees || []).find(x => String(x.applicationId) === String(a.id));
+  const emp = empForApp(a);
   if (emp && emp.documents) {
     emp.documents = emp.documents.filter(d => d.kind !== kind);
     if (kind === 'contract') emp.contractSignedAt = '';
@@ -7927,8 +8006,7 @@ function finishDownloadSendPacket(a, kind, opts) {
   opts = opts || {};
   const def = PAPER_KINDS[kind];
   ensurePaperwork(a);
-  const linked = (a.employeeId && empById(a.employeeId)) ||
-    (s.employees || []).find(x => String(x.applicationId) === String(a.id));
+  const linked = empForApp(a);
   if (linked) syncEmpCtxOntoApp(a, linked);
   if (!s.nextPacketId) s.nextPacketId = 1;
   const existing = a.paperwork[kind];
@@ -7940,8 +8018,7 @@ function finishDownloadSendPacket(a, kind, opts) {
   const paperExtra = { sendStatus: 'sent', sentAt: today(), packetId };
   if (opts.houseSign) paperExtra.houseSign = opts.houseSign;
   setPaper(a, kind, (existing && existing.html) ? '' : buildPaperHtml(a, kind), paperExtra);
-  const emp = (a.employeeId && empById(a.employeeId)) ||
-    (s.employees || []).find(x => String(x.applicationId) === String(a.id));
+  const emp = empForApp(a);
   if (emp) {
     a.employeeId = emp.id;
     emp.applicationId = a.id;
@@ -8300,17 +8377,8 @@ function openSundayRunPreview() {
 
 function copySundayRun() {
   const text = buildSundayRunText(current());
-  const done = () => toast('Sunday pay run copied');
-  if (navigator.clipboard && navigator.clipboard.writeText) {
-    navigator.clipboard.writeText(text).then(done).catch(() => {
-      window.prompt('Copy Sunday pay run:', text);
-      done();
-    });
-  } else {
-    window.prompt('Copy Sunday pay run:', text);
-    done();
-  }
   if ($('sundayRunPreview')) $('sundayRunPreview').textContent = text;
+  copyText(text, 'Sunday pay run copied');
 }
 
 function setEmpFileTab(name) {
@@ -8400,7 +8468,7 @@ function completeProbation(pass) {
    HIRE FLOW
 ===================================================== */
 function nameOnRoster(name) {
-  return s.employees.some(e => e.name.trim().toLowerCase() === name.trim().toLowerCase() && e.status !== 'terminated');
+  return s.employees.some(e => samePersonName(e.name, name) && e.status !== 'terminated');
 }
 
 function hireApplicant(a) {
@@ -8409,6 +8477,11 @@ function hireApplicant(a) {
   }
   if (!eligible(a)) {
     if (!confirm('Eligibility is not fully cleared for ' + a.name + '. Hire anyway?')) return;
+  }
+  ensurePaperwork(a);
+  if (!offerAccepted(a)) {
+    toast('Offer should be accepted before hire — import the offer reply first when you can');
+    if (!confirm('Override and hire ' + a.name + ' without an accepted offer on file?')) return;
   }
   const role = a.offerRole || 'New Hire';
   const hire = today();
@@ -8431,8 +8504,9 @@ function hireApplicant(a) {
     history: [{ date: hire, type: 'hire', summary: 'Hired as ' + role, from: null, to: role, detail: 'Hired from application' }]
   }, hire);
   s.employees.push(e);
-  s.periods.filter(p => p.status === 'open').forEach(p => { p.entries[e.id] = { hours: 0, bonus: 0, tips: 0, rate: e.rate, paidOut: false }; });
+  s.periods.filter(p => p.status === 'open').forEach(p => { p.entries[e.id] = emptyEntry(e); });
   a.stage = 'hired';
+  a.stageChangedAt = hire;
   a.offerRole = role;
   a.employeeId = e.id;
   ensurePaperwork(a);
@@ -8445,6 +8519,7 @@ function hireApplicant(a) {
   $('paperModal').classList.remove('open');
   render();
   toast(e.name + ' hired — Send contract next (you sign first), then the new-hire packet');
+  announce(e.name + ' hired. Next step: send employment contract.');
   editId = e.id;
   const empBtn = document.querySelector('[data-view="employees"]');
   if (empBtn) empBtn.click();
@@ -8719,7 +8794,7 @@ window.addEventListener('hashchange', () => {
   }
 });
 
-$('period').onchange = () => { flushPeriodNotes(); notesDirty = false; syncStubToOverview(); render(); };
+$('period').onchange = () => { flushPeriodNotes(); notesDirty = false; notesPeriodIndex = selectedPeriodIndex(); syncStubToOverview(); render(); };
 if ($('reportYear')) $('reportYear').onchange = () => renderMonthly();
 
 $('todoAddBtn').onclick = () => {
@@ -8792,19 +8867,23 @@ $('tipPool').onchange = () => {
   const tipRes = distributeTips(p);
   log('Tip pool for ' + shortLabel(p) + ' set to ' + money(p.tipPool));
   save(); render();
-  if (p.tipPool > 0 && tipRes && tipRes.eligible === 0) toast('Tip pool saved — no eligible tip roles with hours yet');
+  if (p.tipPool > 0 && tipRes && tipRes.overLocked) toast('Tip pool saved — paid stubs already exceed the pool');
+  else if (p.tipPool > 0 && tipRes && tipRes.eligible === 0) toast('Tip pool saved — no eligible tip roles with hours yet');
   else toast(tipRes && tipRes.locked ? 'Tip pool updated (paid stubs kept locked tips)' : 'Tip pool split across the floor');
 };
 
 $('savePeriodNotes').onclick = () => {
-  const p = current();
+  const idx = notesPeriodIndex != null ? notesPeriodIndex : selectedPeriodIndex();
+  const p = s.periods[idx] || current();
   p.notes = $('periodNotes').value;
   notesDirty = false;
+  notesPeriodIndex = selectedPeriodIndex();
   save(); toast('Notes saved');
 };
 
 $('periodNotes').oninput = () => {
   notesDirty = true;
+  if (notesPeriodIndex == null) notesPeriodIndex = selectedPeriodIndex();
   clearTimeout(notesTimer);
   notesTimer = setTimeout(() => flushPeriodNotes(), 800);
 };
@@ -9096,7 +9175,8 @@ $('sendEmpPacket').onclick = () => {
   const e = empById(editId);
   if (!e) return toast('Save the file first');
   if (!empHasSignedContract(e)) {
-    if (!confirm('No signed contract on file for ' + e.name + '. Paper path says contract first. File & send the packet anyway?')) return;
+    toast('Signed contract required before the new-hire packet');
+    if (!confirm('Override paper path and file & send the packet for ' + e.name + ' without a signed contract?')) return;
   }
   const a = syncEmpCtxOntoApp(ensureAppForEmployee(e), e);
   const html = letterPacket(empCtx(e));
@@ -9111,6 +9191,7 @@ $('sendEmpPacket').onclick = () => {
   save();
   renderEmployeeFile(e);
   copyText(discordPostBlurb(e.name, 'packet', packetId), 'New-hire packet on file · Discord blurb copied');
+  announce('New-hire packet filed for ' + e.name);
 };
 
 $('cancelHrSign').onclick = () => {
@@ -9142,6 +9223,19 @@ $('saveHours').onclick = () => {
   const prev = entry(p, hourId);
   const wasPaid = !!prev.paidOut;
   const nowPaid = $('paidOut').checked;
+  if (wasPaid) {
+    if (wasPaid !== nowPaid) {
+      setPaidStatus(p, hourId, nowPaid);
+      log('Marked unpaid so the stub can be edited: ' + e.name);
+      save();
+      $('hoursModal').classList.remove('open');
+      render();
+      toast(nowPaid ? 'Marked paid' : 'Marked unpaid — edit hours and save again');
+      return;
+    }
+    toast('Paid stub is locked — mark unpaid first to change hours, rate, or bonus');
+    return;
+  }
   const newBonus = Number($('bonusValue').value) || 0;
   const newHours = Number($('hoursValue').value) || 0;
   const newRate = Number($('rateSnapshot').value) || e.rate;
@@ -9151,7 +9245,7 @@ $('saveHours').onclick = () => {
     bonus: newBonus,
     tips: Number(prev.tips || 0),
     rate: newRate,
-    paidOut: wasPaid
+    paidOut: false
   };
   distributeTips(p);
   if (oldBonus !== newBonus) {
@@ -9164,7 +9258,7 @@ $('saveHours').onclick = () => {
       detail: 'Logged on hours entry'
     });
   }
-  if (wasPaid !== nowPaid) setPaidStatus(p, hourId, nowPaid);
+  if (nowPaid) setPaidStatus(p, hourId, true);
   log('Hours logged for ' + e.name + ' — ' + dec(p.entries[hourId].hours) + ' hrs at ' + money(p.entries[hourId].rate) + '/hr');
   save();
   $('hoursModal').classList.remove('open');
@@ -9382,6 +9476,17 @@ $('saveApp').onclick = () => {
   if (!appId && nameOnRoster(name)) {
     if (!confirm(name + ' is already on the active roster. Log a new application anyway?')) return;
   }
+  if (!appId) {
+    const dupe = findAppByName(name, { excludeRejected: true });
+    if (dupe) {
+      if (confirm(name + ' already has an open application (#' + dupe.id + ', ' + (STAGES[dupe.stage] || dupe.stage) + '). Open that file instead?')) {
+        $('appModal').classList.remove('open');
+        editApp(dupe.id);
+        return;
+      }
+      if (!confirm('Create a second open application for ' + name + ' anyway?')) return;
+    }
+  }
   const data = {
     name,
     applied: $('appDate').value || today(),
@@ -9410,12 +9515,14 @@ $('saveApp').onclick = () => {
   if (appId) {
     a = s.applications.find(x => x.id === appId);
     const wasHired = a.stage === 'hired' || !!a.employeeId;
+    const prevStage = a.stage;
     Object.assign(a, data);
     if (wasHired && data.stage !== 'rejected') a.stage = 'hired';
+    if (a.stage !== prevStage) a.stageChangedAt = today();
     normalizeApplication(a);
     log('Updated application: ' + name);
   } else {
-    a = normalizeApplication({ id: s.nextAppId++, ...data });
+    a = normalizeApplication({ id: s.nextAppId++, stageChangedAt: today(), ...data });
     s.applications.unshift(a);
     log('New application received: ' + name);
   }
@@ -9452,9 +9559,6 @@ $('hireFromApp').onclick = () => {
     return;
   }
   ensurePaperwork(a);
-  if (!offerAccepted(a)) {
-    if (!confirm('Offer is not marked accepted for ' + a.name + '. Hire anyway?')) return;
-  }
   hireApplicant(a);
 };
 
@@ -9548,17 +9652,31 @@ $('saveExpense').onclick = () => {
   if (reimbursable && !receipt) {
     if (!confirm('This expense is reimbursable but has no receipt / reference. Save anyway?')) return;
   }
+  if (reimbursable && ($('exRebateStatus') && $('exRebateStatus').value === 'reimbursed') && !receipt) {
+    if (!confirm('Marking reimbursable as reimbursed with no receipt. Continue?')) return;
+  }
   if (category === 'other' && amount >= 50000) {
     if (!confirm('Large “other” expense of ' + money(amount) + '. Save under Other anyway?')) return;
   }
+  const dateVal = $('exDate').value || today();
+  const paidBy = $('exPaidBy').value.trim() || 'Samael Hesperus';
+  if (expenseId == null) {
+    const twin = (s.expenses || []).find(x =>
+      x.date === dateVal &&
+      samePersonName(x.vendor, vendor) &&
+      Number(x.amount || 0) === amount &&
+      samePersonName(x.paidBy, paidBy)
+    );
+    if (twin && !confirm('Looks like a duplicate of #' + twin.id + ' (' + money(amount) + ' · ' + vendor + ' on ' + dateVal + '). Save another anyway?')) return;
+  }
   const data = normalizeExpense({
     id: expenseId || s.nextExpenseId++,
-    date: $('exDate').value || today(),
+    date: dateVal,
     category,
     vendor,
     description: $('exDesc').value.trim(),
     amount,
-    paidBy: $('exPaidBy').value.trim() || 'Samael Hesperus',
+    paidBy,
     receipt,
     reimbursable,
     rebateStatus: ($('exRebateStatus') && $('exRebateStatus').value) || 'pending',
