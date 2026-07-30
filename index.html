@@ -789,6 +789,250 @@ td,th{padding-block:11px}
   .skip-link,.shortcut-sheet,.live-region,.nav-search-wrap,.help-btn,.kbd-hint{display:none!important}
 }
 
+/* ===== Layout system v2 ===== */
+:root{
+  --space-1:6px;--space-2:10px;--space-3:14px;--space-4:18px;--space-5:24px;--space-6:32px;
+  --side-w:252px;--content-max:1480px;--r:12px;
+  --panel:oklch(99.2% .005 84);
+  --ink:oklch(20% .02 155);--muted:oklch(48% .02 155);
+}
+.shell{grid-template-columns:var(--side-w) minmax(0,1fr)}
+.side{padding:22px 12px 18px;gap:2px}
+.logo{padding:4px 8px 18px}
+.logo svg{width:176px}
+.main{display:flex;flex-direction:column;min-height:100vh;background:
+  linear-gradient(180deg, oklch(98.6% .008 84), transparent 180px)}
+.content{
+  width:100%;max-width:var(--content-max);margin:0 auto;
+  padding:28px 32px 80px;
+}
+.view.active{
+  display:flex;flex-direction:column;gap:var(--space-4);
+  animation:viewIn .2s var(--ease,ease);
+}
+.view > .header{
+  margin-bottom:0;padding-bottom:16px;align-items:flex-end;gap:16px;
+  border-bottom:1px solid var(--line);
+}
+.view > .header:after{width:88px;height:3px;bottom:-2px}
+.header .title{font-size:clamp(1.55rem,2vw,1.95rem);margin:4px 0 6px;line-height:1.15}
+.header .subtitle{font-size:.82rem;max-width:48rem}
+.header .actions{justify-content:flex-end}
+.eyebrow{
+  display:inline-flex;align-items:center;gap:8px;
+  padding:3px 0;color:oklch(46% .04 155);
+}
+
+/* Control strips / filter rails */
+.period,.action-bar,.toolbar,.filter-rail{
+  display:flex;flex-wrap:wrap;align-items:center;gap:10px;
+  padding:12px 16px;margin:0;
+  background:linear-gradient(180deg, var(--paper), oklch(97.6% .01 84));
+  border:1px solid var(--line);border-radius:14px;
+  box-shadow:0 1px 2px oklch(30% .02 155 / .04);
+}
+.period{
+  background:linear-gradient(135deg, oklch(93% .035 155), oklch(96% .02 155) 55%, var(--paper));
+  border-color:oklch(84% .04 155);
+  gap:12px;
+}
+.period b{
+  font-size:.68rem;letter-spacing:.08em;text-transform:uppercase;color:var(--navy);
+  padding:4px 8px;border-radius:999px;background:oklch(100% 0 0 / .45);border:1px solid oklch(84% .04 155);
+}
+.period select{
+  flex:1 1 220px;min-width:200px;max-width:420px;
+  border:1px solid oklch(84% .04 155);border-radius:9px;padding:8px 10px;background:var(--paper);
+}
+.period .btn,.action-bar .btn{flex:none}
+.period-tip{
+  display:inline-flex;align-items:center;gap:8px;
+  font-size:.72rem;color:var(--navy);font-weight:600;
+  padding:4px 8px;border-radius:9px;background:oklch(100% 0 0 / .4);
+}
+.period-tip input{
+  width:104px;border:1px solid oklch(84% .04 155);border-radius:7px;
+  padding:7px 8px;background:var(--paper);text-align:right;font-weight:600;
+}
+.toolbar{margin-bottom:0}
+.toolbar .search,.filter-rail .search{flex:1 1 200px;min-width:160px}
+.toolbar select,.filter-rail select{min-width:140px}
+.jump-row{
+  padding:8px 12px;background:transparent;border-style:dashed;box-shadow:none;
+  margin-top:-4px;
+}
+
+/* Metrics band */
+.metrics{
+  display:grid;grid-template-columns:repeat(4,minmax(0,1fr));
+  gap:12px;margin:0;
+}
+.metrics.metrics-dense{gap:10px}
+.metric{
+  padding:16px 16px 14px;border-radius:14px;background:var(--panel);
+  min-height:102px;display:flex;flex-direction:column;justify-content:flex-start;
+}
+.metric strong{font-size:clamp(1.05rem,1.6vw,1.3rem);margin-top:8px}
+.metric span{margin-top:auto;padding-top:6px}
+
+/* Desk grids */
+.grid{
+  display:grid;grid-template-columns:minmax(0,1.45fr) minmax(300px,.95fr);
+  gap:18px;align-items:start;margin:0;
+}
+.grid-2{
+  display:grid;grid-template-columns:repeat(2,minmax(0,1fr));
+  gap:18px;align-items:start;margin:0;
+}
+.stack-col{display:flex;flex-direction:column;gap:16px;min-width:0}
+.stack-col > .card{margin-bottom:0}
+.split-desk{
+  display:grid;grid-template-columns:minmax(0,1.35fr) minmax(280px,.9fr);
+  gap:18px;align-items:start;
+}
+.split-desk > .card{margin-bottom:0}
+.panel-note{
+  padding:10px 16px 0;font-size:.72rem;color:var(--muted);line-height:1.5;
+}
+
+/* Cards */
+.card{
+  margin-bottom:0;border-radius:14px;overflow:hidden;
+  background:var(--panel);border:1px solid var(--line);
+  display:flex;flex-direction:column;min-width:0;
+}
+.card-head{
+  padding:13px 16px;position:sticky;top:0;z-index:1;
+  background:linear-gradient(180deg, oklch(99.4% .004 84), oklch(97.8% .008 84));
+}
+.card-head b{font-size:.86rem;font-weight:700;letter-spacing:.005em}
+.card-body{padding:16px}
+.card > .table-scroll{flex:1}
+.card > table{width:100%}
+.mini-note{padding-left:16px;padding-right:16px}
+
+/* Tables */
+.table-scroll{
+  overflow:auto;max-width:100%;
+  border-radius:0 0 14px 14px;
+}
+.card > table thead th,
+.table-scroll table thead th{
+  position:sticky;top:0;z-index:1;
+  box-shadow:0 1px 0 var(--line);
+}
+th{padding:11px 14px}
+td{padding:11px 14px;font-size:.79rem}
+td .btn.tiny{white-space:nowrap}
+
+/* Callouts / path */
+.callout{
+  margin:0;border-radius:14px;padding:14px 16px;
+}
+.hire-path{
+  margin:0;border-radius:14px;padding:14px 16px;
+  justify-content:flex-start;
+}
+.hire-path span{padding:6px 12px;font-size:.68rem}
+.action-bar{margin:0}
+.action-bar .bar-label{
+  padding:4px 8px;border-radius:999px;background:var(--sage);color:var(--navy);
+}
+
+/* Stub desk */
+.stub-desk{
+  display:grid;grid-template-columns:minmax(0,1.05fr) minmax(300px,.95fr);
+  gap:18px;align-items:start;margin:0;
+}
+.stub-desk > .card{margin-bottom:0}
+.stub-chrome{
+  display:flex;align-items:center;justify-content:space-between;gap:10px;
+  padding:8px 4px 10px;
+}
+
+/* Top bar tighten */
+.top{
+  padding:10px 28px;min-height:60px;
+  border-bottom:1px solid var(--line);
+  background:linear-gradient(180deg, oklch(99.9% .003 84), oklch(98.5% .006 84));
+}
+.quick-jump{min-width:168px;border-radius:9px}
+
+/* Chart wells */
+.chart-well{
+  height:160px;padding:16px 18px 14px;
+}
+.chart-well.tall{height:200px;padding:18px 20px}
+.chart-well > div{
+  width:100%;height:100%;display:flex;align-items:end;gap:6px;
+  border-bottom:1px solid var(--line);min-height:0;
+}
+
+/* Backup / roles / simple pages */
+.page-narrow{max-width:920px}
+.backup-actions .card-body{display:flex;flex-direction:column;gap:12px;min-height:140px}
+
+/* Dense report metrics */
+#view-reports .metrics{margin:0}
+#view-reports .metrics + .metrics{margin-top:-6px}
+.report-metrics{
+  display:grid;gap:12px;
+}
+.report-metrics .metrics{margin:0}
+
+/* Empty & log */
+.empty{border-radius:12px;margin:8px}
+.log{max-height:280px}
+
+/* Sunday closeout padding */
+.closeout-body{padding:8px 16px 14px}
+
+/* Responsive layout */
+@media(max-width:1200px){
+  .grid,.split-desk,.stub-desk{grid-template-columns:1fr}
+  .metrics{grid-template-columns:repeat(2,minmax(0,1fr))}
+}
+@media(max-width:1000px){
+  .shell{grid-template-columns:1fr}
+  .content{padding:22px 16px 64px}
+  .header{align-items:stretch}
+  .header .actions{width:100%;justify-content:stretch}
+  .header .actions .btn{flex:1 1 auto}
+}
+@media(max-width:720px){
+  .metrics,.emp-metrics{grid-template-columns:1fr 1fr}
+  .grid-2{grid-template-columns:1fr}
+  .period .btn,.period-tip{width:100%}
+  .period select{max-width:none}
+  .metric{min-height:0}
+}
+@media(max-width:520px){
+  .metrics{grid-template-columns:1fr}
+}
+
+/* Layout polish pass */
+.toolbar.filter-rail select,
+.toolbar.filter-rail .search,
+.period select{
+  min-height:38px;
+}
+.side .nav-group{margin-bottom:4px}
+.logo{
+  border-bottom:1px solid oklch(38% .03 155 / .65);
+  margin-bottom:10px;padding-bottom:16px;
+}
+.content > .view > .header .actions .btn.primary{
+  min-width:132px;
+}
+.card-head .pill{margin-left:auto}
+.todo-card{align-self:stretch}
+.todo-panel{max-height:min(52vh,480px)}
+.unpaid-desk{order:0}
+@media(min-width:1201px){
+  .desk-split{grid-template-columns:minmax(0,1.5fr) minmax(320px,.9fr)}
+  .split-desk{grid-template-columns:minmax(0,1.4fr) minmax(300px,.95fr)}
+}
+
 </style>
 </head>
 <body>
@@ -884,8 +1128,8 @@ td,th{padding-block:11px}
     <b>Current period</b>
     <label class="sr-only" for="period">Pay period</label>
     <select id="period" aria-label="Pay period"></select>
-    <label style="font-size:.72rem;color:var(--navy);font-weight:600">Tip pool $
-      <input id="tipPool" type="number" min="0" step="1" style="width:110px;border:1px solid oklch(84% .04 155);border-radius:6px;padding:6px 8px;background:var(--paper);text-align:right">
+    <label class="period-tip">Tip pool $
+      <input id="tipPool" type="number" min="0" step="1" aria-label="Tip pool amount">
     </label>
     <button class="btn" id="newPeriod">New period</button>
     <button class="btn" id="markAllPaid">Mark all paid</button>
@@ -897,35 +1141,35 @@ td,th{padding-block:11px}
     <div class="metric"><label>Unpaid stubs</label><strong id="owedCount">0</strong><span id="owedSub">Still owed</span></div>
     <div class="metric"><label>Paid out</label><strong id="paidOutMetric">$0</strong><span>Marked paid this period</span></div>
   </div>
-  <div class="toolbar" style="margin-top:-6px">
+  <div class="toolbar jump-row" aria-label="Quick links">
     <button class="btn tiny soft" type="button" id="ovGotoReports">Year reports</button>
     <button class="btn tiny soft" type="button" id="ovGotoExpenses">Expense rebates</button>
     <button class="btn tiny soft" type="button" id="ovGotoUnpaidStubs">Unpaid stubs</button>
   </div>
-  <div class="grid">
-    <div>
+  <div class="grid desk-split">
+    <div class="stack-col">
       <div class="card unpaid-desk"><div class="card-head"><b>Unpaid desk</b><span class="pill warn" id="unpaidDeskCount">0</span></div>
-        <div class="mini-note" style="padding:8px 16px 0">Sunday queue — everyone still owed for this period.</div>
-        <table><thead><tr><th>Employee</th><th class="r">Hours</th><th class="r">Gross</th><th class="r">Action</th></tr></thead><tbody id="unpaidDesk"></tbody></table>
+        <div class="panel-note">Sunday queue — everyone still owed for this period.</div>
+        <div class="table-scroll"><table><thead><tr><th>Employee</th><th class="r">Hours</th><th class="r">Gross</th><th class="r">Action</th></tr></thead><tbody id="unpaidDesk"></tbody></table></div>
       </div>
       <div class="card"><div class="card-head"><b>Current period</b><span class="pill" id="state">OPEN</span></div>
-        <table><thead><tr><th>Employee</th><th>Role</th><th class="r">Hours</th><th class="r">Bonus</th><th class="r">Tips</th><th class="r">Gross</th><th class="r">Paid</th><th class="r">Action</th></tr></thead><tbody id="payroll"></tbody></table>
+        <div class="table-scroll"><table><thead><tr><th>Employee</th><th>Role</th><th class="r">Hours</th><th class="r">Bonus</th><th class="r">Tips</th><th class="r">Gross</th><th class="r">Paid</th><th class="r">Action</th></tr></thead><tbody id="payroll"></tbody></table></div>
       </div>
       <div class="card"><div class="card-head"><b>Period notes</b><button class="btn tiny" id="savePeriodNotes">Save notes</button></div>
         <div class="card-body"><textarea id="periodNotes" placeholder="Notes for this pay period — coverage, closures, Sunday pay remarks..."></textarea></div>
       </div>
     </div>
-    <div>
+    <div class="stack-col">
       <div class="card todo-card"><div class="card-head"><b>To-do desk</b><span class="pill warn" id="attnCount">0</span></div>
         <div class="todo-summary" id="todoSummary">Payday pings Fri–Sun · Sunday 9:00 AM</div>
         <div class="todo-filters" id="todoFilters">
-          <button type="button" class="todo-chip active" data-todo-filter="all">All</button>
-          <button type="button" class="todo-chip" data-todo-filter="urgent">Urgent</button>
-          <button type="button" class="todo-chip" data-todo-filter="payroll">Payroll</button>
-          <button type="button" class="todo-chip" data-todo-filter="hires">Hires</button>
-          <button type="button" class="todo-chip" data-todo-filter="pipeline">Pipeline</button>
-          <button type="button" class="todo-chip" data-todo-filter="desk">Desk</button>
-          <button type="button" class="todo-chip" data-todo-filter="yours">Yours</button>
+          <button type="button" class="todo-chip active" data-todo-filter="all" aria-pressed="true">All</button>
+          <button type="button" class="todo-chip" data-todo-filter="urgent" aria-pressed="false">Urgent</button>
+          <button type="button" class="todo-chip" data-todo-filter="payroll" aria-pressed="false">Payroll</button>
+          <button type="button" class="todo-chip" data-todo-filter="hires" aria-pressed="false">Hires</button>
+          <button type="button" class="todo-chip" data-todo-filter="pipeline" aria-pressed="false">Pipeline</button>
+          <button type="button" class="todo-chip" data-todo-filter="desk" aria-pressed="false">Desk</button>
+          <button type="button" class="todo-chip" data-todo-filter="yours" aria-pressed="false">Yours</button>
         </div>
         <div class="todo-panel" id="attn"></div>
         <div class="todo-add">
@@ -934,7 +1178,7 @@ td,th{padding-block:11px}
           <button class="btn tiny primary" id="todoAddBtn">Add</button>
         </div>
       </div>
-      <div class="card"><div class="card-head"><b>Sunday closeout</b><span class="pill gray">9 AM</span></div><div style="padding:8px 16px" id="checks"></div></div>
+      <div class="card"><div class="card-head"><b>Sunday closeout</b><span class="pill gray">9 AM</span></div><div class="closeout-body" id="checks"></div></div>
       <div class="card"><div class="card-head"><b>Recent activity</b></div><div class="log" id="activity"></div></div>
     </div>
   </div>
@@ -982,19 +1226,21 @@ td,th{padding-block:11px}
     <i></i><span data-step="contract">Contract</span>
     <i></i><span data-step="packet">Packet</span>
   </div>
-  <div class="toolbar" style="margin-bottom:12px">
+  <div class="toolbar filter-rail">
     <input class="search" id="hireSearch" placeholder="Search applicant" aria-label="Search applicants">
     <button type="button" class="btn tiny soft" id="hireFilterPipe" data-hire-filter="pipeline">Pipeline</button>
     <button type="button" class="btn tiny" id="hireFilterClosed" data-hire-filter="closed">Closed files</button>
     <button type="button" class="btn tiny" id="hireFilterAll" data-hire-filter="all">All applications</button>
     <span class="pill gray" id="hireFilterLabel">Showing pipeline</span>
   </div>
-  <div class="card"><div class="card-head"><b>Applications</b><span class="pill gray" id="appCount"></span></div>
-    <table><thead><tr><th>Applicant</th><th>Stage</th><th>Applied</th><th>Standing</th><th>Record</th><th>Paperwork</th><th class="r">Move</th><th class="r">Action</th></tr></thead><tbody id="apps"></tbody></table>
-  </div>
-  <div class="card"><div class="card-head"><b>Filed replies</b><span class="pill gray" id="filedCount"></span></div>
-    <div class="mini-note" style="padding:0 16px 8px">Completed forms land here after Import reply.</div>
-    <table><thead><tr><th>Returned</th><th>Applicant</th><th>Document</th><th>Decision</th><th>Signed by</th><th class="r">Action</th></tr></thead><tbody id="filedReplies"></tbody></table>
+  <div class="split-desk">
+    <div class="card"><div class="card-head"><b>Applications</b><span class="pill gray" id="appCount"></span></div>
+      <div class="table-scroll"><table><thead><tr><th>Applicant</th><th>Stage</th><th>Applied</th><th>Standing</th><th>Record</th><th>Paperwork</th><th class="r">Move</th><th class="r">Action</th></tr></thead><tbody id="apps"></tbody></table></div>
+    </div>
+    <div class="card"><div class="card-head"><b>Filed replies</b><span class="pill gray" id="filedCount"></span></div>
+      <div class="panel-note">Completed forms land here after Import reply.</div>
+      <div class="table-scroll"><table><thead><tr><th>Returned</th><th>Applicant</th><th>Document</th><th>Decision</th><th>Signed by</th><th class="r">Action</th></tr></thead><tbody id="filedReplies"></tbody></table></div>
+    </div>
   </div>
   <div class="card"><div class="card-head"><b>Paper path</b></div>
     <div class="card-body policy">
@@ -1017,15 +1263,19 @@ td,th{padding-block:11px}
     <div><div class="eyebrow">Roster</div><h1 class="title" id="title-employees">Employees</h1><div class="subtitle">Staff files, timeline, probation, and hire paperwork.</div></div>
     <div class="actions"><button class="btn soft" id="pdfEmployees">Export roster PDF</button><button class="btn primary" id="addEmployee2">Add employee</button></div>
   </div>
-  <div class="toolbar">
+  <div class="toolbar filter-rail">
     <input class="search" id="search" placeholder="Search name or role" aria-label="Search employees">
     <select id="statusFilter"><option value="">All statuses</option><option value="active">Active</option><option value="probation">Probation</option><option value="suspended">Suspended</option><option value="terminated">Terminated</option></select>
     <span class="pill gray" id="shown"></span>
   </div>
-  <div class="card"><table><thead><tr><th>Name</th><th>Role</th><th>Status</th><th class="r">Rate</th><th class="r">Hired</th><th class="r">Strikes</th><th class="r">Action</th></tr></thead><tbody id="employees"></tbody></table></div>
-  <div class="card"><div class="card-head"><b>Staff documents on file</b><span class="pill gray" id="empDocCount"></span></div>
-    <div class="mini-note" style="padding:0 16px 8px">Offer letters, contracts, and new-hire packets from employee files — open a row to read the letter.</div>
-    <table><thead><tr><th>Date</th><th>Employee</th><th>Document</th><th class="r">Action</th></tr></thead><tbody id="empDocsIndex"></tbody></table>
+  <div class="split-desk">
+    <div class="card"><div class="card-head"><b>Roster</b></div>
+      <div class="table-scroll"><table><thead><tr><th>Name</th><th>Role</th><th>Status</th><th class="r">Rate</th><th class="r">Hired</th><th class="r">Strikes</th><th class="r">Action</th></tr></thead><tbody id="employees"></tbody></table></div>
+    </div>
+    <div class="card"><div class="card-head"><b>Staff documents on file</b><span class="pill gray" id="empDocCount"></span></div>
+      <div class="panel-note">Offer letters, contracts, and new-hire packets — open a row to read.</div>
+      <div class="table-scroll"><table><thead><tr><th>Date</th><th>Employee</th><th>Document</th><th class="r">Action</th></tr></thead><tbody id="empDocsIndex"></tbody></table></div>
+    </div>
   </div>
 </section>
 
@@ -1035,12 +1285,16 @@ td,th{padding-block:11px}
     <div><div class="eyebrow">Payroll</div><h1 class="title" id="title-periods">Time &amp; Pay</h1><div class="subtitle">Weekly periods — hours, tips, bonuses, and paid flags.</div></div>
     <div class="actions"><button class="btn soft" id="pdfPeriods">Export periods PDF</button><button class="btn primary" id="newPeriod2">Create next period</button></div>
   </div>
-  <div class="card"><table><thead><tr><th>Period</th><th>Status</th><th class="r">Staff</th><th class="r">Hours</th><th class="r">Tips</th><th class="r">Gross</th><th class="r">Unpaid</th><th class="r">Action</th></tr></thead><tbody id="periods"></tbody></table></div>
-  <div class="card"><div class="card-head"><b>Closed records</b></div>
-    <table><thead><tr><th>Period</th><th class="r">Hours</th><th class="r">Gross paid</th><th>Notes</th></tr></thead><tbody id="records"></tbody></table>
+  <div class="card"><div class="card-head"><b>Open &amp; recent periods</b></div>
+    <div class="table-scroll"><table><thead><tr><th>Period</th><th>Status</th><th class="r">Staff</th><th class="r">Hours</th><th class="r">Tips</th><th class="r">Gross</th><th class="r">Unpaid</th><th class="r">Action</th></tr></thead><tbody id="periods"></tbody></table></div>
   </div>
-  <div class="card"><div class="card-head"><b>Sunday pay log</b><button class="btn tiny" id="copyPayLog">Copy log</button></div>
-    <table><thead><tr><th>Date</th><th>Employee</th><th>Period</th><th class="r">Amount</th><th>Method</th></tr></thead><tbody id="payLog"></tbody></table>
+  <div class="grid-2">
+    <div class="card"><div class="card-head"><b>Closed records</b></div>
+      <div class="table-scroll"><table><thead><tr><th>Period</th><th class="r">Hours</th><th class="r">Gross paid</th><th>Notes</th></tr></thead><tbody id="records"></tbody></table></div>
+    </div>
+    <div class="card"><div class="card-head"><b>Sunday pay log</b><button class="btn tiny" id="copyPayLog">Copy log</button></div>
+      <div class="table-scroll"><table><thead><tr><th>Date</th><th>Employee</th><th>Period</th><th class="r">Amount</th><th>Method</th></tr></thead><tbody id="payLog"></tbody></table></div>
+    </div>
   </div>
 </section>
 
@@ -1050,7 +1304,7 @@ td,th{padding-block:11px}
     <div><div class="eyebrow">Payroll</div><h1 class="title" id="title-events">Events</h1><div class="subtitle">Raffles, entertainment nights, and shift bonuses — separate from base hours.</div></div>
     <div class="actions"><button class="btn primary" id="addEvent">Log event</button></div>
   </div>
-  <div class="card"><table><thead><tr><th>Date</th><th>Type</th><th>Event</th><th class="r">Staff</th><th class="r">Bonus total</th><th>Applied</th><th class="r">Action</th></tr></thead><tbody id="events"></tbody></table></div>
+  <div class="card"><div class="card-head"><b>Event log</b></div><div class="table-scroll"><table><thead><tr><th>Date</th><th>Type</th><th>Event</th><th class="r">Staff</th><th class="r">Bonus total</th><th>Applied</th><th class="r">Action</th></tr></thead><tbody id="events"></tbody></table></div></div>
 </section>
 
 <!-- EXPENSES -->
@@ -1070,11 +1324,11 @@ td,th{padding-block:11px}
     <div class="metric"><label>Reimbursable</label><strong id="expReimb">$0</strong></div>
     <div class="metric"><label>Top category</label><strong id="expTop">—</strong></div>
   </div>
-  <div class="toolbar">
+  <div class="toolbar filter-rail">
     <input class="search" id="expSearch" placeholder="Search vendor, receipt, notes">
     <select id="expMonth"><option value="">All months</option></select>
-    <input id="expFrom" type="date" title="From date" style="border:1px solid var(--line);border-radius:7px;padding:8px 10px;background:var(--paper)">
-    <input id="expTo" type="date" title="To date" style="border:1px solid var(--line);border-radius:7px;padding:8px 10px;background:var(--paper)">
+    <input class="search" id="expFrom" type="date" title="From date" aria-label="From date" style="min-width:140px">
+    <input class="search" id="expTo" type="date" title="To date" aria-label="To date" style="min-width:140px">
     <select id="expCategory"><option value="">All categories</option></select>
     <select id="expPaidByFilter"><option value="">All paid by</option></select>
     <select id="expReimbFilter">
@@ -1090,11 +1344,13 @@ td,th{padding-block:11px}
     </select>
     <span class="pill gray" id="expFilterLabel">Showing all</span>
   </div>
-  <div class="card"><div class="card-head"><b>Monthly spend</b><span class="pill gray" id="expBarsLabel">Filtered</span></div>
-    <div style="height:160px;padding:16px 20px"><div id="expBars" style="height:120px;display:flex;align-items:end;gap:6px;border-bottom:1px solid var(--line)"></div></div>
-  </div>
-  <div class="card"><div class="card-head"><b>Expense log</b><span class="pill gray" id="expTableCount">0</span></div>
-    <div class="table-scroll"><table><thead><tr><th>Date</th><th>Category</th><th>Vendor / item</th><th>Paid by</th><th class="r">Amount</th><th>Rebate</th><th>Status</th><th class="r">Action</th></tr></thead><tbody id="expenses"></tbody></table></div>
+  <div class="split-desk">
+    <div class="card"><div class="card-head"><b>Monthly spend</b><span class="pill gray" id="expBarsLabel">Filtered</span></div>
+      <div class="chart-well"><div id="expBars"></div></div>
+    </div>
+    <div class="card"><div class="card-head"><b>Expense log</b><span class="pill gray" id="expTableCount">0</span></div>
+      <div class="table-scroll"><table><thead><tr><th>Date</th><th>Category</th><th>Vendor / item</th><th>Paid by</th><th class="r">Amount</th><th>Rebate</th><th>Status</th><th class="r">Action</th></tr></thead><tbody id="expenses"></tbody></table></div>
+    </div>
   </div>
   <div class="grid-2">
     <div class="card"><div class="card-head"><b>By category</b><span class="pill gray" id="expCatLabel">Shown filters</span></div>
@@ -1122,7 +1378,7 @@ td,th{padding-block:11px}
     <div class="metric"><label>Unpaid</label><strong id="stubUnpaid">0</strong></div>
     <div class="metric"><label>Paid out</label><strong id="stubPaid">$0</strong></div>
   </div>
-  <div class="toolbar">
+  <div class="toolbar filter-rail">
     <select class="search" id="stubPeriod"></select>
     <select id="stubFilter">
       <option value="all">All stubs</option>
@@ -1139,9 +1395,9 @@ td,th{padding-block:11px}
   </div>
   <div class="stub-desk">
     <div class="card"><div class="card-head"><b>Period roster</b><span class="pill gray" id="stubRosterCount">0</span></div>
-      <table><thead><tr><th>Employee</th><th>Role</th><th class="r">Hours</th><th class="r">Gross</th><th>Paid</th><th class="r"></th></tr></thead><tbody id="stubRoster"></tbody></table>
+      <div class="table-scroll"><table><thead><tr><th>Employee</th><th>Role</th><th class="r">Hours</th><th class="r">Gross</th><th>Paid</th><th class="r"></th></tr></thead><tbody id="stubRoster"></tbody></table></div>
     </div>
-    <div>
+    <div class="stack-col">
       <div class="stub-chrome">
         <span class="pill gray" id="stubPaidPill">—</span>
         <button class="btn tiny" id="stubEditHours">Edit hours</button>
@@ -1160,7 +1416,7 @@ td,th{padding-block:11px}
     <div><div class="eyebrow">People</div><h1 class="title" id="title-relations">Relations</h1><div class="subtitle">Discipline, commendations, suspensions, and follow-ups.</div></div>
     <div class="actions"><button class="btn soft" id="pdfRelations">Export file PDF</button><button class="btn primary" id="addRelation">New entry</button></div>
   </div>
-  <div class="toolbar"><input class="search" id="relSearch" placeholder="Search employee or reason" aria-label="Search relations"></div>
+  <div class="toolbar filter-rail"><input class="search" id="relSearch" placeholder="Search employee or reason" aria-label="Search relations"></div>
   <div class="callout">
     <b>Three-strike system</b> &mdash; Strike one is a verbal warning noted in the file. Strike two is a written warning with a follow-up date.
     Strike three is termination. Suspension may be issued at any point while a matter is under review. Commendations are logged the same way
@@ -1172,11 +1428,13 @@ td,th{padding-block:11px}
     <div class="metric"><label>Commendations</label><strong id="mComm">0</strong><span>Good conduct</span></div>
     <div class="metric"><label>Suspended / terminated</label><strong id="mSusp">0</strong><span>Current roster</span></div>
   </div>
-  <div class="card"><div class="card-head"><b>Strike board</b></div>
-    <table><thead><tr><th>Employee</th><th>Role</th><th>Status</th><th class="r">Strikes</th><th>Standing</th></tr></thead><tbody id="strikeBoard"></tbody></table>
-  </div>
-  <div class="card"><div class="card-head"><b>Entries</b><span class="pill gray" id="relCount"></span></div>
-    <table><thead><tr><th>Date</th><th>Employee</th><th>Type</th><th>Reason</th><th>Issued by</th><th>Follow-up</th><th class="r">Action</th></tr></thead><tbody id="relations"></tbody></table>
+  <div class="split-desk">
+    <div class="card"><div class="card-head"><b>Strike board</b></div>
+      <div class="table-scroll"><table><thead><tr><th>Employee</th><th>Role</th><th>Status</th><th class="r">Strikes</th><th>Standing</th></tr></thead><tbody id="strikeBoard"></tbody></table></div>
+    </div>
+    <div class="card"><div class="card-head"><b>Entries</b><span class="pill gray" id="relCount"></span></div>
+      <div class="table-scroll"><table><thead><tr><th>Date</th><th>Employee</th><th>Type</th><th>Reason</th><th>Issued by</th><th>Follow-up</th><th class="r">Action</th></tr></thead><tbody id="relations"></tbody></table></div>
+    </div>
   </div>
 </section>
 
@@ -1187,7 +1445,7 @@ td,th{padding-block:11px}
     <div class="actions"><button class="btn" id="shiftPrev">&larr; Prev week</button><button class="btn" id="shiftThis">This week</button><button class="btn" id="shiftNext">Next week &rarr;</button><button class="btn soft" id="pdfShifts" title="Print Discord week sheet">Print week sheet</button></div>
   </div>
   <div class="callout plain">Week of <b id="shiftWeekLabel">—</b> &mdash; clock in on radio with 10-1 and clock out with 10-2. Shift Lead posts coverage before open.</div>
-  <div class="card"><table><thead><tr><th>Employee</th><th>Mon</th><th>Tue</th><th>Wed</th><th>Thu</th><th>Fri</th><th>Sat</th><th>Sun</th><th class="r">On</th></tr></thead><tbody id="shiftBoard"></tbody></table></div>
+  <div class="card"><div class="card-head"><b>Week board</b><span class="pill gray" id="shiftWeekPill">Week</span></div><div class="table-scroll"><table><thead><tr><th>Employee</th><th>Mon</th><th>Tue</th><th>Wed</th><th>Thu</th><th>Fri</th><th>Sat</th><th>Sun</th><th class="r">On</th></tr></thead><tbody id="shiftBoard"></tbody></table></div></div>
 </section>
 
 <!-- COMPLIANCE -->
@@ -1196,7 +1454,7 @@ td,th{padding-block:11px}
     <div><div class="eyebrow">Office</div><h1 class="title" id="title-compliance">Compliance</h1><div class="subtitle">Licenses, handbook excerpts, and chain of command.</div></div>
     <div class="actions"><button class="btn primary" id="addLicense">Add license / note</button></div>
   </div>
-  <div class="toolbar"><select id="licFilter"><option value="">All licenses</option><option value="active">Active</option><option value="pending">Pending</option><option value="expired">Expired / due soon</option><option value="note">Notes</option></select></div>
+  <div class="toolbar filter-rail"><label class="sr-only" for="licFilter">License filter</label><select id="licFilter" aria-label="License filter"><option value="">All licenses</option><option value="active">Active</option><option value="pending">Pending</option><option value="expired">Expired / due soon</option><option value="note">Notes</option></select></div>
   <div class="callout">Business direction: restaurant operations first, then raffle nights, then adult entertainment. Keep every license current &mdash; the office does not run an unlicensed floor.</div>
   <div class="card"><div class="table-scroll"><table><thead><tr><th>Item</th><th>Status</th><th>Issued</th><th>Expires</th><th>Notes</th><th class="r">Action</th></tr></thead><tbody id="licenses"></tbody></table></div></div>
 
@@ -1280,23 +1538,25 @@ td,th{padding-block:11px}
       <button class="btn soft" id="pdfMonthly">Export year PDF</button>
     </div>
   </div>
-  <div class="metrics">
-    <div class="metric"><label>Year to date</label><strong id="ytd">$0</strong><span id="ytdSub">Selected year</span></div>
-    <div class="metric"><label>Paid out</label><strong id="yearPaid">$0</strong><span id="yoySub">vs prior year</span></div>
-    <div class="metric"><label>Still owed</label><strong id="yearOwed">$0</strong></div>
-    <div class="metric"><label>Highest month</label><strong id="high">—</strong><span id="highSub">Gross payroll</span></div>
-  </div>
-  <div class="metrics" style="margin-top:-8px">
-    <div class="metric"><label>Wages</label><strong id="yearWages">$0</strong><span id="wageShare">Share of gross</span></div>
-    <div class="metric"><label>Bonuses</label><strong id="yearBonus">$0</strong></div>
-    <div class="metric"><label>Tips</label><strong id="yearTips">$0</strong><span id="tipShare">Share of gross</span></div>
-    <div class="metric"><label>Hours</label><strong id="yearHours">0</strong></div>
-  </div>
-  <div class="metrics" style="margin-top:-8px">
-    <div class="metric"><label>House spend</label><strong id="houseSpend">$0</strong><span>Payroll + expenses</span></div>
-    <div class="metric"><label>Expenses</label><strong id="yearExpenses">$0</strong><span id="yearExpReimb">Reimbursable</span></div>
-    <div class="metric"><label>Headcount</label><strong id="yearHeadcount">0</strong><span id="yearHeadSub">Active / probation / suspended</span></div>
-    <div class="metric"><label>Periods</label><strong id="yearPeriodSnap">0</strong><span id="yearPeriodSub">Open vs closed</span></div>
+  <div class="report-metrics">
+    <div class="metrics">
+      <div class="metric"><label>Year to date</label><strong id="ytd">$0</strong><span id="ytdSub">Selected year</span></div>
+      <div class="metric"><label>Paid out</label><strong id="yearPaid">$0</strong><span id="yoySub">vs prior year</span></div>
+      <div class="metric"><label>Still owed</label><strong id="yearOwed">$0</strong></div>
+      <div class="metric"><label>Highest month</label><strong id="high">—</strong><span id="highSub">Gross payroll</span></div>
+    </div>
+    <div class="metrics metrics-dense">
+      <div class="metric"><label>Wages</label><strong id="yearWages">$0</strong><span id="wageShare">Share of gross</span></div>
+      <div class="metric"><label>Bonuses</label><strong id="yearBonus">$0</strong></div>
+      <div class="metric"><label>Tips</label><strong id="yearTips">$0</strong><span id="tipShare">Share of gross</span></div>
+      <div class="metric"><label>Hours</label><strong id="yearHours">0</strong></div>
+    </div>
+    <div class="metrics metrics-dense">
+      <div class="metric"><label>House spend</label><strong id="houseSpend">$0</strong><span>Payroll + expenses</span></div>
+      <div class="metric"><label>Expenses</label><strong id="yearExpenses">$0</strong><span id="yearExpReimb">Reimbursable</span></div>
+      <div class="metric"><label>Headcount</label><strong id="yearHeadcount">0</strong><span id="yearHeadSub">Active / probation / suspended</span></div>
+      <div class="metric"><label>Periods</label><strong id="yearPeriodSnap">0</strong><span id="yearPeriodSub">Open vs closed</span></div>
+    </div>
   </div>
   <div class="card"><div class="card-head"><b>Monthly chart</b>
     <span style="display:flex;gap:6px;align-items:center;flex-wrap:wrap">
@@ -1307,7 +1567,7 @@ td,th{padding-block:11px}
       </select>
       <span class="pill gray" id="barsYearLabel">—</span>
     </span>
-  </div><div style="height:200px;padding:20px"><div id="bars" style="height:150px;display:flex;align-items:end;gap:8px;border-bottom:1px solid var(--line)"></div></div></div>
+  </div><div class="chart-well tall"><div id="bars"></div></div></div>
   <div class="card"><div class="card-head"><b>Monthly payroll</b><span class="pill gray" id="monthlyYearLabel">—</span></div>
     <div class="mini-note" style="padding:8px 16px 0">Totals by calendar month for the selected year.</div>
     <div class="table-scroll"><table><thead><tr><th>Month</th><th class="r">Periods</th><th class="r">Hours</th><th class="r">Wages</th><th class="r">Bonus</th><th class="r">Tips</th><th class="r">Gross</th><th class="r">Paid</th><th class="r">Owed</th></tr></thead><tbody id="monthly"></tbody></table></div>
@@ -1338,7 +1598,7 @@ td,th{padding-block:11px}
     <div class="actions"><button class="btn soft" id="pdfRoles">Export rates PDF</button></div>
   </div>
   <div class="callout plain">Changing a rate here sets the standard for future hires and new hour entries. Use <b>Apply to all</b> to push a rate onto everyone currently holding that role. Already-saved period entries keep the rate they were logged at.</div>
-  <div class="card"><table><thead><tr><th>Role</th><th class="r">Staff</th><th class="r">Avg logged / yr</th><th class="r">Standard rate / hr</th><th class="r">Action</th></tr></thead><tbody id="roles"></tbody></table></div>
+  <div class="card"><div class="card-head"><b>House ladder</b></div><div class="table-scroll"><table><thead><tr><th>Role</th><th class="r">Staff</th><th class="r">Avg logged / yr</th><th class="r">Standard rate / hr</th><th class="r">Action</th></tr></thead><tbody id="roles"></tbody></table></div></div>
 </section>
 
 <!-- BACKUP -->
@@ -1351,7 +1611,7 @@ td,th{padding-block:11px}
     <div class="metric"><label>Pay log</label><strong id="backupPayCount">0</strong><span>Sunday payment rows</span></div>
   </div>
   <div class="callout plain">Autosave keeps the roster, hours, applications, expenses, relations, shifts, licenses, pay log, and activity history. Export a JSON file after big days — that copy is yours even if the browser is cleared.</div>
-  <div class="grid-2">
+  <div class="grid-2 backup-actions">
     <div class="card"><div class="card-head"><b>Export</b></div><div class="card-body">
       <p class="subtitle" style="margin-bottom:14px">Download a full backup of employees, applications, periods, events, expenses, relations, shifts, licenses, pay log, and activity.</p>
       <div class="actions">
@@ -4054,7 +4314,9 @@ function renderRelations() {
 }
 
 function renderShifts() {
-  $('shiftWeekLabel').textContent = new Date(shiftWeek + 'T00:00:00').toLocaleDateString('en-US', { month: 'long', day: 'numeric', year: 'numeric' });
+  const weekTxt = new Date(shiftWeek + 'T00:00:00').toLocaleDateString('en-US', { month: 'long', day: 'numeric', year: 'numeric' });
+  $('shiftWeekLabel').textContent = weekTxt;
+  if ($('shiftWeekPill')) $('shiftWeekPill').textContent = weekTxt;
   if (!s.shifts[shiftWeek]) s.shifts[shiftWeek] = {};
   const week = s.shifts[shiftWeek];
   const list = activeEmployees();
