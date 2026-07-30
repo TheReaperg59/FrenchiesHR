@@ -1382,6 +1382,37 @@ body{
   .todo-add-pri{width:100%}
 }
 
+/* ===== Desk v11 — realtime sync + 20 improvements ===== */
+.sync-chip{
+  font:700 .66rem 'JetBrains Mono',monospace;padding:5px 9px;border-radius:8px;
+  border:1px solid var(--line);background:var(--paper);color:var(--muted);white-space:nowrap;
+}
+.sync-chip.live{background:var(--sage);color:var(--navy);border-color:transparent}
+.sync-chip.syncing{background:var(--goldwash);color:oklch(42% .08 82)}
+.sync-chip.behind,.sync-chip.conflict{background:var(--warnwash);color:var(--warn)}
+.sync-chip.offline{background:var(--dangerwash);color:var(--danger)}
+.sync-flash{animation:syncFlash .8s ease}
+@keyframes syncFlash{0%{box-shadow:0 0 0 0 oklch(72% .12 82 / .55)}100%{box-shadow:0 0 0 0 transparent}}
+#saveBadge.rel{font-variant-numeric:tabular-nums}
+.tip-mode-chip{font-size:.68rem;color:var(--muted)}
+.nba-card.is-clear{opacity:.72}
+.apps-table th:nth-child(6),
+.apps-table td:nth-child(6){display:none} /* Rate — open file to rate */
+@media(max-width:1100px){
+  .kbd-hint,.help-btn{display:none}
+  .apps-table th:nth-child(3),
+  .apps-table td:nth-child(3){display:none} /* Applied date */
+}
+@media(max-width:720px){
+  #openCmdBtn,.ov-tip-tools .tip-mode-chip{display:none}
+  #syncNowBtn{padding-left:8px;padding-right:8px}
+  .payday{max-width:42vw}
+  .sync-chip{font-size:.6rem;padding:4px 7px}
+}
+.snapshot-row{display:flex;justify-content:space-between;gap:10px;align-items:center;padding:8px 0;border-bottom:1px solid var(--line);font-size:.74rem}
+.snapshot-row:last-child{border-bottom:0}
+.ov-tip-tools{display:inline-flex;align-items:center;gap:6px;flex-wrap:wrap}
+
 /* ===== Desk v10 — clean UI ===== */
 .fold{
   border:1px solid var(--line);border-radius:12px;background:var(--paper);
@@ -1611,11 +1642,13 @@ body.compact-todos .attn-detail{display:none}
       <option value="backup">Backup</option>
     </select>
     <button type="button" class="help-btn" id="helpShortcuts" title="Keyboard shortcuts" aria-haspopup="dialog" aria-controls="shortcutSheet">?</button>
-    <span class="build-chip" title="Desk build marker">v10</span>
+    <span class="build-chip" title="Desk build marker">v11</span>
+    <span class="sync-chip live" id="syncChip" title="Realtime sync across tabs in this browser">LIVE</span>
+    <button type="button" class="btn tiny soft" id="syncNowBtn" title="Pull latest from other tabs">Sync</button>
     <button type="button" class="btn tiny soft" id="openSettingsBtn" title="Desk settings">Settings</button>
     <button type="button" class="btn tiny" id="openCmdBtn" title="Command palette (Ctrl+K)">⌘K</button>
     <span class="kbd-hint" title="Press ? for shortcuts">g then key</span>
-    <div class="payday"><span id="saveBadge" title="Autosave status">Saved</span><span class="payday-sep" aria-hidden="true">·</span><span>Payday: Sunday, 9:00 AM</span></div>
+    <div class="payday"><span id="saveBadge" class="rel" title="Autosave status">Saved</span><span class="payday-sep" aria-hidden="true">·</span><span>Payday: Sunday, 9:00 AM</span></div>
   </div>
 </header>
 <div class="content" id="deskContent">
@@ -1623,11 +1656,11 @@ body.compact-todos .attn-detail{display:none}
 <!-- OVERVIEW -->
 <section class="view active" id="view-overview" role="region" aria-labelledby="title-overview" tabindex="-1">
   <div class="compact-banner" id="buildBanner" role="status">
-    <b>Desk v10</b>
-    <span>Clean UI · collapse panels · organized files</span>
+    <b>Desk v11</b>
+    <span>Realtime tab sync · snapshots · 20 improvements</span>
     <button type="button" class="btn tiny soft" id="openChangelogBtn">What&apos;s new</button>
     <button type="button" class="btn tiny soft" id="toggleHeroBtn" title="Show or hide brand hero">Hero</button>
-    <span class="pill green" id="buildStamp">LIVE</span>
+    <span class="pill green" id="buildStamp">SYNC</span>
   </div>
   <details class="fold quiet" id="heroFold" style="margin-bottom:12px">
     <summary>Frenchie&apos;s desk <span class="pill gray" id="heroPeriodPill">Period</span></summary>
@@ -1671,6 +1704,13 @@ body.compact-todos .attn-detail{display:none}
     </label>
     <button class="btn tiny" id="newPeriod">New</button>
     <button class="btn tiny soft" id="bulkHoursBtn" type="button">Bulk hours</button>
+    <span class="ov-tip-tools">
+      <label class="tip-mode-chip" for="ovTipMode">Tips</label>
+      <select id="ovTipMode" aria-label="Tip split mode" style="border:1px solid var(--line);border-radius:8px;padding:5px 8px;font-size:.72rem;background:var(--cream)">
+        <option value="equal">Equal</option>
+        <option value="hours">By hours</option>
+      </select>
+    </span>
     <button class="btn tiny" id="markAllPaid">Mark all paid</button>
     <span class="strip-row" id="compareStrip" aria-label="Period comparison" style="margin-left:auto">
       <span>vs last:</span>
@@ -2228,7 +2268,14 @@ body.compact-todos .attn-detail{display:none}
       <div class="actions" style="margin-top:12px">
         <button type="button" class="btn tiny soft" id="validateImportBtn">Validate current file</button>
         <button type="button" class="btn tiny" id="exportLicensesBtn">Export license calendar</button>
+        <button type="button" class="btn tiny soft" id="pushSnapshotBtn">Save snapshot now</button>
       </div>
+    </div>
+  </div>
+  <div class="card" style="margin-top:12px"><div class="card-head"><b>Local snapshots</b><span class="pill gray" id="snapshotCount">0</span></div>
+    <div class="card-body">
+      <p class="ui-hint">Automatic safety copies kept in this browser (last 5). Use after a bad edit or sync conflict.</p>
+      <div id="snapshotList"></div>
     </div>
   </div>
   <details class="fold quiet"><summary>About backups</summary><div class="fold-body"><p class="ui-hint">Autosave keeps the office file in this browser. Export JSON after busy days — that copy survives a cleared browser.</p></div></details>
@@ -2666,6 +2713,7 @@ body.compact-todos .attn-detail{display:none}
       <li><span>Filter sidebar tabs</span><kbd>/</kbd></li>
       <li><span>Quick jump menu</span><kbd>j</kbd></li>
       <li><span>Command palette</span><kbd>Ctrl</kbd>+<kbd>K</kbd></li>
+      <li><span>Force sync pull</span><kbd>Ctrl</kbd>+<kbd>Shift</kbd>+<kbd>S</kbd></li>
       <li><span>Close dialog / menu</span><kbd>Esc</kbd></li>
       <li><span>Save in open dialog</span><kbd>Enter</kbd></li>
       <li><span>This help</span><kbd>?</kbd></li>
@@ -2723,7 +2771,7 @@ body.compact-todos .attn-detail{display:none}
 <!-- Changelog -->
 <div class="modal" id="changelogModal" role="dialog" aria-modal="true" aria-labelledby="changelogTitle" hidden>
   <div class="dialog xl" role="document" tabindex="-1">
-    <h2 id="changelogTitle">Desk build v10 — clean UI + 50 upgrades</h2>
+    <h2 id="changelogTitle">Desk build v11 — realtime sync + improvements</h2>
     <div class="upgrade-grid" id="upgradeGrid"></div>
     <div class="dialog-foot"><button type="button" class="btn primary" id="closeChangelog">Got it</button></div>
   </div>
@@ -2810,7 +2858,7 @@ const LOG_TYPES = {
 };
 const TIP_ROLES_DEFAULT = ['Waiter', 'Hostess', 'Cook'];
 const TIP_ROLES = TIP_ROLES_DEFAULT; /* legacy alias — use tipRoles() */
-const DESK_BUILD = 'v10';
+const DESK_BUILD = 'v11';
 const UPGRADE_LIST = [
   'Weighted tip split','Editable tip roles','Period vs last week','High-hours warnings','Bulk hours grid','Pay method on mark-paid','Auto closeout check','Per-stub Discord blurb','Period health score','Close notes warning',
   'Applicant rating','Decline reason required','Paperwork % column','Pipeline aging badge','Interview agenda card','Ready-to-hire spotlight','Duplicate hard warn','Hire checklist','Awaiting-reply filter','Clickable stage metrics',
@@ -2821,6 +2869,26 @@ const UPGRADE_LIST = [
 let undoStack = [];
 let termTargetId = null;
 let cmdIndex = 0;
+const CLIENT_ID = (function () {
+  try {
+    let id = sessionStorage.getItem('frenchies_client_id');
+    if (!id) { id = 'c-' + Math.random().toString(36).slice(2, 10); sessionStorage.setItem('frenchies_client_id', id); }
+    return id;
+  } catch (err) { return 'c-' + Math.random().toString(36).slice(2, 10); }
+})();
+const SNAPSHOT_KEY = 'frenchies_hr_v7_snaps';
+const SYNC_CHANNEL = 'frenchies-hr-sync';
+let syncState = 'live';
+let applyingRemote = false;
+let lastRemoteToast = 0;
+let syncChannel = null;
+let remoteRenderTimer = null;
+const V11_IMPROVEMENTS = [
+  'Realtime cross-tab sync','Revision stamps + stale write guard','Local snapshot ring (5)','Sync status chip','Force Sync button',
+  'Relative saved time','Overview tip-mode control','Auto-collapse empty hire panels','NBA quiet when clear','Remember employee folds',
+  'Period notes auto-open when empty','Cmd palette Sync/Restore','Ctrl+Shift+S pull','Snapshot restore on Backup','Hiring denser columns',
+  'Mobile top-bar trim','Sync flash on apply','Debounced remote render','Export carries rev','Build v11 banner'
+];
 
 const PAY_STATUSES = ['active', 'probation'];
 const STAGES = { application: 'Application', eligibility: 'Eligibility', interview: 'Interview', offer: 'Offer', hired: 'Hired', rejected: 'Rejected' };
@@ -2990,7 +3058,7 @@ function seedState() {
     ],
     activity: [{ text: 'HR & Payroll office file opened (v7)', date: '2026-07-28' }],
     lastForumPost: '',
-    meta: { lastSaved: '', lastExport: '', saveCount: 0 },
+    meta: { lastSaved: '', lastExport: '', saveCount: 0, rev: 0, updatedAt: '', clientId: '' },
     todos: [],
     todoDismissed: {},
     nextId: 7, nextAppId: 1, nextEventId: 1, nextLicId: 4, nextRelId: 1, nextDocId: 1, nextPacketId: 1, nextExpenseId: 1
@@ -3140,7 +3208,7 @@ function migrate(raw) {
     licenses: raw.licenses && raw.licenses.length ? raw.licenses : base.licenses,
     activity: raw.activity || [],
     lastForumPost: raw.lastForumPost || '',
-    meta: Object.assign({ lastSaved: '', lastExport: '', saveCount: 0 }, raw.meta || {}),
+    meta: Object.assign({ lastSaved: '', lastExport: '', saveCount: 0, rev: 0, updatedAt: '', clientId: '' }, raw.meta || {}),
     nextId: raw.nextId || 1,
     nextAppId: raw.nextAppId || 1,
     nextEventId: raw.nextEventId || 1,
@@ -3189,6 +3257,10 @@ function migrate(raw) {
   out.todoDismissed = (raw.todoDismissed && typeof raw.todoDismissed === 'object') ? { ...raw.todoDismissed } : {};
   out.todoSnoozed = (raw.todoSnoozed && typeof raw.todoSnoozed === 'object') ? { ...raw.todoSnoozed } : {};
   out.settings = (raw.settings && typeof raw.settings === 'object') ? Object.assign({}, raw.settings) : {};
+  if (!out.meta || typeof out.meta !== 'object') out.meta = {};
+  out.meta.rev = Number((raw.meta && raw.meta.rev) || out.meta.rev || 0);
+  out.meta.updatedAt = (raw.meta && raw.meta.updatedAt) || out.meta.updatedAt || '';
+  out.meta.clientId = (raw.meta && raw.meta.clientId) || out.meta.clientId || '';
 
   if (!out.employees.length) return base;
   if (!out.periods.length) out.periods = base.periods;
@@ -3293,10 +3365,13 @@ const dec = n => Number(n || 0).toFixed(2);
 const esc = x => String(x === null || x === undefined ? '' : x).replace(/[&<>"']/g, c => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[c]));
 
 function ensureMeta() {
-  if (!s.meta || typeof s.meta !== 'object') s.meta = { lastSaved: '', lastExport: '', saveCount: 0 };
+  if (!s.meta || typeof s.meta !== 'object') s.meta = { lastSaved: '', lastExport: '', saveCount: 0, rev: 0, updatedAt: '', clientId: CLIENT_ID };
   if (!('lastSaved' in s.meta)) s.meta.lastSaved = '';
   if (!('lastExport' in s.meta)) s.meta.lastExport = '';
   if (!('saveCount' in s.meta)) s.meta.saveCount = 0;
+  if (!('rev' in s.meta)) s.meta.rev = 0;
+  if (!('updatedAt' in s.meta)) s.meta.updatedAt = '';
+  if (!('clientId' in s.meta)) s.meta.clientId = CLIENT_ID;
   if (!Array.isArray(s.todos)) s.todos = [];
   if (!s.todoDismissed || typeof s.todoDismissed !== 'object') s.todoDismissed = {};
   if (!s.todoSnoozed || typeof s.todoSnoozed !== 'object') s.todoSnoozed = {};
@@ -3355,6 +3430,35 @@ function runUndo() {
   if ($('undoBtn')) $('undoBtn').disabled = !undoStack.length;
 }
 
+function relativeSaved(iso) {
+  if (!iso) return 'Not saved yet';
+  const d = new Date(iso);
+  if (isNaN(d.getTime())) return 'Saved';
+  const sec = Math.round((Date.now() - d.getTime()) / 1000);
+  if (sec < 8) return 'Saved · just now';
+  if (sec < 60) return 'Saved · ' + sec + 's ago';
+  if (sec < 3600) return 'Saved · ' + Math.floor(sec / 60) + 'm ago';
+  if (sec < 86400) return 'Saved · ' + Math.floor(sec / 3600) + 'h ago';
+  return 'Saved · ' + d.toLocaleString('en-US', { month: 'short', day: 'numeric', hour: 'numeric', minute: '2-digit' });
+}
+
+function setSyncChip(state, detail) {
+  syncState = state || 'live';
+  const el = $('syncChip');
+  if (!el) return;
+  const map = {
+    live: ['LIVE', 'live', 'In sync across tabs in this browser'],
+    syncing: ['SYNC', 'syncing', detail || 'Applying update from another tab…'],
+    behind: ['BEHIND', 'behind', detail || 'Local file is behind another tab'],
+    conflict: ['CONFLICT', 'conflict', detail || 'Conflicting edits — pulled newer copy'],
+    offline: ['LOCAL', 'offline', detail || 'Realtime channel unavailable — storage events still work']
+  };
+  const row = map[syncState] || map.live;
+  el.textContent = row[0];
+  el.className = 'sync-chip ' + row[1];
+  el.title = row[2];
+}
+
 function updateSaveBadge() {
   ensureMeta();
   const el = $('saveBadge');
@@ -3364,18 +3468,119 @@ function updateSaveBadge() {
     el.title = 'Office file has not been written yet';
     return;
   }
-  const d = new Date(s.meta.lastSaved);
-  const stamp = isNaN(d.getTime())
-    ? s.meta.lastSaved
-    : d.toLocaleString('en-US', { month: 'short', day: 'numeric', hour: 'numeric', minute: '2-digit' });
-  el.textContent = 'Saved · ' + stamp;
-  el.title = 'Last saved ' + s.meta.lastSaved + (s.meta.lastExport ? ' · Last backup export ' + s.meta.lastExport : ' · No file backup exported yet');
+  el.textContent = relativeSaved(s.meta.lastSaved);
+  el.title = 'Rev ' + (s.meta.rev || 0) + ' · ' + s.meta.lastSaved +
+    (s.meta.lastExport ? ' · Last backup export ' + s.meta.lastExport : ' · No file backup exported yet');
+}
+
+function readStoredRaw() {
+  try { return localStorage.getItem(STORAGE) || localStorage.getItem(STORAGE_MIRROR); }
+  catch (err) { return null; }
+}
+
+function readStoredMeta() {
+  const raw = readStoredRaw();
+  if (!raw) return null;
+  try {
+    const parsed = JSON.parse(raw);
+    return (parsed && parsed.meta) || null;
+  } catch (err) { return null; }
+}
+
+function pushSnapshot(reason) {
+  try {
+    ensureMeta();
+    const snaps = JSON.parse(localStorage.getItem(SNAPSHOT_KEY) || '[]');
+    snaps.unshift({
+      at: new Date().toISOString(),
+      rev: Number(s.meta.rev || 0),
+      reason: reason || 'auto',
+      bytes: 0,
+      data: s
+    });
+    /* store compact: only keep JSON string of data */
+    const packed = snaps.slice(0, 5).map(x => ({
+      at: x.at,
+      rev: x.rev,
+      reason: x.reason,
+      json: typeof x.json === 'string' ? x.json : JSON.stringify(x.data || x.json || s)
+    }));
+    localStorage.setItem(SNAPSHOT_KEY, JSON.stringify(packed));
+    renderSnapshots();
+    return true;
+  } catch (err) {
+    return false;
+  }
+}
+
+function listSnapshots() {
+  try { return JSON.parse(localStorage.getItem(SNAPSHOT_KEY) || '[]'); }
+  catch (err) { return []; }
+}
+
+function restoreSnapshot(idx) {
+  const snaps = listSnapshots();
+  const row = snaps[idx];
+  if (!row || !row.json) return toast('Snapshot gone');
+  if (!confirm('Restore snapshot from ' + (row.at || '?') + ' (rev ' + (row.rev || 0) + ')? Current file becomes a snapshot first.')) return;
+  pushSnapshot('before-restore');
+  try {
+    const data = migrate(JSON.parse(row.json));
+    if (!data || !data.employees) throw new Error('bad');
+    applyingRemote = true;
+    s = data;
+    ensureMeta();
+    s.meta.clientId = CLIENT_ID;
+    notesDirty = false;
+    applyingRemote = false;
+    save({ force: true, skipSnapshot: true });
+    render();
+    toast('Snapshot restored');
+  } catch (err) {
+    applyingRemote = false;
+    toast('Could not restore snapshot');
+  }
+}
+
+function renderSnapshots() {
+  const el = $('snapshotList');
+  if (!el) return;
+  const snaps = listSnapshots();
+  if ($('snapshotCount')) $('snapshotCount').textContent = String(snaps.length);
+  el.innerHTML = snaps.length ? snaps.map((row, i) =>
+    '<div class="snapshot-row"><span>Rev ' + esc(String(row.rev || 0)) + ' · ' + esc((row.at || '').replace('T', ' ').slice(0, 19)) +
+    '<div class="history">' + esc(row.reason || 'auto') + '</div></span>' +
+    '<button type="button" class="btn tiny" onclick="restoreSnapshot(' + i + ')">Restore</button></div>'
+  ).join('') : '<div class="ui-hint">No snapshots yet — they appear as you save.</div>';
+}
+
+function broadcastSync(payload) {
+  try {
+    if (syncChannel) syncChannel.postMessage(payload);
+  } catch (err) { /* ignore */ }
 }
 
 function save(opts) {
-  const quiet = opts && opts.quiet;
+  opts = opts || {};
+  const quiet = !!opts.quiet;
+  if (applyingRemote && !opts.force) return false;
   try {
     ensureMeta();
+    /* Stale-tab guard: do not clobber a newer revision written by another tab */
+    if (!opts.force && !opts.skipRevCheck) {
+      const remoteMeta = readStoredMeta();
+      if (remoteMeta && Number(remoteMeta.rev || 0) > Number(s.meta.rev || 0)) {
+        setSyncChip('behind', 'Skipped save — another tab has rev ' + remoteMeta.rev);
+        if (!quiet) toast('Another tab has newer data — pulling it');
+        pullRemote({ reason: 'stale-save' });
+        return false;
+      }
+    }
+    if (!opts.skipRevBump) {
+      s.meta.rev = Number(s.meta.rev || 0) + 1;
+      s.meta.updatedAt = new Date().toISOString();
+      s.meta.clientId = CLIENT_ID;
+    }
     s.meta.lastSaved = new Date().toISOString();
     s.meta.saveCount = Number(s.meta.saveCount || 0) + 1;
     if (s.activity && s.activity.length > ACTIVITY_CAP) s.activity.length = ACTIVITY_CAP;
@@ -3383,15 +3588,115 @@ function save(opts) {
     const json = JSON.stringify(s);
     localStorage.setItem(STORAGE, json);
     localStorage.setItem(STORAGE_MIRROR, json);
+    if (!opts.skipSnapshot && (s.meta.saveCount === 1 || s.meta.saveCount % 8 === 0)) pushSnapshot('auto');
     updateSaveBadge();
+    setSyncChip('live');
+    if (!opts.silentBroadcast) {
+      broadcastSync({ type: 'state', rev: s.meta.rev, clientId: CLIENT_ID, at: s.meta.updatedAt });
+    }
     return true;
   } catch (err) {
     if (!quiet) toast('Could not save — storage full. Export a backup now.');
     const badge = $('saveBadge');
     if (badge) { badge.textContent = 'Save failed'; badge.title = String(err && err.message || err); }
+    setSyncChip('offline', String(err && err.message || err));
     return false;
   }
 }
+
+function finishRemoteApply(opts, remoteRev) {
+  opts = opts || {};
+  const paint = () => {
+    try { render(); } catch (err) {}
+    updateSaveBadge();
+    setSyncChip(opts.conflict ? 'conflict' : 'live', opts.reason || '');
+    if ($('buildBanner')) {
+      $('buildBanner').classList.remove('sync-flash');
+      void $('buildBanner').offsetWidth;
+      $('buildBanner').classList.add('sync-flash');
+    }
+    try { renderSnapshots(); } catch (err) {}
+  };
+  if (remoteRenderTimer) clearTimeout(remoteRenderTimer);
+  if (opts.force || opts.immediate) {
+    remoteRenderTimer = null;
+    paint();
+  } else {
+    remoteRenderTimer = setTimeout(() => { remoteRenderTimer = null; paint(); }, 90);
+  }
+  const now = Date.now();
+  if (now - lastRemoteToast > 2500) {
+    lastRemoteToast = now;
+    toast('Synced from another tab · rev ' + remoteRev);
+  }
+}
+
+function pullRemote(opts) {
+  opts = opts || {};
+  const raw = readStoredRaw();
+  if (!raw) return false;
+  try {
+    const parsed = JSON.parse(raw);
+    const data = migrate(parsed);
+    if (!data) return false;
+    const remoteRev = Number((data.meta && data.meta.rev) || 0);
+    const localRev = Number((s.meta && s.meta.rev) || 0);
+    if (!opts.force && remoteRev <= localRev && (data.meta && data.meta.clientId) === CLIENT_ID) return false;
+    if (!opts.force && remoteRev < localRev) return false;
+    setSyncChip('syncing');
+    applyingRemote = true;
+    const keepNotesDirty = notesDirty;
+    const notesVal = keepNotesDirty && $('periodNotes') ? $('periodNotes').value : null;
+    s = data;
+    ensureMeta();
+    applyingRemote = false;
+    if (keepNotesDirty && notesVal != null && $('periodNotes')) {
+      $('periodNotes').value = notesVal;
+      notesDirty = true;
+    }
+    finishRemoteApply(opts, remoteRev);
+    return true;
+  } catch (err) {
+    applyingRemote = false;
+    setSyncChip('offline', 'Pull failed');
+    return false;
+  }
+}
+
+function initRealtimeSync() {
+  try {
+    if (typeof BroadcastChannel !== 'undefined') {
+      syncChannel = new BroadcastChannel(SYNC_CHANNEL);
+      syncChannel.onmessage = (ev) => {
+        const msg = ev && ev.data;
+        if (!msg || msg.clientId === CLIENT_ID) return;
+        if (msg.type === 'state' || msg.type === 'ping') {
+          const remoteRev = Number(msg.rev || 0);
+          if (remoteRev >= Number((s.meta && s.meta.rev) || 0)) pullRemote({ reason: 'broadcast' });
+        }
+        if (msg.type === 'request') {
+          ensureMeta();
+          broadcastSync({ type: 'state', rev: s.meta.rev, clientId: CLIENT_ID, at: s.meta.updatedAt });
+        }
+      };
+      broadcastSync({ type: 'ping', rev: (s.meta && s.meta.rev) || 0, clientId: CLIENT_ID });
+    } else setSyncChip('offline');
+  } catch (err) { setSyncChip('offline'); }
+
+  window.addEventListener('storage', (ev) => {
+    if (!ev) return;
+    if (ev.key !== STORAGE && ev.key !== STORAGE_MIRROR) return;
+    if (!ev.newValue) return;
+    try {
+      const parsed = JSON.parse(ev.newValue);
+      const remoteRev = Number((parsed.meta && parsed.meta.rev) || 0);
+      if (remoteRev >= Number((s.meta && s.meta.rev) || 0)) pullRemote({ reason: 'storage' });
+    } catch (err) { /* ignore */ }
+  });
+
+  setInterval(() => { if ($('saveBadge')) updateSaveBadge(); }, 15000);
+}
+
 
 function toast(msg) { const t = $('toast'); t.textContent = msg; t.classList.add('show'); setTimeout(() => t.classList.remove('show'), 2200); }
 
@@ -4579,6 +4884,7 @@ function renderNba() {
   const nba = nextBestAction();
   window.__nba = nba;
   if ($('nbaText')) $('nbaText').innerHTML = '<b style="color:var(--navy)">' + esc(nba.title) + '</b><br>' + esc(nba.detail || '');
+  if ($('nbaCard')) $('nbaCard').classList.toggle('is-clear', /desk is clear/i.test(nba.title || ''));
 }
 
 function storageHealth() {
@@ -4728,6 +5034,9 @@ function cmdCommands() {
   cmds.push({ label: 'New application', hint: 'Hiring', run: () => { goView('hiring'); setTimeout(() => $('addApp') && $('addApp').click(), 40); } });
   cmds.push({ label: 'Add employee', hint: 'People', run: () => openAddEmployee() });
   cmds.push({ label: 'Undo last action', hint: 'Desk', run: () => runUndo() });
+  cmds.push({ label: 'Sync now', hint: 'Realtime', run: () => { pullRemote({ force: true, reason: 'manual' }); toast('Sync pulled'); } });
+  cmds.push({ label: 'Save snapshot', hint: 'Backup', run: () => { pushSnapshot('manual'); toast('Snapshot saved'); } });
+  cmds.push({ label: 'Open snapshots', hint: 'Backup', run: () => { goView('backup'); setTimeout(() => $('snapshotList') && $('snapshotList').scrollIntoView({ behavior: 'smooth', block: 'center' }), 40); } });
   activeEmployees().forEach(e => {
     cmds.push({ label: e.name, hint: e.role + ' · file', run: () => { goView('employees'); setTimeout(() => editEmployee(e.id), 50); } });
   });
@@ -4795,7 +5104,11 @@ function saveSettings() {
 
 function openChangelog() {
   const grid = $('upgradeGrid');
-  if (grid) grid.innerHTML = UPGRADE_LIST.map((t, i) => '<div class="upgrade-item"><b>' + (i + 1) + '. ' + esc(t) + '</b>Shipped · build v10 clean UI</div>').join('');
+  if (grid) {
+    const v11 = V11_IMPROVEMENTS.map((t, i) => '<div class="upgrade-item"><b>v11.' + (i + 1) + ' ' + esc(t) + '</b>Realtime desk</div>').join('');
+    const v9 = UPGRADE_LIST.map((t, i) => '<div class="upgrade-item"><b>' + (i + 1) + '. ' + esc(t) + '</b>Earlier upgrade</div>').join('');
+    grid.innerHTML = v11 + v9;
+  }
   $('changelogModal').classList.add('open');
   $('changelogModal').removeAttribute('hidden');
 }
@@ -4812,7 +5125,9 @@ function renderInterviewAgenda() {
     '<div class="history">' + esc(a.interviewDate || 'TBD') + (a.interviewTime ? ' · ' + esc(formatInterviewTime(a.interviewTime)) : '') +
     (a.interviewSlot ? ' · ' + esc(a.interviewSlot) : '') + '</div></span>' +
     '<button class="btn tiny" type="button" onclick="editApp(' + a.id + ')">Open</button></div>'
-  ).join('') : '<div class="mini-note">No interviews scheduled. Set date/time on an Interview-stage file.</div>';
+  ).join('') : '<div class="ui-hint">No interviews scheduled.</div>';
+  const fold = el.closest('details.fold');
+  if (fold && !fold.dataset.userToggle) fold.open = rows.length > 0;
 }
 
 function renderReadyHire() {
@@ -4824,7 +5139,9 @@ function renderReadyHire() {
     '<div class="log-row"><i class="dot"></i><span><b>' + esc(a.name) + '</b> accepted · ' + esc(a.offerRole || 'New Hire') +
     ' · papers ' + paperCompletionPct(a) + '%</span>' +
     '<button class="btn tiny primary" type="button" onclick="hireChecklist(' + a.id + ')">Hire ✓</button></div>'
-  ).join('') : '<div class="mini-note">Nobody with an accepted offer waiting on Hire.</div>';
+  ).join('') : '<div class="ui-hint">Nobody waiting on Hire.</div>';
+  const fold = el.closest('details.fold');
+  if (fold && !fold.dataset.userToggle) fold.open = rows.length > 0;
 }
 
 window.rateApplicant = function (id, value) {
@@ -5081,6 +5398,9 @@ function render() {
   renderNba();
   applyUiSettings();
   updateSaveBadge();
+  if ($('ovTipMode') && document.activeElement !== $('ovTipMode')) {
+    $('ovTipMode').value = (s.settings && s.settings.tipMode) || 'equal';
+  }
 
   $('state').textContent = String(p.status).toUpperCase();
   $('state').className = 'pill ' + (p.status === 'closed' ? 'gray' : 'green');
@@ -5144,6 +5464,7 @@ function renderBackupStats() {
     $('storageHealthPill').textContent = sh.ok ? 'OK' : 'HIGH';
     $('storageHealthPill').className = 'pill ' + (sh.ok ? 'green' : 'warn');
   }
+  renderSnapshots();
 }
 
 function renderUnpaidDesk(p) {
@@ -5164,7 +5485,9 @@ function renderUnpaidDesk(p) {
           '<button class="btn tiny" onclick="openPayStubs(' + pi + ',' + e.id + ')">Stub</button>' +
         '</td></tr>';
     }).join('')
-    : '<tr><td colspan="4" class="empty">Nobody owed this period — clear for Sunday.</td></tr>';
+    : '<tr><td colspan="4" class="empty">Nobody owed this period — clear for Sunday.' +
+      (Number(p.tipPool || 0) > 0 ? '<div class="history" style="margin-top:6px">Tip pool ' + money(p.tipPool) + ' is set.</div>' : '') +
+      '</td></tr>';
 }
 
 function renderPayroll(p) {
@@ -5321,9 +5644,9 @@ function renderHiring() {
     const ready = a.stage === 'offer' && offerAccepted(a) && !a.employeeId;
     const moveBtns = ['hired', 'rejected'].includes(a.stage)
       ? '<span class="pill gray">closed</span>'
-      : (canAdvance ? '<button class="btn tiny" onclick="advanceApp(' + a.id + ')">&rarr; ' + esc(STAGES[STAGE_ORDER[idx + 1]]) + '</button> ' : '') +
-        (a.stage === 'offer' ? '<button class="btn tiny primary" onclick="hireChecklist(' + a.id + ')">Hire ✓</button> ' : '') +
-        '<button class="btn tiny danger" onclick="rejectApp(' + a.id + ')">Reject</button>';
+      : (a.stage === 'offer' ? '<button class="btn tiny primary" onclick="hireChecklist(' + a.id + ')">Hire ✓</button> ' : '') +
+        (canAdvance ? '<button class="btn tiny soft" onclick="advanceApp(' + a.id + ')">' + esc(STAGES[STAGE_ORDER[idx + 1]]) + '</button> ' : '') +
+        '<button class="btn tiny" onclick="rejectApp(' + a.id + ')" title="Reject">✕</button>';
     const ps = paperSummary(a);
     const nextAct = nextHireAction(a);
     const paperCell = '<div class="paper-actions">' +
@@ -8650,6 +8973,9 @@ function closePeriodAndRoll(p, opts) {
   const unpaid = unpaidCount(p);
   if (!opts.skipUnpaidConfirm && unpaid > 0 && !confirm(unpaid + ' unpaid stub(s) remain. Close anyway?')) return false;
   if (s.settings.requireNotesOnClose && !String(p.notes || '').trim()) {
+    const fold = $('periodNotes') && $('periodNotes').closest('details.fold');
+    if (fold) fold.open = true;
+    if ($('periodNotes')) setTimeout(() => $('periodNotes').focus(), 30);
     if (!confirm('No period notes yet. Close anyway? (Turn off this warning in Settings.)')) return false;
   }
   if (!opts.skipCloseConfirm && !confirm('Close and preserve ' + label(p) + '? A new period will open.')) return false;
@@ -9373,6 +9699,35 @@ function renderEmployeeFile(e) {
       $('openHirePapersBtn').style.display = 'none';
     }
   }
+  restoreEmpFolds(e.id);
+}
+
+function empFoldKey(id) { return 'frenchies_emp_folds_' + id; }
+function restoreEmpFolds(empId) {
+  const wrap = $('fileExtras');
+  if (!wrap) return;
+  let saved = null;
+  try { saved = JSON.parse(sessionStorage.getItem(empFoldKey(empId)) || 'null'); } catch (err) { saved = null; }
+  wrap.querySelectorAll('details.fold').forEach(fold => {
+    const sum = fold.querySelector('summary');
+    const key = (sum && sum.textContent || '').trim().split('\n')[0].trim();
+    if (saved && key in saved) fold.open = !!saved[key];
+  });
+  wrap.dataset.foldBound = String(empId);
+  if (wrap._foldHandler) wrap.removeEventListener('toggle', wrap._foldHandler, true);
+  wrap._foldHandler = (ev) => {
+    const t = ev.target;
+    if (!t || t.tagName !== 'DETAILS') return;
+    const id = wrap.dataset.foldBound || String(empId);
+    const map = {};
+    wrap.querySelectorAll('details.fold').forEach(f => {
+      const sum = f.querySelector('summary');
+      const k = (sum && sum.textContent || '').trim().split('\n')[0].trim();
+      map[k] = !!f.open;
+    });
+    try { sessionStorage.setItem(empFoldKey(id), JSON.stringify(map)); } catch (err) {}
+  };
+  wrap.addEventListener('toggle', wrap._foldHandler, true);
 }
 
 window.openLinkedAppPaper = function (appId) {
@@ -9807,6 +10162,12 @@ document.addEventListener('keydown', ev => {
   const cmdOpen = $('cmdPalette') && $('cmdPalette').classList.contains('open');
   const settingsOpen = $('settingsDrawer') && $('settingsDrawer').classList.contains('open');
 
+  if ((ev.metaKey || ev.ctrlKey) && ev.shiftKey && String(ev.key || '').toLowerCase() === 's') {
+    ev.preventDefault();
+    pullRemote({ force: true, reason: 'hotkey' });
+    toast('Sync pulled');
+    return;
+  }
   if ((ev.metaKey || ev.ctrlKey) && String(ev.key || '').toLowerCase() === 'k') {
     ev.preventDefault();
     if (cmdOpen) closeCmdPalette();
@@ -10074,6 +10435,22 @@ bindClick('openCmdBtn', openCmdPalette);
 bindClick('openChangelogBtn', openChangelog);
 bindClick('closeChangelog', () => { if ($('changelogModal')) $('changelogModal').classList.remove('open'); });
 bindClick('undoBtn', runUndo);
+bindClick('syncNowBtn', () => { pullRemote({ force: true, reason: 'button' }); broadcastSync({ type: 'request', clientId: CLIENT_ID }); toast('Sync pulled'); });
+bindClick('pushSnapshotBtn', () => { if (pushSnapshot('manual')) toast('Snapshot saved'); else toast('Could not snapshot'); });
+if ($('ovTipMode')) {
+  $('ovTipMode').onchange = () => {
+    ensureMeta();
+    s.settings.tipMode = $('ovTipMode').value === 'hours' ? 'hours' : 'equal';
+    const p = current();
+    if (p && p.status === 'open') distributeTips(p);
+    save(); render();
+    toast(s.settings.tipMode === 'hours' ? 'Tips weighted by hours' : 'Tips equal share');
+  };
+}
+document.querySelectorAll('#view-hiring details.fold').forEach(fold => {
+  fold.addEventListener('toggle', () => { fold.dataset.userToggle = '1'; });
+});
+
 bindClick('nbaGoBtn', () => {
   const nba = window.__nba || nextBestAction();
   if (nba && nba.go) goTodo({ go: nba.go, id: (nba.item && nba.item.id) || '', tag: '' });
@@ -11134,13 +11511,14 @@ function markExported() {
 
 $('exportJson').onclick = () => {
   flushPeriodNotes();
+  ensureMeta();
   const blob = new Blob([JSON.stringify(s, null, 2)], { type: 'application/json' });
   const a = document.createElement('a');
   a.href = URL.createObjectURL(blob);
-  a.download = 'frenchies-hr-backup-' + today() + '.json';
+  a.download = 'frenchies-hr-backup-' + today() + '-r' + (s.meta.rev || 0) + '.json';
   a.click();
   markExported();
-  toast('Backup downloaded');
+  toast('Backup downloaded · rev ' + (s.meta.rev || 0));
 };
 
 $('exportActivity').onclick = () => {
@@ -11180,25 +11558,31 @@ $('importJson').onclick = () => {
 };
 window.addEventListener('beforeunload', () => {
   flushPeriodNotes();
-  save({ quiet: true });
+  save({ quiet: true, skipSnapshot: true });
 });
 window.addEventListener('pagehide', () => {
   flushPeriodNotes();
-  save({ quiet: true });
+  save({ quiet: true, skipSnapshot: true });
 });
 document.addEventListener('visibilitychange', () => {
   if (document.visibilityState === 'hidden') {
     flushPeriodNotes();
-    save({ quiet: true });
+    save({ quiet: true, skipSnapshot: true });
+  } else {
+    pullRemote({ reason: 'visible' });
+    updateSaveBadge();
   }
 });
+
+window.restoreSnapshot = restoreSnapshot;
 
 /* ---------- boot ---------- */
 roleOptions($('role'), 'New Hire');
 roleOptions($('appRole'), 'New Hire');
 fillSupervisors(null);
 ensureMeta();
-save();
+save({ skipRevBump: true, silentBroadcast: true, skipSnapshot: true, skipRevCheck: true });
+initRealtimeSync();
 (function bootNav() {
   const fromHash = (location.hash || '').replace(/^#/, '');
   const start = (fromHash && document.querySelector('.nav button[data-view="' + fromHash + '"]')) ? fromHash : 'overview';
@@ -11206,6 +11590,26 @@ save();
 })();
 render();
 updateSaveBadge();
+setSyncChip(syncChannel ? 'live' : 'offline');
+try { renderSnapshots(); } catch (err) {}
+if ($('ovTipMode')) $('ovTipMode').value = (s.settings && s.settings.tipMode) || 'equal';
+document.querySelectorAll('#view-hiring details.fold').forEach(fold => {
+  fold.addEventListener('toggle', () => { fold.dataset.userToggle = '1'; });
+});
+
+/* Debug / test hooks (same-origin desk) */
+window.__desk = {
+  get s() { return s; },
+  set s(v) { s = v; },
+  save,
+  pullRemote,
+  pushSnapshot,
+  CLIENT_ID,
+  V11_IMPROVEMENTS,
+  DESK_BUILD,
+  STORAGE,
+  SNAPSHOT_KEY
+};
 </script>
 </body>
 </html>
