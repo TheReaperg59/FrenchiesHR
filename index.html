@@ -2101,6 +2101,15 @@ body.session-staff #closePeriod,
 body.session-staff #undoBtn,
 body.session-staff #previewSundayRun,
 body.session-staff #copySundayRun{display:none!important}
+body.session-staff #payroll .btn,
+body.session-staff #payroll button.btn,
+body.session-lead #markAllPaid,
+body.session-lead #newPeriod,
+body.session-lead #closePeriod,
+body.session-lead #undoBtn,
+body.session-lead [data-mgmt-only]{display:none!important}
+body.session-staff .staff-hide,
+body.session-lead .mgmt-only{display:none!important}
 
 @media(max-width:1100px){
   .ov-rail{grid-template-columns:1fr 1fr}
@@ -2427,7 +2436,7 @@ body.compact-todos .attn-detail{display:none}
         <button type="button" class="top-account-item" id="helpShortcuts" role="menuitem" aria-haspopup="dialog" aria-controls="shortcutSheet">Keyboard shortcuts</button>
         <button type="button" class="top-account-item danger" id="logoutBtn" role="menuitem">Sign out</button>
         <div class="top-account-foot">
-          <span class="build-chip" title="Desk build">v16</span>
+          <span class="build-chip" title="Desk build">v17</span>
           <label class="top-jump-label" for="quickJump">Jump to</label>
           <select class="top-jump" id="quickJump" title="Jump to any tab">
             <option value="overview">Overview</option>
@@ -3793,9 +3802,10 @@ const LOG_TYPES = {
 };
 const TIP_ROLES_DEFAULT = ['Waiter', 'Hostess', 'Cook'];
 const TIP_ROLES = TIP_ROLES_DEFAULT; /* legacy alias — use tipRoles() */
-const DESK_BUILD = 'v16';
+const DESK_BUILD = 'v17';
 const HOUSE_LOGIN_PASSWORD = 'frenchies636';
 const SESSION_KEY = 'frenchies_desk_session';
+const SESSION_DURABLE_KEY = 'frenchies_desk_session_durable';
 const MGMT_ROLES = ['Owner', 'District Manager', 'Store Manager', 'HR Director', 'Operations Manager'];
 const LEAD_ROLES = ['Shift Lead'];
 const STAFF_ROLES = ['Cook', 'Waiter', 'Hostess', 'New Hire'];
@@ -3869,7 +3879,7 @@ const EXPENSE_CATS = {
   utilities: 'Utilities',
   other: 'Other'
 };
-const STATIONS = ['Off', 'Bar', 'Kitchen', 'Floor'];
+const STATIONS = ['Off', 'Bar', 'Kitchen', 'Floor', 'Host'];
 const DAY_NAMES = ['Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat', 'Sun'];
 
 /* ---- hiring paperwork pack ---- */
@@ -4743,6 +4753,21 @@ function requireMgmt(actionLabel) {
   toast((actionLabel || 'That action') + ' is for Owner / HR / Ops');
   return false;
 }
+function requireHoursEdit(actionLabel) {
+  if (canEditHours()) return true;
+  toast((actionLabel || 'Hours') + ' — leads and management only');
+  return false;
+}
+function requireShiftEdit(actionLabel) {
+  if (canEditShifts()) return true;
+  toast((actionLabel || 'Shifts') + ' — leads and management only');
+  return false;
+}
+function requireLicenseEdit(actionLabel) {
+  if (canEditLicenses()) return true;
+  toast((actionLabel || 'Licenses') + ' — management only');
+  return false;
+}
 
 function maybeBackupNudge(reason) {
   ensureMeta();
@@ -5553,6 +5578,45 @@ function canMutateDesk() {
   if (!sessionUser) return false;
   const band = roleAccessBand(sessionUser.role);
   return band === 'owner' || band === 'mgmt';
+}
+function sessionBand() {
+  return sessionUser ? roleAccessBand(sessionUser.role) : '';
+}
+function canEditHours() {
+  const b = sessionBand();
+  return b === 'owner' || b === 'mgmt' || b === 'lead';
+}
+function canEditShifts() {
+  return canEditHours();
+}
+function canEditEvents() {
+  return canEditHours();
+}
+function canEditLicenses() {
+  return canMutateDesk();
+}
+function canEditExpenses() {
+  return canMutateDesk();
+}
+function canHire() {
+  return canMutateDesk();
+}
+function canEditOwnProfileFields() {
+  return !!sessionUser;
+}
+function canEditEmployeeRecord(emp) {
+  if (!sessionUser || !emp) return false;
+  if (canMutateDesk()) return true;
+  if (isLeadSession()) {
+    /* Leads may open files but only soft fields via dedicated saves — not role/rate/status */
+    return false;
+  }
+  return false;
+}
+function canEditOwnSoftProfile(emp) {
+  if (!sessionUser || !emp) return false;
+  if (canMutateDesk()) return true;
+  return String(sessionUser.empId) === String(emp.id);
 }
 function isStaffSession() {
   return !!sessionUser && roleAccessBand(sessionUser.role) === 'staff';
@@ -7170,7 +7234,11 @@ function renderUnpaidDesk(p) {
 function renderPayroll(p) {
   ensureMeta();
   const otLimit = Number((s.settings && s.settings.otHours) || 40);
-  const list = payableEmployees();
+  let list = payableEmployees();
+  if (isStaffSession() && sessionUser) {
+    list = list.filter(e => String(e.id) === String(sessionUser.empId));
+  }
+  const canPay = canEditHours();
   const rows = list.map(e => {
     const x = entry(p, e.id);
     const g = lineGross(e, x);
@@ -7183,21 +7251,21 @@ function renderPayroll(p) {
       '<td class="r mono">' + money(x.bonus) + '</td>' +
       '<td class="r mono">' + money(x.tips) + '</td>' +
       '<td class="r mono">' + money(g) + '</td>' +
-      '<td class="r">' + (g ? '<button class="btn tiny" onclick="togglePaid(' + e.id + ')">' + (x.paidOut ? 'Paid' : 'Unpaid') + '</button>' : '<span class="pill gray">—</span>') + '</td>' +
+      '<td class="r">' + (g && canPay ? '<button class="btn tiny" onclick="togglePaid(' + e.id + ')">' + (x.paidOut ? 'Paid' : 'Unpaid') + '</button>' : (g ? (x.paidOut ? '<span class="pill green">paid</span>' : '<span class="pill warn">owed</span>') : '<span class="pill gray">—</span>')) + '</td>' +
       '<td class="r">' +
-        (p.status === 'open' ? '<button class="btn tiny" onclick="openHours(' + e.id + ')">Edit</button> ' : '<span class="pill gray">Locked</span> ') +
+        (canPay && p.status === 'open' ? '<button class="btn tiny" onclick="openHours(' + e.id + ')">Edit</button> ' : '') +
         (g ? '<button class="btn tiny" onclick="openPayStubs(' + selectedPeriodIndex() + ',' + e.id + ')">Stub</button> ' : '') +
-        (g ? '<button class="btn tiny soft" onclick="copyStubDiscord(' + e.id + ')" title="Discord pay blurb">Discord</button>' : '') +
+        (g && canMutateDesk() ? '<button class="btn tiny soft" onclick="copyStubDiscord(' + e.id + ')" title="Discord pay blurb">Discord</button>' : '') +
       '</td>' +
       '</tr>';
   }).join('');
 
-  const totals = '<tr class="total"><td colspan="2">TOTAL</td>' +
+  const totals = isStaffSession() ? '' : ('<tr class="total"><td colspan="2">TOTAL</td>' +
     '<td class="r mono">' + dec(hoursOf(p)) + '</td>' +
     '<td class="r mono">' + money(bonusOf(p)) + '</td>' +
     '<td class="r mono">' + money(tipsOf(p)) + '</td>' +
     '<td class="r mono">' + money(grossOf(p)) + '</td>' +
-    '<td colspan="2"></td></tr>';
+    '<td colspan="2"></td></tr>');
 
   $('payroll').innerHTML = (rows || '<tr><td colspan="8" class="empty">No payable staff. Suspended and terminated staff are excluded.</td></tr>') + totals;
 }
@@ -8118,13 +8186,16 @@ function renderShifts() {
   if (!s.shifts[shiftWeek]) s.shifts[shiftWeek] = {};
   const week = s.shifts[shiftWeek];
   const list = activeEmployees();
+  const boardEditable = canEditShifts();
   $('shiftBoard').innerHTML = list.length ? list.map(e => {
     const row = week[e.id] || ['Off', 'Off', 'Off', 'Off', 'Off', 'Off', 'Off'];
     week[e.id] = row;
     const cells = row.map((st, i) =>
-      '<td><select class="shift-sel" data-station="' + esc(st) + '" onchange="setShift(' + e.id + ',' + i + ',this.value)">' +
-      STATIONS.map(o => '<option value="' + o + '"' + (o === st ? ' selected' : '') + '>' + o + '</option>').join('') +
-      '</select></td>'
+      boardEditable
+        ? ('<td><select class="shift-sel" data-station="' + esc(st) + '" onchange="setShift(' + e.id + ',' + i + ',this.value)">' +
+          STATIONS.map(o => '<option value="' + o + '"' + (o === st ? ' selected' : '') + '>' + o + '</option>').join('') +
+          '</select></td>')
+        : ('<td><span class="pill ' + (st === 'Off' ? 'gray' : 'blue') + '">' + esc(st) + '</span></td>')
     ).join('');
     const on = row.filter(x => x !== 'Off').length;
     return '<tr><td class="name">' + esc(e.name) + '<div class="history">' + esc(e.role) + '</div></td>' + cells + '<td class="r mono">' + on + '</td></tr>';
@@ -8707,6 +8778,7 @@ window.jumpStubPeriod = function (i) {
   render();
 };
 window.markPaidNow = function (id) {
+  if (!requireHoursEdit('Mark paid')) return;
   const p = current();
   if (p.status === 'closed' && !confirm('This period is closed. Mark paid anyway?')) return;
   const method = promptPayMethod();
@@ -10981,6 +11053,10 @@ window.toggleCheck = function (k, v) {
 };
 
 window.togglePaid = function (id) {
+  if (!requireHoursEdit('Mark paid')) return;
+  if (isLeadSession() && !canMutateDesk()) {
+    /* Leads may set paid for floor runs */
+  }
   const p = current();
   const e = empById(id);
   if (!e) return;
@@ -11000,6 +11076,7 @@ window.togglePaid = function (id) {
 };
 
 window.openHours = function (id) {
+  if (!requireHoursEdit('Edit hours')) return;
   const p = current();
   if (p.status === 'closed') return toast('This period is closed');
   hourId = id;
@@ -11013,7 +11090,7 @@ window.openHours = function (id) {
   $('paidOut').checked = locked;
   $('hoursValue').disabled = locked;
   $('bonusValue').disabled = locked;
-  $('rateSnapshot').disabled = locked;
+  $('rateSnapshot').disabled = locked || !canMutateDesk();
   if ($('hoursPaidLock')) {
     $('hoursPaidLock').style.display = locked ? 'block' : 'none';
     $('hoursPaidLock').textContent = locked
@@ -11106,7 +11183,18 @@ window.editEmployee = function (id) {
   if ($('uniformSize')) $('uniformSize').value = e.uniformSize || '';
   if ($('emergencyName')) $('emergencyName').value = e.emergencyName || '';
   if ($('emergencyPhone')) $('emergencyPhone').value = e.emergencyPhone || '';
-  $('deleteEmployee').style.display = 'inline-block';
+  $('deleteEmployee').style.display = canMutateDesk() ? 'inline-block' : 'none';
+  if ($('promoField')) $('promoField').style.display = canMutateDesk() ? 'block' : 'none';
+  const softOnly = !canMutateDesk();
+  ['role', 'rate', 'empStatus', 'hire', 'probationEnd', 'supervisor', 'name'].forEach(fid => {
+    if ($(fid)) $(fid).disabled = softOnly;
+  });
+  ['phone', 'availDays', 'availWindow', 'availNotes', 'stationPref', 'uniformSize', 'emergencyName', 'emergencyPhone'].forEach(fid => {
+    if ($(fid)) $(fid).disabled = !(canMutateDesk() || canEditOwnSoftProfile(e));
+  });
+  ['obUniform', 'obStation', 'obMenu', 'obShadow', 'obLead'].forEach(fid => {
+    if ($(fid)) $(fid).disabled = !canMutateDesk();
+  });
   if ($('empTabFile')) $('empTabFile').style.display = 'inline-flex';
   fillEmpDossierChrome(e);
   renderEmployeeFile(e);
@@ -11121,11 +11209,12 @@ window.editEmployee = function (id) {
   const comp = empFileCompleteness(e);
   const startTab = (!empHasSignedContract(e) || !empHasPacket(e)) ? 'file' : (e.status === 'probation' ? 'onboard' : 'file');
   setEmpFileTab(startTab);
-  if ($('name')) setTimeout(() => { try { $('name').focus(); } catch (err) {} }, 40);
+  if ($('name') && !softOnly) setTimeout(() => { try { $('name').focus(); } catch (err) {} }, 40);
   announce((e.name || 'Employee') + ' file opened · ' + comp.label);
 };
 
 window.saveRole = function (inp) {
+  if (!requireMgmt('Role rates')) return;
   const r = inp.dataset.role;
   const v = Number(inp.value) || 0;
   if (s.roles[r] === v) return;
@@ -11135,6 +11224,7 @@ window.saveRole = function (inp) {
 };
 
 window.applyRateToRole = function (role) {
+  if (!requireMgmt('Apply rates')) return;
   const rate = Number(s.roles[role] || 0);
   const list = s.employees.filter(e => e.role === role && e.status !== 'terminated');
   if (!list.length) return toast('Nobody holds that role');
@@ -11334,6 +11424,7 @@ window.deleteLicense = function (id) {
 };
 
 window.setShift = function (empId, dayIdx, value) {
+  if (!requireShiftEdit('Edit shift board')) return;
   if (!s.shifts[shiftWeek]) s.shifts[shiftWeek] = {};
   const week = s.shifts[shiftWeek];
   if (!week[empId]) week[empId] = ['Off', 'Off', 'Off', 'Off', 'Off', 'Off', 'Off'];
@@ -12713,6 +12804,14 @@ $('cancel').onclick = () => $('employeeModal').classList.remove('open');
 $('save').onclick = () => {
   const n = $('name').value.trim();
   if (!n) return toast('Name required');
+  if (editId) {
+    const existing = empById(editId);
+    if (existing && !canMutateDesk() && !canEditOwnSoftProfile(existing)) {
+      return toast('You cannot edit this file');
+    }
+  } else if (!canMutateDesk()) {
+    return toast('Only management can add roster files');
+  }
   const r = $('role').value;
   const rate = Number($('rate').value) || 0;
   const h = $('hire').value || today();
@@ -12725,6 +12824,28 @@ $('save').onclick = () => {
 
   if (editId) {
     const e = empById(editId);
+    const softOnly = !canMutateDesk();
+    if (softOnly) {
+      /* Staff/lead self: soft fields only */
+      e.phone = phone;
+      const availability = {
+        days: ($('availDays') && $('availDays').value || '').split(/[,|/]/).map(x => x.trim()).filter(Boolean),
+        window: ($('availWindow') && $('availWindow').value) || '',
+        notes: ($('availNotes') && $('availNotes').value) || ''
+      };
+      e.availability = availability;
+      e.stationPref = ($('stationPref') && $('stationPref').value) || '';
+      e.uniformSize = ($('uniformSize') && $('uniformSize').value) || '';
+      e.emergencyName = ($('emergencyName') && $('emergencyName').value) || '';
+      e.emergencyPhone = ($('emergencyPhone') && $('emergencyPhone').value) || '';
+      pushEmpLog(e, { type: 'profile', summary: 'Updated floor / contact details', detail: 'Self-service save' });
+      log(e.name + ' updated own profile details');
+      save();
+      $('employeeModal').classList.remove('open');
+      render();
+      toast('Saved your details');
+      return;
+    }
     const logged = [];
 
     if (e.name !== n) {
@@ -13364,6 +13485,7 @@ $('hireFromApp').onclick = () => {
 
 /* ---------- events ---------- */
 $('addEvent').onclick = () => {
+  if (!canEditEvents()) return toast('Logging events is for leads and management');
   eventId = null;
   $('eventTitle').textContent = 'Log event';
   $('evDate').value = today();
@@ -13614,6 +13736,7 @@ $('pdfShifts').onclick = () => {
 
 /* ---------- licenses ---------- */
 $('addLicense').onclick = () => {
+  if (!requireLicenseEdit('Add license')) return;
   licId = null;
   $('licTitle').textContent = 'Add license / note';
   $('licName').value = '';
@@ -13625,8 +13748,9 @@ $('addLicense').onclick = () => {
   $('licModal').classList.add('open');
 };
 $('cancelLic').onclick = () => $('licModal').classList.remove('open');
-$('deleteLic').onclick = () => { if (licId) deleteLicense(licId); $('licModal').classList.remove('open'); };
+$('deleteLic').onclick = () => { if (!requireLicenseEdit('Delete license')) return; if (licId) deleteLicense(licId); $('licModal').classList.remove('open'); };
 $('saveLic').onclick = () => {
+  if (!requireLicenseEdit('Save license')) return;
   const name = $('licName').value.trim();
   if (!name) return toast('Name required');
   const data = { name, status: $('licStatus').value, issued: $('licIssued').value, expires: $('licExpires').value, notes: $('licNotes').value };
