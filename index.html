@@ -2100,14 +2100,22 @@ body.session-staff #closePeriod,
 body.session-staff #undoBtn,
 body.session-staff #previewSundayRun,
 body.session-staff #copySundayRun,
-body.session-staff #clockLogBtn,
 body.session-staff #closePeriod{display:none!important}
 body.session-staff .ov-cta-row{display:flex!important}
 body.session-staff .ov-cta-row #tipSettlementBtn{display:inline-flex!important}
 body.session-staff .ov-cta-row #previewSundayRun,
-body.session-staff .ov-cta-row #clockLogBtn,
 body.session-staff .ov-cta-row #closePeriod{display:none!important}
 .staff-welcome{margin:14px 0 18px;padding:16px 18px;border:1px solid var(--line);border-radius:14px;background:linear-gradient(135deg,oklch(98% .01 84),oklch(96% .02 155 / .35))}
+.payday-desk{margin:0 0 18px;padding:14px 16px;border:1px solid var(--line);border-radius:14px;background:oklch(98.5% .008 84)}
+.payday-desk-head{display:flex;align-items:center;justify-content:space-between;gap:8px;margin-bottom:10px}
+.payday-desk-grid{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:8px;margin-bottom:10px}
+@media(max-width:720px){.payday-desk-grid{grid-template-columns:1fr 1fr}}
+.payday-desk-stat{padding:10px 12px;border:1px solid var(--line);border-radius:10px;background:var(--paper)}
+.payday-desk-stat b{display:block;font-size:1.05rem;color:var(--navy)}
+.payday-desk-stat span{font-size:.68rem;color:var(--muted)}
+.payday-desk-actions{display:flex;flex-wrap:wrap;gap:8px}
+body.session-staff .payday-desk{display:none!important}
+body.session-staff #clockLogBtn{display:inline-flex!important}
 .staff-welcome .staff-actions{display:flex;flex-wrap:wrap;gap:8px;margin-top:12px}
 body.session-staff #payroll .btn,
 body.session-staff #payroll button.btn,
@@ -2323,11 +2331,11 @@ body.compact-todos .attn-detail{display:none}
 .gap-pill{font-size:.62rem;padding:2px 6px;border-radius:6px;background:var(--dangerwash);color:var(--danger);font-weight:700}
 
 
-body.session-staff #clockLogBtn,
 body.session-staff #interviewBoardBtn,
 body.session-staff #bulkHoursBtn,
 body.session-lead #interviewBoardBtn{display:none!important}
 body.session-staff #tipSettlementBtn{display:inline-flex!important}
+body.session-staff #pullSharedBtn{display:none!important}
 .roadmap-panel{margin:12px 0;padding:14px;border:1px solid var(--line);border-radius:12px;background:oklch(99% .004 84)}
 .roadmap-panel h3{margin:0 0 8px;font:700 .72rem 'DM Sans',sans-serif;letter-spacing:.08em;text-transform:uppercase;color:var(--muted)}
 .iv-row,.co-row,.clk-row{display:flex;flex-wrap:wrap;gap:8px;align-items:center;justify-content:space-between;padding:10px 12px;border:1px solid var(--line);border-radius:9px;background:var(--paper);margin-bottom:6px}
@@ -2462,14 +2470,14 @@ body.session-staff #tipSettlementBtn{display:inline-flex!important}
         <button type="button" class="top-account-item" id="handbookBtn" role="menuitem">Handbook</button>
         <button type="button" class="top-account-item" id="hoursDisputeBtn" role="menuitem">Hours dispute</button>
         <button type="button" class="top-account-item" id="callOffBtn" role="menuitem">Call-off / time-off</button>
-        <button type="button" class="top-account-item" id="syncNowBtn" role="menuitem">Sync desk</button>
-        <button type="button" class="top-account-item" id="pullSharedBtn" role="menuitem" data-mgmt-only>Pull shared desk</button>
+        <button type="button" class="top-account-item" id="syncNowBtn" role="menuitem">Sync this browser</button>
+        <button type="button" class="top-account-item" id="pullSharedBtn" role="menuitem">Pull shared desk (other PC)</button>
         <button type="button" class="top-account-item" id="openSettingsBtn" role="menuitem" data-mgmt-only>Settings</button>
         <button type="button" class="top-account-item" id="helpShortcuts" role="menuitem" aria-haspopup="dialog" aria-controls="shortcutSheet">Keyboard shortcuts</button>
         <button type="button" class="top-account-item danger" id="logoutBtn" role="menuitem">Sign out</button>
         <button type="button" class="top-account-item" id="logoutAllBtn" role="menuitem">Sign out all remembered</button>
         <div class="top-account-foot">
-          <span class="build-chip" title="Desk build">v25</span>
+          <span class="build-chip" title="Desk build">v30</span>
           <label class="top-jump-label" for="quickJump">Jump to</label>
           <select class="top-jump" id="quickJump" title="Jump to any tab">
             <option value="overview">Overview</option>
@@ -2534,6 +2542,15 @@ body.session-staff #tipSettlementBtn{display:inline-flex!important}
   </div>
 
   <div class="staff-welcome" id="staffWelcome" style="display:none"></div>
+
+  <div class="payday-desk" id="paydayDesk" style="display:none" aria-label="Sunday payday desk">
+    <div class="payday-desk-head">
+      <span class="ov-tool-label">Sunday payday desk</span>
+      <span class="pill warn" id="paydayDeskPill">—</span>
+    </div>
+    <div class="payday-desk-grid" id="paydayDeskBody"></div>
+    <div class="payday-desk-actions" id="paydayDeskActions"></div>
+  </div>
 
   <div class="ov-rail overview-tools" aria-label="Period controls">
     <div class="ov-rail-card ov-rail-period">
@@ -3491,6 +3508,20 @@ body.session-staff #tipSettlementBtn{display:inline-flex!important}
     <div class="field"><label>What is wrong?</label><textarea id="disputeNote" rows="4" placeholder="e.g. I worked Thursday bar but hours show 0"></textarea></div>
     <div id="disputeMyStatus" class="roadmap-panel" style="margin-top:12px"></div>
     <div id="disputeInbox" class="roadmap-panel" style="display:none;margin-top:12px"><h3>Open disputes</h3><div id="disputeList"></div></div>
+    <div id="disputeResolvePanel" class="roadmap-panel" style="display:none;margin-top:12px">
+      <h3>Resolve dispute</h3>
+      <p class="ui-hint" id="disputeResolveSummary"></p>
+      <div class="field-row">
+        <div class="field"><label>Corrected hours</label><input id="disputeFixHours" type="number" step=".01" min="0"></div>
+        <div class="field"><label>Bonus ($)</label><input id="disputeFixBonus" type="number" step="1" min="0"></div>
+      </div>
+      <div class="field"><label>Resolution note / deny reason</label><textarea id="disputeResolveNote" rows="2" placeholder="Required to deny; optional note when approving with hours fix"></textarea></div>
+      <div class="actions" style="margin-top:8px">
+        <button type="button" class="btn primary" id="disputeApproveFix">Approve &amp; save hours</button>
+        <button type="button" class="btn" id="disputeDenyBtn">Deny</button>
+        <button type="button" class="btn soft" id="disputeCancelResolve">Cancel</button>
+      </div>
+    </div>
   </div>
   <div class="dialog-foot"><button class="btn" id="cancelDispute">Cancel</button><button class="btn primary" id="saveDispute">Submit dispute</button></div>
 </div></div>
@@ -3524,8 +3555,10 @@ body.session-staff #tipSettlementBtn{display:inline-flex!important}
       <div class="field"><label>Time</label><input id="clkTime" type="time" value="09:00"></div>
     </div>
     <div class="field"><label>Note</label><input id="clkNote" placeholder="Optional — e.g. mid-shift break"></div>
-    <p class="ui-hint">Apply pairs uses in/out times on the same date. If times are missing, each pair counts as 1 hour. Note text like &quot;4h&quot; overrides.</p>
+    <p class="ui-hint" id="clockHint">Staff log their own 10-1/10-2. Leads apply unapplied pairs to the open period. Overnight spans allowed when out time is earlier than in (next calendar day). Note text like &quot;4h&quot; overrides.</p>
+    <div id="clockApplyPreview" class="roadmap-panel" style="display:none;margin:10px 0"></div>
     <div class="dialog-foot" style="border:0;padding-top:0;margin:0 0 12px"><button class="btn primary" id="addClockEntry" type="button">Add entry</button>
+      <button class="btn soft" id="previewClockHours" type="button">Preview pairs</button>
       <button class="btn soft" id="applyClockHours" type="button">Apply pairs to open period</button></div>
     <div id="clockList"></div>
   </div>
@@ -3944,6 +3977,7 @@ body.session-staff #tipSettlementBtn{display:inline-flex!important}
     <div class="field"><label>High-hours warning threshold</label><input id="setOtHours" type="number" min="1" step="0.5" value="40"></div>
     <div class="field"><label>Stay-logged-in days</label><select id="setSessionDays"><option value="1">1</option><option value="7">7</option><option value="14" selected>14</option><option value="30">30</option></select></div>
     <div class="field"><label>Shared desk raw URL</label><input id="setSharedUrl" placeholder="https://…/frenchies-shared-desk.json"></div>
+    <label class="checkline"><input type="checkbox" id="setSharedAutoPull"><span>Auto-pull shared desk on login / tab focus (mgmt &amp; leads)</span></label>
     <div class="field"><label>Handbook Google Doc URL</label><input id="setHandbookUrl" placeholder="https://docs.google.com/document/d/…"></div>
     <label class="checkline"><input type="checkbox" id="setQuietMode"><span>Quiet mode (less motion / hover)</span></label>
     <label class="checkline"><input type="checkbox" id="setRequireNotes"><span>Warn if closing period without notes</span></label>
@@ -4007,7 +4041,7 @@ const LOG_TYPES = {
 };
 const TIP_ROLES_DEFAULT = ['Waiter', 'Hostess', 'Cook'];
 const TIP_ROLES = TIP_ROLES_DEFAULT; /* legacy alias — use tipRoles() */
-const DESK_BUILD = 'v25';
+const DESK_BUILD = 'v30';
 const HOUSE_LOGIN_PASSWORD = 'frenchies636';
 const SESSION_KEY = 'frenchies_desk_session';
 const SESSION_DURABLE_KEY = 'frenchies_desk_session_durable';
@@ -4648,6 +4682,7 @@ function ensureMeta() {
   if (!s.settings || typeof s.settings !== 'object') s.settings = {};
   if (!('sessionDays' in s.settings)) s.settings.sessionDays = 14;
   if (!('sharedDeskUrl' in s.settings)) s.settings.sharedDeskUrl = '';
+  if (!('sharedAutoPull' in s.settings)) s.settings.sharedAutoPull = false;
   if (!('handbookUrl' in s.settings)) s.settings.handbookUrl = '';
   if (!s.shiftTimes || typeof s.shiftTimes !== 'object') s.shiftTimes = {};
   if (!s.settings || typeof s.settings !== 'object') s.settings = {};
@@ -6163,9 +6198,8 @@ function buildTodos() {
       tone: 'warn',
       priority: 3,
       due: d.created || today(),
-      go: (canMutateDesk() || isLeadSession()) ? { type: 'view', view: 'overview' } : null,
-      action: (canMutateDesk() || isLeadSession()) ? { label: 'Approve', run: () => resolveDispute(d.id, true) } : null,
-      action2: (canMutateDesk() || isLeadSession()) ? { label: 'Deny', run: () => resolveDispute(d.id, false) } : null
+      go: (canEditHours()) ? { type: 'dispute', id: d.id } : null,
+      action: (canEditHours()) ? { label: 'Review', run: () => openDisputeForResolve(d.id) } : null
     });
   });
   /* Staff: show resolved/denied disputes recently */
@@ -6176,7 +6210,7 @@ function buildTodos() {
         group: 'yours',
         tag: 'Dispute',
         title: 'Dispute ' + d.status,
-        detail: (d.periodLabel || '') + ' · ' + (d.note || ''),
+        detail: (d.periodLabel || '') + ' · ' + (d.note || '') + (d.resolveNote ? ' — ' + d.resolveNote : ''),
         tone: d.status === 'resolved' ? 'green' : 'gray',
         priority: 1,
         due: d.resolvedAt || d.created || today()
@@ -6629,6 +6663,11 @@ function goTodo(item) {
   if (g.type === 'app') {
     goView('hiring');
     setTimeout(() => editApp(g.id), 60);
+    return;
+  }
+  if (g.type === 'dispute') {
+    goView('overview');
+    setTimeout(() => openDisputeForResolve(g.id), 60);
   }
 }
 
@@ -7126,6 +7165,7 @@ function openSettings() {
   $('setCompactTodos').checked = !!s.settings.compactTodos;
   if ($('setSessionDays')) $('setSessionDays').value = String(s.settings.sessionDays || 14);
   if ($('setSharedUrl')) $('setSharedUrl').value = s.settings.sharedDeskUrl || '';
+  if ($('setSharedAutoPull')) $('setSharedAutoPull').checked = !!s.settings.sharedAutoPull;
   if ($('setHandbookUrl')) $('setHandbookUrl').value = s.settings.handbookUrl || '';
   d.classList.add('open'); d.removeAttribute('hidden');
 }
@@ -7147,6 +7187,7 @@ function saveSettings() {
   s.settings.compactTodos = !!$('setCompactTodos').checked;
   if ($('setSessionDays')) s.settings.sessionDays = Number($('setSessionDays').value) || 14;
   if ($('setSharedUrl')) s.settings.sharedDeskUrl = ($('setSharedUrl').value || '').trim();
+  if ($('setSharedAutoPull')) s.settings.sharedAutoPull = !!$('setSharedAutoPull').checked;
   if ($('setHandbookUrl')) s.settings.handbookUrl = ($('setHandbookUrl').value || '').trim();
   save(); applyUiSettings(); closeSettings(); render(); toast('Settings saved');
 }
@@ -7155,6 +7196,11 @@ function openChangelog() {
   const grid = $('upgradeGrid');
   if (grid) {
     const recent = [
+      ['v30', 'Shared desk auto-pull on focus · backup vs shared pack warnings · Sync vs Pull labels'],
+      ['v29', 'Interview Done→offer / No-show→reject · call-off coverage Discord paste'],
+      ['v28', 'Sunday payday desk strip · open-dispute blocker on Mark all paid'],
+      ['v27', 'Staff self 10-1/10-2 clock · overnight pairs · apply preview'],
+      ['v26', 'Dispute Approve opens hours fix · Deny reason on My file · inbox deep-link'],
       ['v25', 'Sunday tip settlement — recompute equal/by-hours, print letterhead, staff own-line view'],
       ['v24', 'Interview board — awaiting confirm, done/no-show outcomes, Discord blurbs'],
       ['v23', 'Call-off / time-off — approve/deny, multi-week board Off marks, My file status'],
@@ -7474,6 +7520,7 @@ function render() {
   if ($('periodHealthSub')) {
     $('periodHealthSub').textContent = shortLabel(p) + ' · tip pool ' + money(p.tipPool || 0);
   }
+  try { renderPaydayDesk(p); } catch (err) {}
   if ($('staffWelcome')) {
     if (isStaffSession() && sessionUser) {
       $('staffWelcome').style.display = '';
@@ -7485,6 +7532,7 @@ function render() {
         '<button type="button" class="btn tiny soft" id="staffTipsBtn">My tips</button>' +
         '<button type="button" class="btn tiny soft" id="staffDisputeBtn">Hours dispute</button>' +
         '<button type="button" class="btn tiny soft" id="staffCallOffBtn">Call-off</button>' +
+        '<button type="button" class="btn tiny soft" id="staffClockBtn">Clock in/out</button>' +
         '<button type="button" class="btn tiny soft" id="staffHandbookBtn">Handbook</button>' +
         '</div>';
       if ($('staffOpenFileBtn')) $('staffOpenFileBtn').onclick = () => openMyFile();
@@ -7492,6 +7540,7 @@ function render() {
       if ($('staffTipsBtn')) $('staffTipsBtn').onclick = () => openTipSettlement();
       if ($('staffDisputeBtn')) $('staffDisputeBtn').onclick = () => openDisputeModal();
       if ($('staffCallOffBtn')) $('staffCallOffBtn').onclick = () => openTimeOffModal();
+      if ($('staffClockBtn')) $('staffClockBtn').onclick = () => openClockModal();
       if ($('staffHandbookBtn')) $('staffHandbookBtn').onclick = () => openHandbookHub();
     } else {
       $('staffWelcome').style.display = 'none';
@@ -13075,6 +13124,9 @@ $('markAllPaid').onclick = () => {
   const p = current();
   const pending = unpaidPayable(p);
   if (!pending.length) return toast('Nothing outstanding');
+  ensureMeta();
+  const openDisputes = (s.disputes || []).filter(d => d.status === 'open');
+  if (openDisputes.length && !confirm(openDisputes.length + ' open hours dispute(s) still on the desk. Mark all paid anyway?')) return;
   if (p.status === 'closed' && !confirm('This period is closed. Mark all unpaid stubs paid anyway?')) return;
   if (!confirm('Mark ' + pending.length + ' stub(s) as paid for the Sunday run?')) return;
   const method = promptPayMethod();
@@ -14385,7 +14437,7 @@ $('exportJson').onclick = () => {
   a.download = 'frenchies-hr-backup-' + today() + '-r' + (s.meta.rev || 0) + '.json';
   a.click();
   markExported();
-  toast('Backup downloaded · rev ' + (s.meta.rev || 0));
+  toast('Full backup downloaded (includes passwords) · rev ' + (s.meta.rev || 0));
 };
 
 $('exportActivity').onclick = () => {
@@ -14406,11 +14458,16 @@ $('importJson').onclick = () => {
   if (!requireMgmt('Import backup')) return;
   const f = $('importFile').files[0];
   if (!f) return toast('Choose a JSON file first');
-  if (!confirm('Replace the entire office file with this backup? A local snapshot will be kept first.')) return;
+  if (!confirm('Replace the entire office file with this backup? A local snapshot will be kept first.\n\nFull backups include login passwords. Shared packs are password-redacted — use Pull shared desk for those.')) return;
   const reader = new FileReader();
   reader.onload = () => {
     try {
-      const data = migrate(JSON.parse(reader.result));
+      const parsed = JSON.parse(reader.result);
+      const looksShared = !!(parsed && parsed.meta && parsed.meta.passwordsRedacted);
+      if (looksShared && !confirm('This file looks like a shared pack (passwords redacted), not a full backup. Import anyway? Prefer Pull shared desk for multi-PC sync.')) return;
+      const hasPasswords = (parsed.employees || []).some(e => e && String(e.loginPassword || '').length);
+      if (hasPasswords && !confirm('This backup includes personal login passwords. Continue import?')) return;
+      const data = migrate(parsed);
       if (!data || !data.employees) throw new Error('bad file');
       pushSnapshot('pre-import');
       s = data;
@@ -14441,6 +14498,7 @@ document.addEventListener('visibilitychange', () => {
   } else {
     pullRemote({ reason: 'visible' });
     updateSaveBadge();
+    maybeAutoPullSharedDesk('focus');
   }
 });
 
@@ -14499,13 +14557,17 @@ if ($('handbookBtn')) $('handbookBtn').onclick = () => { openHandbookHub(); cons
 if ($('hoursDisputeBtn')) $('hoursDisputeBtn').onclick = () => { openDisputeModal(); const m=$('accountMenu'); if(m) m.removeAttribute('open'); };
 if ($('callOffBtn')) $('callOffBtn').onclick = () => { openTimeOffModal(); const m=$('accountMenu'); if(m) m.removeAttribute('open'); };
 if ($('pullSharedBtn')) $('pullSharedBtn').onclick = () => { pullSharedDesk(); const m=$('accountMenu'); if(m) m.removeAttribute('open'); };
-if ($('cancelDispute')) $('cancelDispute').onclick = () => $('disputeModal').classList.remove('open');
+if ($('cancelDispute')) $('cancelDispute').onclick = () => { hideDisputeResolve(); $('disputeModal').classList.remove('open'); };
 if ($('saveDispute')) $('saveDispute').onclick = () => submitDispute();
+if ($('disputeApproveFix')) $('disputeApproveFix').onclick = () => approveDisputeFromPanel();
+if ($('disputeDenyBtn')) $('disputeDenyBtn').onclick = () => denyDisputeFromPanel();
+if ($('disputeCancelResolve')) $('disputeCancelResolve').onclick = () => hideDisputeResolve();
 if ($('cancelTimeOff')) $('cancelTimeOff').onclick = () => $('timeOffModal').classList.remove('open');
 if ($('saveTimeOff')) $('saveTimeOff').onclick = () => submitTimeOff();
 if ($('clockLogBtn')) $('clockLogBtn').onclick = () => openClockModal();
 if ($('closeClock')) $('closeClock').onclick = () => $('clockModal').classList.remove('open');
 if ($('addClockEntry')) $('addClockEntry').onclick = () => addClockEntry();
+if ($('previewClockHours')) $('previewClockHours').onclick = () => previewClockPairs(false);
 if ($('applyClockHours')) $('applyClockHours').onclick = () => applyClockHoursToPeriod();
 if ($('interviewBoardBtn')) $('interviewBoardBtn').onclick = () => openInterviewBoard();
 if ($('closeInterviewBoard')) $('closeInterviewBoard').onclick = () => $('interviewBoardModal').classList.remove('open');
@@ -14571,6 +14633,7 @@ if ($('setSessionDays')) {
 })();
 if (sessionUser) render();
 updateSaveBadge();
+if (sessionUser) setTimeout(() => maybeAutoPullSharedDesk('login'), 800);
 setSyncChip(syncChannel ? 'live' : 'offline');
 try { renderSnapshots(); } catch (err) {}
 if ($('ovTipMode')) $('ovTipMode').value = (s.settings && s.settings.tipMode) || 'equal';
@@ -14592,6 +14655,51 @@ const HANDBOOK_EXCERPTS = [
   { id: 'login', title: 'Desk login', tags: 'login password stay', body: 'House password first, then your personal password. Stay logged in keeps you signed in on this device until expiry or Sign out. Never share personal passwords.' },
   { id: 'conduct', title: 'Floor conduct', tags: 'radio respect guests', body: 'Stay professional on radio and Discord. Log serious issues with Relations. Commendations and warnings live on the personnel file.' }
 ];
+
+function openDisputesCount() {
+  ensureMeta();
+  return (s.disputes || []).filter(d => d.status === 'open').length;
+}
+
+function renderPaydayDesk(p) {
+  const root = $('paydayDesk');
+  if (!root) return;
+  if (!canEditHours() || isStaffSession()) {
+    root.style.display = 'none';
+    return;
+  }
+  p = p || workingPeriod() || current();
+  if (!p) { root.style.display = 'none'; return; }
+  root.style.display = '';
+  const unpaid = unpaidCount(p);
+  const disputes = openDisputesCount();
+  const pool = Number(p.tipPool || 0);
+  const owed = owedGrossOf(p);
+  if ($('paydayDeskPill')) {
+    $('paydayDeskPill').textContent = disputes ? (disputes + ' dispute' + (disputes === 1 ? '' : 's')) : (unpaid ? unpaid + ' unpaid' : 'Clear');
+    $('paydayDeskPill').className = 'pill ' + (disputes || unpaid ? 'warn' : 'green');
+  }
+  if ($('paydayDeskBody')) {
+    $('paydayDeskBody').innerHTML =
+      '<div class="payday-desk-stat"><b>' + unpaid + '</b><span>Unpaid stubs</span></div>' +
+      '<div class="payday-desk-stat"><b>' + disputes + '</b><span>Open disputes</span></div>' +
+      '<div class="payday-desk-stat"><b>' + money(pool) + '</b><span>Tip pool</span></div>' +
+      '<div class="payday-desk-stat"><b>' + money(owed) + '</b><span>Still owed</span></div>';
+  }
+  if ($('paydayDeskActions')) {
+    $('paydayDeskActions').innerHTML =
+      '<button type="button" class="btn tiny primary" id="pdCopySunday">Copy Sunday run</button>' +
+      '<button type="button" class="btn tiny soft" id="pdTips">Tip settlement</button>' +
+      '<button type="button" class="btn tiny soft" id="pdDisputes">Open disputes</button>' +
+      '<button type="button" class="btn tiny soft" id="pdStubs">Pay stubs</button>' +
+      (unpaid ? '<button type="button" class="btn tiny" id="pdMarkAll">Mark all paid</button>' : '');
+    if ($('pdCopySunday')) $('pdCopySunday').onclick = () => copySundayRun();
+    if ($('pdTips')) $('pdTips').onclick = () => openTipSettlement();
+    if ($('pdDisputes')) $('pdDisputes').onclick = () => openDisputeModal();
+    if ($('pdStubs')) $('pdStubs').onclick = () => goView('paystubs');
+    if ($('pdMarkAll')) $('pdMarkAll').onclick = () => { if ($('markAllPaid')) $('markAllPaid').click(); };
+  }
+}
 
 function openMyFile() {
   if (!sessionUser) return toast('Sign in first');
@@ -14668,27 +14776,69 @@ function ackHandbook() {
   toast('Handbook acknowledged');
 }
 
-function openDisputeModal() {
+function openDisputeModal(opts) {
+  opts = opts || {};
   if (!sessionUser) return toast('Sign in first');
   const sel = $('disputePeriod');
   if (sel) {
     sel.innerHTML = s.periods.map((p, i) => '<option value="' + i + '"' + (i === selectedPeriodIndex() ? ' selected' : '') + '>' + esc(label(p)) + '</option>').join('');
   }
-  if ($('disputeNote')) $('disputeNote').value = '';
-  renderDisputePanels();
+  if ($('disputeNote') && !opts.keepNote) $('disputeNote').value = '';
+  hideDisputeResolve();
+  renderDisputePanels(opts.focusId);
   $('disputeModal').classList.add('open');
   $('disputeModal').removeAttribute('hidden');
 }
 
-function renderDisputePanels() {
+function hideDisputeResolve() {
+  window.__disputeResolveId = null;
+  if ($('disputeResolvePanel')) $('disputeResolvePanel').style.display = 'none';
+}
+
+function openDisputeForResolve(id) {
+  if (!canEditHours()) return toast('Leads and management only');
+  openDisputeModal({ focusId: id });
+  beginDisputeResolve(id);
+}
+
+function beginDisputeResolve(id) {
+  if (!canEditHours()) return toast('Leads and management only');
+  ensureMeta();
+  const d = (s.disputes || []).find(x => String(x.id) === String(id));
+  if (!d || d.status !== 'open') return toast('Dispute not open');
+  window.__disputeResolveId = d.id;
+  const e = empById(d.empId);
+  const p = (s.periods || []).find(x => String(x.id) === String(d.periodId)) || workingPeriod() || current();
+  if (p) {
+    const pi = s.periods.indexOf(p);
+    if (pi >= 0) setSelectedPeriod(pi, { syncStub: true });
+  }
+  const x = e && p ? entry(p, e.id) : { hours: 0, bonus: 0 };
+  if ($('disputeResolvePanel')) $('disputeResolvePanel').style.display = '';
+  if ($('disputeResolveSummary')) {
+    $('disputeResolveSummary').innerHTML = '<b>' + esc((e && e.name) || d.name) + '</b> · ' + esc(d.periodLabel || (p ? shortLabel(p) : '')) +
+      '<br>' + esc(d.note || '') +
+      '<br>Current hours: <b>' + dec(Number(x.hours || 0)) + '</b> · bonus <b>' + money(Number(x.bonus || 0)) + '</b>';
+  }
+  if ($('disputeFixHours')) $('disputeFixHours').value = Number(x.hours || 0);
+  if ($('disputeFixBonus')) $('disputeFixBonus').value = Number(x.bonus || 0);
+  if ($('disputeResolveNote')) $('disputeResolveNote').value = '';
+  renderDisputePanels(d.id);
+}
+
+function renderDisputePanels(focusId) {
   ensureMeta();
   const mine = $('disputeMyStatus');
   const e = sessionEmp();
   if (mine && e) {
-    const rows = (s.disputes || []).filter(d => String(d.empId) === String(e.id)).slice(0, 6);
+    const rows = (s.disputes || []).filter(d => String(d.empId) === String(e.id)).slice(0, 8);
     mine.innerHTML = '<h3>Your disputes</h3>' + (rows.length ? rows.map(d =>
       '<div class="co-row"><div><b>' + esc(d.status) + '</b> · ' + esc(d.periodLabel || '') +
-      '<div class="history">' + esc(d.note || '') + (d.resolvedAt ? ' · closed ' + esc(d.resolvedAt) : '') + '</div></div></div>'
+      '<div class="history">' + esc(d.note || '') +
+      (d.resolveNote ? ' — HR: ' + esc(d.resolveNote) : '') +
+      (d.resolvedAt ? ' · closed ' + esc(d.resolvedAt) : '') +
+      (d.hoursAfter != null ? ' · hours set to ' + dec(d.hoursAfter) : '') +
+      '</div></div></div>'
     ).join('') : '<div class="mini-note">No disputes filed yet.</div>');
   }
   const inbox = $('disputeInbox');
@@ -14700,10 +14850,11 @@ function renderDisputePanels() {
       const open = (s.disputes || []).filter(d => d.status === 'open');
       list.innerHTML = open.length ? open.map(d => {
         const emp = empById(d.empId);
-        return '<div class="co-row"><div><b>' + esc((emp && emp.name) || d.name) + '</b> · ' + esc(d.periodLabel || '') +
+        const focus = focusId != null && String(d.id) === String(focusId);
+        return '<div class="co-row"' + (focus ? ' style="outline:2px solid var(--gold);outline-offset:1px"' : '') + '><div><b>' + esc((emp && emp.name) || d.name) + '</b> · ' + esc(d.periodLabel || '') +
           '<div class="history">' + esc(d.note || '') + '</div></div>' +
-          '<div><button class="btn tiny primary" onclick="resolveDispute(' + d.id + ',true)">Approve</button> ' +
-          '<button class="btn tiny" onclick="resolveDispute(' + d.id + ',false)">Deny</button></div></div>';
+          '<div><button class="btn tiny primary" onclick="beginDisputeResolve(' + d.id + ')">Fix hours</button> ' +
+          '<button class="btn tiny" onclick="beginDisputeResolve(' + d.id + ')">Deny…</button></div></div>';
       }).join('') : '<div class="mini-note">No open disputes.</div>';
     }
   }
@@ -14736,22 +14887,84 @@ function submitDispute() {
   render();
 }
 
-window.resolveDispute = function (id, ok) {
-  if (!canMutateDesk() && !isLeadSession()) return toast('Leads/HR only');
+function applyDisputeHoursFix(d, hours, bonus) {
+  const e = empById(d.empId);
+  if (!e) return { ok: false, msg: 'Employee missing' };
+  const p = (s.periods || []).find(x => String(x.id) === String(d.periodId)) || workingPeriod() || current();
+  if (!p) return { ok: false, msg: 'Period missing' };
+  if (p.status === 'closed') return { ok: false, msg: 'Period is closed' };
+  const x = ensureEntry(p, e.id);
+  if (x.paidOut) return { ok: false, msg: 'Stub already paid — mark unpaid first' };
+  const beforeH = Number(x.hours || 0);
+  const beforeB = Number(x.bonus || 0);
+  x.hours = Math.max(0, Number(hours) || 0);
+  x.bonus = Math.max(0, Number(bonus) || 0);
+  distributeTips(p);
+  d.hoursBefore = beforeH;
+  d.hoursAfter = x.hours;
+  d.bonusBefore = beforeB;
+  d.bonusAfter = x.bonus;
+  d.periodId = p.id;
+  d.periodLabel = shortLabel(p);
+  return { ok: true, e, p, beforeH, x };
+}
+
+window.resolveDispute = function (id, ok, opts) {
+  opts = opts || {};
+  if (!canEditHours()) return toast('Leads and management only');
   ensureMeta();
   const d = (s.disputes || []).find(x => String(x.id) === String(id));
-  if (!d) return;
-  d.status = ok ? 'resolved' : 'denied';
+  if (!d || d.status !== 'open') return toast('Dispute not open');
+  const note = String(opts.note != null ? opts.note : (($('disputeResolveNote') && $('disputeResolveNote').value) || '')).trim();
+  if (!ok && !note) return toast('Deny reason required');
+  const e = empById(d.empId);
+  if (ok) {
+    const hours = opts.hours != null ? opts.hours : Number($('disputeFixHours') && $('disputeFixHours').value);
+    const bonus = opts.bonus != null ? opts.bonus : Number($('disputeFixBonus') && $('disputeFixBonus').value);
+    const res = applyDisputeHoursFix(d, hours, bonus);
+    if (!res.ok) return toast(res.msg);
+    d.status = 'resolved';
+    d.resolveNote = note || ('Hours set to ' + dec(res.x.hours));
+    d.resolvedAt = today();
+    d.resolvedBy = sessionUser ? sessionUser.name : '';
+    if (e) {
+      pushEmpLog(e, {
+        type: 'note',
+        summary: 'Hours dispute resolved',
+        detail: (d.note || '') + ' → ' + dec(res.beforeH) + 'h to ' + dec(res.x.hours) + 'h' + (note ? ' — ' + note : '')
+      });
+    }
+    log('Dispute resolved — ' + (d.name || '') + ' hours ' + dec(res.beforeH) + ' → ' + dec(res.x.hours));
+    save();
+    hideDisputeResolve();
+    renderDisputePanels();
+    render();
+    toast('Dispute resolved · hours saved');
+    return;
+  }
+  d.status = 'denied';
+  d.resolveNote = note;
   d.resolvedAt = today();
   d.resolvedBy = sessionUser ? sessionUser.name : '';
-  const e = empById(d.empId);
-  if (e) pushEmpLog(e, { type: 'note', summary: 'Hours dispute ' + d.status, detail: d.note + (ok ? '' : ' — denied') });
-  log('Dispute ' + d.status + ' — ' + (d.name || '') + (ok ? '' : ' (denied)'));
+  if (e) pushEmpLog(e, { type: 'note', summary: 'Hours dispute denied', detail: (d.note || '') + ' — ' + note });
+  log('Dispute denied — ' + (d.name || '') + ': ' + note);
   save();
+  hideDisputeResolve();
   renderDisputePanels();
   render();
-  toast('Dispute ' + d.status);
+  toast('Dispute denied');
 };
+
+function approveDisputeFromPanel() {
+  const id = window.__disputeResolveId;
+  if (id == null) return toast('Pick a dispute first');
+  resolveDispute(id, true);
+}
+function denyDisputeFromPanel() {
+  const id = window.__disputeResolveId;
+  if (id == null) return toast('Pick a dispute first');
+  resolveDispute(id, false);
+}
 
 function openTimeOffModal() {
   if (!sessionUser) return toast('Sign in first');
@@ -14852,12 +15065,41 @@ window.resolveTimeOff = function (id, ok) {
   if (ok && e) {
     const chip = t.type === 'calloff' ? 'Off' : 'Off';
     markTimeOffOnBoard(e.id, t.start, t.end || t.start, chip);
+    if (t.type === 'calloff') {
+      const blurb = coverageDiscordBlurb(e, t);
+      if (blurb) copyText(blurb, 'Approved · board Off · coverage Discord copied');
+      else toast('Approved · board marked Off');
+    } else {
+      toast('Approved · board marked Off');
+    }
+  } else {
+    toast(ok ? 'Approved · board marked Off' : 'Denied');
   }
   save();
   renderTimeOffPanels();
   render();
-  toast(ok ? 'Approved · board marked Off' : 'Denied');
 };
+
+function coverageDiscordBlurb(e, t) {
+  if (!e || !t) return '';
+  const days = [];
+  const start = new Date(t.start + 'T00:00:00');
+  const end = new Date((t.end || t.start) + 'T00:00:00');
+  if (isNaN(start) || isNaN(end)) return '';
+  for (let d = new Date(start); d <= end; d.setDate(d.getDate() + 1)) {
+    const iso = d.getFullYear() + '-' + String(d.getMonth() + 1).padStart(2, '0') + '-' + String(d.getDate()).padStart(2, '0');
+    const week = mondayOf(iso);
+    const dayIdx = (d.getDay() + 6) % 7;
+    const station = (s.shifts[week] && s.shifts[week][e.id] && s.shifts[week][e.id][dayIdx]) || 'Off';
+    const long = d.toLocaleDateString('en-US', { weekday: 'short', month: 'short', day: 'numeric' });
+    days.push(long + (station && station !== 'Off' ? ' (was ' + station + ')' : ''));
+  }
+  return "Frenchie's floor — NEED COVERAGE\n" +
+    e.name + ' (' + e.role + ') call-off approved.\n' +
+    'Days open: ' + days.join(', ') + '\n' +
+    (t.reason ? 'Note: ' + t.reason + '\n' : '') +
+    'Reply if you can cover.';
+}
 
 function parseClockHoursFromNote(note) {
   const m = String(note || '').match(/(\d+(?:\.\d+)?)\s*h\b/i);
@@ -14872,10 +15114,19 @@ function clockTimeToMinutes(t) {
 }
 
 function openClockModal() {
-  if (!canEditHours()) return toast('Leads and management only');
+  if (!sessionUser) return toast('Sign in first');
+  if (!canEditHours() && !isStaffSession()) return toast('Sign in to clock');
   ensureMeta();
+  const staffSelf = isStaffSession() && !canEditHours();
   if ($('clkEmp')) {
-    $('clkEmp').innerHTML = activeEmployees().map(e => '<option value="' + e.id + '">' + esc(e.name) + '</option>').join('');
+    if (staffSelf) {
+      const me = sessionEmp();
+      $('clkEmp').innerHTML = me ? ('<option value="' + me.id + '">' + esc(me.name) + '</option>') : '';
+      $('clkEmp').disabled = true;
+    } else {
+      $('clkEmp').disabled = false;
+      $('clkEmp').innerHTML = activeEmployees().map(e => '<option value="' + e.id + '">' + esc(e.name) + '</option>').join('');
+    }
   }
   if ($('clkDate')) $('clkDate').value = today();
   if ($('clkTime')) {
@@ -14883,7 +15134,16 @@ function openClockModal() {
     $('clkTime').value = String(now.getHours()).padStart(2, '0') + ':' + String(now.getMinutes()).padStart(2, '0');
   }
   if ($('clkNote')) $('clkNote').value = '';
+  if ($('clkMark') && staffSelf && $('clkMark').value === 'note') $('clkMark').value = '10-1';
+  if ($('applyClockHours')) $('applyClockHours').style.display = canEditHours() ? '' : 'none';
+  if ($('previewClockHours')) $('previewClockHours').style.display = canEditHours() ? '' : 'none';
+  if ($('clockHint')) {
+    $('clockHint').textContent = staffSelf
+      ? 'Log your own 10-1 (in) and 10-2 (out). A lead applies pairs to the open period.'
+      : 'Log floor marks, preview unapplied pairs, then apply to the open period. Overnight spans OK when out is earlier than in.';
+  }
   renderClockList();
+  previewClockPairs(true);
   $('clockModal').classList.add('open');
   $('clockModal').removeAttribute('hidden');
 }
@@ -14892,34 +15152,53 @@ function renderClockList() {
   ensureMeta();
   const root = $('clockList');
   if (!root) return;
-  const rows = (s.clockLog || []).slice(0, 60);
-  root.innerHTML = rows.length ? rows.map(c => {
+  const staffSelf = isStaffSession() && !canEditHours();
+  let rows = (s.clockLog || []).slice();
+  if (staffSelf && sessionUser) rows = rows.filter(c => String(c.empId) === String(sessionUser.empId));
+  rows = rows.slice(0, 60);
+  const unapplied = rows.filter(c => !c.applied && (c.mark === '10-1' || c.mark === '10-2')).length;
+  root.innerHTML = (canEditHours() && unapplied ? '<div class="mini-note" style="margin-bottom:8px"><b>' + unapplied + '</b> unapplied in/out marks in this list.</div>' : '') +
+    (rows.length ? rows.map(c => {
     const e = empById(c.empId);
+    const canDel = canEditHours() || (staffSelf && !c.applied && sessionUser && String(c.empId) === String(sessionUser.empId));
     return '<div class="clk-row"><div><b>' + esc((e && e.name) || c.name || '—') + '</b> · ' + esc(c.mark) +
       (c.time ? ' · ' + esc(c.time) : '') +
       '<div class="history">' + esc(c.date) + (c.note ? ' — ' + esc(c.note) : '') +
-      (c.applied ? ' · applied' : '') + '</div></div>' +
-      (canEditHours() ? '<button class="btn tiny soft" onclick="deleteClockEntry(' + c.id + ')">Remove</button>' : '') +
+      (c.applied ? ' · applied' : ' · pending') + '</div></div>' +
+      (canDel ? '<button class="btn tiny soft" onclick="deleteClockEntry(' + c.id + ')">Remove</button>' : '') +
       '</div>';
-  }).join('') : '<div class="mini-note">No clock entries yet.</div>';
+  }).join('') : '<div class="mini-note">No clock entries yet.</div>');
 }
 
 window.deleteClockEntry = function (id) {
-  if (!canEditHours()) return;
   ensureMeta();
-  s.clockLog = (s.clockLog || []).filter(c => String(c.id) !== String(id));
+  const c = (s.clockLog || []).find(x => String(x.id) === String(id));
+  if (!c) return;
+  const staffSelf = isStaffSession() && !canEditHours();
+  if (!canEditHours()) {
+    if (!(staffSelf && sessionUser && String(c.empId) === String(sessionUser.empId) && !c.applied)) {
+      return toast('Cannot remove that entry');
+    }
+  }
+  s.clockLog = (s.clockLog || []).filter(x => String(x.id) !== String(id));
   save();
   renderClockList();
+  previewClockPairs(true);
   toast('Entry removed');
 };
 
 function addClockEntry() {
   ensureMeta();
-  if (!canEditHours()) return;
-  const empId = Number($('clkEmp') && $('clkEmp').value);
+  if (!sessionUser) return toast('Sign in first');
+  const staffSelf = isStaffSession() && !canEditHours();
+  if (!canEditHours() && !staffSelf) return toast('Leads and management only');
+  let empId = Number($('clkEmp') && $('clkEmp').value);
+  if (staffSelf) empId = Number(sessionUser.empId);
   const e = empById(empId);
   if (!e) return toast('Pick staff');
+  if (staffSelf && String(e.id) !== String(sessionUser.empId)) return toast('You can only clock yourself');
   const mark = ($('clkMark') && $('clkMark').value) || '10-1';
+  if (staffSelf && mark === 'note') return toast('Staff can only log 10-1 / 10-2');
   const time = ($('clkTime') && $('clkTime').value) || '';
   const note = ($('clkNote') && $('clkNote').value) || '';
   s.clockLog.unshift({
@@ -14927,15 +15206,18 @@ function addClockEntry() {
     date: ($('clkDate') && $('clkDate').value) || today(),
     time, mark, note,
     at: new Date().toISOString(),
-    applied: false
+    applied: false,
+    selfLogged: !!staffSelf
   });
   save();
   renderClockList();
+  previewClockPairs(true);
   toast('Logged ' + e.name + ' ' + mark + (time ? ' @ ' + time : ''));
 }
 
-function pairClockHours(entries) {
-  /* Returns { hours, pairs } from chronological 10-1 / 10-2 pairs */
+function pairClockHours(entries, opts) {
+  opts = opts || {};
+  const allowOvernight = opts.overnight !== false;
   const list = (entries || []).slice().sort((a, b) => {
     const da = String(a.date) + 'T' + (a.time || '00:00');
     const db = String(b.date) + 'T' + (b.time || '00:00');
@@ -14945,32 +15227,80 @@ function pairClockHours(entries) {
   let hours = 0;
   let pairs = 0;
   const used = [];
+  const details = [];
   list.forEach(c => {
     if (c.mark === 'note') return;
     if (c.mark === '10-1') { openIn = c; return; }
-    if (c.mark === '10-2' && openIn && openIn.date === c.date) {
+    if (c.mark === '10-2' && openIn) {
+      const sameDay = openIn.date === c.date;
+      const nextDay = allowOvernight && addDays(openIn.date, 1) === c.date;
+      if (!sameDay && !nextDay) return;
       const fromNote = parseClockHoursFromNote(c.note) || parseClockHoursFromNote(openIn.note);
       let add = fromNote;
+      let how = 'note';
       if (add == null) {
         const a = clockTimeToMinutes(openIn.time);
         const b = clockTimeToMinutes(c.time);
-        if (a != null && b != null && b > a) add = Math.round(((b - a) / 60) * 100) / 100;
-        else add = 1;
+        if (a != null && b != null) {
+          let mins = b - a;
+          if (nextDay || mins < 0) mins += 24 * 60;
+          if (mins > 0) {
+            add = Math.round((mins / 60) * 100) / 100;
+            how = nextDay ? 'overnight' : 'times';
+          }
+        }
       }
+      if (add == null) { add = 1; how = 'default-1h'; }
       hours += add;
       pairs++;
       used.push(openIn.id, c.id);
+      details.push({ name: openIn.name || c.name, date: openIn.date, in: openIn.time || '?', out: c.time || '?', hours: add, how });
       openIn = null;
     }
   });
-  return { hours, pairs, used };
+  return { hours, pairs, used, details };
+}
+
+function previewClockPairs(quiet) {
+  ensureMeta();
+  const box = $('clockApplyPreview');
+  if (!box) return null;
+  if (!canEditHours()) { box.style.display = 'none'; return null; }
+  const byEmp = {};
+  (s.clockLog || []).filter(c => !c.applied).forEach(c => {
+    if (!byEmp[c.empId]) byEmp[c.empId] = [];
+    byEmp[c.empId].push(c);
+  });
+  const lines = [];
+  let totalH = 0, totalP = 0;
+  Object.keys(byEmp).forEach(id => {
+    const result = pairClockHours(byEmp[id]);
+    if (!result.pairs) return;
+    const e = empById(id);
+    totalH += result.hours;
+    totalP += result.pairs;
+    lines.push('<div class="history"><b>' + esc((e && e.name) || id) + '</b> — ' + result.pairs + ' pair(s) · ' + dec(result.hours) + 'h' +
+      (result.details.some(d => d.how === 'default-1h') ? ' (includes 1h default)' : '') +
+      (result.details.some(d => d.how === 'overnight') ? ' (overnight)' : '') + '</div>');
+  });
+  if (!lines.length) {
+    box.style.display = quiet ? 'none' : '';
+    box.innerHTML = quiet ? '' : '<h3>Apply preview</h3><div class="mini-note">No unapplied 10-1/10-2 pairs.</div>';
+    return { totalH: 0, totalP: 0 };
+  }
+  box.style.display = '';
+  box.innerHTML = '<h3>Apply preview</h3><p class="ui-hint">' + totalP + ' pair(s) · <b>' + dec(totalH) + 'h</b> total to add to the open period.</p>' + lines.join('');
+  return { totalH, totalP };
 }
 
 function applyClockHoursToPeriod() {
   ensureMeta();
-  if (!canEditHours()) return;
+  if (!canEditHours()) return toast('Leads and management only');
   const p = workingPeriod();
   if (!p || p.status !== 'open') return toast('No open period');
+  const preview = previewClockPairs(false);
+  if (!preview || !preview.totalP) return toast('No unapplied 10-1/10-2 pairs');
+  if (!confirm('Apply ' + preview.totalP + ' clock pair(s) (' + dec(preview.totalH) + 'h) to ' + shortLabel(p) + '?')) return;
   const byEmp = {};
   (s.clockLog || []).filter(c => !c.applied).forEach(c => {
     if (!byEmp[c.empId]) byEmp[c.empId] = [];
@@ -14983,6 +15313,7 @@ function applyClockHoursToPeriod() {
     if (result.hours <= 0) return;
     const e = empById(id);
     if (!p.entries[id]) p.entries[id] = emptyEntry(e);
+    if (p.entries[id].paidOut) return;
     p.entries[id].hours = Number(p.entries[id].hours || 0) + result.hours;
     (s.clockLog || []).forEach(c => {
       if (result.used.indexOf(c.id) >= 0) c.applied = true;
@@ -14993,8 +15324,9 @@ function applyClockHoursToPeriod() {
   if (n) distributeTips(p);
   save();
   renderClockList();
+  previewClockPairs(true);
   render();
-  toast(n ? ('Applied ' + dec(totalH) + 'h across ' + n + ' staff') : 'No unapplied 10-1/10-2 pairs');
+  toast(n ? ('Applied ' + dec(totalH) + 'h across ' + n + ' staff') : 'Nothing applied (paid stubs skipped)');
 }
 
 function openPromoteModal(empId) {
@@ -15188,8 +15520,46 @@ window.setInterviewOutcome = function (id, outcome) {
   if (!a) return;
   a.interviewOutcome = outcome;
   a.interviewOutcomeAt = today();
+  if (outcome === 'done') {
+    a.interviewConfirm = a.interviewConfirm || 'confirmed';
+    if (a.stage !== 'offer' && a.stage !== 'hired' && a.stage !== 'rejected') {
+      if (confirm('Move ' + a.name + ' to Offer stage?')) {
+        a.stage = 'offer';
+        a.stageChangedAt = today();
+        log(a.name + ' interview done → Offer');
+      }
+    }
+    save();
+    openInterviewBoard();
+    const blurb = "Frenchie's HR — Interview complete for " + a.name +
+      (a.offerRole ? ' (' + a.offerRole + ')' : '') +
+      '. Moving toward offer — watch Discord for next steps.';
+    copyText(blurb, a.name + ' · done · Discord blurb copied');
+    render();
+    return;
+  }
   if (outcome === 'noshow' || outcome === 'no-show') {
     a.interviewConfirm = 'noshow';
+    const choice = confirm('No-show: OK = reject application, Cancel = keep open to reschedule');
+    if (choice) {
+      const reason = prompt('Decline reason (required):', a.declineReason || 'No-show for scheduled interview');
+      if (reason == null || !String(reason).trim()) {
+        toast('Decline reason required to reject — outcome still saved as no-show');
+      } else {
+        a.declineReason = String(reason).trim();
+        a.stage = 'rejected';
+        a.stageChangedAt = today();
+        log(a.name + ' rejected — no-show');
+      }
+    } else {
+      const newDate = prompt('Reschedule interview date (YYYY-MM-DD), or leave blank:', a.interviewDate || today());
+      if (newDate && /^\d{4}-\d{2}-\d{2}$/.test(newDate)) {
+        a.interviewDate = newDate;
+        a.interviewOutcome = '';
+        a.interviewConfirm = 'awaiting';
+        toast('Rescheduled to ' + newDate);
+      }
+    }
   }
   save();
   openInterviewBoard();
@@ -15296,7 +15666,7 @@ function publishSharedPack() {
 let pendingSharedPull = null;
 
 async function pullSharedDesk() {
-  if (!requireMgmt('Pull shared desk')) return;
+  if (!canEditHours() && !canMutateDesk()) return toast('Leads and management only');
   ensureMeta();
   if ($('sharedConflictBox')) $('sharedConflictBox').style.display = 'none';
   pendingSharedPull = null;
@@ -15338,7 +15708,7 @@ function applySharedDesk(migrated, labelText) {
 }
 
 async function confirmSharedPull() {
-  if (!requireMgmt('Pull shared desk')) return;
+  if (!canEditHours() && !canMutateDesk()) return toast('Leads and management only');
   let text = ($('sharedPaste') && $('sharedPaste').value || '').trim();
   const url = ($('sharedUrl') && $('sharedUrl').value || '').trim();
   try {
@@ -15390,6 +15760,63 @@ function sharedKeepMine() {
 function sharedTakeTheirs() {
   if (!pendingSharedPull || !pendingSharedPull.migrated) return toast('Nothing to apply');
   applySharedDesk(pendingSharedPull.migrated, 'rev ' + pendingSharedPull.remoteRev);
+}
+
+let sharedAutoPullBusy = false;
+let lastSharedAutoPullAt = 0;
+
+function canSharedAutoPull() {
+  ensureMeta();
+  if (!sessionUser) return false;
+  if (!(canEditHours() || canMutateDesk())) return false;
+  if (!(s.settings && s.settings.sharedAutoPull)) return false;
+  const url = (s.settings.sharedDeskUrl || '').trim();
+  return !!url;
+}
+
+async function maybeAutoPullSharedDesk(reason) {
+  if (!canSharedAutoPull()) return;
+  if (sharedAutoPullBusy) return;
+  if (Date.now() - lastSharedAutoPullAt < 20000) return;
+  const url = (s.settings.sharedDeskUrl || '').trim();
+  sharedAutoPullBusy = true;
+  lastSharedAutoPullAt = Date.now();
+  try {
+    const res = await fetch(url, { cache: 'no-store' });
+    if (!res.ok) throw new Error('fetch ' + res.status);
+    const text = await res.text();
+    const parsed = JSON.parse(text);
+    const migrated = migrate(parsed);
+    if (!migrated || !migrated.employees) throw new Error('bad pack');
+    const remoteRev = Number((migrated.meta && migrated.meta.rev) || 0);
+    const localRev = Number((s.meta && s.meta.rev) || 0);
+    const remoteAt = (migrated.meta && migrated.meta.updatedAt) || (migrated.meta && migrated.meta.sharedAt) || '';
+    const localAt = (s.meta && s.meta.updatedAt) || '';
+    if (remoteRev < localRev) {
+      /* quieter when local is ahead */
+      return;
+    }
+    if (remoteRev === localRev && remoteAt && localAt && remoteAt === localAt) return;
+    if (remoteRev === localRev && !remoteAt) return;
+    pendingSharedPull = { migrated, remoteRev, localRev, remoteAt, localAt, auto: true };
+    if ($('sharedUrl')) $('sharedUrl').value = url;
+    if ($('sharedPaste')) $('sharedPaste').value = '';
+    $('sharedPullModal').classList.add('open');
+    $('sharedPullModal').removeAttribute('hidden');
+    const box = $('sharedConflictBox');
+    const msg = $('sharedConflictText');
+    if (box) box.style.display = '';
+    if (msg) {
+      msg.textContent = 'Auto-pull (' + (reason || 'focus') + '): local rev ' + localRev +
+        ' vs shared rev ' + remoteRev + '. Keep mine or Take theirs.';
+    }
+    toast('Shared desk update available · choose Keep mine or Take theirs');
+  } catch (err) {
+    /* quiet fail on auto */
+    if (reason === 'login') toast('Shared auto-pull failed — check URL in Settings');
+  } finally {
+    sharedAutoPullBusy = false;
+  }
 }
 
 /* Durable stay-logged-in */
