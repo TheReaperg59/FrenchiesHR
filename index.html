@@ -2100,6 +2100,7 @@ body.session-staff #closePeriod,
 body.session-staff #undoBtn,
 body.session-staff #previewSundayRun,
 body.session-staff #copySundayRun,
+body.session-staff #postSundayRun,
 body.session-staff #closePeriod{display:none!important}
 body.session-staff .ov-cta-row{display:flex!important}
 body.session-staff .ov-cta-row #tipSettlementBtn{display:inline-flex!important}
@@ -2477,7 +2478,7 @@ body.session-staff #pullSharedBtn{display:none!important}
         <button type="button" class="top-account-item danger" id="logoutBtn" role="menuitem">Sign out</button>
         <button type="button" class="top-account-item" id="logoutAllBtn" role="menuitem">Sign out all remembered</button>
         <div class="top-account-foot">
-          <span class="build-chip" title="Desk build">v30</span>
+          <span class="build-chip" title="Desk build">v31</span>
           <label class="top-jump-label" for="quickJump">Jump to</label>
           <select class="top-jump" id="quickJump" title="Jump to any tab">
             <option value="overview">Overview</option>
@@ -2520,6 +2521,7 @@ body.session-staff #pullSharedBtn{display:none!important}
       <div class="ov-hero-side">
         <div class="ov-cta-primary">
           <button class="btn primary" type="button" id="copySundayRun">Copy Sunday run</button>
+          <button class="btn soft" type="button" id="postSundayRun">Post to Discord</button>
         </div>
         <div class="ov-cta-row">
           <button class="btn soft" type="button" id="tipSettlementBtn">Tip settlement</button>
@@ -3580,7 +3582,10 @@ body.session-staff #pullSharedBtn{display:none!important}
     </div>
     <div id="interviewBoardList"></div>
   </div>
-  <div class="dialog-foot"><button class="btn" id="closeInterviewBoard">Close</button></div>
+  <div class="dialog-foot">
+    <button class="btn soft" id="postInterviewBoard" type="button">Post board to Discord</button>
+    <button class="btn" id="closeInterviewBoard">Close</button>
+  </div>
 </div></div>
 
 <!-- Tip settlement modal -->
@@ -3592,6 +3597,7 @@ body.session-staff #pullSharedBtn{display:none!important}
   <div class="dialog-foot">
     <button class="btn primary" id="recomputeTipSettle">Recompute tips</button>
     <button class="btn soft" id="copyTipSettle">Copy Discord</button>
+    <button class="btn soft" id="postTipSettle">Post to Discord</button>
     <button class="btn soft" id="printTipSettle">Print</button>
     <button class="btn" id="closeTipSettle">Close</button>
   </div>
@@ -3912,6 +3918,7 @@ body.session-staff #pullSharedBtn{display:none!important}
     <div class="dialog-foot">
       <button type="button" class="btn" id="closeSundayRun">Close</button>
       <button type="button" class="btn primary" id="copySundayRunModal">Copy to clipboard</button>
+      <button type="button" class="btn soft" id="postSundayRunModal">Post to Discord</button>
     </div>
   </div>
 </div>
@@ -3979,6 +3986,13 @@ body.session-staff #pullSharedBtn{display:none!important}
     <div class="field"><label>Shared desk raw URL</label><input id="setSharedUrl" placeholder="https://…/frenchies-shared-desk.json"></div>
     <label class="checkline"><input type="checkbox" id="setSharedAutoPull"><span>Auto-pull shared desk on login / tab focus (mgmt &amp; leads)</span></label>
     <div class="field"><label>Handbook Google Doc URL</label><input id="setHandbookUrl" placeholder="https://docs.google.com/document/d/…"></div>
+    <h3 style="margin:16px 0 8px;font:700 .72rem 'DM Sans',sans-serif;letter-spacing:.08em;text-transform:uppercase;color:var(--muted)">Discord webhooks</h3>
+    <p class="ui-hint" style="margin:0 0 10px">Paste Incoming Webhook URLs from Discord (channel → Integrations → Webhooks). Secrets — not shared in Publish shared pack. Leave blank to keep Copy-only.</p>
+    <div class="field"><label>Payroll webhook</label><input id="setWhPayroll" placeholder="https://discord.com/api/webhooks/…" autocomplete="off"></div>
+    <div class="field"><label>Hiring webhook</label><input id="setWhHiring" placeholder="https://discord.com/api/webhooks/…" autocomplete="off"></div>
+    <div class="field"><label>Coverage / call-offs webhook</label><input id="setWhCoverage" placeholder="https://discord.com/api/webhooks/…" autocomplete="off"></div>
+    <div class="field"><label>HR desk log webhook</label><input id="setWhHrLog" placeholder="https://discord.com/api/webhooks/…" autocomplete="off"></div>
+    <div class="field"><label>Announcements webhook</label><input id="setWhAnnounce" placeholder="https://discord.com/api/webhooks/…" autocomplete="off"></div>
     <label class="checkline"><input type="checkbox" id="setQuietMode"><span>Quiet mode (less motion / hover)</span></label>
     <label class="checkline"><input type="checkbox" id="setRequireNotes"><span>Warn if closing period without notes</span></label>
     <label class="checkline"><input type="checkbox" id="setCompactTodos"><span>Compact to-do rows by default</span></label>
@@ -4041,7 +4055,7 @@ const LOG_TYPES = {
 };
 const TIP_ROLES_DEFAULT = ['Waiter', 'Hostess', 'Cook'];
 const TIP_ROLES = TIP_ROLES_DEFAULT; /* legacy alias — use tipRoles() */
-const DESK_BUILD = 'v30';
+const DESK_BUILD = 'v31';
 const HOUSE_LOGIN_PASSWORD = 'frenchies636';
 const SESSION_KEY = 'frenchies_desk_session';
 const SESSION_DURABLE_KEY = 'frenchies_desk_session_durable';
@@ -4684,6 +4698,12 @@ function ensureMeta() {
   if (!('sharedDeskUrl' in s.settings)) s.settings.sharedDeskUrl = '';
   if (!('sharedAutoPull' in s.settings)) s.settings.sharedAutoPull = false;
   if (!('handbookUrl' in s.settings)) s.settings.handbookUrl = '';
+  if (!s.settings.discordWebhooks || typeof s.settings.discordWebhooks !== 'object') {
+    s.settings.discordWebhooks = { payroll: '', hiring: '', coverage: '', hrLog: '', announcements: '' };
+  } else {
+    const dw = s.settings.discordWebhooks;
+    ['payroll','hiring','coverage','hrLog','announcements'].forEach(k => { if (!(k in dw)) dw[k] = ''; });
+  }
   if (!s.shiftTimes || typeof s.shiftTimes !== 'object') s.shiftTimes = {};
   if (!s.settings || typeof s.settings !== 'object') s.settings = {};
   const set = s.settings;
@@ -7167,6 +7187,12 @@ function openSettings() {
   if ($('setSharedUrl')) $('setSharedUrl').value = s.settings.sharedDeskUrl || '';
   if ($('setSharedAutoPull')) $('setSharedAutoPull').checked = !!s.settings.sharedAutoPull;
   if ($('setHandbookUrl')) $('setHandbookUrl').value = s.settings.handbookUrl || '';
+  const dw = s.settings.discordWebhooks || {};
+  if ($('setWhPayroll')) $('setWhPayroll').value = dw.payroll || '';
+  if ($('setWhHiring')) $('setWhHiring').value = dw.hiring || '';
+  if ($('setWhCoverage')) $('setWhCoverage').value = dw.coverage || '';
+  if ($('setWhHrLog')) $('setWhHrLog').value = dw.hrLog || '';
+  if ($('setWhAnnounce')) $('setWhAnnounce').value = dw.announcements || '';
   d.classList.add('open'); d.removeAttribute('hidden');
 }
 function closeSettings() {
@@ -7189,6 +7215,13 @@ function saveSettings() {
   if ($('setSharedUrl')) s.settings.sharedDeskUrl = ($('setSharedUrl').value || '').trim();
   if ($('setSharedAutoPull')) s.settings.sharedAutoPull = !!$('setSharedAutoPull').checked;
   if ($('setHandbookUrl')) s.settings.handbookUrl = ($('setHandbookUrl').value || '').trim();
+  s.settings.discordWebhooks = {
+    payroll: ($('setWhPayroll') && $('setWhPayroll').value || '').trim(),
+    hiring: ($('setWhHiring') && $('setWhHiring').value || '').trim(),
+    coverage: ($('setWhCoverage') && $('setWhCoverage').value || '').trim(),
+    hrLog: ($('setWhHrLog') && $('setWhHrLog').value || '').trim(),
+    announcements: ($('setWhAnnounce') && $('setWhAnnounce').value || '').trim()
+  };
   save(); applyUiSettings(); closeSettings(); render(); toast('Settings saved');
 }
 
@@ -7196,6 +7229,7 @@ function openChangelog() {
   const grid = $('upgradeGrid');
   if (grid) {
     const recent = [
+      ['v31', 'Discord Post-to-channel webhooks · signed hire papers Open/Print on employee file'],
       ['v30', 'Shared desk auto-pull on focus · backup vs shared pack warnings · Sync vs Pull labels'],
       ['v29', 'Interview Done→offer / No-show→reject · call-off coverage Discord paste'],
       ['v28', 'Sunday payday desk strip · open-dispute blocker on Mark all paid'],
@@ -7285,13 +7319,13 @@ window.hireChecklist = function (id) {
   hireApplicant(a);
 };
 
-window.copyStubDiscord = function (empId) {
+function stubDiscordText(empId) {
   const p = current();
   const e = empById(empId);
-  if (!e || !p) return;
+  if (!e || !p) return '';
   const x = entry(p, empId);
   const g = lineGross(e, x);
-  const text = [
+  return [
     "Frenchie's pay — " + e.name,
     'Period: ' + shortLabel(p),
     'Hours: ' + dec(x.hours) + ' @ ' + money(entryRate(e, x)) + '/hr',
@@ -7301,7 +7335,16 @@ window.copyStubDiscord = function (empId) {
     'Status: ' + (x.paidOut ? 'PAID' : 'UNPAID'),
     'Payday: Sunday 9:00 AM from the house'
   ].join('\n');
+}
+window.copyStubDiscord = function (empId) {
+  const text = stubDiscordText(empId);
+  if (!text) return;
   copyTextSafe(text, 'Discord pay blurb copied');
+};
+window.postStubDiscord = function (empId) {
+  const text = stubDiscordText(empId);
+  if (!text) return;
+  return postDiscord('payroll', text, { label: 'Stub · ' + ((empById(empId) && empById(empId).name) || empId) });
 };
 
 function findDupApplicants(name, phone, excludeId) {
@@ -7355,6 +7398,13 @@ function confirmTermination() {
   });
   $('termModal').classList.remove('open');
   save(); render(); toast(e.name + ' terminated');
+  postDiscordHrLog(
+    "Frenchie's HR log — Termination\n" +
+    e.name + ' · ' + e.role + '\n' +
+    (notes ? 'Notes: ' + notes + '\n' : '') +
+    'Checklist: ' + checks + '/4 · By ' + (sessionUser ? sessionUser.name : 'desk'),
+    'Termination · ' + e.name
+  );
 }
 
 window.rehireEmployee = function (id) {
@@ -7685,7 +7735,7 @@ function renderPayroll(p) {
       '<td class="r">' +
         (canPay && p.status === 'open' ? '<button class="btn tiny" onclick="openHours(' + e.id + ')">Edit</button> ' : '') +
         (g ? '<button class="btn tiny" onclick="openPayStubs(' + selectedPeriodIndex() + ',' + e.id + ')">Stub</button> ' : '') +
-        (g && canMutateDesk() ? '<button class="btn tiny soft" onclick="copyStubDiscord(' + e.id + ')" title="Discord pay blurb">Discord</button>' : '') +
+        (g && canMutateDesk() ? '<button class="btn tiny soft" onclick="copyStubDiscord(' + e.id + ')" title="Copy Discord pay blurb">Copy</button> <button class="btn tiny soft" onclick="postStubDiscord(' + e.id + ')" title="Post stub to Discord">Post</button>' : '') +
       '</td>' +
       '</tr>';
   }).join('');
@@ -9273,6 +9323,80 @@ function copyText(text, msg) {
   if (navigator.clipboard && navigator.clipboard.writeText) {
     navigator.clipboard.writeText(text).then(() => toast(msg)).catch(() => { fallbackCopy(text); toast(msg); });
   } else { fallbackCopy(text); toast(msg); }
+}
+
+const DISCORD_CHANNEL_KEYS = ['payroll', 'hiring', 'coverage', 'hrLog', 'announcements'];
+function discordWebhookUrl(channelKey) {
+  ensureMeta();
+  const dw = (s.settings && s.settings.discordWebhooks) || {};
+  return String(dw[channelKey] || '').trim();
+}
+function discordWebhookConfigured(channelKey) {
+  const u = discordWebhookUrl(channelKey);
+  return /^https:\/\/(discord\.com|discordapp\.com)\/api\/webhooks\//i.test(u);
+}
+function canPostDiscord() {
+  return canEditHours() || canMutateDesk();
+}
+function splitDiscordContent(text) {
+  const raw = String(text || '');
+  if (raw.length <= 2000) return [raw];
+  const parts = [];
+  let rest = raw;
+  while (rest.length > 2000) {
+    let cut = rest.lastIndexOf('\n', 1990);
+    if (cut < 800) cut = 2000;
+    parts.push(rest.slice(0, cut));
+    rest = rest.slice(cut).replace(/^\n+/, '');
+  }
+  if (rest) parts.push(rest);
+  return parts;
+}
+async function postDiscord(channelKey, content, opts) {
+  opts = opts || {};
+  if (!canPostDiscord()) {
+    toast('Leads and management only');
+    return { ok: false, msg: 'denied' };
+  }
+  const text = String(content || '').trim();
+  if (!text) {
+    toast('Nothing to post');
+    return { ok: false, msg: 'empty' };
+  }
+  if (!discordWebhookConfigured(channelKey)) {
+    if (opts.fallbackCopy !== false) copyText(text, 'No webhook for ' + channelKey + ' — copied instead. Add URL in Settings.');
+    else toast('Set the ' + channelKey + ' webhook in Settings first');
+    return { ok: false, msg: 'missing-webhook' };
+  }
+  const url = discordWebhookUrl(channelKey);
+  const chunks = splitDiscordContent(text);
+  try {
+    for (let i = 0; i < chunks.length; i++) {
+      const body = { content: chunks[i], allowed_mentions: { parse: [] } };
+      body.username = opts.username || "Frenchie's HR desk";
+      const res = await fetch(url, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(body)
+      });
+      if (!res.ok) {
+        const detail = await res.text().catch(() => '');
+        throw new Error('Discord ' + res.status + (detail ? ': ' + detail.slice(0, 120) : ''));
+      }
+    }
+    log('Discord → ' + channelKey + (opts.label ? ' · ' + opts.label : ''));
+    if (!opts.quiet) toast('Posted to Discord (' + channelKey + ')');
+    save({ quiet: true, skipSnapshot: true });
+    return { ok: true };
+  } catch (err) {
+    const msg = (err && err.message) ? err.message : 'post failed';
+    if (opts.fallbackCopy !== false) copyText(text, 'Discord post failed — copied instead');
+    else toast('Discord post failed — ' + msg);
+    return { ok: false, msg };
+  }
+}
+function postDiscordHrLog(text, label) {
+  return postDiscord('hrLog', text, { label: label || 'HR log', fallbackCopy: false, quiet: false });
 }
 function discordPostBlurb(name, kind, packetId) {
   const who = name || 'you';
@@ -11638,6 +11762,7 @@ window.editEmployee = function (id) {
   }
   editId = id;
   window.__empLogFilter = 'all';
+  try { syncAllHirePapersToEmp(e, appForEmployee(e)); } catch (err) { /* sync best-effort */ }
   $('promoField').style.display = 'block';
   $('promoReason').value = '';
   roleOptions($('role'), e.role);
@@ -12014,9 +12139,10 @@ function finishDownloadSendPacket(a, kind, opts) {
   log('Packet ' + packetId + ' prepared — ' + def.title + ' for ' + a.name + (opts.houseSign ? ' (house signed)' : ''));
   save(); render();
   const blurb = discordPostBlurb(a.name, kind, packetId);
-  copyText(blurb, kind === 'contract'
-    ? 'Contract downloaded · Discord blurb copied'
-    : 'Packet downloaded · Discord blurb copied');
+  postDiscord('hiring', blurb, {
+    label: (def.title || kind) + ' · ' + a.name,
+    fallbackCopy: true
+  });
 }
 
 let hrSignPending = null;
@@ -12119,19 +12245,112 @@ function openSendApplicantPick(kind, preferred, onConfirm) {
   $('sendPickModal').classList.add('open');
 }
 
+function paperVersionLabel(docOrRec, status) {
+  const st = String(status || (docOrRec && docOrRec.status) || '').toLowerCase();
+  const reply = (docOrRec && docOrRec.reply) || null;
+  if (reply && reply.replyHtml) return 'signed reply';
+  if (PAPER_FILED_STATUS.indexOf(st) >= 0 || st === 'signed' || st === 'acknowledged' || st === 'accepted' || st === 'confirmed' || st === 'returned') {
+    return 'signed reply';
+  }
+  if (st === 'sent' || st === 'draft') return 'sent draft';
+  return '';
+}
+
+/** Resolve viewable HTML for a hire paper — prefer signed reply on employee doc, then hiring file. */
+function resolveEmpPaperHtml(e, kind) {
+  if (!e || !kind) return null;
+  const d = findEmpDoc(e, kind);
+  if (d && d.html) {
+    return {
+      html: d.html,
+      title: d.title || ((PAPER_KINDS[kind] && PAPER_KINDS[kind].title) || kind),
+      status: d.status || 'on file',
+      docId: d.id,
+      version: paperVersionLabel(d, d.status),
+      source: 'doc'
+    };
+  }
+  const a = appForEmployee(e);
+  if (a && a.paperwork && a.paperwork[kind]) {
+    const rec = a.paperwork[kind];
+    const reply = rec.reply || null;
+    const html = (reply && reply.replyHtml) || rec.html || '';
+    if (!html) return null;
+    const pr = empPaperRecord(e, kind);
+    return {
+      html,
+      title: ((PAPER_KINDS[kind] && PAPER_KINDS[kind].title) || kind) + (reply && reply.replyHtml ? ' (signed)' : ''),
+      status: pr.state || rec.sendStatus || 'on file',
+      docId: null,
+      version: paperVersionLabel(Object.assign({}, rec, { reply }), pr.state),
+      source: 'app',
+      kind
+    };
+  }
+  return null;
+}
+
 window.openEmpDoc = function (empId, kind, docId) {
   const e = empById(empId);
   if (!e) return;
   let doc = null;
   if (docId !== null && docId !== undefined) doc = (e.documents || []).find(x => String(x.id) === String(docId));
   if (!doc && kind) doc = findEmpDoc(e, kind);
-  if (!doc) {
+  if (!doc || !doc.html) {
+    const resolved = resolveEmpPaperHtml(e, kind || (doc && doc.kind));
+    if (resolved && resolved.html) {
+      openLetter(resolved.title + ' — ' + e.name, resolved.html, { empId: e.id, kind: kind || (doc && doc.kind), docId: resolved.docId });
+      return;
+    }
     toast('Nothing on file to view yet');
     return;
   }
   const ctx = { empId: e.id, kind: doc.kind, docId: doc.id };
   if (doc.html) openLetter(doc.title + ' — ' + e.name, doc.html, ctx);
   else openDoc(doc.title + ' — ' + e.name, doc.text || '', ctx);
+};
+
+window.openArchivedEmpDoc = function (empId, archiveIdx, docIdx) {
+  const e = empById(empId);
+  if (!e) return;
+  const arch = (e.paperArchive || [])[archiveIdx];
+  const d = arch && arch.docs && arch.docs[docIdx];
+  if (!d || !d.html) return toast('Archived document has no HTML to open');
+  openLetter((d.title || d.kind || 'Archived paper') + ' — ' + e.name + ' (cycle ' + (arch.cycle || '?') + ')', d.html, {
+    empId: e.id, kind: d.kind, archived: true
+  });
+};
+
+window.printArchivedEmpDoc = function (empId, archiveIdx, docIdx) {
+  const e = empById(empId);
+  if (!e) return toast('Employee gone');
+  const arch = (e.paperArchive || [])[archiveIdx];
+  const d = arch && arch.docs && arch.docs[docIdx];
+  if (!d || !d.html) return toast('Nothing to print');
+  printLetter(d.html);
+};
+
+window.openHireFilePaper = function (empId, kind) {
+  const e = empById(empId);
+  if (!e) return;
+  try { syncAllHirePapersToEmp(e, appForEmployee(e)); } catch (err) {}
+  const d = findEmpDoc(e, kind);
+  if (d && d.html) return openEmpDoc(empId, kind, d.id);
+  const resolved = resolveEmpPaperHtml(e, kind);
+  if (resolved && resolved.html) {
+    openLetter(resolved.title + ' — ' + e.name, resolved.html, { empId: e.id, kind });
+    return;
+  }
+  toast('Nothing on file to view yet');
+};
+
+window.printHireFilePaper = function (empId, kind) {
+  const e = empById(empId);
+  if (!e) return toast('Employee gone');
+  try { syncAllHirePapersToEmp(e, appForEmployee(e)); } catch (err) {}
+  const resolved = resolveEmpPaperHtml(e, kind);
+  if (!resolved || !resolved.html) return toast('Nothing to print');
+  printLetter(resolved.html);
 };
 
 window.deleteDoc = function (empId, docId) {
@@ -12156,6 +12375,7 @@ function fillSupervisors(e) {
 function renderEmployeeFile(e) {
   window.__empLogFilter = window.__empLogFilter || 'all';
   const filter = window.__empLogFilter;
+  try { syncAllHirePapersToEmp(e, appForEmployee(e)); } catch (err) { /* best-effort sync before paint */ }
   const hist = (e.history || []).map(normalizeHistEntry).slice().reverse();
   const counts = {};
   hist.forEach(h => { counts[h.type] = (counts[h.type] || 0) + 1; });
@@ -12220,6 +12440,7 @@ function renderEmployeeFile(e) {
   const docs = e.documents || [];
   const kinds = ['offer', 'contract', 'packet', 'login'];
   const extras = docs.filter(d => kinds.indexOf(d.kind) < 0);
+  const canDeleteDocs = canMutateDesk();
   let docsHtml = '';
   if (e.status === 'probation' && e.probationEnd) {
     const left = daysBetween(today(), e.probationEnd);
@@ -12230,23 +12451,40 @@ function renderEmployeeFile(e) {
     const d = findEmpDoc(e, k);
     const label = (PAPER_KINDS[k] && PAPER_KINDS[k].title) || k;
     const pr = empPaperRecord(e, k);
-    if (d) {
-      const st = d.status || 'on file';
+    const resolved = resolveEmpPaperHtml(e, k);
+    if (d || (resolved && resolved.html)) {
+      const st = (d && d.status) || (resolved && resolved.status) || pr.state || 'on file';
       const pillTone = empDocStatusPill(st);
       const lockNote = empPaperIsLocked(e, k) ? ' · ' + empPaperStatusLabel(st) : '';
-      docsHtml += '<div class="doc-row"><div><b>' + esc(d.title || label) + '</b>' +
-        '<div class="paper-sub">' + esc(d.date || '—') + (st ? ' · ' + esc(st) : '') + esc(lockNote) +
-        (d.packetId ? ' · ' + esc(d.packetId) : '') + '</div></div>' +
+      const ver = (d && paperVersionLabel(d, st)) || (resolved && resolved.version) || '';
+      const title = (d && d.title) || (resolved && resolved.title) || label;
+      const dateStr = (d && d.date) || (resolved && resolved.source === 'app' ? 'hiring file' : '—');
+      const hasHtml = !!(d && d.html) || !!(resolved && resolved.html);
+      const openFn = (d && d.html)
+        ? 'viewDoc(' + e.id + ',' + d.id + ')'
+        : 'openHireFilePaper(' + e.id + ',\'' + k + '\')';
+      const printFn = (d && d.html)
+        ? 'printEmpDoc(' + e.id + ',' + d.id + ')'
+        : 'printHireFilePaper(' + e.id + ',\'' + k + '\')';
+      docsHtml += '<div class="doc-row"><div><b>' + esc(title) + '</b>' +
+        '<div class="paper-sub">' + esc(dateStr) + (st ? ' · ' + esc(st) : '') + esc(lockNote) +
+        (ver ? ' · ' + esc(ver) : '') +
+        ((d && d.packetId) ? ' · ' + esc(d.packetId) : '') +
+        (!d && resolved && resolved.source === 'app' ? ' · on hiring file' : '') +
+        '</div></div>' +
         '<div class="paper-actions">' +
         '<span class="pill ' + pillTone + '">' + esc(st) + '</span>' +
-        (d.html ? '<button class="btn tiny" onclick="viewDoc(' + e.id + ',' + d.id + ')">Open</button>' : '') +
-        (d.html ? '<button class="btn tiny soft" onclick="printEmpDoc(' + e.id + ',' + d.id + ')">Print</button>' : '') +
-        (empPaperIsLocked(e, k) ? '' : '<button class="btn tiny danger" onclick="deleteDoc(' + e.id + ',' + d.id + ')">Delete</button>') +
+        (hasHtml ? '<button class="btn tiny" onclick="' + openFn + '">Open</button>' : '') +
+        (hasHtml ? '<button class="btn tiny soft" onclick="' + printFn + '">Print</button>' : '') +
+        (canDeleteDocs && d && !empPaperIsLocked(e, k) ? '<button class="btn tiny danger" onclick="deleteDoc(' + e.id + ',' + d.id + ')">Delete</button>' : '') +
         '</div></div>';
     } else if (pr.state !== 'none' && pr.state !== 'draft') {
       docsHtml += '<div class="doc-row"><div><b>' + esc(label) + '</b><div class="paper-sub">' +
         esc(empPaperStatusLabel(pr.state)) + ' on hiring file</div></div>' +
-        '<div class="paper-actions"><span class="pill warn">' + esc(pr.state) + '</span></div></div>';
+        '<div class="paper-actions"><span class="pill warn">' + esc(pr.state) + '</span>' +
+        '<button class="btn tiny" onclick="openHireFilePaper(' + e.id + ',\'' + k + '\')">Open</button>' +
+        '<button class="btn tiny soft" onclick="printHireFilePaper(' + e.id + ',\'' + k + '\')">Print</button>' +
+        '</div></div>';
     } else {
       const next = k === 'offer' ? 'Copied from the hiring file when available'
         : (k === 'contract' ? 'Not on file yet — send a contract to start'
@@ -12257,24 +12495,47 @@ function renderEmployeeFile(e) {
     }
   });
   extras.forEach(d => {
+    const ver = paperVersionLabel(d, d.status);
     docsHtml += '<div class="doc-row"><div><b>' + esc(d.title || d.kind) + '</b>' +
-      '<div class="paper-sub">' + esc(d.date || '—') + '</div></div>' +
+      '<div class="paper-sub">' + esc(d.date || '—') + (d.status ? ' · ' + esc(d.status) : '') +
+      (ver ? ' · ' + esc(ver) : '') + '</div></div>' +
       '<div class="paper-actions">' +
       (d.html ? '<button class="btn tiny" onclick="viewDoc(' + e.id + ',' + d.id + ')">Open</button>' : '') +
-      '<button class="btn tiny danger" onclick="deleteDoc(' + e.id + ',' + d.id + ')">Delete</button></div></div>';
+      (d.html ? '<button class="btn tiny soft" onclick="printEmpDoc(' + e.id + ',' + d.id + ')">Print</button>' : '') +
+      (canDeleteDocs ? '<button class="btn tiny danger" onclick="deleteDoc(' + e.id + ',' + d.id + ')">Delete</button>' : '') +
+      '</div></div>';
   });
   if ((e.paperArchive || []).length) {
-    const arch = e.paperArchive[0];
-    docsHtml += '<div class="ui-hint">Previous hire paperwork archived · cycle ' + esc(String(arch.cycle || '')) +
-      (arch.closedAt ? ' closed ' + esc(arch.closedAt) : '') + ' · ' +
-      ((arch.docs && arch.docs.length) || 0) + ' document' + (((arch.docs && arch.docs.length) || 0) === 1 ? '' : 's') +
-      '. Rehire opened cycle ' + esc(String(e.hireCycle || 1)) + '.</div>';
+    (e.paperArchive || []).forEach((arch, ai) => {
+      docsHtml += '<div class="ui-hint" style="margin-top:10px">Archived hire cycle <b>#' + esc(String(arch.cycle || '')) + '</b>' +
+        (arch.closedAt ? ' · closed ' + esc(arch.closedAt) : '') +
+        (arch.reason ? ' · ' + esc(arch.reason) : '') +
+        ' · ' + ((arch.docs && arch.docs.length) || 0) + ' document' +
+        ((((arch.docs && arch.docs.length) || 0) === 1) ? '' : 's') + '</div>';
+      (arch.docs || []).forEach((ad, di) => {
+        const st = ad.status || 'archived';
+        docsHtml += '<div class="doc-row"><div><b>' + esc(ad.title || ad.kind || 'Paper') + '</b>' +
+          '<div class="paper-sub">Archived · cycle #' + esc(String(arch.cycle || '')) +
+          (ad.date ? ' · ' + esc(ad.date) : '') +
+          (st ? ' · ' + esc(st) : '') +
+          (paperVersionLabel(ad, st) ? ' · ' + esc(paperVersionLabel(ad, st)) : '') +
+          '</div></div>' +
+          '<div class="paper-actions">' +
+          '<span class="pill gray">archived</span>' +
+          (ad.html ? '<button class="btn tiny" onclick="openArchivedEmpDoc(' + e.id + ',' + ai + ',' + di + ')">Open</button>' : '') +
+          (ad.html ? '<button class="btn tiny soft" onclick="printArchivedEmpDoc(' + e.id + ',' + ai + ',' + di + ')">Print</button>' : '') +
+          '</div></div>';
+      });
+    });
+    if ((e.hireCycle || 1) > 1) {
+      docsHtml += '<div class="ui-hint">Current hire paper cycle <b>#' + esc(String(e.hireCycle)) + '</b> · started ' + esc(e.hireCycleStartedAt || e.hire || '—') + '</div>';
+    }
   } else if ((e.hireCycle || 1) > 1) {
     docsHtml += '<div class="ui-hint">Hire paper cycle <b>#' + esc(String(e.hireCycle)) + '</b> · started ' + esc(e.hireCycleStartedAt || e.hire || '—') + '</div>';
   }
   $('empDocs').innerHTML = docsHtml || '<div class="ui-hint">No documents yet.</div>';
   if ($('empDocPill')) {
-    const onFile = kinds.filter(k => findEmpDoc(e, k)).length;
+    const onFile = kinds.filter(k => findEmpDoc(e, k) || resolveEmpPaperHtml(e, k)).length;
     $('empDocPill').textContent = onFile + '/4';
   }
   fillEmpDossierChrome(e);
@@ -12504,6 +12765,11 @@ function copySundayRun() {
   const text = buildSundayRunText(current());
   if ($('sundayRunPreview')) $('sundayRunPreview').textContent = text;
   copyText(text, 'Sunday pay run copied');
+}
+function postSundayRunDiscord() {
+  const text = buildSundayRunText(current());
+  if ($('sundayRunPreview')) $('sundayRunPreview').textContent = text;
+  return postDiscord('payroll', text, { label: 'Sunday run' });
 }
 
 function setEmpFileTab(name) {
@@ -13168,8 +13434,10 @@ $('copyPayLog').onclick = () => {
 /* ---------- desk pro feature wiring ---------- */
 function bindClick(id, fn) { const el = $(id); if (el) el.onclick = fn; }
 bindClick('copySundayRun', copySundayRun);
+bindClick('postSundayRun', postSundayRunDiscord);
 bindClick('previewSundayRun', openSundayRunPreview);
 bindClick('copySundayRunModal', () => { copySundayRun(); });
+bindClick('postSundayRunModal', postSundayRunDiscord);
 bindClick('closeSundayRun', () => { if ($('sundayRunModal')) $('sundayRunModal').classList.remove('open'); });
 bindClick('closePeriodTop', () => { if (!requireMgmt('Close period')) return; closePeriodAndRoll(current()); });
 bindClick('probPassBtn', () => completeProbation(true));
@@ -13544,7 +13812,7 @@ $('sendEmpPacket').onclick = () => {
   log('New-hire packet filed and downloaded for ' + e.name);
   save();
   renderEmployeeFile(e);
-  copyText(discordPostBlurb(e.name, 'packet', packetId), 'New-hire packet on file · Discord blurb copied');
+  postDiscord('hiring', discordPostBlurb(e.name, 'packet', packetId), { label: 'Packet · ' + e.name });
   announce('New-hire packet filed for ' + e.name);
 };
 
@@ -13587,7 +13855,7 @@ if ($('sendEmpLogin')) $('sendEmpLogin').onclick = () => {
   log('Account login information filed and downloaded for ' + e.name + ' · ' + e.loginUsername);
   save();
   renderEmployeeFile(e);
-  copyText(discordPostBlurb(e.name, 'login', packetId), 'Account login sheet on file · Discord blurb copied');
+  postDiscord('hiring', discordPostBlurb(e.name, 'login', packetId), { label: 'Login · ' + e.name });
   announce('Account login sheet filed for ' + e.name);
 };
 
@@ -14571,10 +14839,12 @@ if ($('previewClockHours')) $('previewClockHours').onclick = () => previewClockP
 if ($('applyClockHours')) $('applyClockHours').onclick = () => applyClockHoursToPeriod();
 if ($('interviewBoardBtn')) $('interviewBoardBtn').onclick = () => openInterviewBoard();
 if ($('closeInterviewBoard')) $('closeInterviewBoard').onclick = () => $('interviewBoardModal').classList.remove('open');
+if ($('postInterviewBoard')) $('postInterviewBoard').onclick = () => postInterviewBoardDiscord();
 if ($('ivFilter')) $('ivFilter').onchange = () => openInterviewBoard();
 if ($('tipSettlementBtn')) $('tipSettlementBtn').onclick = () => openTipSettlement();
 if ($('closeTipSettle')) $('closeTipSettle').onclick = () => $('tipSettleModal').classList.remove('open');
 if ($('copyTipSettle')) $('copyTipSettle').onclick = () => copyText(tipSettlementDiscord(), 'Tip settlement copied');
+if ($('postTipSettle')) $('postTipSettle').onclick = () => postDiscord('payroll', tipSettlementDiscord(), { label: 'Tip settlement' });
 if ($('printTipSettle')) $('printTipSettle').onclick = () => printTipSettlement();
 if ($('recomputeTipSettle')) $('recomputeTipSettle').onclick = () => recomputeTipSettlement();
 if ($('promoteEmpBtn')) $('promoteEmpBtn').onclick = () => openPromoteModal(editId);
@@ -14689,11 +14959,13 @@ function renderPaydayDesk(p) {
   if ($('paydayDeskActions')) {
     $('paydayDeskActions').innerHTML =
       '<button type="button" class="btn tiny primary" id="pdCopySunday">Copy Sunday run</button>' +
+      '<button type="button" class="btn tiny soft" id="pdPostSunday">Post to Discord</button>' +
       '<button type="button" class="btn tiny soft" id="pdTips">Tip settlement</button>' +
       '<button type="button" class="btn tiny soft" id="pdDisputes">Open disputes</button>' +
       '<button type="button" class="btn tiny soft" id="pdStubs">Pay stubs</button>' +
       (unpaid ? '<button type="button" class="btn tiny" id="pdMarkAll">Mark all paid</button>' : '');
     if ($('pdCopySunday')) $('pdCopySunday').onclick = () => copySundayRun();
+    if ($('pdPostSunday')) $('pdPostSunday').onclick = () => postSundayRunDiscord();
     if ($('pdTips')) $('pdTips').onclick = () => openTipSettlement();
     if ($('pdDisputes')) $('pdDisputes').onclick = () => openDisputeModal();
     if ($('pdStubs')) $('pdStubs').onclick = () => goView('paystubs');
@@ -14940,6 +15212,14 @@ window.resolveDispute = function (id, ok, opts) {
     renderDisputePanels();
     render();
     toast('Dispute resolved · hours saved');
+    postDiscordHrLog(
+      "Frenchie's HR log — Dispute resolved\n" +
+      ((e && e.name) || d.name || 'Staff') + ' · ' + (d.periodLabel || '') + '\n' +
+      'Hours ' + dec(res.beforeH) + ' → ' + dec(res.x.hours) +
+      (note ? '\nNote: ' + note : '') +
+      '\nBy ' + (sessionUser ? sessionUser.name : 'desk'),
+      'Dispute resolved'
+    );
     return;
   }
   d.status = 'denied';
@@ -14953,6 +15233,13 @@ window.resolveDispute = function (id, ok, opts) {
   renderDisputePanels();
   render();
   toast('Dispute denied');
+  postDiscordHrLog(
+    "Frenchie's HR log — Dispute denied\n" +
+    ((e && e.name) || d.name || 'Staff') + ' · ' + (d.periodLabel || '') + '\n' +
+    'Reason: ' + note +
+    '\nBy ' + (sessionUser ? sessionUser.name : 'desk'),
+    'Dispute denied'
+  );
 };
 
 function approveDisputeFromPanel() {
@@ -15067,8 +15354,11 @@ window.resolveTimeOff = function (id, ok) {
     markTimeOffOnBoard(e.id, t.start, t.end || t.start, chip);
     if (t.type === 'calloff') {
       const blurb = coverageDiscordBlurb(e, t);
-      if (blurb) copyText(blurb, 'Approved · board Off · coverage Discord copied');
-      else toast('Approved · board marked Off');
+      if (blurb) {
+        postDiscord('coverage', blurb, { label: 'Coverage · ' + e.name }).then(r => {
+          if (r && r.ok) toast('Approved · board Off · NEED COVERAGE posted');
+        });
+      } else toast('Approved · board marked Off');
     } else {
       toast('Approved · board marked Off');
     }
@@ -15364,7 +15654,8 @@ function savePromotion() {
   save();
   $('promoteModal').classList.remove('open');
   toast(e.name + ' → ' + role);
-  copyText("Frenchie's HR — " + e.name + ' is now ' + role + ' effective ' + when + (note ? ' — ' + note : ''), 'Promotion Discord blurb copied');
+  const promoBlurb = "Frenchie's HR — " + e.name + ' is now ' + role + ' effective ' + when + (note ? ' — ' + note : '');
+  postDiscord('hrLog', promoBlurb, { label: 'Promotion · ' + e.name, fallbackCopy: true });
   render();
 }
 
@@ -15480,7 +15771,8 @@ function openInterviewBoard() {
         (outcome ? ' · ' + esc(outcome) : '') + '</div></div>' +
         '<div style="display:flex;flex-wrap:wrap;gap:4px">' +
         '<button class="btn tiny" onclick="goView(\'hiring\');setTimeout(function(){editApp(' + a.id + ')},40)">Open</button> ' +
-        '<button class="btn tiny soft" onclick="copyInterviewBlurb(' + a.id + ')">Discord</button> ' +
+        '<button class="btn tiny soft" onclick="copyInterviewBlurb(' + a.id + ')">Copy</button> ' +
+        '<button class="btn tiny soft" onclick="postInterviewBlurb(' + a.id + ')">Post</button> ' +
         (canHire() ? (
           '<button class="btn tiny soft" onclick="setInterviewConfirm(' + a.id + ',\'confirmed\')">Confirm</button> ' +
           '<button class="btn tiny soft" onclick="setInterviewOutcome(' + a.id + ',\'done\')">Done</button> ' +
@@ -15493,16 +15785,39 @@ function openInterviewBoard() {
   $('interviewBoardModal').removeAttribute('hidden');
 }
 
-window.copyInterviewBlurb = function (id) {
-  const a = findApp(id);
-  if (!a) return;
-  const blurb = "Frenchie's HR — Interview reminder for " + a.name +
+function interviewReminderText(a) {
+  if (!a) return '';
+  return "Frenchie's HR — Interview reminder for " + a.name +
     (a.interviewDate ? ' on ' + fmtLong(a.interviewDate) : '') +
     (a.interviewTime ? ' at ' + formatInterviewTime(a.interviewTime) : '') +
     (a.interviewSlot ? ' (' + a.interviewSlot + ')' : '') +
     '. Reply on Discord if you need to reschedule.';
-  copyText(blurb, 'Interview reminder copied');
+}
+window.copyInterviewBlurb = function (id) {
+  const a = findApp(id);
+  if (!a) return;
+  copyText(interviewReminderText(a), 'Interview reminder copied');
 };
+window.postInterviewBlurb = function (id) {
+  const a = findApp(id);
+  if (!a) return;
+  return postDiscord('hiring', interviewReminderText(a), { label: 'Interview · ' + a.name });
+};
+function postInterviewBoardDiscord() {
+  const filter = ($('ivFilter') && $('ivFilter').value) || 'week';
+  const list = interviewBoardRows(filter);
+  if (!list.length) return toast('No interviews to post');
+  const lines = ["Frenchie's HR — Interview board (" + filter + ")", ''];
+  list.forEach(a => {
+    lines.push('• ' + a.name + (a.offerRole ? ' · ' + a.offerRole : '') +
+      (a.interviewDate ? ' · ' + (fmtLong(a.interviewDate) || a.interviewDate) : '') +
+      (a.interviewTime ? ' · ' + formatInterviewTime(a.interviewTime) : '') +
+      (a.interviewConfirm ? ' · ' + a.interviewConfirm : '') +
+      (a.interviewOutcome ? ' · ' + a.interviewOutcome : ''));
+  });
+  lines.push('', 'Reply on Discord if you need to reschedule.');
+  return postDiscord('hiring', lines.join('\n'), { label: 'Interview board' });
+}
 
 window.setInterviewConfirm = function (id, status) {
   if (!requireHire('Interview')) return;
@@ -15534,7 +15849,7 @@ window.setInterviewOutcome = function (id, outcome) {
     const blurb = "Frenchie's HR — Interview complete for " + a.name +
       (a.offerRole ? ' (' + a.offerRole + ')' : '') +
       '. Moving toward offer — watch Discord for next steps.';
-    copyText(blurb, a.name + ' · done · Discord blurb copied');
+    postDiscord('hiring', blurb, { label: 'Interview done · ' + a.name });
     render();
     return;
   }
@@ -15608,6 +15923,8 @@ function openTipSettlement() {
     '</tbody></table></div>' +
     (!staffView && data.excluded.length ? '<p class="ui-hint" style="margin-top:10px">Excluded: ' + esc(data.excluded.join(', ')) + '</p>' : '');
   if ($('recomputeTipSettle')) $('recomputeTipSettle').style.display = canEditHours() ? '' : 'none';
+  if ($('postTipSettle')) $('postTipSettle').style.display = canPostDiscord() ? '' : 'none';
+  if ($('copyTipSettle')) $('copyTipSettle').style.display = canEditHours() || isStaffSession() ? '' : 'none';
   $('tipSettleModal').classList.add('open');
   $('tipSettleModal').removeAttribute('hidden');
 }
@@ -15648,6 +15965,9 @@ function printTipSettlement() {
 function redactPasswordsInState(raw) {
   const clone = JSON.parse(JSON.stringify(raw));
   (clone.employees || []).forEach(e => { if (e && 'loginPassword' in e) e.loginPassword = ''; });
+  if (clone.settings && clone.settings.discordWebhooks) {
+    clone.settings.discordWebhooks = { payroll: '', hiring: '', coverage: '', hrLog: '', announcements: '' };
+  }
   return clone;
 }
 
