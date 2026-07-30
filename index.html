@@ -2156,14 +2156,21 @@ body.session-staff #copySundayRun{display:none!important}
   padding:12px 14px;border:1px solid var(--line);border-radius:11px;background:oklch(99% .004 84);
 }
 .doc-row b{display:block;font-size:.84rem;color:var(--navy)}
+.doc-row.needed{background:oklch(99% .006 84);border-style:dashed}
 .doc-row .paper-sub{margin-top:2px}
 .doc-row .paper-actions{display:flex;flex-wrap:wrap;gap:6px;justify-content:flex-end}
 .doc-next{
-  display:flex;flex-wrap:wrap;gap:8px;align-items:center;
+  display:flex;flex-wrap:wrap;gap:10px 14px;align-items:flex-start;
   margin-top:12px;padding:12px 14px;border-radius:11px;
   background:var(--sage);border:1px solid transparent;
 }
-.doc-next .hint{font-size:.74rem;color:var(--muted);flex:1;min-width:160px;line-height:1.4}
+.doc-next-copy{flex:1 1 180px;min-width:160px}
+.doc-next-kicker{
+  display:block;font-size:.6rem;font-weight:700;letter-spacing:.1em;text-transform:uppercase;
+  color:oklch(42% .05 155);margin:0 0 4px;
+}
+.doc-next .hint{font-size:.74rem;color:var(--muted);line-height:1.4;display:block}
+.doc-next-actions{display:flex;flex-wrap:wrap;gap:8px;align-items:center;justify-content:flex-end}
 .hire-path{flex-wrap:wrap;gap:6px;margin-bottom:12px}
 .content .header{margin-bottom:18px;padding-bottom:14px}
 .view .subtitle{max-width:36rem}
@@ -3256,12 +3263,17 @@ body.compact-todos .attn-detail{display:none}
       <div class="fold-body">
         <div id="empDocs" class="doc-list"></div>
         <div class="doc-next" id="empDocActions">
-          <span class="hint" id="empDocHint">Next: send contract, then packet, then account login.</span>
-          <button class="btn tiny soft" id="sendEmpContract">Send contract</button>
-          <button class="btn tiny soft" id="sendEmpPacket">Send packet</button>
-          <button class="btn tiny soft" id="sendEmpLogin">Send account login</button>
-          <button class="btn tiny" id="resetEmpPasswordBtn" type="button" title="Clear personal password — they sign in with house password again">Reset password</button>
-          <button class="btn tiny" id="openHirePapersBtn" type="button" style="display:none">Hiring file</button>
+          <div class="doc-next-copy">
+            <span class="doc-next-kicker">Next step</span>
+            <span class="hint" id="empDocHint">Next: send contract, then packet, then account login.</span>
+          </div>
+          <div class="doc-next-actions">
+            <button class="btn tiny soft" id="sendEmpContract">Send contract</button>
+            <button class="btn tiny soft" id="sendEmpPacket">Send packet</button>
+            <button class="btn tiny soft" id="sendEmpLogin">Send account login</button>
+            <button class="btn tiny" id="resetEmpPasswordBtn" type="button" title="Clear personal password — they sign in with house password again">Reset password</button>
+            <button class="btn tiny" id="openHirePapersBtn" type="button" style="display:none">Hiring file</button>
+          </div>
         </div>
         <button class="btn tiny" id="genOffer" hidden>View offer</button>
         <button class="btn tiny" id="genContract" hidden>View contract</button>
@@ -5111,11 +5123,15 @@ function isTodoDismissed(id) {
 
 function empHasSignedContract(e) {
   if (!e) return false;
-  if (e.contractSignedAt) return true;
-  return (e.documents || []).some(d => d.kind === 'contract' && (
-    d.status === 'signed' || d.status === 'accepted' || d.status === 'confirmed' ||
-    /signed|accepted/i.test(d.title || '')
-  ));
+  const docs = e.documents || [];
+  const contractDoc = docs.find(d => d.kind === 'contract');
+  if (!contractDoc) return false;
+  if (
+    contractDoc.status === 'signed' || contractDoc.status === 'accepted' ||
+    contractDoc.status === 'confirmed' || /signed|accepted/i.test(contractDoc.title || '')
+  ) return true;
+  /* Legacy flag only counts when a contract document is actually on file */
+  return !!e.contractSignedAt;
 }
 
 function empHasPacket(e) {
@@ -11194,20 +11210,23 @@ function renderEmployeeFile(e) {
     const d = findEmpDoc(e, k);
     const label = (PAPER_KINDS[k] && PAPER_KINDS[k].title) || k;
     if (d) {
+      const st = d.status || 'on file';
+      const pillTone = empDocStatusPill(st);
       docsHtml += '<div class="doc-row"><div><b>' + esc(d.title || label) + '</b>' +
-        '<div class="paper-sub">' + esc(d.date || '—') + (d.status ? ' · ' + esc(d.status) : '') + '</div></div>' +
+        '<div class="paper-sub">' + esc(d.date || '—') + (st ? ' · ' + esc(st) : '') + '</div></div>' +
         '<div class="paper-actions">' +
-        '<span class="pill ' + empDocStatusPill(d.status || 'draft') + '">' + esc(d.status || 'on file') + '</span>' +
+        '<span class="pill ' + pillTone + '">' + esc(st) + '</span>' +
         (d.html ? '<button class="btn tiny" onclick="viewDoc(' + e.id + ',' + d.id + ')">Open</button>' : '') +
         (d.html ? '<button class="btn tiny soft" onclick="printEmpDoc(' + e.id + ',' + d.id + ')">Print</button>' : '') +
         '<button class="btn tiny danger" onclick="deleteDoc(' + e.id + ',' + d.id + ')">Delete</button>' +
         '</div></div>';
     } else {
-      const next = k === 'contract' ? 'Use Send contract below'
-        : (k === 'packet' ? 'Use Send packet below'
-          : (k === 'login' ? 'Use Send account login below' : 'Comes from hiring file'));
-      docsHtml += '<div class="doc-row"><div><b>' + esc(label) + '</b><div class="paper-sub">' + next + '</div></div>' +
-        '<div class="paper-actions"><span class="pill gray">needed</span></div></div>';
+      const next = k === 'offer' ? 'Copied from the hiring file when available'
+        : (k === 'contract' ? 'Not on file yet — send a contract to start'
+          : (k === 'packet' ? 'Send after the contract is signed'
+            : 'Send after the packet is acknowledged'));
+      docsHtml += '<div class="doc-row needed"><div><b>' + esc(label) + '</b><div class="paper-sub">' + next + '</div></div>' +
+        '<div class="paper-actions"><span class="pill warn">needed</span></div></div>';
     }
   });
   extras.forEach(d => {
@@ -11235,19 +11254,29 @@ function renderEmployeeFile(e) {
   if ($('genContract')) { $('genContract').hidden = true; $('genContract').disabled = !hasContract; }
   if ($('genPacket')) { $('genPacket').hidden = true; $('genPacket').disabled = !hasPacket; }
   if ($('genLogin')) { $('genLogin').hidden = true; $('genLogin').disabled = !hasLogin; }
+  /* Re-send only when that paper is already on the file */
   if ($('sendEmpContract')) {
-    $('sendEmpContract').textContent = signedContract ? 'Re-send contract' : 'Send contract';
-    $('sendEmpContract').className = signedContract ? 'btn tiny' : 'btn tiny primary';
+    $('sendEmpContract').textContent = hasContract ? 'Re-send contract' : 'Send contract';
+    $('sendEmpContract').className = (!hasContract || !signedContract) ? 'btn tiny primary' : 'btn tiny';
+    $('sendEmpContract').title = hasContract
+      ? 'Send another copy of the contract'
+      : 'Create and send the employment contract';
   }
   if ($('sendEmpPacket')) {
     $('sendEmpPacket').textContent = hasPacket ? 'Re-send packet' : 'Send packet';
-    $('sendEmpPacket').className = (!signedContract || hasPacket) ? 'btn tiny' : 'btn tiny soft';
+    $('sendEmpPacket').className = (signedContract && !hasPacket) ? 'btn tiny primary' : 'btn tiny soft';
     $('sendEmpPacket').disabled = false;
+    $('sendEmpPacket').title = hasPacket
+      ? 'Send another copy of the new-hire packet'
+      : 'Send the new-hire packet';
   }
   if ($('sendEmpLogin')) {
     $('sendEmpLogin').textContent = hasLogin ? 'Re-send account login' : 'Send account login';
     $('sendEmpLogin').className = (packetAcked && !loginOk) ? 'btn tiny primary' : 'btn tiny soft';
     $('sendEmpLogin').disabled = false;
+    $('sendEmpLogin').title = hasLogin
+      ? 'Send another account login sheet'
+      : 'Send account login information';
   }
   if ($('resetEmpPasswordBtn')) {
     const hasPw = empHasOwnPassword(e);
@@ -11256,7 +11285,8 @@ function renderEmployeeFile(e) {
     $('resetEmpPasswordBtn').textContent = hasPw ? 'Reset password' : 'No password set';
   }
   if ($('empDocHint')) {
-    if (!signedContract) $('empDocHint').textContent = 'Next: send contract (you sign first), then import their reply.';
+    if (!hasContract) $('empDocHint').textContent = 'Send the employment contract first (you sign, then they reply).';
+    else if (!signedContract) $('empDocHint').textContent = 'Contract is on file — import their signed reply when it comes back.';
     else if (!hasPacket) $('empDocHint').textContent = 'Contract signed — send the new-hire packet next.';
     else if (!packetAcked) $('empDocHint').textContent = 'Packet sent — await acknowledgement, then send account login.';
     else if (!hasLogin) $('empDocHint').textContent = 'Packet acknowledged — send Account login information next.';
