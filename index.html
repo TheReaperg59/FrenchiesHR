@@ -5926,10 +5926,7 @@ function renderCompareAndHealth(p) {
   if ($('cmpGross')) $('cmpGross').textContent = prev ? fmtDelta(grossOf(p), grossOf(prev), true) : '—';
   if ($('cmpHours')) $('cmpHours').textContent = prev ? fmtDelta(hoursOf(p), hoursOf(prev), false) : '—';
   if ($('cmpTips')) $('cmpTips').textContent = prev ? fmtDelta(tipsOf(p), tipsOf(prev), true) : '—';
-  if ($('compareStrip')) {
-    $('compareStrip').hidden = !prev;
-    if (prev) $('compareStrip').removeAttribute('hidden');
-  }
+  if ($('compareStrip')) $('compareStrip').hidden = !prev;
   const h = periodHealth(p);
   if ($('periodHealthScore')) $('periodHealthScore').textContent = h.score + '/100';
   if ($('healthScoreLabel')) {
