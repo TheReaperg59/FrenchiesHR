@@ -1386,12 +1386,17 @@ body{
 #view-employees .split-desk{
   grid-template-columns:minmax(0,1.55fr) minmax(260px,.85fr);
 }
+#view-employees .roster-card{
+  overflow:visible;
+}
 #view-employees .roster-card .table-scroll{
   overflow:auto;
-  padding-bottom:2px;
+  padding-bottom:4px;
+  padding-right:4px;
+  border-radius:0 0 14px 14px;
 }
 #view-employees table{
-  min-width:720px;
+  min-width:760px;
   border-collapse:separate;
   border-spacing:0;
 }
@@ -1400,28 +1405,33 @@ body{
 #view-employees th.action-col,
 #view-employees td.action-col{
   position:sticky;right:0;z-index:2;
-  min-width:118px;width:118px;
-  padding-right:16px !important;
-  background:linear-gradient(90deg, transparent, var(--paper) 18%);
-  box-shadow:-8px 0 12px oklch(20% .02 155 / .04);
+  min-width:132px;width:132px;
+  padding:10px 18px 10px 12px !important;
+  background:var(--paper);
+  box-shadow:-10px 0 14px oklch(20% .02 155 / .05);
   text-align:right;
+  overflow:visible;
 }
 #view-employees thead th.action-col,
 #view-employees thead th:last-child{
-  background:linear-gradient(90deg, transparent, oklch(97% .008 84) 18%);
+  background:oklch(97% .008 84);
   z-index:3;
 }
-#view-employees td.name{
-  white-space:normal;max-width:240px;line-height:1.35;
+#view-employees tbody tr:hover td.action-col{
+  background:oklch(98% .005 84);
 }
-#view-employees td .history{white-space:normal}
+#view-employees td.name{
+  white-space:normal;max-width:260px;line-height:1.35;
+}
+#view-employees td .history{white-space:normal;max-width:240px}
 .open-file-btn{
   display:inline-flex !important;align-items:center;justify-content:center;gap:6px;
-  min-width:102px;padding:6px 12px !important;
+  min-width:108px;padding:7px 13px !important;margin:0;
   border-radius:9px !important;
   background:linear-gradient(180deg, oklch(97% .01 84), var(--paper));
   border:1px solid oklch(82% .03 155) !important;
   box-shadow:0 1px 0 oklch(100% 0 0 / .8), var(--shadow-sm);
+  white-space:nowrap;
 }
 .open-file-btn:hover{
   border-color:var(--navy) !important;color:var(--navy);
@@ -4922,16 +4932,15 @@ function renderEmployees() {
     });
   }
   $('employees').innerHTML = list.length ? list.map(e => {
-    const hist = (e.history || []).slice(-2).map(h => {
-      const row = normalizeHistEntry(h);
-      if (row.summary) return row.date + ': ' + row.summary + (row.detail ? ' (' + row.detail + ')' : '');
-      return row.date + ': ' + (row.from || 'new') + ' → ' + (row.to || '') + (row.detail ? ' (' + row.detail + ')' : '');
+    const recent = (e.history || []).map(normalizeHistEntry).filter(h => h.type !== 'hire').slice(-2);
+    const hist = recent.map(h => {
+      if (h.summary) return h.date + ': ' + h.summary + (h.detail ? ' (' + h.detail + ')' : '');
+      return h.date + ': ' + (h.from || 'new') + ' → ' + (h.to || '') + (h.detail ? ' (' + h.detail + ')' : '');
     }).join(' · ');
     const prob = e.status === 'probation' && e.probationEnd ? '<div class="history">Probation ends ' + esc(e.probationEnd) + '</div>' : '';
     const docs = (e.documents || []).length;
     const comp = empFileCompleteness(e);
     const badges = [];
-    if (e.status === 'probation') badges.push('<span class="pill warn">Probation</span>');
     if (!empHasSignedContract(e) && e.status !== 'terminated') badges.push('<span class="pill danger">Contract open</span>');
     else if (!empHasPacket(e) && e.status === 'probation') badges.push('<span class="pill warn">Packet open</span>');
     if (docs) badges.push('<span class="pill gray">' + docs + ' doc' + (docs === 1 ? '' : 's') + '</span>');
