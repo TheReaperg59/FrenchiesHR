@@ -27,6 +27,20 @@ textarea{resize:vertical;min-height:72px}
 .side button{width:100%;border:0;background:none;color:oklch(78% .02 155);padding:10px 14px;border-radius:8px;text-align:left;font-size:.78rem;font-weight:500;letter-spacing:.01em;transition:background .15s,color .15s,box-shadow .15s}
 .side button:hover{background:oklch(32% .04 155);color:oklch(96% .01 84)}
 .side button.active{background:var(--navy2);color:oklch(98% .01 84);box-shadow:inset 3px 0 var(--gold);font-weight:600}
+.side{position:sticky;top:0;height:100vh;overflow:auto}
+.card .table-scroll{overflow:auto;max-width:100%}
+.header{align-items:flex-end}
+button.linkish{background:none;border:none;color:var(--navy);cursor:pointer;padding:0;font:inherit;text-decoration:underline}
+.log-row button.linkish{font-size:.75rem}
+.table-scroll{overflow-x:auto;-webkit-overflow-scrolling:touch}
+@media(max-width:900px){
+  .metrics{grid-template-columns:1fr 1fr}
+  .grid,.grid-2{grid-template-columns:1fr}
+  .toolbar .search{min-width:120px;flex:1}
+  .header{flex-direction:column;align-items:stretch}
+  .actions{width:100%}
+  .content{padding:22px 16px 48px}
+}
 .side-label{padding:20px 14px 8px;color:oklch(58% .02 155);font-size:.6rem;letter-spacing:.12em;text-transform:uppercase;font-weight:700}
 .side-label:first-of-type{padding-top:4px}
 .side-foot{margin-top:auto;border-top:1px solid oklch(38% .03 155);padding:18px 14px 8px;color:oklch(68% .02 155);font-size:.7rem;line-height:1.55}
@@ -433,6 +447,11 @@ tbody tr:hover{background:oklch(98% .005 84)}
     <div class="metric"><label>Unpaid stubs</label><strong id="owedCount">0</strong><span id="owedSub">Still owed</span></div>
     <div class="metric"><label>Paid out</label><strong id="paidOutMetric">$0</strong><span>Marked paid this period</span></div>
   </div>
+  <div class="toolbar" style="margin-top:-6px">
+    <button class="btn tiny soft" type="button" id="ovGotoReports">Year reports</button>
+    <button class="btn tiny soft" type="button" id="ovGotoExpenses">Expense rebates</button>
+    <button class="btn tiny soft" type="button" id="ovGotoUnpaidStubs">Unpaid stubs</button>
+  </div>
   <div class="grid">
     <div>
       <div class="card unpaid-desk"><div class="card-head"><b>Unpaid desk</b><span class="pill warn" id="unpaidDeskCount">0</span></div>
@@ -494,6 +513,7 @@ tbody tr:hover{background:oklch(98% .005 84)}
     <div class="metric"><label>Offers out</label><strong id="mOffer">0</strong><span>Pending accept</span></div>
   </div>
   <div class="toolbar" style="margin-bottom:12px">
+    <input class="search" id="hireSearch" placeholder="Search applicant">
     <button class="btn tiny soft" id="hireFilterPipe" data-hire-filter="pipeline">Pipeline</button>
     <button class="btn tiny" id="hireFilterClosed" data-hire-filter="closed">Closed files</button>
     <button class="btn tiny" id="hireFilterAll" data-hire-filter="all">All applications</button>
@@ -511,10 +531,12 @@ tbody tr:hover{background:oklch(98% .005 84)}
       <ol class="paper-steps">
         <li><b>Send</b> downloads a fillable form — post that file on Discord. You don’t fill it on this desk.</li>
         <li>They complete the starred fields, sign, hit <b>Download reply</b>, and send that file back.</li>
-        <li>You hit <b>Import reply</b>. It files under Filed replies and on their application.</li>
+        <li>You hit <b>Import reply</b>. It files under Filed replies, on their application, and onto the employee file after hire.</li>
       </ol>
-      <p class="paper-order"><b>After hire:</b> employee file → Send contract (you sign first) → then File &amp; send new-hire packet.</p>
-      <p class="paper-order muted">Before hire: Application → Invitation → Questions → Offer. Screening and Notes stay in the office.</p>
+      <p class="paper-order"><b>Before hire:</b> Application → Invitation → Questions → Offer (accept) → Hire.</p>
+      <p class="paper-order"><b>After hire:</b> employee file → Send contract (you sign first) → Import signed reply → File &amp; send new-hire packet.</p>
+      <p class="paper-order muted">Screening and Interviewer notes stay in the office. Contract and packet unlock only after hire.</p>
+      <p class="paper-order muted">Letter preview fills name, role, rate, start, manager, phone, Discord, and probation dates before you Send — import the reply to file it on the employee.</p>
     </div>
   </div>
 </section>
@@ -566,6 +588,8 @@ tbody tr:hover{background:oklch(98% .005 84)}
   <div class="header">
     <div><div class="eyebrow">Office</div><h1 class="title">Expenses</h1><div class="subtitle">House purchases — food, drink, furniture, Weazel ads, map markers, permits, and more. Build a clean report for rebates.</div></div>
     <div class="actions">
+      <button class="btn" id="csvExpenses">Export CSV</button>
+      <button class="btn soft" id="pdfExpensesReimb">Print reimbursable pack</button>
       <button class="btn soft" id="pdfExpenses">Print expense report</button>
       <button class="btn primary" id="addExpense">Log expense</button>
     </div>
@@ -577,20 +601,38 @@ tbody tr:hover{background:oklch(98% .005 84)}
     <div class="metric"><label>Top category</label><strong id="expTop">—</strong></div>
   </div>
   <div class="toolbar">
+    <input class="search" id="expSearch" placeholder="Search vendor, receipt, notes">
     <select id="expMonth"><option value="">All months</option></select>
+    <input id="expFrom" type="date" title="From date" style="border:1px solid var(--line);border-radius:7px;padding:8px 10px;background:var(--paper)">
+    <input id="expTo" type="date" title="To date" style="border:1px solid var(--line);border-radius:7px;padding:8px 10px;background:var(--paper)">
     <select id="expCategory"><option value="">All categories</option></select>
+    <select id="expPaidByFilter"><option value="">All paid by</option></select>
     <select id="expReimbFilter">
       <option value="">All expenses</option>
       <option value="yes">Reimbursable only</option>
       <option value="no">Not reimbursable</option>
     </select>
+    <select id="expStatusFilter">
+      <option value="">All rebate status</option>
+      <option value="pending">Pending</option>
+      <option value="submitted">Submitted</option>
+      <option value="reimbursed">Reimbursed</option>
+    </select>
     <span class="pill gray" id="expFilterLabel">Showing all</span>
   </div>
-  <div class="card"><div class="card-head"><b>Expense log</b><span class="pill gray" id="expTableCount">0</span></div>
-    <table><thead><tr><th>Date</th><th>Category</th><th>Vendor / item</th><th>Paid by</th><th class="r">Amount</th><th>Rebate</th><th class="r">Action</th></tr></thead><tbody id="expenses"></tbody></table>
+  <div class="card"><div class="card-head"><b>Monthly spend</b><span class="pill gray" id="expBarsLabel">Filtered</span></div>
+    <div style="height:160px;padding:16px 20px"><div id="expBars" style="height:120px;display:flex;align-items:end;gap:6px;border-bottom:1px solid var(--line)"></div></div>
   </div>
-  <div class="card"><div class="card-head"><b>By category</b><span class="pill gray" id="expCatLabel">Shown filters</span></div>
-    <table><thead><tr><th>Category</th><th class="r">Entries</th><th class="r">Total</th><th class="r">Reimbursable</th></tr></thead><tbody id="expByCat"></tbody></table>
+  <div class="card"><div class="card-head"><b>Expense log</b><span class="pill gray" id="expTableCount">0</span></div>
+    <div class="table-scroll"><table><thead><tr><th>Date</th><th>Category</th><th>Vendor / item</th><th>Paid by</th><th class="r">Amount</th><th>Rebate</th><th>Status</th><th class="r">Action</th></tr></thead><tbody id="expenses"></tbody></table></div>
+  </div>
+  <div class="grid-2">
+    <div class="card"><div class="card-head"><b>By category</b><span class="pill gray" id="expCatLabel">Shown filters</span></div>
+      <table><thead><tr><th>Category</th><th class="r">Entries</th><th class="r">Total</th><th class="r">Reimbursable</th></tr></thead><tbody id="expByCat"></tbody></table>
+    </div>
+    <div class="card"><div class="card-head"><b>By paid-by</b><span class="pill gray">Shown filters</span></div>
+      <table><thead><tr><th>Paid by</th><th class="r">Entries</th><th class="r">Total</th><th class="r">Reimbursable</th></tr></thead><tbody id="expByPaid"></tbody></table>
+    </div>
   </div>
 </section>
 
@@ -648,6 +690,7 @@ tbody tr:hover{background:oklch(98% .005 84)}
     <div><div class="eyebrow">People</div><h1 class="title">Relations</h1><div class="subtitle">Discipline, commendations, suspensions, and follow-ups.</div></div>
     <div class="actions"><button class="btn soft" id="pdfRelations">Export file PDF</button><button class="btn primary" id="addRelation">New entry</button></div>
   </div>
+  <div class="toolbar"><input class="search" id="relSearch" placeholder="Search employee or reason"></div>
   <div class="callout">
     <b>Three-strike system</b> &mdash; Strike one is a verbal warning noted in the file. Strike two is a written warning with a follow-up date.
     Strike three is termination. Suspension may be issued at any point while a matter is under review. Commendations are logged the same way
@@ -671,7 +714,7 @@ tbody tr:hover{background:oklch(98% .005 84)}
 <section class="view" id="view-shifts">
   <div class="header">
     <div><div class="eyebrow">People</div><h1 class="title">Shifts</h1><div class="subtitle">Weekly station board — bar, kitchen, and floor.</div></div>
-    <div class="actions"><button class="btn" id="shiftPrev">&larr; Prev week</button><button class="btn" id="shiftThis">This week</button><button class="btn" id="shiftNext">Next week &rarr;</button><button class="btn soft" id="pdfShifts">Export board PDF</button></div>
+    <div class="actions"><button class="btn" id="shiftPrev">&larr; Prev week</button><button class="btn" id="shiftThis">This week</button><button class="btn" id="shiftNext">Next week &rarr;</button><button class="btn soft" id="pdfShifts" title="Print Discord week sheet">Print week sheet</button></div>
   </div>
   <div class="callout plain">Week of <b id="shiftWeekLabel">—</b> &mdash; clock in on radio with 10-1 and clock out with 10-2. Shift Lead posts coverage before open.</div>
   <div class="card"><table><thead><tr><th>Employee</th><th>Mon</th><th>Tue</th><th>Wed</th><th>Thu</th><th>Fri</th><th>Sat</th><th>Sun</th><th class="r">On</th></tr></thead><tbody id="shiftBoard"></tbody></table></div>
@@ -683,8 +726,9 @@ tbody tr:hover{background:oklch(98% .005 84)}
     <div><div class="eyebrow">Office</div><h1 class="title">Compliance</h1><div class="subtitle">Licenses, handbook excerpts, and chain of command.</div></div>
     <div class="actions"><button class="btn primary" id="addLicense">Add license / note</button></div>
   </div>
+  <div class="toolbar"><select id="licFilter"><option value="">All licenses</option><option value="active">Active</option><option value="pending">Pending</option><option value="expired">Expired / due soon</option><option value="note">Notes</option></select></div>
   <div class="callout">Business direction: restaurant operations first, then raffle nights, then adult entertainment. Keep every license current &mdash; the office does not run an unlicensed floor.</div>
-  <div class="card"><table><thead><tr><th>Item</th><th>Status</th><th>Issued</th><th>Expires</th><th>Notes</th><th class="r">Action</th></tr></thead><tbody id="licenses"></tbody></table></div>
+  <div class="card"><div class="table-scroll"><table><thead><tr><th>Item</th><th>Status</th><th>Issued</th><th>Expires</th><th>Notes</th><th class="r">Action</th></tr></thead><tbody id="licenses"></tbody></table></div></div>
 
   <div class="grid-2">
     <div class="card"><div class="card-head"><b>Employee handbook &mdash; excerpts</b></div>
@@ -759,38 +803,61 @@ tbody tr:hover{background:oklch(98% .005 84)}
 <!-- REPORTS -->
 <section class="view" id="view-reports">
   <div class="header">
-    <div><div class="eyebrow">Office</div><h1 class="title">Reports</h1><div class="subtitle">Monthly and yearly payroll across every pay period.</div></div>
+    <div><div class="eyebrow">Office</div><h1 class="title">Reports</h1><div class="subtitle">Monthly and yearly payroll, staff rankings, and house spend.</div></div>
     <div class="actions">
       <select id="reportYear" style="border:1px solid var(--line);border-radius:7px;padding:8px 10px;background:var(--paper);font-size:.78rem"></select>
+      <button class="btn" id="csvMonthly">Export CSV</button>
       <button class="btn soft" id="pdfMonthly">Export year PDF</button>
     </div>
   </div>
   <div class="metrics">
     <div class="metric"><label>Year to date</label><strong id="ytd">$0</strong><span id="ytdSub">Selected year</span></div>
-    <div class="metric"><label>Paid out</label><strong id="yearPaid">$0</strong></div>
+    <div class="metric"><label>Paid out</label><strong id="yearPaid">$0</strong><span id="yoySub">vs prior year</span></div>
     <div class="metric"><label>Still owed</label><strong id="yearOwed">$0</strong></div>
     <div class="metric"><label>Highest month</label><strong id="high">—</strong><span id="highSub">Gross payroll</span></div>
   </div>
   <div class="metrics" style="margin-top:-8px">
-    <div class="metric"><label>Wages</label><strong id="yearWages">$0</strong></div>
+    <div class="metric"><label>Wages</label><strong id="yearWages">$0</strong><span id="wageShare">Share of gross</span></div>
     <div class="metric"><label>Bonuses</label><strong id="yearBonus">$0</strong></div>
-    <div class="metric"><label>Tips</label><strong id="yearTips">$0</strong></div>
+    <div class="metric"><label>Tips</label><strong id="yearTips">$0</strong><span id="tipShare">Share of gross</span></div>
     <div class="metric"><label>Hours</label><strong id="yearHours">0</strong></div>
   </div>
-  <div class="card"><div class="card-head"><b>Monthly gross</b><span class="pill gray" id="barsYearLabel">—</span></div><div style="height:200px;padding:20px"><div id="bars" style="height:150px;display:flex;align-items:end;gap:8px;border-bottom:1px solid var(--line)"></div></div></div>
+  <div class="metrics" style="margin-top:-8px">
+    <div class="metric"><label>House spend</label><strong id="houseSpend">$0</strong><span>Payroll + expenses</span></div>
+    <div class="metric"><label>Expenses</label><strong id="yearExpenses">$0</strong><span id="yearExpReimb">Reimbursable</span></div>
+    <div class="metric"><label>Headcount</label><strong id="yearHeadcount">0</strong><span id="yearHeadSub">Active / probation / suspended</span></div>
+    <div class="metric"><label>Periods</label><strong id="yearPeriodSnap">0</strong><span id="yearPeriodSub">Open vs closed</span></div>
+  </div>
+  <div class="card"><div class="card-head"><b>Monthly chart</b>
+    <span style="display:flex;gap:6px;align-items:center;flex-wrap:wrap">
+      <select id="barMode" style="border:1px solid var(--line);border-radius:7px;padding:5px 8px;background:var(--paper);font-size:.72rem">
+        <option value="g">Gross</option>
+        <option value="h">Hours</option>
+        <option value="t">Tips</option>
+      </select>
+      <span class="pill gray" id="barsYearLabel">—</span>
+    </span>
+  </div><div style="height:200px;padding:20px"><div id="bars" style="height:150px;display:flex;align-items:end;gap:8px;border-bottom:1px solid var(--line)"></div></div></div>
   <div class="card"><div class="card-head"><b>Monthly payroll</b><span class="pill gray" id="monthlyYearLabel">—</span></div>
-    <div class="mini-note" style="padding:8px 16px 0">Totals by calendar month for the selected year. Built from every pay period that starts in that month.</div>
-    <table><thead><tr><th>Month</th><th class="r">Periods</th><th class="r">Hours</th><th class="r">Wages</th><th class="r">Bonus</th><th class="r">Tips</th><th class="r">Gross</th><th class="r">Paid</th><th class="r">Owed</th></tr></thead><tbody id="monthly"></tbody></table>
+    <div class="mini-note" style="padding:8px 16px 0">Totals by calendar month for the selected year.</div>
+    <div class="table-scroll"><table><thead><tr><th>Month</th><th class="r">Periods</th><th class="r">Hours</th><th class="r">Wages</th><th class="r">Bonus</th><th class="r">Tips</th><th class="r">Gross</th><th class="r">Paid</th><th class="r">Owed</th></tr></thead><tbody id="monthly"></tbody></table></div>
+  </div>
+  <div class="grid-2">
+    <div class="card"><div class="card-head"><b>Staff ranking</b><span class="pill gray" id="staffRankLabel">Year</span></div>
+      <div class="table-scroll" style="max-height:320px"><table><thead><tr><th>Employee</th><th class="r">Hours</th><th class="r">Wages</th><th class="r">Bonus</th><th class="r">Tips</th><th class="r">Gross</th><th class="r">Paid</th><th class="r">Owed</th></tr></thead><tbody id="staffRank"></tbody></table></div>
+    </div>
+    <div class="card"><div class="card-head"><b>Role rollup</b><span class="pill gray">Year</span></div>
+      <div class="table-scroll" style="max-height:320px"><table><thead><tr><th>Role</th><th class="r">Hours</th><th class="r">Wages</th><th class="r">Bonus</th><th class="r">Tips</th><th class="r">Gross</th><th class="r">Paid</th><th class="r">Owed</th></tr></thead><tbody id="roleRollup"></tbody></table></div>
+    </div>
   </div>
   <div class="card"><div class="card-head"><b>Pay periods</b><span class="pill gray" id="periodYearLabel">All periods in year</span></div>
-    <div class="mini-note" style="padding:8px 16px 0">Every weekly period rolled into the year above — open Time &amp; pay to edit one.</div>
-    <div style="max-height:320px;overflow:auto">
-      <table><thead><tr><th>Period</th><th>Status</th><th class="r">Hours</th><th class="r">Wages</th><th class="r">Bonus</th><th class="r">Tips</th><th class="r">Gross</th><th class="r">Paid</th><th class="r">Owed</th></tr></thead><tbody id="yearPeriods"></tbody></table>
+    <div class="mini-note" style="padding:8px 16px 0">Click Open to jump to Overview for that week.</div>
+    <div class="table-scroll" style="max-height:320px">
+      <table><thead><tr><th>Period</th><th>Status</th><th class="r">Hours</th><th class="r">Wages</th><th class="r">Bonus</th><th class="r">Tips</th><th class="r">Gross</th><th class="r">Paid</th><th class="r">Owed</th><th class="r"></th></tr></thead><tbody id="yearPeriods"></tbody></table>
     </div>
   </div>
   <div class="card"><div class="card-head"><b>Yearly payroll</b><span class="pill gray">All years on file</span></div>
-    <div class="mini-note" style="padding:8px 16px 0">One row per year across the whole office history.</div>
-    <table><thead><tr><th>Year</th><th class="r">Periods</th><th class="r">Hours</th><th class="r">Wages</th><th class="r">Bonus</th><th class="r">Tips</th><th class="r">Gross</th><th class="r">Paid</th><th class="r">Owed</th></tr></thead><tbody id="yearly"></tbody></table>
+    <div class="table-scroll"><table><thead><tr><th>Year</th><th class="r">Periods</th><th class="r">Hours</th><th class="r">Wages</th><th class="r">Bonus</th><th class="r">Tips</th><th class="r">Gross</th><th class="r">Paid</th><th class="r">Owed</th></tr></thead><tbody id="yearly"></tbody></table></div>
   </div>
 </section>
 
@@ -801,7 +868,7 @@ tbody tr:hover{background:oklch(98% .005 84)}
     <div class="actions"><button class="btn soft" id="pdfRoles">Export rates PDF</button></div>
   </div>
   <div class="callout plain">Changing a rate here sets the standard for future hires and new hour entries. Use <b>Apply to all</b> to push a rate onto everyone currently holding that role. Already-saved period entries keep the rate they were logged at.</div>
-  <div class="card"><table><thead><tr><th>Role</th><th class="r">Staff</th><th class="r">Standard rate / hr</th><th class="r">Action</th></tr></thead><tbody id="roles"></tbody></table></div>
+  <div class="card"><table><thead><tr><th>Role</th><th class="r">Staff</th><th class="r">Avg logged / yr</th><th class="r">Standard rate / hr</th><th class="r">Action</th></tr></thead><tbody id="roles"></tbody></table></div>
 </section>
 
 <!-- BACKUP -->
@@ -991,10 +1058,15 @@ tbody tr:hover{background:oklch(98% .005 84)}
   <div class="field"><label>Description</label><textarea id="exDesc" placeholder="What was bought and why — enough detail for a rebate report"></textarea></div>
   <div class="field-row">
     <div class="field"><label>Receipt / reference</label><input id="exReceipt" placeholder="Optional receipt #, invoice, or note"></div>
-    <div class="field" style="display:flex;align-items:end;padding-bottom:4px">
-      <label class="checkline" style="margin:0"><input type="checkbox" id="exReimb" checked><span>Reimbursable / for rebate report</span></label>
+    <div class="field"><label>Rebate status</label>
+      <select id="exRebateStatus">
+        <option value="pending">Pending</option>
+        <option value="submitted">Submitted</option>
+        <option value="reimbursed">Reimbursed</option>
+      </select>
     </div>
   </div>
+  <label class="checkline"><input type="checkbox" id="exReimb" checked><span>Reimbursable / for rebate report</span></label>
   <div class="field"><label>Internal notes</label><textarea id="exNotes" placeholder="Optional — not printed on the rebate report"></textarea></div>
   <div class="dialog-foot">
     <button class="btn danger" id="deleteExpense" style="margin-right:auto;display:none">Delete</button>
@@ -1545,6 +1617,11 @@ function migrate(raw) {
 
 function normalizeExpense(x) {
   if (!x || typeof x !== 'object') return null;
+  const reimb = x.reimbursable !== false;
+  let rebateStatus = String(x.rebateStatus || '').toLowerCase();
+  if (!['pending', 'submitted', 'reimbursed'].includes(rebateStatus)) {
+    rebateStatus = reimb ? 'submitted' : 'pending';
+  }
   return {
     id: Number(x.id) || Date.now(),
     date: x.date || today(),
@@ -1554,9 +1631,17 @@ function normalizeExpense(x) {
     amount: Math.round(Number(x.amount || 0)),
     paidBy: String(x.paidBy || '').trim() || 'Samael Hesperus',
     receipt: String(x.receipt || '').trim(),
-    reimbursable: x.reimbursable !== false,
+    reimbursable: reimb,
+    rebateStatus,
     notes: String(x.notes || '').trim()
   };
+}
+
+const REBATE_STATUS = { pending: 'Pending', submitted: 'Submitted', reimbursed: 'Reimbursed' };
+function rebateStatusPill(st) {
+  if (st === 'reimbursed') return 'green';
+  if (st === 'submitted') return 'blue';
+  return 'warn';
 }
 
 function loadState() {
@@ -1644,6 +1729,43 @@ function save(opts) {
 }
 
 function toast(msg) { const t = $('toast'); t.textContent = msg; t.classList.add('show'); setTimeout(() => t.classList.remove('show'), 2200); }
+
+function maybeBackupNudge(reason) {
+  ensureMeta();
+  const last = s.meta && s.meta.lastExport;
+  let stale = !last;
+  if (last) {
+    const days = Math.floor((Date.now() - new Date(last).getTime()) / 86400000);
+    stale = isNaN(days) || days >= 7;
+  }
+  if (!stale) return;
+  setTimeout(() => toast('Tip: export a JSON backup from Backup after busy ' + (reason || 'desk') + ' work'), 2400);
+}
+
+function emptyState(msg, hint) {
+  return '<tr><td colspan="12" class="empty">' + esc(msg) +
+    (hint ? '<div class="history" style="margin-top:6px">' + esc(hint) + '</div>' : '') +
+    '</td></tr>';
+}
+
+function confirmDanger(action, detail) {
+  return confirm(action + (detail ? '\n\n' + detail : '') + '\n\nThis cannot be undone from an autosave alone — export a backup if you are unsure.');
+}
+
+function printOfficeHtml(title, html) {
+  $('printArea').innerHTML =
+    '<div class="print-meta" style="margin-bottom:8px">Frenchie\'s Restaurant · 8 Elgin Ave, Legion Square · HR office</div>' +
+    '<h1>' + esc(title) + '</h1>' +
+    '<div class="print-meta">Printed ' + today() + ' · Kenzie Long, HR Director</div>' +
+    html +
+    '<div class="print-meta" style="margin-top:24px;border-top:1px solid #ccc;padding-top:8px">Frenchie\'s office desk · Payday Sunday 9:00 AM from the house</div>';
+  window.print();
+}
+
+function goView(view) {
+  const btn = document.querySelector('[data-view="' + view + '"]');
+  if (btn) btn.click();
+}
 function log(text) {
   if (!s.activity) s.activity = [];
   s.activity.unshift({ text, date: today(), at: new Date().toISOString() });
@@ -1862,13 +1984,39 @@ function statusClass(st) {
 }
 function paperKindsFor(a) {
   const idx = STAGE_ORDER.indexOf(a.stage);
+  const hired = a.stage === 'hired' || !!a.employeeId;
   const out = ['application', 'screening'];
-  if (idx >= 2) out.push('invite', 'interviewIc', 'interviewOoc');
-  if (idx >= 3) out.push('offer', 'contract');
-  if (idx >= 4) out.push('packet');
+  if (idx >= 2 || hired) out.push('invite', 'interviewIc', 'interviewOoc');
+  if (idx >= 3 || hired) out.push('offer');
+  /* Contract + packet only after hire (Paper path) */
+  if (hired) out.push('contract', 'packet');
   if (a.stage === 'rejected') out.push('decline');
   Object.keys(a.paperwork || {}).forEach(k => { if (PAPER_KINDS[k] && out.indexOf(k) < 0) out.push(k); });
   return PAPER_ORDER.filter(k => out.indexOf(k) > -1);
+}
+
+function nextHireAction(a) {
+  if (!a) return '—';
+  if (a.stage === 'rejected') return 'Closed';
+  if (a.stage === 'hired') {
+    const e = a.employeeId ? empById(a.employeeId) : null;
+    if (!e) return 'Open employee file';
+    if (!empHasSignedContract(e)) return 'Send contract';
+    if (!empHasPacket(e)) return 'File & send packet';
+    return 'On roster';
+  }
+  ensurePaperwork(a);
+  const app = a.paperwork.application;
+  if (!app || !app.reply) return 'Send application';
+  if (!eligible(a)) return 'Clear eligibility';
+  if (STAGE_ORDER.indexOf(a.stage) < 2) return 'Move to interview';
+  const inv = a.paperwork.invite;
+  if (!inv || !inv.reply) return 'Send invitation';
+  const offer = a.paperwork.offer;
+  if (!offer || !offer.reply) return a.stage === 'offer' ? 'Awaiting offer reply' : 'Send offer';
+  if (offer.sendStatus === 'accepted' || (offer.reply && offer.reply.decision === 'accept')) return 'Ready to hire';
+  if (offer.sendStatus === 'declined') return 'Offer declined';
+  return 'Review paperwork';
 }
 function paperSummary(a) {
   const pw = (a && a.paperwork) || {};
@@ -2039,7 +2187,7 @@ function buildTodos() {
 
     if (e.probationEnd) {
       const d = daysBetween(t, e.probationEnd);
-      if (d <= 7) {
+      if (d <= 2) {
         bits.push(d < 0
           ? 'probation ended ' + Math.abs(d) + ' day(s) ago — review overdue'
           : d === 0 ? 'probation ends today — review due' : 'probation ends in ' + d + ' day(s)');
@@ -2275,7 +2423,9 @@ function render() {
   renderAttention();
 
   $('activity').innerHTML = s.activity.slice(0, 8).map(x =>
-    '<div class="log-row"><i class="dot"></i><span>' + esc(x.text) + '</span><span class="date">' + esc(x.date) + '</span></div>'
+    '<div class="log-row"><i class="dot"></i><span>' + esc(x.text) + '</span>' +
+    activityOpenLink(x.text) +
+    '<span class="date">' + esc(x.date) + '</span></div>'
   ).join('') || '<div class="empty">Nothing logged yet.</div>';
 
   renderPeriods();
@@ -2294,7 +2444,9 @@ function render() {
   updateSaveBadge();
 
   $('fullActivity').innerHTML = s.activity.map(x =>
-    '<div class="log-row"><i class="dot"></i><span>' + esc(x.text) + '</span><span class="date">' + esc(x.date) + '</span></div>'
+    '<div class="log-row"><i class="dot"></i><span>' + esc(x.text) + '</span>' +
+    activityOpenLink(x.text) +
+    '<span class="date">' + esc(x.date) + '</span></div>'
   ).join('') || '<div class="empty">Nothing logged yet.</div>';
 }
 
@@ -2415,10 +2567,12 @@ function renderHiring() {
   $('mInt').textContent = s.applications.filter(a => a.stage === 'interview').length;
   $('mOffer').textContent = s.applications.filter(a => a.stage === 'offer').length;
 
+  const hq = ($('hireSearch') && $('hireSearch').value || '').trim().toLowerCase();
   const list = s.applications.filter(a => {
     const closed = ['hired', 'rejected'].includes(a.stage);
-    if (hireFilter === 'pipeline') return !closed;
-    if (hireFilter === 'closed') return closed;
+    if (hireFilter === 'pipeline' && closed) return false;
+    if (hireFilter === 'closed' && !closed) return false;
+    if (hq && !String(a.name || '').toLowerCase().includes(hq)) return false;
     return true;
   });
   $('appCount').textContent = list.length + ' shown · ' + s.applications.length + ' total';
@@ -2437,10 +2591,12 @@ function renderHiring() {
       : (canAdvance ? '<button class="btn tiny" onclick="advanceApp(' + a.id + ')">&rarr; ' + esc(STAGES[STAGE_ORDER[idx + 1]]) + '</button> ' : '') +
         '<button class="btn tiny danger" onclick="rejectApp(' + a.id + ')">Reject</button>';
     const ps = paperSummary(a);
+    const nextAct = nextHireAction(a);
     const paperCell = '<div class="paper-actions">' +
       '<span class="pill ' + statusClass(ps.status) + '">' + esc(ps.status === 'none' ? 'none' : ps.status) + '</span>' +
       '<button class="btn tiny" onclick="openAppPaper(' + a.id + ')">Paperwork</button></div>' +
-      (ps.docs ? '<div class="history">' + ps.docs + ' on file &middot; ' + ps.sent + ' sent &middot; ' + ps.replies + ' returned</div>' : '');
+      '<div class="history">' + esc(nextAct) +
+      (ps.docs ? ' · ' + ps.docs + ' on file · ' + ps.sent + ' sent · ' + ps.replies + ' returned' : '') + '</div>';
     return '<tr>' +
       '<td class="name">' + esc(a.name) + '</td>' +
       '<td>' + stagePill(a.stage) + '</td>' +
@@ -2451,9 +2607,10 @@ function renderHiring() {
       '<td class="r">' + moveBtns + '</td>' +
       '<td class="r"><button class="btn tiny" onclick="editApp(' + a.id + ')">Open</button> <button class="btn tiny danger" onclick="deleteApplication(' + a.id + ')">Delete</button></td>' +
       '</tr>';
-  }).join('') : '<tr><td colspan="8" class="empty">' +
-    (hireFilter === 'closed' ? 'No closed files yet.' : (hireFilter === 'pipeline' ? 'No open applications. Click New application.' : 'No applications on the desk.')) +
-    '</td></tr>';
+  }).join('') : emptyState(
+    hireFilter === 'closed' ? 'No closed files yet.' : (hireFilter === 'pipeline' ? 'No open applications.' : 'No applications on the desk.'),
+    hireFilter === 'pipeline' ? 'Click New application to start a hire.' : ''
+  );
 
   renderFiledReplies();
   if ($('paperModal').classList.contains('open') && paperAppId != null && findApp(paperAppId)) renderPaperList(paperAppId);
@@ -2640,7 +2797,7 @@ function renderFiledReplies() {
       '<td class="r"><button class="btn tiny" onclick="viewFiledReply(' + i + ')">Read</button> ' +
       '<button class="btn tiny" onclick="openAppPaper(' + r.appId + ')">Paperwork</button></td>' +
       '</tr>'
-  ).join('') : '<tr><td colspan="6" class="empty">No replies filed yet. Import a completed .html reply from an applicant.</td></tr>';
+  ).join('') : emptyState('No replies filed yet.', 'Import a completed .html reply from an applicant.');
   window.__filedRows = rows;
 }
 
@@ -2759,7 +2916,10 @@ function renderEvents() {
     const tot = Object.values(ev.bonuses || {}).reduce((a, b) => a + Number(b || 0), 0);
     const applied = ev.appliedToPeriodId ? (() => {
       const p = s.periods.find(x => String(x.id) === String(ev.appliedToPeriodId));
-      return '<span class="pill green">' + esc(p ? shortLabel(p) : 'applied') + '</span>';
+      const idx = p ? s.periods.indexOf(p) : -1;
+      return idx >= 0
+        ? '<button class="btn tiny" onclick="jump(' + idx + ')">' + esc(p ? shortLabel(p) : 'applied') + '</button>'
+        : '<span class="pill green">applied</span>';
     })() : '<span class="pill gray">not applied</span>';
     return '<tr>' +
       '<td>' + esc(ev.date) + '</td>' +
@@ -2770,7 +2930,7 @@ function renderEvents() {
       '<td>' + applied + '</td>' +
       '<td class="r"><button class="btn tiny" onclick="editEvent(' + ev.id + ')">Edit</button> <button class="btn tiny danger" onclick="delEvent(' + ev.id + ')">Delete</button></td>' +
       '</tr>';
-  }).join('') : '<tr><td colspan="7" class="empty">No events logged.</td></tr>';
+  }).join('') : emptyState('No events logged.', 'Log raffles and shift bonuses from Events.');
 }
 
 /* ---------------- expenses ---------------- */
@@ -2792,16 +2952,30 @@ function expenseMonthLabel(ym) {
   return d.toLocaleDateString('en-US', { month: 'long', year: 'numeric' });
 }
 
-function filteredExpenses() {
+function filteredExpenses(opts) {
+  opts = opts || {};
   ensureMeta();
-  const month = $('expMonth') ? $('expMonth').value : '';
-  const cat = $('expCategory') ? $('expCategory').value : '';
-  const reimb = $('expReimbFilter') ? $('expReimbFilter').value : '';
+  const month = opts.month != null ? opts.month : ($('expMonth') ? $('expMonth').value : '');
+  const cat = opts.category != null ? opts.category : ($('expCategory') ? $('expCategory').value : '');
+  const reimb = opts.reimb != null ? opts.reimb : ($('expReimbFilter') ? $('expReimbFilter').value : '');
+  const status = opts.status != null ? opts.status : ($('expStatusFilter') ? $('expStatusFilter').value : '');
+  const paidBy = opts.paidBy != null ? opts.paidBy : ($('expPaidByFilter') ? $('expPaidByFilter').value : '');
+  const q = (opts.q != null ? opts.q : ($('expSearch') ? $('expSearch').value : '')).trim().toLowerCase();
+  const from = opts.from != null ? opts.from : ($('expFrom') ? $('expFrom').value : '');
+  const to = opts.to != null ? opts.to : ($('expTo') ? $('expTo').value : '');
   return (s.expenses || []).filter(x => {
-    if (month && expenseMonthKey(x.date) !== month) return false;
+    if (from && String(x.date) < String(from)) return false;
+    if (to && String(x.date) > String(to)) return false;
+    if (!from && !to && month && expenseMonthKey(x.date) !== month) return false;
     if (cat && x.category !== cat) return false;
     if (reimb === 'yes' && !x.reimbursable) return false;
     if (reimb === 'no' && x.reimbursable) return false;
+    if (status && (x.rebateStatus || 'pending') !== status) return false;
+    if (paidBy && String(x.paidBy || '') !== paidBy) return false;
+    if (q) {
+      const hay = [x.vendor, x.description, x.receipt, x.notes, x.paidBy, expenseCatLabel(x.category)].join(' ').toLowerCase();
+      if (!hay.includes(q)) return false;
+    }
     return true;
   }).slice().sort((a, b) => String(b.date).localeCompare(String(a.date)) || (b.id - a.id));
 }
@@ -2825,6 +2999,18 @@ function fillExpenseFilters() {
   $('expCategory').innerHTML = '<option value="">All categories</option>' + Object.entries(EXPENSE_CATS).map(([k, lab]) =>
     '<option value="' + k + '"' + (k === curC ? ' selected' : '') + '>' + esc(lab) + '</option>'
   ).join('');
+
+  if ($('expPaidByFilter')) {
+    const curP = $('expPaidByFilter').value;
+    const people = {};
+    (s.expenses || []).forEach(x => { if (x.paidBy) people[x.paidBy] = true; });
+    activeEmployees().forEach(e => { people[e.name] = true; });
+    people['Samael Hesperus'] = true;
+    const names = Object.keys(people).sort((a, b) => a.localeCompare(b));
+    $('expPaidByFilter').innerHTML = '<option value="">All paid by</option>' + names.map(n =>
+      '<option value="' + esc(n) + '"' + (n === curP ? ' selected' : '') + '>' + esc(n) + '</option>'
+    ).join('');
+  }
 }
 
 function fillExpenseCategorySelect(sel, val) {
@@ -2842,11 +3028,17 @@ function renderExpenses() {
   const total = list.reduce((a, x) => a + Number(x.amount || 0), 0);
   const reimb = list.filter(x => x.reimbursable).reduce((a, x) => a + Number(x.amount || 0), 0);
   const byCat = {};
+  const byPaid = {};
   list.forEach(x => {
     if (!byCat[x.category]) byCat[x.category] = { n: 0, t: 0, r: 0 };
     byCat[x.category].n++;
     byCat[x.category].t += Number(x.amount || 0);
     if (x.reimbursable) byCat[x.category].r += Number(x.amount || 0);
+    const pb = x.paidBy || '—';
+    if (!byPaid[pb]) byPaid[pb] = { n: 0, t: 0, r: 0 };
+    byPaid[pb].n++;
+    byPaid[pb].t += Number(x.amount || 0);
+    if (x.reimbursable) byPaid[pb].r += Number(x.amount || 0);
   });
   const top = Object.entries(byCat).sort((a, b) => b[1].t - a[1].t)[0];
 
@@ -2858,10 +3050,15 @@ function renderExpenses() {
   if ($('expCatLabel')) $('expCatLabel').textContent = list.length ? money(total) : 'No rows';
 
   const bits = [];
-  if ($('expMonth') && $('expMonth').value) bits.push(expenseMonthLabel($('expMonth').value));
+  if ($('expSearch') && $('expSearch').value.trim()) bits.push('search');
+  if ($('expFrom') && $('expFrom').value) bits.push('from ' + $('expFrom').value);
+  if ($('expTo') && $('expTo').value) bits.push('to ' + $('expTo').value);
+  if ($('expMonth') && $('expMonth').value && !($('expFrom') && $('expFrom').value) && !($('expTo') && $('expTo').value)) bits.push(expenseMonthLabel($('expMonth').value));
   if ($('expCategory') && $('expCategory').value) bits.push(expenseCatLabel($('expCategory').value));
+  if ($('expPaidByFilter') && $('expPaidByFilter').value) bits.push($('expPaidByFilter').value);
   if ($('expReimbFilter') && $('expReimbFilter').value === 'yes') bits.push('reimbursable');
   if ($('expReimbFilter') && $('expReimbFilter').value === 'no') bits.push('not reimbursable');
+  if ($('expStatusFilter') && $('expStatusFilter').value) bits.push(REBATE_STATUS[$('expStatusFilter').value] || $('expStatusFilter').value);
   if ($('expFilterLabel')) $('expFilterLabel').textContent = bits.length ? bits.join(' · ') : 'Showing all';
 
   $('expenses').innerHTML = list.length ? list.map(x =>
@@ -2875,9 +3072,12 @@ function renderExpenses() {
     '<td>' + esc(x.paidBy || '—') + '</td>' +
     '<td class="r mono">' + money(x.amount) + '</td>' +
     '<td>' + (x.reimbursable ? '<span class="pill green">yes</span>' : '<span class="pill gray">no</span>') + '</td>' +
-    '<td class="r"><button class="btn tiny" onclick="editExpense(' + x.id + ')">Edit</button> <button class="btn tiny danger" onclick="delExpense(' + x.id + ')">Delete</button></td>' +
+    '<td><span class="pill ' + rebateStatusPill(x.rebateStatus) + '">' + esc(REBATE_STATUS[x.rebateStatus] || x.rebateStatus || 'Pending') + '</span></td>' +
+    '<td class="r"><button class="btn tiny" onclick="editExpense(' + x.id + ')">Edit</button> ' +
+    '<button class="btn tiny" onclick="dupeExpense(' + x.id + ')">Duplicate</button> ' +
+    '<button class="btn tiny danger" onclick="delExpense(' + x.id + ')">Delete</button></td>' +
     '</tr>'
-  ).join('') : '<tr><td colspan="7" class="empty">No expenses match. Log food, drink, furniture, Weazel ads, map markers, permits, and more.</td></tr>';
+  ).join('') : emptyState('No expenses match.', 'Log food, drink, Weazel ads, permits, and more.');
 
   const catRows = Object.keys(EXPENSE_CATS).filter(k => byCat[k]).concat(Object.keys(byCat).filter(k => !EXPENSE_CATS[k]));
   $('expByCat').innerHTML = catRows.length
@@ -2886,8 +3086,54 @@ function renderExpenses() {
       return '<tr><td class="name">' + esc(expenseCatLabel(k)) + '</td><td class="r">' + c.n + '</td><td class="r mono">' + money(c.t) + '</td><td class="r mono">' + money(c.r) + '</td></tr>';
     }).join('') +
     '<tr class="total"><td>Total</td><td class="r">' + list.length + '</td><td class="r mono">' + money(total) + '</td><td class="r mono">' + money(reimb) + '</td></tr>'
-    : '<tr><td colspan="4" class="empty">Nothing to summarize yet.</td></tr>';
+    : emptyState('Nothing to summarize yet.');
+
+  if ($('expByPaid')) {
+    const paidRows = Object.keys(byPaid).sort((a, b) => byPaid[b].t - byPaid[a].t);
+    $('expByPaid').innerHTML = paidRows.length
+      ? paidRows.map(k => {
+        const c = byPaid[k];
+        return '<tr><td class="name">' + esc(k) + '</td><td class="r">' + c.n + '</td><td class="r mono">' + money(c.t) + '</td><td class="r mono">' + money(c.r) + '</td></tr>';
+      }).join('') +
+      '<tr class="total"><td>Total</td><td class="r">' + list.length + '</td><td class="r mono">' + money(total) + '</td><td class="r mono">' + money(reimb) + '</td></tr>'
+      : emptyState('Nothing to summarize yet.');
+  }
+
+  if ($('expBars')) {
+    const byM = {};
+    list.forEach(x => {
+      const k = expenseMonthKey(x.date);
+      if (!k) return;
+      byM[k] = (byM[k] || 0) + Number(x.amount || 0);
+    });
+    const keys = Object.keys(byM).sort().slice(-12);
+    const max = Math.max(0, ...keys.map(k => byM[k]));
+    $('expBars').innerHTML = keys.length ? keys.map(k =>
+      '<div style="flex:1;height:100%;display:flex;flex-direction:column;justify-content:end;align-items:center;gap:3px">' +
+      '<span style="font-size:.52rem;color:var(--navy);font-family:\'JetBrains Mono\',monospace">' + (byM[k] ? money(byM[k]) : '') + '</span>' +
+      '<div style="width:70%;height:' + (max ? Math.max(2, byM[k] / max * 90) : 2) + 'px;background:var(--navy);border-radius:4px 4px 0 0"></div>' +
+      '<span style="font-size:.55rem;color:var(--muted)">' + esc(k.slice(5)) + '</span></div>'
+    ).join('') : '<div class="empty" style="width:100%">No spend in this filter.</div>';
+    if ($('expBarsLabel')) $('expBarsLabel').textContent = keys.length ? keys.length + ' months' : 'Filtered';
+  }
 }
+
+window.dupeExpense = function (id) {
+  const x = (s.expenses || []).find(e => e.id === id);
+  if (!x) return;
+  openExpenseForm(null);
+  fillExpenseCategorySelect($('exCategory'), x.category);
+  $('exDate').value = today();
+  $('exAmount').value = x.amount || 0;
+  $('exPaidBy').value = x.paidBy || 'Samael Hesperus';
+  $('exVendor').value = x.vendor || '';
+  $('exDesc').value = x.description || '';
+  $('exReceipt').value = x.receipt || '';
+  $('exReimb').checked = !!x.reimbursable;
+  if ($('exRebateStatus')) $('exRebateStatus').value = x.rebateStatus || 'pending';
+  $('exNotes').value = x.notes || '';
+  toast('Duplicated — edit and save as a new expense');
+};
 
 function openExpenseForm(id) {
   expenseId = id || null;
@@ -2904,6 +3150,7 @@ function openExpenseForm(id) {
     $('exDesc').value = x.description || '';
     $('exReceipt').value = x.receipt || '';
     $('exReimb').checked = !!x.reimbursable;
+    if ($('exRebateStatus')) $('exRebateStatus').value = x.rebateStatus || 'pending';
     $('exNotes').value = x.notes || '';
     $('deleteExpense').style.display = 'inline-block';
   } else {
@@ -2915,17 +3162,19 @@ function openExpenseForm(id) {
     $('exDesc').value = '';
     $('exReceipt').value = '';
     $('exReimb').checked = true;
+    if ($('exRebateStatus')) $('exRebateStatus').value = 'pending';
     $('exNotes').value = '';
     $('deleteExpense').style.display = 'none';
   }
   $('expenseModal').classList.add('open');
+  setTimeout(() => { const f = $('exVendor') || $('exAmount'); if (f) f.focus(); }, 30);
 }
 
 window.editExpense = function (id) { openExpenseForm(id); };
 window.delExpense = function (id) {
   const x = (s.expenses || []).find(e => e.id === id);
   if (!x) return;
-  if (!confirm('Delete this expense — ' + money(x.amount) + ' · ' + (x.vendor || expenseCatLabel(x.category)) + '?')) return;
+  if (!confirmDanger('Delete this expense — ' + money(x.amount) + ' · ' + (x.vendor || expenseCatLabel(x.category)) + '?', 'It will leave the expense log.')) return;
   s.expenses = s.expenses.filter(e => e.id !== id);
   log('Deleted expense: ' + (x.vendor || expenseCatLabel(x.category)) + ' · ' + money(x.amount));
   save(); render(); toast('Expense deleted');
@@ -2978,10 +3227,32 @@ function buildExpenseReportHtml(list) {
     '(food, drink, furniture, advertising, map markers, permits, and related costs). Attach receipts where available.</p>';
 }
 
-function printExpenseReport() {
-  const list = filteredExpenses();
+function printExpenseReport(list) {
+  list = list || filteredExpenses();
   if (!list.length) return toast('Nothing to print — log expenses or clear filters');
-  printHtml('Expense report', buildExpenseReportHtml(list));
+  printOfficeHtml('Expense report', buildExpenseReportHtml(list));
+  maybeBackupNudge('expense');
+}
+
+function printReimbursablePack() {
+  const list = filteredExpenses({ reimb: 'yes' }).filter(x => (x.rebateStatus || 'pending') !== 'reimbursed');
+  if (!list.length) return toast('No reimbursable pending/submitted expenses to print');
+  printOfficeHtml('Reimbursable expense pack', buildExpenseReportHtml(list));
+  maybeBackupNudge('expense');
+  toast('Reimbursable pack ready to print');
+}
+
+function exportExpensesCsv() {
+  const list = filteredExpenses();
+  if (!list.length) return toast('Nothing to export');
+  const rows = [['date', 'category', 'vendor', 'description', 'paid_by', 'amount', 'reimbursable', 'rebate_status', 'receipt', 'notes']];
+  list.forEach(x => rows.push([x.date, x.category, x.vendor, x.description, x.paidBy, x.amount, !!x.reimbursable, x.rebateStatus || '', x.receipt, x.notes]));
+  const blob = new Blob([rows.map(r => r.map(v => '"' + String(v).split('"').join('""') + '"').join(',')).join('\r\n')], { type: 'text/csv' });
+  const a = document.createElement('a');
+  a.href = URL.createObjectURL(blob);
+  a.download = 'frenchies-expenses-' + today() + '.csv';
+  a.click();
+  toast('Expenses CSV downloaded');
 }
 
 function renderRelations() {
@@ -3001,7 +3272,14 @@ function renderRelations() {
     return '<tr><td class="name">' + esc(e.name) + '</td><td>' + esc(e.role) + '</td><td>' + pillStatus(e.status) + '</td><td class="r mono">' + e.strikes + '</td><td>' + standing + '</td></tr>';
   }).join('') || '<tr><td colspan="5" class="empty">No staff on file.</td></tr>';
 
-  $('relations').innerHTML = s.relations.length ? s.relations.map(r => {
+  const rq = ($('relSearch') && $('relSearch').value || '').trim().toLowerCase();
+  const relList = s.relations.filter(r => {
+    if (!rq) return true;
+    const e = empById(r.empId);
+    const hay = [(e && e.name) || '', r.reason || '', REL_TYPES[r.type] || r.type, r.issuedBy || ''].join(' ').toLowerCase();
+    return hay.includes(rq);
+  });
+  $('relations').innerHTML = relList.length ? relList.map(r => {
     const e = empById(r.empId);
     const typePill = r.type === 'commendation' ? 'green' : r.type === 'termination' ? 'danger' : 'warn';
     let follow = '—';
@@ -3009,19 +3287,22 @@ function renderRelations() {
       if (r.resolved) follow = '<span class="pill green">resolved</span>';
       else {
         const d = daysBetween(t, r.followUp);
-        follow = '<span class="pill ' + (d < 0 ? 'danger' : 'warn') + '">' + esc(r.followUp) + '</span>';
+        follow = '<span class="pill ' + (d < 0 ? 'danger' : 'warn') + '">' + esc(r.followUp) + (d < 0 ? ' · overdue' : '') + '</span>';
       }
     }
-    return '<tr>' +
+    const overdue = r.followUp && !r.resolved && daysBetween(t, r.followUp) < 0;
+    return '<tr' + (overdue ? ' style="background:var(--dangerwash)"' : '') + '>' +
       '<td>' + esc(r.date) + '</td>' +
-      '<td class="name">' + esc(e ? e.name : 'Former staff') + '</td>' +
+      '<td class="name">' + (e ? '<button class="btn tiny" onclick="editEmployee(' + e.id + ')">' + esc(e.name) + '</button>' : 'Former staff') + '</td>' +
       '<td><span class="pill ' + typePill + '">' + esc(REL_TYPES[r.type] || r.type) + '</span></td>' +
       '<td style="white-space:normal;max-width:320px">' + esc(r.reason || '') + '</td>' +
       '<td>' + esc(r.issuedBy || '') + '</td>' +
       '<td>' + follow + '</td>' +
-      '<td class="r"><button class="btn tiny" onclick="editRelation(' + r.id + ')">Edit</button> <button class="btn tiny danger" onclick="deleteRelation(' + r.id + ')">Delete</button></td>' +
+      '<td class="r"><button class="btn tiny" onclick="editRelation(' + r.id + ')">Edit</button> ' +
+      (e ? '<button class="btn tiny" onclick="editEmployee(' + e.id + ')">File</button> ' : '') +
+      '<button class="btn tiny danger" onclick="deleteRelation(' + r.id + ')">Delete</button></td>' +
       '</tr>';
-  }).join('') : '<tr><td colspan="7" class="empty">Nothing on file. A clean week.</td></tr>';
+  }).join('') : emptyState('Nothing on file.', 'A clean week — or clear the search.');
 }
 
 function renderShifts() {
@@ -3044,19 +3325,38 @@ function renderShifts() {
 
 function renderLicenses() {
   const licPill = st => ({ active: 'green', pending: 'warn', expired: 'danger', note: 'gray' }[st] || 'gray');
-  $('licenses').innerHTML = s.licenses.length ? s.licenses.map(l =>
-    '<tr>' +
-    '<td class="name">' + esc(l.name) + '</td>' +
-    '<td><span class="pill ' + licPill(l.status) + '">' + esc(l.status) + '</span></td>' +
-    '<td>' + esc(l.issued || '—') + '</td>' +
-    '<td>' + esc(l.expires || '—') + '</td>' +
-    '<td style="white-space:normal">' + esc(l.notes || '') + '</td>' +
-    '<td class="r"><button class="btn tiny" onclick="editLic(' + l.id + ')">Edit</button> <button class="btn tiny danger" onclick="deleteLicense(' + l.id + ')">Delete</button></td>' +
-    '</tr>'
-  ).join('') : '<tr><td colspan="6" class="empty">No licenses on file.</td></tr>';
+  const filter = ($('licFilter') && $('licFilter').value) || '';
+  const t = today();
+  const list = (s.licenses || []).filter(l => {
+    if (!filter) return true;
+    if (filter === 'expired') {
+      if (l.status === 'expired') return true;
+      if (l.expires && daysBetween(t, l.expires) <= 14) return true;
+      return false;
+    }
+    return l.status === filter;
+  });
+  $('licenses').innerHTML = list.length ? list.map(l => {
+    let st = l.status;
+    let tone = licPill(st);
+    if (l.expires && st !== 'expired') {
+      const d = daysBetween(t, l.expires);
+      if (d < 0) { st = 'expired'; tone = 'danger'; }
+      else if (d <= 14) tone = 'warn';
+    }
+    return '<tr>' +
+      '<td class="name">' + esc(l.name) + '</td>' +
+      '<td><span class="pill ' + tone + '">' + esc(st) + '</span></td>' +
+      '<td>' + esc(l.issued || '—') + '</td>' +
+      '<td>' + esc(l.expires || '—') + '</td>' +
+      '<td style="white-space:normal">' + esc(l.notes || '') + '</td>' +
+      '<td class="r"><button class="btn tiny" onclick="editLic(' + l.id + ')">Edit</button> <button class="btn tiny danger" onclick="deleteLicense(' + l.id + ')">Delete</button></td>' +
+      '</tr>';
+  }).join('') : emptyState('No licenses match.', 'Add business licenses under Compliance.');
 }
 
 function renderMonthly() {
+  if (!$('ytd')) return;
   const ms = ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec'];
   const ledger = buildPayrollLedger();
   const years = Object.keys(ledger).map(Number).sort((a, b) => b - a);
@@ -3076,6 +3376,8 @@ function renderMonthly() {
   const ytdBucket = (through && periodYear(through) === year)
     ? yearYtdThrough(year, through)
     : row;
+  const prior = ledger[year - 1];
+  const yoy = prior && prior.g ? ((ytdBucket.g - prior.g) / prior.g * 100) : null;
 
   $('ytd').textContent = money(ytdBucket.g);
   if ($('ytdSub')) {
@@ -3084,26 +3386,57 @@ function renderMonthly() {
       : year + ' · full year';
   }
   if ($('yearPaid')) $('yearPaid').textContent = money(ytdBucket.paid);
+  if ($('yoySub')) {
+    $('yoySub').textContent = yoy == null ? 'No prior year' :
+      ((yoy >= 0 ? '+' : '') + yoy.toFixed(0) + '% vs ' + (year - 1));
+  }
   if ($('yearOwed')) $('yearOwed').textContent = money(ytdBucket.owed);
   if ($('yearWages')) $('yearWages').textContent = money(row.w);
   if ($('yearBonus')) $('yearBonus').textContent = money(row.b);
   if ($('yearTips')) $('yearTips').textContent = money(row.t);
   if ($('yearHours')) $('yearHours').textContent = dec(row.h);
+  if ($('wageShare')) $('wageShare').textContent = row.g ? Math.round(row.w / row.g * 100) + '% of gross' : 'Share of gross';
+  if ($('tipShare')) $('tipShare').textContent = row.g ? Math.round(row.t / row.g * 100) + '% of gross' : 'Share of gross';
 
-  const max = Math.max(0, ...months.map(x => x.g));
-  const hiIdx = months.findIndex(x => x.g === max && max > 0);
+  const yearExp = (s.expenses || []).filter(x => String(x.date || '').startsWith(String(year)));
+  const expTotal = yearExp.reduce((a, x) => a + Number(x.amount || 0), 0);
+  const expReimb = yearExp.filter(x => x.reimbursable).reduce((a, x) => a + Number(x.amount || 0), 0);
+  if ($('yearExpenses')) $('yearExpenses').textContent = money(expTotal);
+  if ($('yearExpReimb')) $('yearExpReimb').textContent = 'Reimbursable ' + money(expReimb);
+  if ($('houseSpend')) $('houseSpend').textContent = money(row.g + expTotal);
+
+  const activeN = s.employees.filter(e => e.status === 'active').length;
+  const probN = s.employees.filter(e => e.status === 'probation').length;
+  const suspN = s.employees.filter(e => e.status === 'suspended').length;
+  if ($('yearHeadcount')) $('yearHeadcount').textContent = String(activeN + probN + suspN);
+  if ($('yearHeadSub')) $('yearHeadSub').textContent = activeN + ' active · ' + probN + ' probation · ' + suspN + ' suspended';
+
+  const openN = (row.periods || []).filter(p => p.status === 'open').length;
+  const closedN = (row.periods || []).filter(p => p.status === 'closed').length;
+  if ($('yearPeriodSnap')) $('yearPeriodSnap').textContent = String(row.p || 0);
+  if ($('yearPeriodSub')) $('yearPeriodSub').textContent = openN + ' open · ' + closedN + ' closed · owed ' + money(row.owed);
+
+  const barMode = ($('barMode') && $('barMode').value) || 'g';
+  const barVals = months.map(x => barMode === 'h' ? x.h : (barMode === 't' ? x.t : x.g));
+  const max = Math.max(0, ...barVals);
+  const hiIdx = months.findIndex(x => x.g === Math.max(0, ...months.map(m => m.g)) && Math.max(0, ...months.map(m => m.g)) > 0);
   $('high').textContent = hiIdx >= 0 ? ms[hiIdx] : '—';
-  if ($('highSub')) $('highSub').textContent = hiIdx >= 0 ? money(max) + ' · ' + year : 'Gross payroll';
+  if ($('highSub')) $('highSub').textContent = hiIdx >= 0 ? money(months[hiIdx].g) + ' · ' + year : 'Gross payroll';
   if ($('barsYearLabel')) $('barsYearLabel').textContent = String(year);
   if ($('monthlyYearLabel')) $('monthlyYearLabel').textContent = String(year);
   if ($('periodYearLabel')) $('periodYearLabel').textContent = row.p + ' period' + (row.p === 1 ? '' : 's') + ' · ' + year;
+  if ($('staffRankLabel')) $('staffRankLabel').textContent = String(year);
 
-  $('bars').innerHTML = months.map((x, i) =>
-    '<div style="flex:1;height:100%;display:flex;flex-direction:column;justify-content:end;align-items:center;gap:4px">' +
-    '<span style="font-size:.55rem;color:var(--navy);font-family:\'JetBrains Mono\',monospace">' + (x.g ? money(x.g) : '') + '</span>' +
-    '<div style="width:70%;height:' + (max ? Math.max(2, x.g / max * 110) : 2) + 'px;background:var(--navy);border-radius:4px 4px 0 0"></div>' +
-    '<span style="font-size:.58rem;color:var(--muted)">' + ms[i] + '</span></div>'
-  ).join('');
+  if ($('bars')) {
+    $('bars').innerHTML = months.map((x, i) => {
+      const v = barVals[i];
+      const label = barMode === 'h' ? dec(v) : (v ? money(v) : '');
+      return '<div style="flex:1;height:100%;display:flex;flex-direction:column;justify-content:end;align-items:center;gap:4px">' +
+        '<span style="font-size:.55rem;color:var(--navy);font-family:\'JetBrains Mono\',monospace">' + label + '</span>' +
+        '<div style="width:70%;height:' + (max ? Math.max(2, v / max * 110) : 2) + 'px;background:var(--navy);border-radius:4px 4px 0 0"></div>' +
+        '<span style="font-size:.58rem;color:var(--muted)">' + ms[i] + '</span></div>';
+    }).join('');
+  }
 
   const monthRows = months.map((x, i) => {
     if (!x.p) return '<tr><td>' + ms[i] + '</td><td class="r">—</td><td class="r">—</td><td class="r">—</td><td class="r">—</td><td class="r">—</td><td class="r">—</td><td class="r">—</td><td class="r">—</td></tr>';
@@ -3130,7 +3463,43 @@ function renderMonthly() {
     '<td class="r mono">' + money(row.paid) + '</td>' +
     '<td class="r mono">' + money(row.owed) + '</td></tr>'
   );
-  $('monthly').innerHTML = monthRows.join('');
+  if ($('monthly')) $('monthly').innerHTML = monthRows.join('');
+
+  /* Staff ranking + role rollup */
+  const throughFake = { start: year + '-12-31' };
+  const staff = s.employees.map(e => {
+    const tot = employeeYtdTotals(e.id, throughFake);
+    // only periods in this year — employeeYtdTotals uses throughPeriod year
+    return { e, tot };
+  }).filter(x => x.tot.g > 0 || x.tot.h > 0).sort((a, b) => b.tot.g - a.tot.g);
+  // Fix: employeeYtdTotals uses periodYear(through) — Dec 31 of year works
+  if ($('staffRank')) {
+    $('staffRank').innerHTML = staff.length
+      ? staff.map(({ e, tot }) =>
+        '<tr><td class="name"><button class="btn tiny" onclick="editEmployee(' + e.id + ')">' + esc(e.name) + '</button><div class="history">' + esc(e.role) + '</div></td>' +
+        '<td class="r mono">' + dec(tot.h) + '</td><td class="r mono">' + money(tot.w) + '</td><td class="r mono">' + money(tot.b) + '</td><td class="r mono">' + money(tot.t) + '</td>' +
+        '<td class="r mono">' + money(tot.g) + '</td><td class="r mono">' + money(tot.paid) + '</td><td class="r mono">' + (tot.owed ? money(tot.owed) : '—') + '</td></tr>'
+      ).join('')
+      : emptyState('No staff pay in ' + year + '.');
+  }
+  if ($('roleRollup')) {
+    const byRole = {};
+    staff.forEach(({ e, tot }) => {
+      const r = e.role || '—';
+      if (!byRole[r]) byRole[r] = emptyEmpPayTotals();
+      byRole[r].h += tot.h; byRole[r].w += tot.w; byRole[r].b += tot.b; byRole[r].t += tot.t;
+      byRole[r].g += tot.g; byRole[r].paid += tot.paid; byRole[r].owed += tot.owed;
+    });
+    const roles = Object.keys(byRole).sort((a, b) => byRole[b].g - byRole[a].g);
+    $('roleRollup').innerHTML = roles.length
+      ? roles.map(r =>
+        '<tr><td class="name">' + esc(r) + '</td><td class="r mono">' + dec(byRole[r].h) + '</td>' +
+        '<td class="r mono">' + money(byRole[r].w) + '</td><td class="r mono">' + money(byRole[r].b) + '</td><td class="r mono">' + money(byRole[r].t) + '</td>' +
+        '<td class="r mono">' + money(byRole[r].g) + '</td><td class="r mono">' + money(byRole[r].paid) + '</td>' +
+        '<td class="r mono">' + (byRole[r].owed ? money(byRole[r].owed) : '—') + '</td></tr>'
+      ).join('')
+      : emptyState('No role totals in ' + year + '.');
+  }
 
   const periods = (row.periods || []).slice().sort((a, b) => String(b.start).localeCompare(String(a.start)));
   if ($('yearPeriods')) {
@@ -3138,6 +3507,7 @@ function renderMonthly() {
       ? periods.map(p => {
         const paid = paidGrossOf(p);
         const owed = owedGrossOf(p);
+        const idx = s.periods.indexOf(p);
         return '<tr>' +
           '<td class="name">' + esc(label(p)) + '</td>' +
           '<td>' + (p.status === 'closed' ? '<span class="pill gray">closed</span>' : '<span class="pill green">open</span>') + '</td>' +
@@ -3148,9 +3518,11 @@ function renderMonthly() {
           '<td class="r mono">' + money(grossOf(p)) + '</td>' +
           '<td class="r mono">' + money(paid) + '</td>' +
           '<td class="r mono">' + (owed ? money(owed) : '—') + '</td>' +
+          '<td class="r"><button class="btn tiny" onclick="jump(' + idx + ')">Open</button> ' +
+          '<button class="btn tiny" onclick="openPayStubs(' + idx + ')">Stubs</button></td>' +
           '</tr>';
       }).join('')
-      : '<tr><td colspan="9" class="empty">No pay periods in ' + year + ' yet.</td></tr>';
+      : emptyState('No pay periods in ' + year + ' yet.');
   }
 
   if ($('yearly')) {
@@ -3185,8 +3557,50 @@ function renderMonthly() {
         '<td class="r mono">' + money(all.owed) + '</td></tr>'
       );
     }
-    $('yearly').innerHTML = yearRows.join('') || '<tr><td colspan="9" class="empty">No payroll on file yet.</td></tr>';
+    $('yearly').innerHTML = yearRows.join('') || emptyState('No payroll on file yet.');
   }
+}
+
+function buildPayrollReportHtml(year) {
+  const ledger = buildPayrollLedger();
+  const row = ledger[year] || emptyYearBucket(year);
+  const ms = ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec'];
+  const monthTable = '<table><tr><th>Month</th><th>Periods</th><th>Hours</th><th>Wages</th><th>Bonus</th><th>Tips</th><th>Gross</th><th>Paid</th><th>Owed</th></tr>' +
+    row.months.map((x, i) => !x.p ? '' :
+      '<tr><td>' + ms[i] + ' ' + year + '</td><td>' + x.p + '</td><td>' + dec(x.h) + '</td><td>' + money(x.w) + '</td><td>' + money(x.b) + '</td><td>' + money(x.t) + '</td><td>' + money(x.g) + '</td><td>' + money(x.paid) + '</td><td>' + money(x.owed) + '</td></tr>'
+    ).join('') +
+    '<tr><td><b>Year total</b></td><td><b>' + row.p + '</b></td><td><b>' + dec(row.h) + '</b></td><td><b>' + money(row.w) + '</b></td><td><b>' + money(row.b) + '</b></td><td><b>' + money(row.t) + '</b></td><td><b>' + money(row.g) + '</b></td><td><b>' + money(row.paid) + '</b></td><td><b>' + money(row.owed) + '</b></td></tr></table>';
+  const periods = (row.periods || []).slice().sort((a, b) => String(b.start).localeCompare(String(a.start)));
+  const perTable = '<table><tr><th>Period</th><th>Status</th><th>Hours</th><th>Gross</th><th>Paid</th><th>Owed</th></tr>' +
+    periods.map(p => '<tr><td>' + esc(label(p)) + '</td><td>' + esc(p.status) + '</td><td>' + dec(hoursOf(p)) + '</td><td>' + money(grossOf(p)) + '</td><td>' + money(paidGrossOf(p)) + '</td><td>' + money(owedGrossOf(p)) + '</td></tr>').join('') +
+    '</table>';
+  return '<div style="margin:0 0 18px;padding:14px 16px;border:1px solid #ddd;border-radius:8px;background:#faf8f3">' +
+    '<div style="font:700 11px Arial,sans-serif;text-transform:uppercase;letter-spacing:.08em;color:#666;margin-bottom:6px">Payroll report</div>' +
+    '<div style="font:700 20px Georgia,serif;margin-bottom:4px">Frenchie\'s Restaurant — ' + year + '</div>' +
+    '<div style="color:#555;font-size:12px;line-height:1.55">Prepared ' + esc(today()) + ' · HR office · Kenzie Long</div></div>' +
+    '<h2 style="font:700 16px Georgia,serif;margin:0 0 8px">Monthly</h2>' + monthTable +
+    '<h2 style="font:700 16px Georgia,serif;margin:22px 0 8px">Pay periods</h2>' + perTable;
+}
+
+function exportReportsCsv() {
+  const year = Number($('reportYear') && $('reportYear').value) || new Date().getFullYear();
+  const ledger = buildPayrollLedger();
+  const row = ledger[year] || emptyYearBucket(year);
+  const ms = ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec'];
+  const rows = [['section', 'label', 'periods', 'hours', 'wages', 'bonus', 'tips', 'gross', 'paid', 'owed']];
+  row.months.forEach((x, i) => {
+    if (!x.p) return;
+    rows.push(['month', ms[i] + ' ' + year, x.p, x.h, x.w, x.b, x.t, x.g, x.paid, x.owed]);
+  });
+  (row.periods || []).forEach(p => {
+    rows.push(['period', label(p), 1, hoursOf(p), wagesOf(p), bonusOf(p), tipsOf(p), grossOf(p), paidGrossOf(p), owedGrossOf(p)]);
+  });
+  const blob = new Blob([rows.map(r => r.map(v => '"' + String(v).split('"').join('""') + '"').join(',')).join('\r\n')], { type: 'text/csv' });
+  const a = document.createElement('a');
+  a.href = URL.createObjectURL(blob);
+  a.download = 'frenchies-payroll-' + year + '.csv';
+  a.click();
+  toast('Reports CSV downloaded');
 }
 
 window.jumpReportYear = function (y) {
@@ -3197,11 +3611,25 @@ window.jumpReportYear = function (y) {
 };
 
 function renderRoles() {
+  const year = new Date().getFullYear();
   $('roles').innerHTML = Object.entries(s.roles).map(([r, v]) => {
-    const count = s.employees.filter(e => e.role === r && e.status !== 'terminated').length;
+    const holders = s.employees.filter(e => e.role === r && e.status !== 'terminated');
+    const count = holders.length;
+    let rateSum = 0, rateN = 0;
+    (s.periods || []).forEach(p => {
+      if (periodYear(p) !== year) return;
+      holders.forEach(e => {
+        const x = p.entries[e.id];
+        if (!x || !Number(x.hours || 0)) return;
+        rateSum += entryRate(e, x);
+        rateN++;
+      });
+    });
+    const avg = rateN ? Math.round(rateSum / rateN) : 0;
     return '<tr>' +
       '<td class="name">' + esc(r) + '</td>' +
       '<td class="r">' + count + '</td>' +
+      '<td class="r mono">' + (avg ? money(avg) : '—') + '</td>' +
       '<td class="r"><input class="rate-input" type="number" value="' + Number(v) + '" data-role="' + esc(r) + '" onchange="saveRole(this)"></td>' +
       '<td class="r"><button class="btn tiny" onclick="applyRateToRole(\'' + esc(r).replace(/'/g, "\\'") + '\')" ' + (count ? '' : 'disabled') + '>Apply to all</button></td>' +
       '</tr>';
@@ -3847,11 +4275,12 @@ const EMP_DOC_BUILDERS = {
   contract: { title: 'Contract', build: e => letterContract(empCtx(e)) },
   packet: { title: 'New-hire packet', build: e => letterPacket(empCtx(e)) }
 };
+const EMP_ARCHIVE_KINDS = ['application', 'invite', 'interviewIc', 'offer', 'contract', 'packet', 'decline'];
 
 function addDocument(e, kind) {
   const def = EMP_DOC_BUILDERS[kind];
   if (!def) return null;
-  const doc = { id: s.nextDocId++, kind, title: def.title, date: today(), html: def.build(e), text: '' };
+  const doc = { id: s.nextDocId++, kind, title: def.title, date: today(), html: def.build(e), text: '', status: 'draft' };
   e.documents = e.documents || [];
   e.documents.unshift(doc);
   return doc;
@@ -3861,7 +4290,86 @@ function addDocument(e, kind) {
 function findEmpDoc(e, kind) {
   const docs = (e.documents || []).filter(d => d.kind === kind);
   if (!docs.length) return null;
-  return docs.find(d => d.status === 'signed' || d.status === 'acknowledged' || /signed/i.test(d.title || '')) || docs[0];
+  return docs.find(d => d.status === 'signed' || d.status === 'acknowledged' || d.status === 'accepted' || /signed/i.test(d.title || '')) || docs[0];
+}
+
+function empDocStatusPill(st) {
+  if (!st || st === 'draft' || st === 'none') return 'gray';
+  if (st === 'sent') return 'blue';
+  if (st === 'returned' || st === 'confirmed') return 'warn';
+  if (st === 'signed' || st === 'accepted' || st === 'acknowledged') return 'green';
+  if (st === 'declined') return 'danger';
+  return 'gray';
+}
+
+/** Upsert application paper onto employee.documents — prefer reply HTML, never wipe signed with blank. */
+function syncPaperToEmpDoc(e, a, kind, opts) {
+  opts = opts || {};
+  if (!e || !kind || !PAPER_KINDS[kind]) return null;
+  if (a) ensurePaperwork(a);
+  const rec = (a && a.paperwork && a.paperwork[kind]) || null;
+  const reply = opts.reply != null ? opts.reply : (rec && rec.reply) || null;
+  let html = opts.html || '';
+  if (!html && reply && reply.replyHtml) html = reply.replyHtml;
+  if (!html && rec && rec.html) html = rec.html;
+  if (!html && EMP_DOC_BUILDERS[kind]) {
+    try { html = EMP_DOC_BUILDERS[kind].build(e); } catch (err) { html = ''; }
+  }
+  if (!html && a) {
+    try { html = buildPaperHtml(syncEmpCtxOntoApp(Object.assign({}, a), e), kind); } catch (err) { html = ''; }
+  }
+  if (!html) return null;
+
+  let status = opts.status || (rec && rec.sendStatus) || 'draft';
+  if (reply && reply.decision) status = replyStatus(kind, reply.decision);
+
+  const titleBase = (PAPER_KINDS[kind] && PAPER_KINDS[kind].title) || kind;
+  let title = titleBase;
+  if (status === 'signed' || status === 'accepted') title = titleBase + ' (signed)';
+  else if (status === 'acknowledged' || status === 'confirmed' || status === 'returned') title = titleBase + ' (returned)';
+  else if (status === 'sent') title = titleBase + ' (sent)';
+  else if (status === 'declined') title = titleBase + ' (declined)';
+
+  e.documents = e.documents || [];
+  let doc = e.documents.find(d => d.kind === kind);
+  const existingRank = doc ? (PAPER_RANK[doc.status] || 0) : -1;
+  const newRank = PAPER_RANK[status] || 0;
+
+  if (doc && !opts.force && existingRank > newRank && doc.html && (!opts.html && !reply)) {
+    return doc;
+  }
+
+  const date = (reply && reply.signedAt) || (rec && rec.returnedAt) || (rec && rec.sentAt) || today();
+  if (!doc) {
+    doc = { id: s.nextDocId++, kind, title, date, html, text: '', status };
+    e.documents.unshift(doc);
+  } else {
+    if (html && (newRank >= existingRank || opts.force || !doc.html)) doc.html = html;
+    if (newRank >= existingRank || opts.force || !doc.status) {
+      doc.status = status;
+      doc.title = title;
+    }
+    doc.date = date || doc.date;
+  }
+  if ((reply && reply.houseSign) || opts.houseSign) doc.houseSign = (reply && reply.houseSign) || opts.houseSign;
+  return doc;
+}
+
+function syncAllHirePapersToEmp(e, a) {
+  if (!e || !a) return;
+  ensurePaperwork(a);
+  EMP_ARCHIVE_KINDS.forEach(k => {
+    const rec = a.paperwork[k];
+    if (!rec) return;
+    if (!rec.html && !rec.reply) return;
+    syncPaperToEmpDoc(e, a, k);
+  });
+  if (!findEmpDoc(e, 'offer')) {
+    syncPaperToEmpDoc(e, a, 'offer', {
+      html: letterOffer(empCtx(e)),
+      status: (a.paperwork.offer && a.paperwork.offer.sendStatus) || 'draft'
+    });
+  }
 }
 
 function generateHirePaperwork(e) {
@@ -4012,14 +4520,14 @@ function templateStub(kind) {
   };
 }
 
-/* Preferred pipeline stages for each Send button dropdown */
+/* Preferred pipeline stages for each Send button dropdown — contract/packet only post-hire */
 const SEND_PICK_STAGES = {
   application: ['application', 'eligibility', 'interview', 'offer'],
   invite: ['interview'],
   interviewIc: ['interview', 'offer'],
   offer: ['interview', 'offer'],
-  contract: ['offer', 'hired'],
-  packet: ['offer', 'hired'],
+  contract: ['hired'],
+  packet: ['hired'],
   decline: ['application', 'eligibility', 'interview', 'offer', 'rejected']
 };
 
@@ -5066,46 +5574,25 @@ function applyReply(reply) {
   } else if (kind === 'contract') {
     if (status === 'accepted') {
       extra = 'contract signed — next: File & send new-hire packet from their employee file';
-      const e = (a.employeeId && empById(a.employeeId)) ||
-        (s.employees || []).find(x => String(x.applicationId) === String(a.id)) ||
-        (s.employees || []).find(x => String(x.name).trim().toLowerCase() === String(a.name).trim().toLowerCase() && x.status !== 'terminated');
-      if (e) {
-        a.employeeId = e.id;
-        e.applicationId = a.id;
-        let doc = (e.documents || []).find(d => d.kind === 'contract');
-        const signedHtml = reply.replyHtml || letterContract(empCtx(e));
-        if (doc) {
-          doc.html = signedHtml;
-          doc.date = reply.signedAt || today();
-          doc.status = 'signed';
-          doc.title = 'Contract (signed)';
-        } else {
-          doc = addDocument(e, 'contract');
-          doc.html = signedHtml;
-          doc.status = 'signed';
-          doc.title = 'Contract (signed)';
-          doc.date = reply.signedAt || today();
-        }
-        if (reply.houseSign) doc.houseSign = reply.houseSign;
-        e.contractSignedAt = reply.signedAt || today();
-      }
     } else {
       extra = 'contract declined / returned';
     }
   } else if (kind === 'packet') {
     extra = 'new-hire packet acknowledged';
-    const e = (a.employeeId && empById(a.employeeId)) ||
-      (s.employees || []).find(x => String(x.applicationId) === String(a.id));
-    if (e && status) {
-      let doc = (e.documents || []).find(d => d.kind === 'packet');
-      if (doc) {
-        doc.status = 'acknowledged';
-        doc.date = reply.signedAt || today();
-        if (reply.replyHtml) doc.html = reply.replyHtml;
-      }
-    }
   } else if (kind === 'decline') {
     extra = reply.decision === 'reapply' ? 'may apply again later' : 'decline acknowledged';
+  }
+
+  /* Smart sync onto employee Documents whenever linked (or name-matched after hire) */
+  let emp = (a.employeeId && empById(a.employeeId)) ||
+    (s.employees || []).find(x => String(x.applicationId) === String(a.id)) ||
+    (a.stage === 'hired' ? (s.employees || []).find(x => String(x.name).trim().toLowerCase() === String(a.name).trim().toLowerCase() && x.status !== 'terminated') : null);
+  if (emp) {
+    a.employeeId = emp.id;
+    emp.applicationId = a.id;
+    syncPaperToEmpDoc(emp, a, kind, { reply, status, force: true });
+    if (kind === 'contract' && status === 'accepted') emp.contractSignedAt = reply.signedAt || today();
+    if (EMP_ARCHIVE_KINDS.indexOf(kind) >= 0) extra += ' · employee file updated';
   }
 
   if (f.note) a.notes = appendNote(a.notes, PAPER_KINDS[kind].title + ' note: ' + f.note);
@@ -5113,7 +5600,7 @@ function applyReply(reply) {
   log('Reply filed — ' + PAPER_KINDS[kind].title + ' from ' + a.name + ' (' + status + (reply.packetId ? ', ' + reply.packetId : '') + ')');
   save();
   render();
-  return { ok: true, app: a, kind, status, rec, msg: extra };
+  return { ok: true, app: a, kind, status, rec, msg: extra, empUpdated: !!emp };
 }
 
 function parseReplyPayload(text, filename) {
@@ -5164,8 +5651,18 @@ function importReplyFrom(input, after) {
 
 /* ---------------- print ---------------- */
 function printHtml(title, html) {
-  $('printArea').innerHTML = '<h1>' + esc(title) + '</h1><div class="print-meta">Frenchie\'s Restaurant &middot; 8 Elgin Ave, Legion Square &middot; ' + today() + '</div>' + html;
-  window.print();
+  printOfficeHtml(title, html);
+}
+
+function activityOpenLink(text) {
+  const t = String(text || '');
+  const emp = (s.employees || []).find(e => t.indexOf(e.name) >= 0);
+  if (emp) return '<button type="button" class="linkish" onclick="editEmployee(' + emp.id + ')">Open file</button>';
+  const app = (s.applications || []).find(a => t.indexOf(a.name) >= 0 && !['hired', 'rejected'].includes(a.stage));
+  if (app) return '<button type="button" class="linkish" onclick="goView(\'hiring\');setTimeout(function(){editApp(' + app.id + ')},40)">Open app</button>';
+  if (/period|stub|paid|tip pool|Sunday/i.test(t)) return '<button type="button" class="linkish" onclick="goView(\'overview\')">Overview</button>';
+  if (/expense|rebate/i.test(t)) return '<button type="button" class="linkish" onclick="goView(\'expenses\')">Expenses</button>';
+  return '';
 }
 
 /* ---------------- period ops ---------------- */
@@ -5207,6 +5704,7 @@ function closePeriodAndRoll(p, opts) {
   save();
   render();
   toast('Period closed — next week opened');
+  maybeBackupNudge('close-period');
   return true;
 }
 
@@ -5238,12 +5736,12 @@ window.reopenPeriod = function (i) {
   if (!p || p.status !== 'closed') return;
   const opens = s.periods.filter(x => x.status === 'open');
   if (opens.length) {
-    if (!confirm('Close the current open period(s) and reopen ' + label(p) + '?')) return;
+    if (!confirmDanger('Close the current open period(s) and reopen ' + label(p) + '?', 'Tip pool on the current open period will freeze when it closes.')) return;
     opens.forEach(op => {
       op.status = 'closed';
       if (op.checks) op.checks.closeRecord = true;
     });
-  } else if (!confirm('Reopen ' + label(p) + ' for edits?')) return;
+  } else if (!confirmDanger('Reopen ' + label(p) + ' for edits?', 'Tip pool becomes editable again.')) return;
   p.status = 'open';
   if (p.checks) p.checks.closeRecord = false;
   setSelectedPeriod(i);
@@ -5371,19 +5869,34 @@ window.advanceApp = function (id) {
   const i = STAGE_ORDER.indexOf(a.stage);
   if (i < 0 || i >= STAGE_ORDER.length - 1) return;
   const next = STAGE_ORDER[i + 1];
+  ensurePaperwork(a);
   if (next === 'interview' && !eligible(a)) {
     if (!confirm('Eligibility is not fully cleared. Move ' + a.name + ' to interview anyway?')) return;
   }
-  if (next === 'hired') { hireApplicant(a); return; }
+  if (next === 'interview' && !(a.paperwork.application && a.paperwork.application.reply)) {
+    if (!confirm('No returned application on file for ' + a.name + '. Move to interview anyway?')) return;
+  }
+  if (next === 'offer' && !(a.paperwork.invite && a.paperwork.invite.reply)) {
+    if (!confirm('Interview invitation has not been returned yet. Move ' + a.name + ' to offer anyway?')) return;
+  }
+  if (next === 'hired') {
+    const offer = a.paperwork.offer;
+    const accepted = offer && (offer.sendStatus === 'accepted' || (offer.reply && offer.reply.decision === 'accept'));
+    if (!accepted) {
+      if (!confirm('Offer is not marked accepted for ' + a.name + '. Hire anyway?')) return;
+    }
+    hireApplicant(a);
+    return;
+  }
   a.stage = next;
   log(a.name + ' moved to ' + STAGES[next]);
-  save(); render();   toast(a.name + ' → ' + STAGES[next]);
+  save(); render(); toast(a.name + ' → ' + STAGES[next]);
 };
 
 window.rejectApp = function (id) {
   const a = s.applications.find(x => x.id === id);
   if (!a) return;
-  if (!confirm('Reject ' + a.name + '?')) return;
+  if (!confirmDanger('Reject ' + a.name + '?', 'A decline letter will be drafted on their hiring file.')) return;
   a.stage = 'rejected';
   ensurePaperwork(a);
   if (!a.paperwork.decline) setPaper(a, 'decline', letterDecline(a));
@@ -5394,7 +5907,7 @@ window.rejectApp = function (id) {
 window.deleteApplication = function (id) {
   const a = s.applications.find(x => x.id === id);
   if (!a) return;
-  if (!confirm('Delete the application for ' + a.name + '? This removes it from the desk entirely.')) return;
+  if (!confirmDanger('Delete the application for ' + a.name + '?', 'This removes it from the desk entirely.')) return;
   s.applications = s.applications.filter(x => x.id !== id);
   log('Deleted application: ' + a.name);
   save(); render(); toast('Application deleted');
@@ -5559,10 +6072,17 @@ function finishDownloadSendPacket(a, kind, opts) {
   const paperExtra = { sendStatus: 'sent', sentAt: today(), packetId };
   if (opts.houseSign) paperExtra.houseSign = opts.houseSign;
   setPaper(a, kind, (existing && existing.html) ? '' : buildPaperHtml(a, kind), paperExtra);
+  const emp = (a.employeeId && empById(a.employeeId)) ||
+    (s.employees || []).find(x => String(x.applicationId) === String(a.id));
+  if (emp) {
+    a.employeeId = emp.id;
+    emp.applicationId = a.id;
+    syncPaperToEmpDoc(emp, a, kind, { status: 'sent', houseSign: opts.houseSign, force: true });
+  }
   log('Packet ' + packetId + ' prepared — ' + def.title + ' for ' + a.name + (opts.houseSign ? ' (house signed)' : ''));
   save(); render();
   toast(kind === 'contract'
-    ? 'Contract downloaded — send on Discord. They sign, Download reply, and you Import it.'
+    ? 'Contract downloaded — on file as sent. They sign, Download reply, and you Import it.'
     : 'Packet .html downloaded — send that file on Discord. They fill it, Download reply, and you Import their completed .html');
 }
 
@@ -5758,22 +6278,65 @@ function renderEmployeeFile(e) {
     ? rel.map(r => '<div>' + esc(r.date) + ' &middot; ' + esc(REL_TYPES[r.type] || r.type) + (r.reason ? ' — ' + esc(r.reason) : '') + '</div>').join('')
     : '<div>No relations entries.</div>');
 
-  $('empDocs').innerHTML = (e.documents || []).length
-    ? (e.documents || []).map(d =>
-        '<div class="docrow"><span><b>' + esc(d.title) + '</b> <span class="pill gray">' + esc(d.date) + '</span>' +
-        (d.status ? ' <span class="pill ' + (d.status === 'signed' || d.status === 'acknowledged' ? 'green' : 'warn') + '">' + esc(d.status) + '</span>' : '') +
-        '</span>' +
-        '<span><button class="btn tiny" onclick="viewDoc(' + e.id + ',' + d.id + ')">Open</button> ' +
-        '<button class="btn tiny danger" onclick="deleteDoc(' + e.id + ',' + d.id + ')">Delete</button></span></div>').join('')
-    : '<div class="mini-note">No paperwork on file yet — after hire, send the contract for signature.</div>';
+  const linkedApp = appForEmployee(e);
+  const docs = e.documents || [];
+  const ordered = EMP_ARCHIVE_KINDS.map(k => docs.find(d => d.kind === k)).filter(Boolean)
+    .concat(docs.filter(d => EMP_ARCHIVE_KINDS.indexOf(d.kind) < 0));
+  let docsHtml = '';
+  if (ordered.length) {
+    docsHtml = ordered.map(d =>
+      '<div class="paper-row docrow"><div class="paper-name"><b>' + esc(d.title) + '</b>' +
+      '<div class="paper-sub">' + esc(d.date || '—') +
+      (d.kind ? ' · ' + esc((PAPER_KINDS[d.kind] && PAPER_KINDS[d.kind].short) || d.kind) : '') +
+      ' · from hiring file</div></div>' +
+      '<div class="paper-actions">' +
+      (d.status ? '<span class="pill ' + empDocStatusPill(d.status) + '">' + esc(d.status) + '</span> ' : '') +
+      (d.html ? '<button class="btn tiny" onclick="viewDoc(' + e.id + ',' + d.id + ')">View</button> ' : '<button class="btn tiny" disabled title="Not on file yet">View</button> ') +
+      '<button class="btn tiny danger" onclick="deleteDoc(' + e.id + ',' + d.id + ')">Delete</button></div></div>'
+    ).join('');
+  } else {
+    docsHtml = '<div class="mini-note">No paperwork on file yet — after hire, Send contract (you sign first), then File &amp; send the new-hire packet.</div>';
+  }
+  ['offer', 'contract', 'packet'].forEach(k => {
+    if (findEmpDoc(e, k)) return;
+    const label = (PAPER_KINDS[k] && PAPER_KINDS[k].title) || k;
+    docsHtml += '<div class="paper-row docrow"><div class="paper-name"><b>' + esc(label) + '</b>' +
+      '<div class="paper-sub">Not on file yet</div></div>' +
+      '<div class="paper-actions"><span class="pill gray">missing</span> ' +
+      '<button class="btn tiny" disabled title="Send or file this document first">View</button></div></div>';
+  });
+  if (linkedApp) {
+    docsHtml += '<div class="mini-note" style="margin-top:8px"><button class="btn tiny" type="button" onclick="openLinkedAppPaper(' + linkedApp.id + ')">Open hiring paperwork</button> for ' + esc(linkedApp.name) + '</div>';
+  }
+  if (e.status === 'probation' && e.probationEnd) {
+    const left = daysBetween(today(), e.probationEnd);
+    docsHtml = '<div class="mini-note" style="margin-bottom:8px">Probation ends <b>' + esc(e.probationEnd) + '</b> · ' +
+      (left < 0 ? 'overdue' : (left === 0 ? 'due today' : left + ' day' + (left === 1 ? '' : 's') + ' left')) + '</div>' + docsHtml;
+  }
+  $('empDocs').innerHTML = docsHtml;
 
   const hasOffer = !!findEmpDoc(e, 'offer');
   const hasContract = !!findEmpDoc(e, 'contract');
   const hasPacket = !!findEmpDoc(e, 'packet');
   const signedContract = empHasSignedContract(e);
-  if ($('genOffer')) $('genOffer').style.display = hasOffer ? '' : 'none';
-  if ($('genContract')) $('genContract').style.display = hasContract ? '' : 'none';
-  if ($('genPacket')) $('genPacket').style.display = hasPacket ? '' : 'none';
+  if ($('genOffer')) {
+    $('genOffer').style.display = '';
+    $('genOffer').disabled = !hasOffer;
+    $('genOffer').title = hasOffer ? 'View offer letter' : 'Not on file yet';
+    $('genOffer').textContent = hasOffer ? 'View offer letter' : 'View offer (missing)';
+  }
+  if ($('genContract')) {
+    $('genContract').style.display = '';
+    $('genContract').disabled = !hasContract;
+    $('genContract').title = hasContract ? 'View contract' : 'Send contract first';
+    $('genContract').textContent = hasContract ? 'View contract' : 'View contract (missing)';
+  }
+  if ($('genPacket')) {
+    $('genPacket').style.display = '';
+    $('genPacket').disabled = !hasPacket;
+    $('genPacket').title = hasPacket ? 'View new-hire packet' : 'File & send packet first';
+    $('genPacket').textContent = hasPacket ? 'View new-hire packet' : 'View packet (missing)';
+  }
   if ($('sendEmpContract')) {
     $('sendEmpContract').style.display = '';
     $('sendEmpContract').textContent = signedContract ? 'Re-send contract' : 'Send contract for signature';
@@ -5785,6 +6348,12 @@ function renderEmployeeFile(e) {
     $('sendEmpPacket').className = hasPacket ? 'btn tiny' : 'btn tiny soft';
   }
 }
+
+window.openLinkedAppPaper = function (appId) {
+  $('employeeModal').classList.remove('open');
+  goView('hiring');
+  setTimeout(() => { if (typeof openAppPaper === 'function') openAppPaper(appId); }, 60);
+};
 
 window.filterEmpLog = function (type) {
   window.__empLogFilter = type || 'all';
@@ -5850,16 +6419,16 @@ function hireApplicant(a) {
   a.stage = 'hired';
   a.offerRole = role;
   a.employeeId = e.id;
-  /* Offer letter on file only — contract is a two-party send next; packet after contract is signed */
-  const offerDoc = addDocument(e, 'offer');
   ensurePaperwork(a);
-  if (offerDoc) setPaper(a, 'offer', offerDoc.html, { sendStatus: 'draft' });
+  /* Preserve application paperwork — sync real HTML/status onto the employee file */
+  syncAllHirePapersToEmp(e, a);
+  maybeBackupNudge('hire');
   log('Hired ' + e.name + ' as ' + role + ' — probation through ' + e.probationEnd + ' · next: send contract');
   save();
   $('appModal').classList.remove('open');
   $('paperModal').classList.remove('open');
   render();
-  toast(e.name + ' hired — open their employee file and Send contract (you sign first)');
+  toast(e.name + ' hired — Send contract next (you sign first), then the new-hire packet');
   editId = e.id;
   const empBtn = document.querySelector('[data-view="employees"]');
   if (empBtn) empBtn.click();
@@ -5900,8 +6469,34 @@ document.querySelectorAll('.nav button').forEach(b => {
 document.querySelectorAll('.modal').forEach(m => {
   m.addEventListener('mousedown', ev => { if (ev.target === m) m.classList.remove('open'); });
 });
+const _modalObserver = new MutationObserver(muts => {
+  muts.forEach(mu => {
+    if (mu.attributeName !== 'class') return;
+    const m = mu.target;
+    if (!m.classList.contains('open')) return;
+    setTimeout(() => {
+      const field = m.querySelector('input:not([type=hidden]):not([type=checkbox]):not([type=radio]), select, textarea');
+      if (field && typeof field.focus === 'function') field.focus();
+    }, 40);
+  });
+});
+document.querySelectorAll('.modal').forEach(m => _modalObserver.observe(m, { attributes: true }));
 document.addEventListener('keydown', ev => {
-  if (ev.key === 'Escape') document.querySelectorAll('.modal.open').forEach(m => m.classList.remove('open'));
+  if (ev.key === 'Escape') {
+    document.querySelectorAll('.modal.open').forEach(m => m.classList.remove('open'));
+    return;
+  }
+  if (ev.key === 'Enter' && !ev.shiftKey) {
+    const open = document.querySelector('.modal.open');
+    if (!open) return;
+    const tag = (ev.target && ev.target.tagName || '').toLowerCase();
+    if (tag === 'textarea') return;
+    const primary = open.querySelector('.dialog-foot .btn.primary');
+    if (primary && !primary.disabled) {
+      ev.preventDefault();
+      primary.click();
+    }
+  }
 });
 
 $('period').onchange = () => { flushPeriodNotes(); notesDirty = false; syncStubToOverview(); render(); };
@@ -6155,7 +6750,7 @@ $('save').onclick = () => {
 $('deleteEmployee').onclick = () => {
   const e = empById(editId);
   if (!e) return;
-  if (!confirm('Remove ' + e.name + ' from the roster entirely? Consider setting status to terminated instead so the file is kept.')) return;
+  if (!confirmDanger('Remove ' + e.name + ' from the roster entirely?', 'Consider setting status to terminated instead so the file is kept.')) return;
   s.employees = s.employees.filter(x => x.id !== e.id);
   log('Removed ' + e.name + ' from the roster');
   save();
@@ -6179,6 +6774,7 @@ $('sendEmpContract').onclick = () => {
   const e = empById(editId);
   if (!e) return toast('Save the file first');
   const a = syncEmpCtxOntoApp(ensureAppForEmployee(e), e);
+  syncPaperToEmpDoc(e, a, 'contract', { status: 'draft', force: false });
   save();
   openHrSignThenSend(a, 'contract');
 };
@@ -6186,19 +6782,18 @@ $('sendEmpPacket').onclick = () => {
   const e = empById(editId);
   if (!e) return toast('Save the file first');
   const a = syncEmpCtxOntoApp(ensureAppForEmployee(e), e);
-  let doc = (e.documents || []).find(d => d.kind === 'packet');
-  if (!doc) doc = addDocument(e, 'packet');
-  else { doc.html = letterPacket(empCtx(e)); doc.date = today(); doc.title = 'New-hire packet'; }
+  const html = letterPacket(empCtx(e));
   ensurePaperwork(a);
   if (!s.nextPacketId) s.nextPacketId = 1;
   const packetId = (a.paperwork.packet && a.paperwork.packet.packetId) || ('FR-' + String(s.nextPacketId++).padStart(4, '0'));
-  setPaper(a, 'packet', doc.html, { sendStatus: 'sent', sentAt: today(), packetId });
+  setPaper(a, 'packet', html, { sendStatus: 'sent', sentAt: today(), packetId });
+  syncPaperToEmpDoc(e, a, 'packet', { html, status: 'sent', force: true });
   const keep = buildSendPacket(a, 'packet', packetId);
   openPacketWindow(keep, 'Frenchies-New-Hire-Packet-' + safeName(e.name) + '.html');
   log('New-hire packet filed and downloaded for ' + e.name);
   save();
   renderEmployeeFile(e);
-  toast('New-hire packet on file — send the .html so they can open it anytime. They can Download reply if you want an acknowledgement back.');
+  toast('New-hire packet on file — send the .html so they can open it anytime.');
 };
 
 $('cancelHrSign').onclick = () => {
@@ -6592,18 +7187,28 @@ $('saveExpense').onclick = () => {
   ensureMeta();
   const amount = Math.round(Number($('exAmount').value) || 0);
   const vendor = $('exVendor').value.trim();
+  const category = $('exCategory').value || 'other';
+  const reimbursable = $('exReimb').checked;
+  const receipt = $('exReceipt').value.trim();
   if (!amount) return toast('Enter an amount');
   if (!vendor) return toast('Enter vendor or item');
+  if (reimbursable && !receipt) {
+    if (!confirm('This expense is reimbursable but has no receipt / reference. Save anyway?')) return;
+  }
+  if (category === 'other' && amount >= 50000) {
+    if (!confirm('Large “other” expense of ' + money(amount) + '. Save under Other anyway?')) return;
+  }
   const data = normalizeExpense({
     id: expenseId || s.nextExpenseId++,
     date: $('exDate').value || today(),
-    category: $('exCategory').value || 'other',
+    category,
     vendor,
     description: $('exDesc').value.trim(),
     amount,
     paidBy: $('exPaidBy').value.trim() || 'Samael Hesperus',
-    receipt: $('exReceipt').value.trim(),
-    reimbursable: $('exReimb').checked,
+    receipt,
+    reimbursable,
+    rebateStatus: ($('exRebateStatus') && $('exRebateStatus').value) || 'pending',
     notes: $('exNotes').value.trim()
   });
   if (expenseId) {
@@ -6611,19 +7216,23 @@ $('saveExpense').onclick = () => {
     if (i < 0) return toast('Expense not found');
     s.expenses[i] = data;
     log('Updated expense: ' + data.vendor + ' · ' + money(data.amount));
+    toast('Expense updated');
   } else {
     s.expenses.unshift(data);
     log('Logged expense: ' + data.vendor + ' · ' + money(data.amount) + ' (' + expenseCatLabel(data.category) + ')');
+    toast('Expense logged — ' + money(data.amount));
   }
   save();
   $('expenseModal').classList.remove('open');
   render();
-  toast('Expense saved');
 };
 $('pdfExpenses').onclick = () => printExpenseReport();
-if ($('expMonth')) $('expMonth').onchange = () => renderExpenses();
-if ($('expCategory')) $('expCategory').onchange = () => renderExpenses();
-if ($('expReimbFilter')) $('expReimbFilter').onchange = () => renderExpenses();
+if ($('pdfExpensesReimb')) $('pdfExpensesReimb').onclick = () => printReimbursablePack();
+if ($('csvExpenses')) $('csvExpenses').onclick = () => exportExpensesCsv();
+['expMonth', 'expCategory', 'expReimbFilter', 'expStatusFilter', 'expPaidByFilter', 'expFrom', 'expTo'].forEach(id => {
+  if ($(id)) $(id).onchange = () => renderExpenses();
+});
+if ($('expSearch')) $('expSearch').oninput = () => renderExpenses();
 
 /* ---------- relations ---------- */
 $('addRelation').onclick = () => {
@@ -6722,8 +7331,10 @@ $('pdfShifts').onclick = () => {
     const row = week[e.id] || ['Off', 'Off', 'Off', 'Off', 'Off', 'Off', 'Off'];
     return '<tr><td>' + esc(e.name) + '</td>' + row.map(x => '<td>' + esc(x) + '</td>').join('') + '</tr>';
   }).join('');
-  printHtml('Shift board — week of ' + shiftWeek,
+  printOfficeHtml('Shift week sheet — week of ' + shiftWeek,
+    '<p style="color:#555;font-size:12px;margin:0 0 12px">Post on Discord for coverage. Stations: Bar, Kitchen, Floor, Host, Off.</p>' +
     '<table><tr><th>Employee</th>' + DAY_NAMES.map(d => '<th>' + d + '</th>').join('') + '</tr>' + rows + '</table>');
+  toast('Week sheet ready to print');
 };
 
 /* ---------- licenses ---------- */
@@ -6871,15 +7482,21 @@ $('pdfRelations').onclick = () => printHtml('Employee relations file',
     return '<tr><td>' + esc(r.date) + '</td><td>' + esc(e ? e.name : '—') + '</td><td>' + esc(REL_TYPES[r.type] || r.type) + '</td><td>' + esc(r.reason || '') + '</td><td>' + esc(r.issuedBy || '') + '</td><td>' + esc(r.followUp || '—') + '</td></tr>';
   }).join('') + '</table>');
 $('pdfMonthly').onclick = () => {
-  const y = ($('reportYear') && $('reportYear').value) || '';
-  printHtml('Payroll report' + (y ? ' — ' + y : ''),
-    '<h3>Monthly</h3><table><tr><th>Month</th><th>Periods</th><th>Hours</th><th>Wages</th><th>Bonus</th><th>Tips</th><th>Gross</th><th>Paid</th><th>Owed</th></tr>' +
-    ($('monthly') ? $('monthly').innerHTML : '') + '</table>' +
-    '<h3 style="margin-top:18px">Pay periods</h3><table><tr><th>Period</th><th>Status</th><th>Hours</th><th>Wages</th><th>Bonus</th><th>Tips</th><th>Gross</th><th>Paid</th><th>Owed</th></tr>' +
-    ($('yearPeriods') ? $('yearPeriods').innerHTML : '') + '</table>' +
-    '<h3 style="margin-top:18px">Yearly</h3><table><tr><th>Year</th><th>Periods</th><th>Hours</th><th>Wages</th><th>Bonus</th><th>Tips</th><th>Gross</th><th>Paid</th><th>Owed</th></tr>' +
-    ($('yearly') ? $('yearly').innerHTML : '') + '</table>');
+  const y = Number(($('reportYear') && $('reportYear').value) || new Date().getFullYear());
+  printOfficeHtml('Payroll report — ' + y, buildPayrollReportHtml(y));
+  toast('Year report ready to print');
 };
+if ($('csvMonthly')) $('csvMonthly').onclick = () => exportReportsCsv();
+if ($('barMode')) $('barMode').onchange = () => renderMonthly();
+if ($('ovGotoReports')) $('ovGotoReports').onclick = () => goView('reports');
+if ($('ovGotoExpenses')) $('ovGotoExpenses').onclick = () => {
+  goView('expenses');
+  if ($('expReimbFilter')) { $('expReimbFilter').value = 'yes'; renderExpenses(); }
+};
+if ($('ovGotoUnpaidStubs')) $('ovGotoUnpaidStubs').onclick = () => openPayStubs(selectedPeriodIndex());
+if ($('hireSearch')) $('hireSearch').oninput = () => renderHiring();
+if ($('relSearch')) $('relSearch').oninput = () => renderRelations();
+if ($('licFilter')) $('licFilter').onchange = () => renderLicenses();
 $('pdfRoles').onclick = () => printHtml('Role rates',
   '<table><tr><th>Role</th><th>Rate</th></tr>' + Object.entries(s.roles).map(([r, v]) => '<tr><td>' + esc(r) + '</td><td>' + money(v) + '</td></tr>').join('') + '</table>');
 
