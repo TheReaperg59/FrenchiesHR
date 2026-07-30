@@ -1382,6 +1382,261 @@ body{
   .todo-add-pri{width:100%}
 }
 
+/* ===== Employees dossier + action-column polish v9 ===== */
+#view-employees .split-desk{
+  grid-template-columns:minmax(0,1.55fr) minmax(260px,.85fr);
+}
+#view-employees .roster-card .table-scroll{
+  overflow:auto;
+  padding-bottom:2px;
+}
+#view-employees table{
+  min-width:720px;
+  border-collapse:separate;
+  border-spacing:0;
+}
+#view-employees th:last-child,
+#view-employees td:last-child,
+#view-employees th.action-col,
+#view-employees td.action-col{
+  position:sticky;right:0;z-index:2;
+  min-width:118px;width:118px;
+  padding-right:16px !important;
+  background:linear-gradient(90deg, transparent, var(--paper) 18%);
+  box-shadow:-8px 0 12px oklch(20% .02 155 / .04);
+  text-align:right;
+}
+#view-employees thead th.action-col,
+#view-employees thead th:last-child{
+  background:linear-gradient(90deg, transparent, oklch(97% .008 84) 18%);
+  z-index:3;
+}
+#view-employees td.name{
+  white-space:normal;max-width:240px;line-height:1.35;
+}
+#view-employees td .history{white-space:normal}
+.open-file-btn{
+  display:inline-flex !important;align-items:center;justify-content:center;gap:6px;
+  min-width:102px;padding:6px 12px !important;
+  border-radius:9px !important;
+  background:linear-gradient(180deg, oklch(97% .01 84), var(--paper));
+  border:1px solid oklch(82% .03 155) !important;
+  box-shadow:0 1px 0 oklch(100% 0 0 / .8), var(--shadow-sm);
+}
+.open-file-btn:hover{
+  border-color:var(--navy) !important;color:var(--navy);
+  background:linear-gradient(180deg, var(--sage), oklch(95% .02 155));
+}
+.open-file-btn .folder-ico{
+  width:14px;height:14px;flex:none;display:inline-block;
+  background:
+    linear-gradient(180deg, oklch(74% .12 82), oklch(62% .1 82));
+  border-radius:2px 2px 3px 3px;
+  position:relative;box-shadow:inset 0 1px 0 oklch(90% .05 82);
+}
+.open-file-btn .folder-ico:before{
+  content:'';position:absolute;left:0;top:-3px;width:7px;height:4px;
+  background:oklch(68% .11 82);border-radius:2px 2px 0 0;
+}
+.roster-metrics{
+  display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:10px;margin:0 0 14px;
+}
+.roster-metrics .metric{min-height:88px;padding:14px}
+.roster-metrics .metric strong{font-size:1.15rem}
+.status-chips{display:flex;flex-wrap:wrap;gap:6px;align-items:center}
+.status-chips button{
+  border:1px solid var(--line);background:var(--paper);color:var(--muted);
+  border-radius:999px;padding:6px 11px;font-size:.68rem;font-weight:700;min-height:32px;
+}
+.status-chips button:hover{border-color:oklch(75% .03 155);color:var(--navy)}
+.status-chips button.active{background:var(--navy);color:var(--gold);border-color:var(--navy)}
+.emp-row-badges{display:flex;flex-wrap:wrap;gap:4px;margin-top:5px}
+.emp-row-badges .pill{font-size:.6rem}
+.file-complete{display:inline-flex;align-items:center;gap:5px;font-size:.62rem;color:var(--muted);font-weight:600}
+.file-complete i{
+  display:inline-block;width:42px;height:5px;border-radius:999px;background:oklch(92% .01 84);overflow:hidden;position:relative;
+}
+.file-complete i:after{
+  content:'';position:absolute;inset:0 auto 0 0;width:var(--pct,0%);
+  background:linear-gradient(90deg,var(--gold),var(--navy));border-radius:inherit;
+}
+
+/* Dossier modal */
+#employeeModal .dialog.dossier{
+  width:min(980px,96vw);padding:0;overflow:hidden;display:flex;flex-direction:column;max-height:92vh;
+  background:
+    linear-gradient(180deg, oklch(98% .01 84), var(--paper));
+  border:1px solid oklch(82% .03 84);
+  box-shadow:var(--shadow-lg), 0 0 0 1px oklch(100% 0 0 / .4) inset;
+}
+#employeeModal .dialog.dossier.open-anim{animation:dossierIn .28s cubic-bezier(.2,.8,.2,1)}
+@keyframes dossierIn{
+  from{opacity:0;transform:translateY(14px) scale(.985)}
+  to{opacity:1;transform:none}
+}
+.dossier-chrome{
+  position:relative;
+  background:
+    linear-gradient(135deg, oklch(26% .04 155), oklch(32% .055 155) 55%, oklch(24% .035 155));
+  color:oklch(96% .01 84);
+  padding:18px 22px 16px;
+  border-bottom:3px solid var(--gold);
+}
+.dossier-chrome:before{
+  content:'PERSONNEL FILE';position:absolute;right:18px;top:12px;
+  font:700 .62rem/1 'JetBrains Mono',monospace;letter-spacing:.14em;color:oklch(78% .04 82 / .85);
+}
+.dossier-folder-tab{
+  display:inline-flex;align-items:center;gap:8px;
+  margin:0 0 12px;padding:5px 12px 5px 10px;
+  background:oklch(92% .04 82);color:var(--navy);
+  border-radius:8px 8px 0 0;font:700 .66rem/1 DM Sans,sans-serif;letter-spacing:.06em;text-transform:uppercase;
+  box-shadow:0 -2px 0 oklch(70% .1 82);
+}
+.dossier-folder-tab span{opacity:.7;font-weight:600}
+.dossier-head{
+  display:grid;grid-template-columns:auto minmax(0,1fr) auto;gap:14px 16px;align-items:center;
+}
+.dossier-avatar{
+  width:64px;height:64px;border-radius:16px;
+  display:grid;place-items:center;
+  background:linear-gradient(160deg, oklch(74% .12 82), oklch(55% .08 82));
+  color:var(--navy);font:700 1.15rem 'Playfair Display',serif;
+  box-shadow:0 8px 20px oklch(10% .02 155 / .35), inset 0 1px 0 oklch(95% .04 82);
+  border:2px solid oklch(90% .05 82 / .5);
+}
+.dossier-who{min-width:0}
+.dossier-who h2{
+  margin:0 0 4px;font:700 clamp(1.25rem,2vw,1.55rem)/1.15 'Playfair Display',serif;
+  color:oklch(98% .01 84);letter-spacing:-.02em;
+}
+.dossier-who .dossier-sub{
+  display:flex;flex-wrap:wrap;gap:6px 10px;align-items:center;
+  font-size:.76rem;color:oklch(84% .02 155);
+}
+.dossier-stamp{
+  justify-self:end;align-self:start;
+  border:2px solid currentColor;border-radius:8px;padding:8px 12px;
+  font:700 .72rem/1.2 'JetBrains Mono',monospace;letter-spacing:.08em;text-transform:uppercase;
+  transform:rotate(-4deg);opacity:.92;
+}
+.dossier-stamp.active{color:oklch(78% .1 155);border-color:oklch(70% .1 155)}
+.dossier-stamp.probation{color:oklch(78% .12 70);border-color:oklch(72% .12 70)}
+.dossier-stamp.suspended{color:oklch(78% .12 55);border-color:oklch(72% .12 55)}
+.dossier-stamp.terminated{color:oklch(75% .12 25);border-color:oklch(70% .12 25)}
+.dossier-meta{
+  display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:8px;margin-top:14px;
+}
+.dossier-meta .dm{
+  background:oklch(18% .03 155 / .45);border:1px solid oklch(48% .04 155 / .45);
+  border-radius:10px;padding:8px 10px;
+}
+.dossier-meta .dm label{
+  display:block;font-size:.58rem;text-transform:uppercase;letter-spacing:.08em;
+  color:oklch(72% .02 155);font-weight:700;margin-bottom:2px;
+}
+.dossier-meta .dm strong{font-size:.8rem;color:oklch(96% .01 84);font-weight:600}
+.dossier-progress{
+  margin-top:12px;display:flex;flex-wrap:wrap;gap:10px 16px;align-items:center;
+  font-size:.72rem;color:oklch(84% .02 155);
+}
+.dossier-progress .bar{
+  flex:1;min-width:140px;height:7px;border-radius:999px;background:oklch(20% .03 155 / .55);overflow:hidden;
+}
+.dossier-progress .bar i{
+  display:block;height:100%;width:0%;border-radius:inherit;
+  background:linear-gradient(90deg,var(--gold),oklch(85% .08 82));
+  transition:width .35s ease;
+}
+.dossier-body{
+  padding:18px 22px 8px;overflow:auto;flex:1;min-height:0;
+  background:
+    linear-gradient(180deg, oklch(99% .004 84), transparent 48px),
+    repeating-linear-gradient(0deg, transparent, transparent 27px, oklch(93% .01 84 / .35) 28px);
+}
+#employeeModal .dialog.dossier > h2#modalTitle{display:none}
+#employeeModal .dialog.dossier .field-row,
+#employeeModal .dialog.dossier .field-row3{margin-bottom:4px}
+#employeeModal .dialog.dossier .file-tabs{
+  margin-top:12px;
+  background:linear-gradient(180deg, oklch(94% .015 84), oklch(96.5% .01 84));
+  border-radius:12px 12px 0 0;border-bottom:0;padding:8px 8px 0;
+  gap:4px;
+}
+#employeeModal .dialog.dossier .file-tab{
+  border:1px solid transparent;border-bottom:0;border-radius:10px 10px 0 0;
+  padding:10px 14px;position:relative;top:1px;
+}
+#employeeModal .dialog.dossier .file-tab.active{
+  background:var(--paper);color:var(--navy);border-color:var(--line);
+  box-shadow:0 -2px 0 var(--gold) inset;
+}
+#employeeModal .dialog.dossier .file-panel.active{
+  background:var(--paper);border:1px solid var(--line);border-radius:0 12px 12px 12px;
+  padding:16px 16px 12px;margin-bottom:8px;
+}
+#employeeModal .dialog.dossier .file-panel h3{
+  font:700 .95rem 'Playfair Display',serif;color:var(--navy);margin:0 0 10px;
+  padding-bottom:6px;border-bottom:1px dashed var(--line);
+}
+.dossier-profile-grid{
+  display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:10px 14px;
+}
+.doc-shelf{display:flex;flex-direction:column;gap:8px}
+.doc-card{
+  display:grid;grid-template-columns:minmax(0,1fr) auto;gap:10px;align-items:center;
+  padding:12px 14px;border-radius:12px;
+  background:
+    linear-gradient(135deg, oklch(99% .008 84), oklch(97% .015 82)),
+    var(--paper);
+  border:1px solid oklch(88% .025 84);
+  box-shadow:0 1px 0 oklch(100% 0 0 / .7), 2px 3px 0 oklch(90% .02 84);
+  position:relative;
+}
+.doc-card:before{
+  content:'';position:absolute;left:0;top:8px;bottom:8px;width:3px;border-radius:0 3px 3px 0;
+  background:var(--gold);
+}
+.doc-card.missing{opacity:.78;background:oklch(97% .006 84);box-shadow:none}
+.doc-card.missing:before{background:oklch(78% .01 155)}
+.doc-card .doc-title{font-weight:700;color:var(--navy);font-size:.82rem}
+.doc-card .doc-sub{font-size:.7rem;color:var(--muted);margin-top:2px}
+.onboard-grid{
+  display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:8px;
+}
+.onboard-grid .checkline{
+  margin:0;padding:10px 12px;border:1px solid var(--line);border-radius:10px;
+  background:oklch(98.5% .005 84);
+}
+.onboard-grid .checkline:has(input:checked){
+  background:var(--sage);border-color:oklch(82% .04 155);
+}
+.dossier-confidential{
+  text-align:center;font:600 .62rem/1.4 'JetBrains Mono',monospace;letter-spacing:.1em;
+  text-transform:uppercase;color:var(--muted);padding:4px 16px 10px;
+  border-top:1px dashed var(--line);margin-top:4px;
+}
+#employeeModal .dialog.dossier .dialog-foot{
+  margin:0;padding:12px 18px 16px;border-top:1px solid var(--line);
+  background:linear-gradient(180deg, oklch(98% .006 84), var(--paper));
+  position:sticky;bottom:0;
+}
+.feature-banner.is-quiet{
+  background:oklch(98% .006 84);border-style:dashed;color:var(--muted);font-size:.72rem;
+}
+.feature-banner.is-quiet b{color:var(--navy);font-weight:600}
+@media(max-width:820px){
+  .dossier-meta{grid-template-columns:1fr 1fr}
+  .dossier-head{grid-template-columns:auto minmax(0,1fr)}
+  .dossier-stamp{justify-self:start;grid-column:2}
+  .roster-metrics{grid-template-columns:1fr 1fr}
+  .onboard-grid,.dossier-profile-grid{grid-template-columns:1fr}
+}
+@media(max-width:640px){
+  .dossier-meta{grid-template-columns:1fr}
+  #view-employees table{min-width:640px}
+}
+
 </style>
 </head>
 <body>
@@ -1457,7 +1712,7 @@ body{
       <option value="backup">Backup</option>
     </select>
     <button type="button" class="help-btn" id="helpShortcuts" title="Keyboard shortcuts" aria-haspopup="dialog" aria-controls="shortcutSheet">?</button>
-    <span class="build-chip" title="Desk build marker">v8</span>
+    <span class="build-chip" title="Desk build marker">v9</span>
     <span class="kbd-hint" title="Press ? for shortcuts">g then key</span>
     <div class="payday"><span id="saveBadge" title="Autosave status">Saved</span><span class="payday-sep" aria-hidden="true">·</span><span>Payday: Sunday, 9:00 AM</span></div>
   </div>
@@ -1467,8 +1722,8 @@ body{
 <!-- OVERVIEW -->
 <section class="view active" id="view-overview" role="region" aria-labelledby="title-overview" tabindex="-1">
   <div class="build-banner" id="buildBanner" role="status">
-    <b>Desk build v8</b>
-    <span>Todo desk rebuilt · Sunday pay run · Probation review · Availability board</span>
+    <b>Desk build v9</b>
+    <span>Personnel dossier · roster polish · duplicate cleanup · workflow keepers</span>
     <span class="pill green" id="buildStamp">LIVE</span>
   </div>
   <div class="desk-hero">
@@ -1493,7 +1748,6 @@ body{
     <div><div class="eyebrow">Payroll</div><h1 class="title" id="title-overview">Overview</h1><div class="subtitle">Current period, Sunday closeout, and desk priorities.</div></div>
     <div class="actions">
       <button class="btn soft" type="button" id="previewSundayRun">Preview pay run</button>
-      <button class="btn primary" type="button" id="closePeriodTop">Close &amp; roll next</button>
     </div>
   </div>
   <div class="period">
@@ -1521,8 +1775,8 @@ body{
   </div>
   <div class="grid desk-split">
     <div class="stack-col">
-      <div class="card unpaid-desk"><div class="card-head"><b>Unpaid desk</b><span class="pill warn" id="unpaidDeskCount">0</span><button class="btn tiny soft" type="button" id="copySundayRun2">Copy Sunday run</button></div>
-        <div class="panel-note">Sunday queue — everyone still owed for this period.</div>
+      <div class="card unpaid-desk"><div class="card-head"><b>Unpaid desk</b><span class="pill warn" id="unpaidDeskCount">0</span></div>
+        <div class="panel-note">Sunday queue — everyone still owed for this period. Use <b>Copy Sunday pay run</b> in the hero above when you paste to Discord.</div>
         <div class="table-scroll"><table><thead><tr><th>Employee</th><th class="r">Hours</th><th class="r">Gross</th><th class="r">Action</th></tr></thead><tbody id="unpaidDesk"></tbody></table></div>
       </div>
       <div class="card"><div class="card-head"><b>Current period</b><span class="pill" id="state">OPEN</span></div>
@@ -1589,7 +1843,7 @@ body{
 
 <!-- HIRING -->
 <section class="view" id="view-hiring" role="region" aria-labelledby="title-hiring" tabindex="-1">
-  <div class="feature-banner"><b>Desk upgrade:</b> Offer-gated hire, paper path, and employee sync stay in force — use Preview / Import for Discord forms.<span class="pill gray">Hiring</span></div>
+  <div class="feature-banner is-quiet"><b>Hiring path:</b> Preview sheets, Send for Discord, then Import the returned reply onto the file.<span class="pill gray">Paper</span></div>
   <div class="header">
     <div><div class="eyebrow">Recruitment</div><h1 class="title" id="title-hiring">Hiring</h1><div class="subtitle">Application → eligibility → interview → offer → hire → contract → packet.</div></div>
     <div class="actions hire-forms">
@@ -1664,21 +1918,34 @@ body{
 <!-- EMPLOYEES -->
 <section class="view" id="view-employees" role="region" aria-labelledby="title-employees" tabindex="-1">
   <div class="header">
-    <div><div class="eyebrow">Roster</div><h1 class="title" id="title-employees">Employees</h1><div class="subtitle">Staff files, timeline, probation, and hire paperwork.</div></div>
+    <div><div class="eyebrow">Roster</div><h1 class="title" id="title-employees">Employees</h1><div class="subtitle">Staff files, timeline, probation, and hire paperwork — open a dossier to work the file.</div></div>
     <div class="actions"><button class="btn soft" id="pdfEmployees">Export roster PDF</button><button class="btn primary" id="addEmployee2">Add employee</button></div>
+  </div>
+  <div class="roster-metrics" id="rosterMetrics" aria-label="Roster snapshot">
+    <div class="metric"><label>On roster</label><strong id="rosterActive">0</strong><span>Active + probation</span></div>
+    <div class="metric"><label>On probation</label><strong id="rosterProbation">0</strong><span>Review window open</span></div>
+    <div class="metric"><label>Docs missing</label><strong id="rosterDocsGap">0</strong><span>Contract / packet gaps</span></div>
+    <div class="metric"><label>Strikes open</label><strong id="rosterStrikes">0</strong><span>Across the house</span></div>
   </div>
   <div class="toolbar filter-rail">
     <input class="search" id="search" placeholder="Search name or role" aria-label="Search employees">
-    <select id="statusFilter"><option value="">All statuses</option><option value="active">Active</option><option value="probation">Probation</option><option value="suspended">Suspended</option><option value="terminated">Terminated</option></select>
+    <select id="statusFilter" class="sr-only" aria-hidden="true" tabindex="-1"><option value="">All statuses</option><option value="active">Active</option><option value="probation">Probation</option><option value="suspended">Suspended</option><option value="terminated">Terminated</option></select>
+    <div class="status-chips" id="statusChips" role="group" aria-label="Filter by status">
+      <button type="button" class="active" data-status="">All</button>
+      <button type="button" data-status="active">Active</button>
+      <button type="button" data-status="probation">Probation</button>
+      <button type="button" data-status="suspended">Suspended</button>
+      <button type="button" data-status="terminated">Terminated</button>
+    </div>
     <span class="pill gray" id="shown"></span>
   </div>
   <div class="split-desk">
-    <div class="card"><div class="card-head"><b>Roster</b></div>
-      <div class="table-scroll"><table><thead><tr><th>Name</th><th>Role</th><th>Status</th><th class="r">Rate</th><th class="r">Hired</th><th class="r">Strikes</th><th class="r">Action</th></tr></thead><tbody id="employees"></tbody></table></div>
+    <div class="card roster-card"><div class="card-head"><b>Roster</b><span class="pill gray" id="rosterFileHint">Open a file to edit</span></div>
+      <div class="table-scroll"><table><thead><tr><th>Name</th><th>Role</th><th>Status</th><th class="r">Rate</th><th class="r">Hired</th><th class="r">Strikes</th><th class="r action-col">File</th></tr></thead><tbody id="employees"></tbody></table></div>
     </div>
     <div class="card"><div class="card-head"><b>Staff documents on file</b><span class="pill gray" id="empDocCount"></span></div>
-      <div class="panel-note">Offer letters, contracts, and new-hire packets — open a row to read.</div>
-      <div class="table-scroll"><table><thead><tr><th>Date</th><th>Employee</th><th>Document</th><th class="r">Action</th></tr></thead><tbody id="empDocsIndex"></tbody></table></div>
+      <div class="panel-note">Offer letters, contracts, and new-hire packets — open a row to read the paper.</div>
+      <div class="table-scroll"><table><thead><tr><th>Date</th><th>Employee</th><th>Document</th><th class="r action-col">Action</th></tr></thead><tbody id="empDocsIndex"></tbody></table></div>
     </div>
   </div>
 </section>
@@ -1848,7 +2115,7 @@ body{
     <div><div class="eyebrow">People</div><h1 class="title" id="title-shifts">Shifts</h1><div class="subtitle">Weekly station board — bar, kitchen, and floor.</div></div>
     <div class="actions"><button class="btn" id="shiftPrev">&larr; Prev week</button><button class="btn" id="shiftThis">This week</button><button class="btn" id="shiftNext">Next week &rarr;</button><button class="btn soft" id="pdfShifts" title="Print Discord week sheet">Print week sheet</button></div>
   </div>
-  <div class="feature-banner"><b>New:</b> Availability board pulls days and shift windows from hired applications — edit them on the employee file.<span class="pill green">Coverage</span></div>
+  <div class="feature-banner is-quiet"><b>Coverage:</b> Days and shift windows sync from the hired application — edit them on the employee file.<span class="pill green">Shifts</span></div>
   <div class="callout plain">Week of <b id="shiftWeekLabel">—</b> &mdash; clock in on radio with 10-1 and clock out with 10-2. Shift Lead posts coverage before open.</div>
   <div class="card"><div class="card-head"><b>Week board</b><span class="pill gray" id="shiftWeekPill">Week</span></div><div class="table-scroll"><table><thead><tr><th>Employee</th><th>Mon</th><th>Tue</th><th>Wed</th><th>Thu</th><th>Fri</th><th>Sat</th><th>Sun</th><th class="r">On</th></tr></thead><tbody id="shiftBoard"></tbody></table></div></div>
   <div class="card"><div class="card-head"><b>Availability &amp; coverage</b><span class="pill gray" id="availCount">0</span></div>
@@ -2043,16 +2310,38 @@ body{
 <div id="printArea"></div>
 
 <!-- Employee modal -->
-<div class="modal" id="employeeModal" role="dialog" aria-modal="true" aria-labelledby="modalTitle" hidden><div class="dialog xl" role="document" tabindex="-1">
-  <h2 id="modalTitle">Add employee</h2>
+<div class="modal" id="employeeModal" role="dialog" aria-modal="true" aria-labelledby="modalTitle" hidden><div class="dialog xl dossier" role="document" tabindex="-1">
+  <div class="dossier-chrome" id="empDossierChrome">
+    <div class="dossier-folder-tab">Frenchie's HR <span>· personnel</span></div>
+    <div class="dossier-head">
+      <div class="dossier-avatar" id="empAvatar" aria-hidden="true">?</div>
+      <div class="dossier-who">
+        <h2 id="modalTitle">Add employee</h2>
+        <div class="dossier-sub" id="empDossierSub">New file</div>
+      </div>
+      <div class="dossier-stamp active" id="empDossierStamp">Draft</div>
+    </div>
+    <div class="dossier-meta" id="empDossierMeta">
+      <div class="dm"><label>File no.</label><strong id="empFileNo">—</strong></div>
+      <div class="dm"><label>Tenure</label><strong id="empTenure">—</strong></div>
+      <div class="dm"><label>Supervisor</label><strong id="empSupLabel">—</strong></div>
+      <div class="dm"><label>Phone</label><strong id="empPhoneLabel">—</strong></div>
+    </div>
+    <div class="dossier-progress" id="empDossierProgress" style="display:none">
+      <span id="empProgressLabel">File completeness</span>
+      <div class="bar" aria-hidden="true"><i id="empProgressBar" style="width:0%"></i></div>
+      <span id="empProgressPct">0%</span>
+    </div>
+  </div>
+  <div class="dossier-body">
   <div class="field-row">
-    <div class="field"><label>Name</label><input id="name"></div>
-    <div class="field"><label>Phone</label><input id="phone" placeholder="e.g. 636"></div>
+    <div class="field"><label>Name</label><input id="name" autocomplete="name"></div>
+    <div class="field"><label>Phone</label><input id="phone" placeholder="e.g. 636" inputmode="tel"></div>
   </div>
   <div class="field-row3">
     <div class="field"><label>Role</label><select id="role"></select></div>
     <div class="field"><label>Status</label><select id="empStatus"><option value="active">Active</option><option value="probation">Probation</option><option value="suspended">Suspended</option><option value="terminated">Terminated</option></select></div>
-    <div class="field"><label>Rate</label><input id="rate" type="number"></div>
+    <div class="field"><label>Rate ($/hr)</label><input id="rate" type="number" min="0" step="1"></div>
   </div>
   <div class="field-row3">
     <div class="field"><label>Hire date</label><input id="hire" type="date"></div>
@@ -2068,16 +2357,12 @@ body{
   </div>
 
   <div class="file-panel active" data-emp-panel="onboard">
-  <h3>Onboarding</h3>
-  <div class="field-row">
+  <h3>Onboarding checklist</h3>
+  <div class="onboard-grid">
     <label class="checkline"><input type="checkbox" id="obUniform"><span>Uniform issued</span></label>
     <label class="checkline"><input type="checkbox" id="obStation"><span>Station trained</span></label>
-  </div>
-  <div class="field-row">
     <label class="checkline"><input type="checkbox" id="obMenu"><span>Menu learned</span></label>
     <label class="checkline"><input type="checkbox" id="obShadow"><span>Shadow shift completed</span></label>
-  </div>
-  <div class="field-row">
     <label class="checkline"><input type="checkbox" id="obLead"><span>Met Shift Lead</span></label>
   </div>
   <div class="probation-box" id="probationBox" style="display:none">
@@ -2105,7 +2390,10 @@ body{
   <div id="fileExtras" class="file-panel" data-emp-panel="file" style="display:none">
     <h3>Earnings</h3>
     <div class="emp-metrics" id="empPayMetrics"></div>
-    <div style="margin-bottom:12px"><button class="btn tiny soft" type="button" id="empOpenStub">Open latest stub</button></div>
+    <div style="margin-bottom:12px;display:flex;flex-wrap:wrap;gap:8px">
+      <button class="btn tiny soft" type="button" id="empOpenStub">Open latest stub</button>
+      <button class="btn tiny" type="button" id="empPrintSummary">Print file summary</button>
+    </div>
     <h3>File timeline</h3>
     <div class="mini-note">Promotions, demotions, raises, bonuses, status moves, and onboarding — everything that touches this file.</div>
     <div class="emp-log-filters" id="empLogFilters"></div>
@@ -2114,9 +2402,9 @@ body{
     <div style="max-height:200px;overflow:auto"><table><thead><tr><th>Period</th><th class="r">Hours</th><th class="r">Rate</th><th class="r">Bonus</th><th class="r">Tips</th><th class="r">Gross</th><th>Paid</th></tr></thead><tbody id="empPayHistory"></tbody></table></div>
     <h3>Discipline</h3>
     <div id="empStrikes" class="mini-note"></div>
-    <h3>Documents</h3>
+    <h3>Documents in folder</h3>
     <div class="mini-note" style="margin-bottom:8px">After hire: <b>Send contract</b> (you sign first, they sign and reply) → then <b>New-hire packet</b> (file it here and download a copy for them to keep).</div>
-    <div id="empDocs"></div>
+    <div id="empDocs" class="doc-shelf"></div>
     <div id="empDocActions" style="margin-top:10px;display:flex;gap:8px;flex-wrap:wrap">
       <button class="btn tiny soft" id="sendEmpContract">Send contract for signature</button>
       <button class="btn tiny soft" id="sendEmpPacket">File &amp; send new-hire packet</button>
@@ -2124,6 +2412,8 @@ body{
       <button class="btn tiny" id="genContract" style="display:none">View contract</button>
       <button class="btn tiny" id="genPacket" style="display:none">View new-hire packet</button>
     </div>
+  </div>
+  <div class="dossier-confidential">Confidential — Frenchie's Restaurant personnel record · Legion Square</div>
   </div>
 
   <div class="dialog-foot">
@@ -2806,6 +3096,30 @@ function migrate(raw) {
   };
 
   (raw.employees || []).forEach(e => out.employees.push(normalizeEmployee({ ...e }, today())));
+  /* Deduplicate by id (keep first), then by normalized name+hire if idless collisions slipped in */
+  {
+    const seenId = new Set();
+    const seenKey = new Set();
+    const deduped = [];
+    out.employees.forEach(e => {
+      const idKey = e.id != null ? 'id:' + String(e.id) : '';
+      const nameKey = 'n:' + String(e.name || '').trim().toLowerCase() + '|' + String(e.hire || '');
+      if (idKey && seenId.has(idKey)) return;
+      if (!idKey && seenKey.has(nameKey)) return;
+      if (idKey) seenId.add(idKey);
+      seenKey.add(nameKey);
+      deduped.push(e);
+    });
+    if (deduped.length !== out.employees.length) {
+      out.activity = out.activity || [];
+      out.activity.unshift({
+        text: 'Removed ' + (out.employees.length - deduped.length) + ' duplicate roster row' +
+          (out.employees.length - deduped.length === 1 ? '' : 's') + ' on load',
+        date: today()
+      });
+    }
+    out.employees = deduped;
+  }
 
   (raw.periods || []).forEach(p => {
     const entries = {};
@@ -3413,6 +3727,54 @@ function empPacketStatus(e) {
 function empHasAcknowledgedPacket(e) {
   return empPacketStatus(e) === 'acked';
 }
+function empInitials(name) {
+  const parts = String(name || '').trim().split(/\s+/).filter(Boolean);
+  if (!parts.length) return '?';
+  if (parts.length === 1) return parts[0].slice(0, 2).toUpperCase();
+  return (parts[0][0] + parts[parts.length - 1][0]).toUpperCase();
+}
+function empTenureLabel(hire) {
+  if (!hire) return '—';
+  const d = daysBetween(hire, today());
+  if (d < 0) return 'Starts ' + hire;
+  if (d === 0) return 'Day one';
+  if (d < 14) return d + ' day' + (d === 1 ? '' : 's');
+  if (d < 60) return Math.floor(d / 7) + ' wk';
+  const months = Math.floor(d / 30);
+  if (months < 24) return months + ' mo';
+  return Math.floor(months / 12) + ' yr';
+}
+function empFileCompleteness(e) {
+  if (!e) return { pct: 0, label: 'Empty file', bits: [] };
+  const onb = e.onboarding || {};
+  const onbKeys = ['uniform', 'station', 'menu', 'shadow', 'lead'];
+  const onbDone = onbKeys.filter(k => onb[k]).length;
+  const hasContract = empHasSignedContract(e) || !!(e.documents || []).some(d => d.kind === 'contract');
+  const signed = empHasSignedContract(e);
+  const hasPacket = empHasPacket(e);
+  const acked = empHasAcknowledgedPacket(e);
+  const bits = [];
+  bits.push({ key: 'onboard', ok: onbDone === onbKeys.length, label: 'Onboarding ' + onbDone + '/' + onbKeys.length });
+  bits.push({ key: 'contract', ok: signed, label: signed ? 'Contract signed' : (hasContract ? 'Contract on file' : 'Contract missing') });
+  bits.push({ key: 'packet', ok: acked || (e.status !== 'probation' && hasPacket), label: acked ? 'Packet ack' : (hasPacket ? 'Packet filed' : 'Packet missing') });
+  const needPacket = e.status === 'probation' || hasPacket || hasContract;
+  const checks = [
+    onbDone / onbKeys.length,
+    signed ? 1 : (hasContract ? 0.5 : 0),
+    needPacket ? (acked ? 1 : (hasPacket ? 0.55 : 0)) : 1
+  ];
+  const pct = Math.round((checks.reduce((a, b) => a + b, 0) / checks.length) * 100);
+  let label = 'File ' + pct + '% complete';
+  if (pct >= 100) label = 'File complete';
+  else if (!signed) label = 'Contract still open';
+  else if (!hasPacket) label = 'Packet still open';
+  else if (!acked && e.status === 'probation') label = 'Awaiting packet ack';
+  else if (onbDone < onbKeys.length) label = 'Onboarding incomplete';
+  return { pct, label, bits, onbDone, onbTotal: onbKeys.length };
+}
+function folderIconHtml() {
+  return '<span class="folder-ico" aria-hidden="true"></span>';
+}
 function offerAccepted(a) {
   if (!a) return false;
   ensurePaperwork(a);
@@ -3497,8 +3859,8 @@ function buildTodos() {
           group: 'hires',
           tone: 'warn',
           tag: 'Contract',
-          title: e.name,
-          detail: 'Contract sent — waiting on their signed reply.',
+          title: 'Awaiting signed contract',
+          detail: e.name + ' — contract sent, waiting on their reply.',
           go: { type: 'emp', id: e.id }
         });
       } else {
@@ -3507,8 +3869,8 @@ function buildTodos() {
           group: 'hires',
           tone: 'danger',
           tag: 'Contract',
-          title: e.name,
-          detail: 'Needs employment contract — you sign first, then they reply.',
+          title: 'Send employment contract',
+          detail: e.name + ' — you sign first, then they reply.',
           go: { type: 'emp', id: e.id }
         });
       }
@@ -3518,8 +3880,8 @@ function buildTodos() {
         group: 'hires',
         tone: 'warn',
         tag: 'Packet',
-        title: e.name,
-        detail: 'Contract signed — file & send the new-hire packet next.',
+        title: 'File new-hire packet',
+        detail: e.name + ' — contract signed; send the packet next.',
         go: { type: 'emp', id: e.id }
       });
     } else if (!empHasAcknowledgedPacket(e)) {
@@ -3528,8 +3890,8 @@ function buildTodos() {
         group: 'hires',
         tone: 'warn',
         tag: 'Packet',
-        title: e.name,
-        detail: 'New-hire packet sent — waiting on their acknowledgement reply.',
+        title: 'Awaiting packet acknowledgement',
+        detail: e.name + ' — packet sent, waiting on their reply.',
         go: { type: 'emp', id: e.id }
       });
     }
@@ -3542,8 +3904,8 @@ function buildTodos() {
         group: 'hires',
         tone: 'warn',
         tag: 'Onboarding',
-        title: e.name,
-        detail: 'Still open: ' + missing.map(k => ONBOARD_LABELS[k] || k).join(', ') + '.',
+        title: 'Finish onboarding checklist',
+        detail: e.name + ' — still open: ' + missing.map(k => ONBOARD_LABELS[k] || k).join(', ') + '.',
         go: { type: 'emp', id: e.id }
       });
     }
@@ -3556,10 +3918,10 @@ function buildTodos() {
           group: 'hires',
           tone: d <= 0 ? 'danger' : 'warn',
           tag: 'Probation',
-          title: e.name,
-          detail: d < 0
-            ? 'Probation ended ' + Math.abs(d) + ' day' + (Math.abs(d) === 1 ? '' : 's') + ' ago — review overdue.'
-            : (d === 0 ? 'Probation ends today — review due.' : 'Probation ends in ' + d + ' day' + (d === 1 ? '' : 's') + '.'),
+          title: d < 0 ? 'Probation review overdue' : (d === 0 ? 'Probation ends today' : 'Probation review soon'),
+          detail: e.name + ' — ' + (d < 0
+            ? 'ended ' + Math.abs(d) + ' day' + (Math.abs(d) === 1 ? '' : 's') + ' ago.'
+            : (d === 0 ? 'review due today.' : 'ends in ' + d + ' day' + (d === 1 ? '' : 's') + '.')),
           due: e.probationEnd,
           go: { type: 'emp', id: e.id, tab: 'onboard' }
         });
@@ -3584,8 +3946,8 @@ function buildTodos() {
         group: 'pipeline',
         tone: 'warn',
         tag: 'Awaiting',
-        title: a.name,
-        detail: (def.title || k) + ' sent' + (rec.sentAt ? ' ' + rec.sentAt : '') + ' — no reply filed yet.',
+        title: 'Awaiting ' + (def.title || k).toLowerCase() + ' reply',
+        detail: a.name + ' — sent' + (rec.sentAt ? ' ' + rec.sentAt : '') + ', no reply filed yet.',
         go: { type: 'app', id: a.id }
       });
     });
@@ -3597,8 +3959,8 @@ function buildTodos() {
         group: 'pipeline',
         tone: d >= 14 ? 'danger' : 'warn',
         tag: 'Stale',
-        title: a.name,
-        detail: 'Still at ' + (STAGES[a.stage] || a.stage) + ' for ' + d + ' days.',
+        title: 'Stale application · ' + (STAGES[a.stage] || a.stage),
+        detail: a.name + ' — still at this stage for ' + d + ' days.',
         due: a.applied,
         go: { type: 'app', id: a.id }
       });
@@ -3612,8 +3974,8 @@ function buildTodos() {
           group: 'pipeline',
           tone: 'danger',
           tag: 'Hire',
-          title: a.name,
-          detail: 'Offer accepted — hire them onto the roster.',
+          title: 'Hire onto roster',
+          detail: a.name + ' — offer accepted; move them onto the employee file.',
           go: { type: 'app', id: a.id }
         });
       }
@@ -4541,6 +4903,24 @@ function renderEmployees() {
   const st = $('statusFilter').value;
   const list = s.employees.filter(e => (e.name + ' ' + e.role).toLowerCase().includes(q) && (st ? e.status === st : true));
   $('shown').textContent = list.length + ' shown';
+  const activeN = s.employees.filter(e => e.status === 'active' || e.status === 'probation').length;
+  const probN = s.employees.filter(e => e.status === 'probation').length;
+  const docsGap = s.employees.filter(e => e.status !== 'terminated' && (!empHasSignedContract(e) || !empHasPacket(e))).length;
+  const strikeN = s.employees.reduce((a, e) => a + (Number(e.strikes) || 0), 0);
+  if ($('rosterActive')) $('rosterActive').textContent = String(activeN);
+  if ($('rosterProbation')) $('rosterProbation').textContent = String(probN);
+  if ($('rosterDocsGap')) $('rosterDocsGap').textContent = String(docsGap);
+  if ($('rosterStrikes')) $('rosterStrikes').textContent = String(strikeN);
+  if ($('rosterFileHint')) {
+    $('rosterFileHint').textContent = docsGap
+      ? docsGap + ' file' + (docsGap === 1 ? '' : 's') + ' need paperwork'
+      : 'Files look current';
+  }
+  if ($('statusChips')) {
+    $('statusChips').querySelectorAll('button').forEach(btn => {
+      btn.classList.toggle('active', (btn.getAttribute('data-status') || '') === st);
+    });
+  }
   $('employees').innerHTML = list.length ? list.map(e => {
     const hist = (e.history || []).slice(-2).map(h => {
       const row = normalizeHistEntry(h);
@@ -4549,16 +4929,25 @@ function renderEmployees() {
     }).join(' · ');
     const prob = e.status === 'probation' && e.probationEnd ? '<div class="history">Probation ends ' + esc(e.probationEnd) + '</div>' : '';
     const docs = (e.documents || []).length;
-    return '<tr>' +
-      '<td class="name">' + esc(e.name) + (e.phone ? ' <span class="pill gray">' + esc(e.phone) + '</span>' : '') +
+    const comp = empFileCompleteness(e);
+    const badges = [];
+    if (e.status === 'probation') badges.push('<span class="pill warn">Probation</span>');
+    if (!empHasSignedContract(e) && e.status !== 'terminated') badges.push('<span class="pill danger">Contract open</span>');
+    else if (!empHasPacket(e) && e.status === 'probation') badges.push('<span class="pill warn">Packet open</span>');
+    if (docs) badges.push('<span class="pill gray">' + docs + ' doc' + (docs === 1 ? '' : 's') + '</span>');
+    return '<tr class="emp-roster-row" data-emp-id="' + e.id + '">' +
+      '<td class="name"><button type="button" class="linkish" onclick="editEmployee(' + e.id + ')">' + esc(e.name) + '</button>' +
+      (e.phone ? ' <span class="pill gray">' + esc(e.phone) + '</span>' : '') +
       (hist ? '<div class="history">' + esc(hist) + '</div>' : '') + prob +
-      (docs ? '<div class="history">' + docs + ' document' + (docs === 1 ? '' : 's') + ' on file</div>' : '') + '</td>' +
+      (badges.length ? '<div class="emp-row-badges">' + badges.join('') + '</div>' : '') +
+      '<div class="file-complete" title="' + esc(comp.label) + '"><i style="--pct:' + comp.pct + '%"></i> ' + comp.pct + '%</div></td>' +
       '<td>' + esc(e.role) + '</td>' +
       '<td>' + pillStatus(e.status) + '</td>' +
       '<td class="r mono">' + money(e.rate) + '</td>' +
       '<td class="r">' + esc(e.hire) + '</td>' +
       '<td class="r">' + (e.strikes ? '<span class="pill ' + (e.strikes >= 3 ? 'danger' : 'warn') + '">' + e.strikes + '</span>' : '<span class="pill green">0</span>') + '</td>' +
-      '<td class="r"><button class="btn tiny" onclick="editEmployee(' + e.id + ')">Open file</button></td>' +
+      '<td class="r action-col"><button class="btn tiny open-file-btn" type="button" onclick="editEmployee(' + e.id + ')" title="Open personnel file">' +
+      folderIconHtml() + ' Open file</button></td>' +
       '</tr>';
   }).join('') : '<tr><td colspan="7" class="empty">No staff match that search.</td></tr>';
 
@@ -4573,7 +4962,7 @@ function renderEmployees() {
   if ($('empDocsIndex')) {
     $('empDocsIndex').innerHTML = docRows.length ? docRows.map(r =>
       '<tr><td>' + esc(r.doc.date || '—') + '</td><td class="name">' + esc(r.name) + '</td><td>' + esc(r.doc.title || r.doc.kind) + '</td>' +
-      '<td class="r"><button class="btn tiny" onclick="viewDoc(' + r.empId + ',' + r.doc.id + ')">Open</button> ' +
+      '<td class="r action-col"><button class="btn tiny open-file-btn" onclick="viewDoc(' + r.empId + ',' + r.doc.id + ')">' + folderIconHtml() + ' Open</button> ' +
       (r.doc.html ? '<button class="btn tiny" onclick="printEmpDoc(' + r.empId + ',' + r.doc.id + ')">Print</button>' : '') +
       '</td></tr>'
     ).join('') : emptyState('No staff documents yet.', 'Open an employee file and send hire paperwork.');
@@ -7618,12 +8007,57 @@ window.openHours = function (id) {
 
 window.openPayStubs = openPayStubs;
 
+function fillEmpDossierChrome(e) {
+  const isNew = !e;
+  const name = e ? e.name : (($('name') && $('name').value.trim()) || 'New hire');
+  if ($('empAvatar')) $('empAvatar').textContent = empInitials(name);
+  if ($('modalTitle')) $('modalTitle').textContent = isNew ? 'New personnel file' : name;
+  if ($('empDossierSub')) {
+    if (isNew) {
+      $('empDossierSub').innerHTML = '<span class="pill gray">Draft</span> Fill the form and save onto the roster';
+    } else {
+      const bits = [
+        '<span>' + esc(e.role || '—') + '</span>',
+        '<span class="pill gray">#' + esc(String(e.id).padStart(4, '0')) + '</span>',
+        e.hire ? '<span>Hired ' + esc(e.hire) + '</span>' : '',
+        '<span>' + esc(empTenureLabel(e.hire)) + ' on the floor</span>'
+      ].filter(Boolean);
+      $('empDossierSub').innerHTML = bits.join('<span aria-hidden="true"> · </span>');
+    }
+  }
+  if ($('empDossierStamp')) {
+    const st = e ? (e.status || 'active') : 'draft';
+    $('empDossierStamp').className = 'dossier-stamp ' + (st === 'draft' ? 'probation' : st);
+    $('empDossierStamp').textContent = st === 'draft' ? 'Draft' : st;
+  }
+  if ($('empFileNo')) $('empFileNo').textContent = e ? ('FR-E-' + String(e.id).padStart(4, '0')) : 'Unassigned';
+  if ($('empTenure')) $('empTenure').textContent = e ? empTenureLabel(e.hire) : '—';
+  if ($('empSupLabel')) {
+    if (!e || !e.supervisorId) $('empSupLabel').textContent = '—';
+    else {
+      const sup = empById(e.supervisorId);
+      $('empSupLabel').textContent = sup ? sup.name : '—';
+    }
+  }
+  if ($('empPhoneLabel')) $('empPhoneLabel').textContent = (e && e.phone) ? e.phone : '—';
+  if ($('empDossierProgress')) {
+    if (!e) {
+      $('empDossierProgress').style.display = 'none';
+    } else {
+      const comp = empFileCompleteness(e);
+      $('empDossierProgress').style.display = 'flex';
+      if ($('empProgressLabel')) $('empProgressLabel').textContent = comp.label;
+      if ($('empProgressBar')) $('empProgressBar').style.width = comp.pct + '%';
+      if ($('empProgressPct')) $('empProgressPct').textContent = comp.pct + '%';
+    }
+  }
+}
+
 window.editEmployee = function (id) {
   const e = empById(id);
   if (!e) return;
   editId = id;
   window.__empLogFilter = 'all';
-  $('modalTitle').textContent = 'Employee file — ' + e.name;
   $('promoField').style.display = 'block';
   $('promoReason').value = '';
   roleOptions($('role'), e.role);
@@ -7644,10 +8078,21 @@ window.editEmployee = function (id) {
   if ($('availNotes')) $('availNotes').value = (e.availability && e.availability.notes) || '';
   $('deleteEmployee').style.display = 'inline-block';
   if ($('empTabFile')) $('empTabFile').style.display = 'inline-flex';
+  fillEmpDossierChrome(e);
   renderEmployeeFile(e);
   syncProbationBox(e);
+  const dlg = document.querySelector('#employeeModal .dialog');
+  if (dlg) {
+    dlg.classList.remove('open-anim');
+    void dlg.offsetWidth;
+    dlg.classList.add('open-anim');
+  }
   $('employeeModal').classList.add('open');
-  setEmpFileTab('onboard');
+  const comp = empFileCompleteness(e);
+  const startTab = (!empHasSignedContract(e) || !empHasPacket(e)) ? 'file' : (e.status === 'probation' ? 'onboard' : 'file');
+  setEmpFileTab(startTab);
+  if ($('name')) setTimeout(() => { try { $('name').focus(); } catch (err) {} }, 40);
+  announce((e.name || 'Employee') + ' file opened · ' + comp.label);
 };
 
 window.saveRole = function (inp) {
@@ -8157,10 +8602,10 @@ function renderEmployeeFile(e) {
   let docsHtml = '';
   if (ordered.length) {
     docsHtml = ordered.map(d =>
-      '<div class="paper-row docrow"><div class="paper-name"><b>' + esc(d.title) + '</b>' +
-      '<div class="paper-sub">' + esc(d.date || '—') +
+      '<div class="doc-card"><div><div class="doc-title">' + esc(d.title) + '</div>' +
+      '<div class="doc-sub">' + esc(d.date || '—') +
       (d.kind ? ' · ' + esc((PAPER_KINDS[d.kind] && PAPER_KINDS[d.kind].short) || d.kind) : '') +
-      ' · from hiring file</div></div>' +
+      ' · filed on employee</div></div>' +
       '<div class="paper-actions">' +
       (d.status ? '<span class="pill ' + empDocStatusPill(d.status) + '">' + esc(d.status) + '</span> ' : '') +
       (d.html ? '<button class="btn tiny" onclick="viewDoc(' + e.id + ',' + d.id + ')">View</button> ' : '<button class="btn tiny" disabled title="Not on file yet">View</button> ') +
@@ -8173,8 +8618,8 @@ function renderEmployeeFile(e) {
   ['offer', 'contract', 'packet'].forEach(k => {
     if (findEmpDoc(e, k)) return;
     const label = (PAPER_KINDS[k] && PAPER_KINDS[k].title) || k;
-    docsHtml += '<div class="paper-row docrow"><div class="paper-name"><b>' + esc(label) + '</b>' +
-      '<div class="paper-sub">Not on file yet</div></div>' +
+    docsHtml += '<div class="doc-card missing"><div><div class="doc-title">' + esc(label) + '</div>' +
+      '<div class="doc-sub">Not on file yet — send from the actions below</div></div>' +
       '<div class="paper-actions"><span class="pill gray">missing</span> ' +
       '<button class="btn tiny" disabled title="Send or file this document first">View</button></div></div>';
   });
@@ -8187,6 +8632,7 @@ function renderEmployeeFile(e) {
       (left < 0 ? 'overdue' : (left === 0 ? 'due today' : left + ' day' + (left === 1 ? '' : 's') + ' left')) + '</div>' + docsHtml;
   }
   $('empDocs').innerHTML = docsHtml;
+  fillEmpDossierChrome(e);
 
   const hasOffer = !!findEmpDoc(e, 'offer');
   const hasContract = !!findEmpDoc(e, 'contract');
@@ -8234,6 +8680,48 @@ window.printEmpDoc = function (empId, docId) {
   if (!d || !d.html) return toast('Nothing to print');
   printLetter(d.html);
 };
+
+function printEmployeeSummary(e) {
+  const comp = empFileCompleteness(e);
+  const sup = e.supervisorId ? empById(e.supervisorId) : null;
+  const onb = e.onboarding || {};
+  const ytd = employeeYtdTotals(e.id, workingPeriod() || current());
+  const career = employeeCareerTotals(e.id);
+  const docs = (e.documents || []).map(d =>
+    '<tr><td>' + esc(d.date || '—') + '</td><td>' + esc(d.title || d.kind) + '</td><td>' + esc(d.status || 'on file') + '</td></tr>'
+  ).join('') || '<tr><td colspan="3">No documents filed</td></tr>';
+  const hist = (e.history || []).map(normalizeHistEntry).slice().reverse().slice(0, 12).map(h =>
+    '<tr><td>' + esc(h.date || '—') + '</td><td>' + esc(h.summary || '') + '</td><td>' + esc(h.detail || '') + '</td></tr>'
+  ).join('') || '<tr><td colspan="3">No timeline entries</td></tr>';
+  const html =
+    '<div class="packet-embed" style="max-width:820px;margin:0 auto;padding:28px;font:15px/1.55 Georgia,serif;color:#1e2a24">' +
+    '<div style="display:flex;justify-content:space-between;align-items:flex-end;border-bottom:2px solid #b18a3e;padding-bottom:12px;margin-bottom:18px">' +
+    '<div><div style="font:700 11px/1.4 \'Courier New\',monospace;letter-spacing:.12em;color:#6c7873;text-transform:uppercase">Personnel file summary</div>' +
+    '<h1 style="margin:6px 0 0;font:700 26px Georgia,serif">' + esc(e.name) + '</h1>' +
+    '<div style="color:#6c7873;font-size:13px">' + esc(e.role) + ' · File FR-E-' + esc(String(e.id).padStart(4, '0')) + '</div></div>' +
+    '<div style="text-align:right;font:700 12px/1.3 \'Courier New\',monospace;text-transform:uppercase;border:2px solid #22322b;padding:8px 10px;border-radius:6px">' + esc(e.status || 'active') + '</div></div>' +
+    '<p style="margin:0 0 14px;font-size:13px;color:#6c7873">Printed ' + esc(today()) + ' · Confidential — Frenchie\'s Restaurant · Legion Square · Completeness ' + comp.pct + '%</p>' +
+    '<h2 style="font:700 15px Georgia,serif;border-bottom:1px solid #e3dac6;padding-bottom:4px">Profile</h2>' +
+    '<table style="width:100%;border-collapse:collapse;margin:0 0 16px;font-size:14px">' +
+    '<tr><td style="padding:6px 0;color:#6c7873;width:34%">Phone</td><td style="padding:6px 0">' + esc(e.phone || '—') + '</td></tr>' +
+    '<tr><td style="padding:6px 0;color:#6c7873">Hire date</td><td style="padding:6px 0">' + esc(e.hire || '—') + ' (' + esc(empTenureLabel(e.hire)) + ')</td></tr>' +
+    '<tr><td style="padding:6px 0;color:#6c7873">Rate</td><td style="padding:6px 0">' + money(e.rate) + '/hr</td></tr>' +
+    '<tr><td style="padding:6px 0;color:#6c7873">Supervisor</td><td style="padding:6px 0">' + esc(sup ? (sup.name + ' — ' + sup.role) : '—') + '</td></tr>' +
+    '<tr><td style="padding:6px 0;color:#6c7873">Probation ends</td><td style="padding:6px 0">' + esc(e.probationEnd || '—') + '</td></tr>' +
+    '<tr><td style="padding:6px 0;color:#6c7873">Strikes</td><td style="padding:6px 0">' + (e.strikes || 0) + '</td></tr></table>' +
+    '<h2 style="font:700 15px Georgia,serif;border-bottom:1px solid #e3dac6;padding-bottom:4px">Onboarding</h2>' +
+    '<p style="margin:0 0 14px">' + ['uniform', 'station', 'menu', 'shadow', 'lead'].map(k =>
+      (onb[k] ? '☑ ' : '☐ ') + (ONBOARD_LABELS[k] || k)
+    ).join(' &nbsp;&nbsp; ') + '</p>' +
+    '<h2 style="font:700 15px Georgia,serif;border-bottom:1px solid #e3dac6;padding-bottom:4px">Earnings snapshot</h2>' +
+    '<p style="margin:0 0 14px">YTD ' + money(ytd.g) + ' · Career ' + money(career.g) + ' · Paid ' + money(career.paid) + ' · Owed ' + money(career.owed) + ' · Hours YTD ' + dec(ytd.h) + '</p>' +
+    '<h2 style="font:700 15px Georgia,serif;border-bottom:1px solid #e3dac6;padding-bottom:4px">Documents</h2>' +
+    '<table style="width:100%;border-collapse:collapse;margin:0 0 16px;font-size:13px"><thead><tr><th align="left">Date</th><th align="left">Document</th><th align="left">Status</th></tr></thead><tbody>' + docs + '</tbody></table>' +
+    '<h2 style="font:700 15px Georgia,serif;border-bottom:1px solid #e3dac6;padding-bottom:4px">Recent timeline</h2>' +
+    '<table style="width:100%;border-collapse:collapse;font-size:13px"><thead><tr><th align="left">Date</th><th align="left">Entry</th><th align="left">Detail</th></tr></thead><tbody>' + hist + '</tbody></table>' +
+    '<p style="margin:22px 0 0;font-size:11px;color:#6c7873;text-transform:uppercase;letter-spacing:.08em;text-align:center">Frenchie\'s Restaurant — HR &amp; Payroll desk</p></div>';
+  printLetter(html);
+}
 
 window.filterEmpLog = function (type) {
   window.__empLogFilter = type || 'all';
@@ -8773,6 +9261,15 @@ if ($('stubFilter')) $('stubFilter').onchange = () => renderPayStubs();
 if ($('stubHideZero')) $('stubHideZero').onchange = () => renderPayStubs();
 $('search').oninput = renderEmployees;
 $('statusFilter').onchange = renderEmployees;
+if ($('statusChips')) {
+  $('statusChips').querySelectorAll('button').forEach(btn => {
+    btn.onclick = () => {
+      const v = btn.getAttribute('data-status') || '';
+      if ($('statusFilter')) $('statusFilter').value = v;
+      renderEmployees();
+    };
+  });
+}
 $('newPeriod').onclick = $('newPeriod2').onclick = newPeriod;
 
 if ($('gotoStubs')) $('gotoStubs').onclick = () => openPayStubs(selectedPeriodIndex());
@@ -8784,6 +9281,38 @@ if ($('empOpenStub')) {
     openPayStubs(workingPeriodIndex(), e.id);
   };
 }
+if ($('empPrintSummary')) {
+  $('empPrintSummary').onclick = () => {
+    const e = empById(editId);
+    if (!e) return toast('Open an employee file first');
+    printEmployeeSummary(e);
+  };
+}
+['name', 'phone', 'empStatus', 'role', 'hire'].forEach(id => {
+  const el = $(id);
+  if (!el) return;
+  el.addEventListener('input', () => {
+    if (!$('employeeModal').classList.contains('open')) return;
+    if (editId != null) {
+      const e = empById(editId);
+      if (!e) return;
+      fillEmpDossierChrome({
+        ...e,
+        name: $('name').value || e.name,
+        phone: $('phone').value,
+        status: $('empStatus').value || e.status,
+        role: $('role').value || e.role,
+        hire: $('hire').value || e.hire
+      });
+    } else {
+      fillEmpDossierChrome(null);
+      if ($('empAvatar')) $('empAvatar').textContent = empInitials($('name').value || 'New hire');
+      if ($('modalTitle')) $('modalTitle').textContent = $('name').value.trim() || 'New personnel file';
+      if ($('empPhoneLabel')) $('empPhoneLabel').textContent = $('phone').value.trim() || '—';
+    }
+  });
+  if (el.tagName === 'SELECT') el.addEventListener('change', () => el.dispatchEvent(new Event('input')));
+});
 
 $('tipPool').onchange = () => {
   const p = current();
@@ -8857,20 +9386,15 @@ $('copyPayLog').onclick = () => {
 /* ---------- desk pro feature wiring ---------- */
 function bindClick(id, fn) { const el = $(id); if (el) el.onclick = fn; }
 bindClick('copySundayRun', copySundayRun);
-bindClick('copySundayRun2', copySundayRun);
 bindClick('previewSundayRun', openSundayRunPreview);
 bindClick('copySundayRunModal', () => { copySundayRun(); });
 bindClick('closeSundayRun', () => { if ($('sundayRunModal')) $('sundayRunModal').classList.remove('open'); });
-bindClick('closePeriodTop', () => closePeriodAndRoll(current()));
 bindClick('probPassBtn', () => completeProbation(true));
 bindClick('probFailBtn', () => completeProbation(false));
 document.querySelectorAll('#empFileTabs .file-tab').forEach(btn => {
   btn.onclick = () => setEmpFileTab(btn.getAttribute('data-emp-tab') || 'onboard');
 });
 if ($('sundayRunModal')) {
-  document.querySelectorAll('.modal').forEach(m => {
-    /* already wired; ensure sunday modal observed */
-  });
   const mo = document.querySelector('#sundayRunModal');
   if (mo && typeof _modalObserver !== 'undefined') {
     try { _modalObserver.observe(mo, { attributes: true }); } catch (err) {}
@@ -8883,7 +9407,6 @@ $('empStatus').addEventListener('change', () => {
 /* ---------- employee modal ---------- */
 function openAddEmployee() {
   editId = null;
-  $('modalTitle').textContent = 'Add employee';
   $('promoField').style.display = 'none';
   $('promoReason').value = '';
   roleOptions($('role'), 'New Hire');
@@ -8902,8 +9425,16 @@ function openAddEmployee() {
   if ($('empTabFile')) $('empTabFile').style.display = 'none';
   if ($('probationBox')) $('probationBox').style.display = 'none';
   if ($('probNotes')) $('probNotes').value = '';
+  fillEmpDossierChrome(null);
+  const dlg = document.querySelector('#employeeModal .dialog');
+  if (dlg) {
+    dlg.classList.remove('open-anim');
+    void dlg.offsetWidth;
+    dlg.classList.add('open-anim');
+  }
   $('employeeModal').classList.add('open');
   setEmpFileTab('onboard');
+  setTimeout(() => { try { $('name').focus(); } catch (err) {} }, 40);
 }
 $('addEmployee').onclick = $('addEmployee2').onclick = openAddEmployee;
 $('role').onchange = () => { $('rate').value = s.roles[$('role').value] || 3000; };
