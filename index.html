@@ -1716,6 +1716,126 @@ body.login-locked .shell{filter:blur(2px);pointer-events:none;user-select:none}
 .staff-welcome b{color:var(--navy)}
 
 
+
+/* ===== Top header cleanup ===== */
+.top{
+  position:sticky;top:0;z-index:12;
+  display:flex;align-items:center;justify-content:space-between;gap:18px;
+  min-height:64px;height:auto;padding:12px 28px;
+  background:oklch(99.8% .003 84 / .92);
+  backdrop-filter:blur(14px) saturate(1.1);
+  border-bottom:1px solid var(--line);
+  box-shadow:none;
+  flex-wrap:nowrap;
+}
+.top-left{display:flex;align-items:center;gap:12px;min-width:0;flex:1}
+.top-right{display:flex;align-items:center;gap:10px;flex:none;justify-content:flex-end}
+.top-titleblock{min-width:0}
+.top-kicker{
+  margin:0 0 2px;font-size:.62rem;font-weight:700;letter-spacing:.12em;
+  text-transform:uppercase;color:var(--muted);line-height:1;
+}
+.top-page{
+  margin:0;font:600 .95rem/1.2 'DM Sans',sans-serif;color:var(--navy);
+  letter-spacing:-.01em;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;
+}
+.top-status{
+  display:inline-flex;align-items:center;gap:8px;
+  padding:6px 10px;border-radius:999px;
+  background:oklch(97.5% .008 84);border:1px solid var(--line);
+  font-size:.68rem;color:var(--muted);white-space:nowrap;
+}
+.top-status #saveBadge,.top-save{color:var(--muted);font-weight:600;font-variant-numeric:tabular-nums;padding:0;background:transparent;border-radius:0}
+.top-status-sep{width:4px;height:4px;border-radius:50%;background:oklch(82% .02 84)}
+.sync-chip{
+  font:600 .68rem 'DM Sans',sans-serif;padding:0;border:0;background:transparent;
+  color:var(--green);letter-spacing:0;text-transform:none;
+  display:inline-flex;align-items:center;gap:5px;
+}
+.sync-chip:before{content:'';width:6px;height:6px;border-radius:50%;background:currentColor}
+.sync-chip.syncing{color:oklch(42% .08 82)}
+.sync-chip.behind,.sync-chip.conflict{color:var(--warn)}
+.sync-chip.offline{color:var(--danger)}
+.top-iconbtn{
+  width:36px;height:36px;border-radius:10px;border:1px solid var(--line);
+  background:var(--paper);color:var(--navy);display:inline-flex;align-items:center;justify-content:center;
+  cursor:pointer;flex:none;
+}
+.top-iconbtn:hover{background:oklch(97% .008 84);border-color:oklch(78% .03 155)}
+.top-account{position:relative;flex:none}
+.top-account > summary{list-style:none}
+.top-account > summary::-webkit-details-marker{display:none}
+.top-account-btn{
+  display:inline-flex;align-items:center;gap:10px;cursor:pointer;
+  padding:5px 10px 5px 5px;border-radius:999px;border:1px solid var(--line);
+  background:var(--paper);min-height:40px;user-select:none;
+}
+.top-account-btn:hover{background:oklch(97.5% .008 84)}
+.top-account[open] > .top-account-btn{border-color:oklch(78% .04 155);background:var(--sage)}
+.top-avatar{
+  width:30px;height:30px;border-radius:50%;display:inline-flex;align-items:center;justify-content:center;
+  background:var(--navy);color:var(--gold);font:700 .72rem 'DM Sans',sans-serif;flex:none;
+}
+.top-account-text{display:flex;flex-direction:column;min-width:0;line-height:1.15;text-align:left}
+.top-account-name{
+  font-size:.74rem;font-weight:700;color:var(--navy);
+  max-width:140px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;
+}
+.top-account-role{font-size:.62rem;color:var(--muted);max-width:140px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.top-account-caret{
+  width:6px;height:6px;border-right:1.7px solid var(--muted);border-bottom:1.7px solid var(--muted);
+  transform:rotate(45deg);margin:0 2px 3px 2px;flex:none;
+}
+.top-account-panel{
+  position:absolute;right:0;top:calc(100% + 8px);z-index:40;
+  width:min(280px,86vw);padding:8px;
+  border:1px solid var(--line);border-radius:14px;background:var(--paper);
+  box-shadow:0 18px 40px oklch(20% .02 155 / .16);
+}
+.top-account-head{padding:10px 10px 12px;border-bottom:1px solid var(--line);margin:0 0 6px}
+.top-account-head-name{font-weight:700;color:var(--navy);font-size:.84rem}
+.top-account-head-meta{margin-top:4px;font-size:.7rem;color:var(--muted)}
+.top-account-item{
+  width:100%;text-align:left;border:0;background:transparent;color:var(--ink);
+  padding:10px 10px;border-radius:9px;font-size:.78rem;font-weight:600;cursor:pointer;
+}
+.top-account-item:hover{background:oklch(96.5% .01 84)}
+.top-account-item.danger{color:var(--danger)}
+.top-account-item.danger:hover{background:var(--dangerwash)}
+.top-account-foot{
+  margin-top:6px;padding:10px;border-top:1px solid var(--line);
+  display:grid;grid-template-columns:auto 1fr;gap:8px;align-items:center;
+}
+.top-jump-label{font-size:.62rem;font-weight:700;letter-spacing:.06em;text-transform:uppercase;color:var(--muted);grid-column:1 / -1}
+.top-jump{
+  grid-column:1 / -1;width:100%;border:1px solid var(--line);background:var(--cream);
+  border-radius:9px;padding:8px 10px;font-size:.74rem;min-height:36px;
+}
+.build-chip{
+  font:700 .62rem 'JetBrains Mono',monospace;padding:4px 7px;border-radius:6px;
+  background:oklch(96% .01 84);color:var(--muted);border:1px solid var(--line);
+}
+/* legacy crumbs / chips kept quiet if referenced elsewhere */
+.crumb{display:none}
+.help-btn,.kbd-hint,.quick-jump,.session-chip{display:none!important}
+.payday{display:contents}
+body.view-is-overview .payday{display:contents}
+body.view-is-overview .top{min-height:64px;padding-top:12px;padding-bottom:12px}
+body.view-is-overview .quick-jump{display:none!important}
+@media(max-width:900px){
+  .top{padding:10px 14px;gap:10px}
+  .top-kicker{display:none}
+  .top-page{font-size:1.05rem}
+  .top-status{display:none}
+  .top-account-text{display:none}
+  .top-account-btn{padding:4px;border-radius:50%}
+  .top-account-caret{display:none}
+}
+@media(max-width:720px){
+  .top-iconbtn{display:none}
+}
+/* ===== Top header cleanup end ===== */
+
 /* ===== Overview revamp ===== */
 #view-overview{max-width:100%}
 body.view-is-overview .kbd-hint{display:none}
@@ -2128,39 +2248,59 @@ body.compact-todos .attn-detail{display:none}
 <header class="top" role="banner">
   <div class="top-left">
     <button type="button" class="hamburger" id="navToggle" aria-label="Open menu" aria-controls="side" aria-expanded="false"><span aria-hidden="true"></span></button>
-    <nav class="crumb" aria-label="Breadcrumb">
-      <span class="crumb-root">Frenchie's</span>
-      <span class="crumb-sep" aria-hidden="true">/</span>
-      <b id="crumb">Overview</b>
-    </nav>
+    <div class="top-titleblock">
+      <p class="top-kicker">Frenchie&apos;s desk</p>
+      <h1 class="top-page" id="crumb">Overview</h1>
+    </div>
   </div>
   <div class="top-right">
-    <label class="sr-only" for="quickJump">Jump to tab</label>
-    <select class="quick-jump" id="quickJump" title="Jump to any tab">
-      <option value="overview">Overview</option>
-      <option value="periods">Time &amp; Pay</option>
-      <option value="events">Events</option>
-      <option value="paystubs">Pay stubs</option>
-      <option value="roles">Role rates</option>
-      <option value="hiring">Hiring</option>
-      <option value="employees">Employees</option>
-      <option value="relations">Relations</option>
-      <option value="shifts">Shifts</option>
-      <option value="compliance">Compliance</option>
-      <option value="expenses">Expenses</option>
-      <option value="reports">Reports</option>
-      <option value="backup">Backup</option>
-    </select>
-    <button type="button" class="help-btn" id="helpShortcuts" title="Keyboard shortcuts" aria-haspopup="dialog" aria-controls="shortcutSheet">?</button>
-    <span class="build-chip" title="Desk build marker">v13</span>
-    <span class="sync-chip live" id="syncChip" title="Realtime sync across tabs in this browser">LIVE</span>
-    <span class="session-chip" id="sessionChip" title="Signed-in staff">Signed out</span>
-    <button type="button" class="btn tiny soft" id="logoutBtn" title="Sign out">Logout</button>
-    <button type="button" class="btn tiny soft" id="syncNowBtn" title="Pull latest from other tabs">Sync</button>
-    <button type="button" class="btn tiny soft" id="openSettingsBtn" title="Desk settings" data-mgmt-only>Settings</button>
-    <button type="button" class="btn tiny" id="openCmdBtn" title="Command palette (Ctrl+K)">⌘K</button>
-    <span class="kbd-hint" title="Press ? for shortcuts">g then key</span>
-    <div class="payday"><span id="saveBadge" class="rel" title="Autosave status">Saved</span><span class="payday-sep" aria-hidden="true">·</span><span>Payday: Sunday, 9:00 AM</span></div>
+    <div class="top-status" aria-label="Desk status">
+      <span id="saveBadge" class="top-save rel" title="Autosave status">Saved</span>
+      <span class="top-status-sep" aria-hidden="true"></span>
+      <span class="sync-chip live" id="syncChip" title="Realtime sync across tabs in this browser">Live</span>
+    </div>
+    <button type="button" class="top-iconbtn" id="openCmdBtn" title="Search desk (Ctrl+K)" aria-label="Search desk">
+      <svg width="16" height="16" viewBox="0 0 24 24" fill="none" aria-hidden="true"><circle cx="11" cy="11" r="6.5" stroke="currentColor" stroke-width="1.8"/><path d="M16.5 16.5L21 21" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"/></svg>
+    </button>
+    <details class="top-account" id="accountMenu">
+      <summary class="top-account-btn" title="Account menu">
+        <span class="top-avatar" id="sessionAvatar" aria-hidden="true">?</span>
+        <span class="top-account-text">
+          <span class="top-account-name" id="sessionChip">Signed out</span>
+          <span class="top-account-role" id="sessionRole">Guest</span>
+        </span>
+        <span class="top-account-caret" aria-hidden="true"></span>
+      </summary>
+      <div class="top-account-panel" role="menu">
+        <div class="top-account-head">
+          <div class="top-account-head-name" id="sessionFullName">Not signed in</div>
+          <div class="top-account-head-meta payday"><span data-payday-label="1">Payday: Sunday, 9:00 AM</span></div>
+        </div>
+        <button type="button" class="top-account-item" id="syncNowBtn" role="menuitem">Sync desk</button>
+        <button type="button" class="top-account-item" id="openSettingsBtn" role="menuitem" data-mgmt-only>Settings</button>
+        <button type="button" class="top-account-item" id="helpShortcuts" role="menuitem" aria-haspopup="dialog" aria-controls="shortcutSheet">Keyboard shortcuts</button>
+        <button type="button" class="top-account-item danger" id="logoutBtn" role="menuitem">Sign out</button>
+        <div class="top-account-foot">
+          <span class="build-chip" title="Desk build">v13</span>
+          <label class="top-jump-label" for="quickJump">Jump to</label>
+          <select class="top-jump" id="quickJump" title="Jump to any tab">
+            <option value="overview">Overview</option>
+            <option value="periods">Time &amp; Pay</option>
+            <option value="events">Events</option>
+            <option value="paystubs">Pay stubs</option>
+            <option value="roles">Role rates</option>
+            <option value="hiring">Hiring</option>
+            <option value="employees">Employees</option>
+            <option value="relations">Relations</option>
+            <option value="shifts">Shifts</option>
+            <option value="compliance">Compliance</option>
+            <option value="expenses">Expenses</option>
+            <option value="reports">Reports</option>
+            <option value="backup">Backup</option>
+          </select>
+        </div>
+      </div>
+    </details>
   </div>
 </header>
 <div class="content" id="deskContent">
@@ -4124,11 +4264,11 @@ function setSyncChip(state, detail) {
   const el = $('syncChip');
   if (!el) return;
   const map = {
-    live: ['LIVE', 'live', 'In sync across tabs in this browser'],
-    syncing: ['SYNC', 'syncing', detail || 'Applying update from another tab…'],
-    behind: ['BEHIND', 'behind', detail || 'Local file is behind another tab'],
-    conflict: ['CONFLICT', 'conflict', detail || 'Conflicting edits — pulled newer copy'],
-    offline: ['LOCAL', 'offline', detail || 'Realtime channel unavailable — storage events still work']
+    live: ['Live', 'live', 'In sync across tabs in this browser'],
+    syncing: ['Syncing', 'syncing', detail || 'Applying update from another tab…'],
+    behind: ['Behind', 'behind', detail || 'Local file is behind another tab'],
+    conflict: ['Conflict', 'conflict', detail || 'Conflicting edits — pulled newer copy'],
+    offline: ['Local', 'offline', detail || 'Realtime channel unavailable — storage events still work']
   };
   const row = map[syncState] || map.live;
   el.textContent = row[0];
@@ -5031,6 +5171,15 @@ function applySessionChrome() {
   const gate = $('loginGate');
   const shell = document.querySelector('.shell');
   const needsSetup = !!pendingPasswordEmpId;
+  const setAccount = (name, role, full, initial, title) => {
+    if ($('sessionChip')) {
+      $('sessionChip').textContent = name;
+      $('sessionChip').title = title || name;
+    }
+    if ($('sessionRole')) $('sessionRole').textContent = role || '';
+    if ($('sessionFullName')) $('sessionFullName').textContent = full || name;
+    if ($('sessionAvatar')) $('sessionAvatar').textContent = (initial || '?').slice(0, 1).toUpperCase();
+  };
   if (!sessionUser || needsSetup) {
     if (gate) {
       gate.classList.add('open');
@@ -5039,10 +5188,13 @@ function applySessionChrome() {
     }
     if (shell) shell.setAttribute('aria-hidden', 'true');
     document.body.classList.add('login-locked');
-    if ($('sessionChip')) {
-      $('sessionChip').textContent = needsSetup ? 'Set password' : 'Signed out';
-      $('sessionChip').title = needsSetup ? 'Create your personal password to continue' : 'Not signed in';
-    }
+    setAccount(
+      needsSetup ? 'Set password' : 'Signed out',
+      needsSetup ? 'Almost in' : 'Guest',
+      needsSetup ? 'Create your password' : 'Not signed in',
+      needsSetup ? '!' : '?',
+      needsSetup ? 'Create your personal password to continue' : 'Not signed in'
+    );
     return;
   }
   if (gate) { gate.classList.remove('open'); gate.setAttribute('hidden', ''); gate.setAttribute('data-mode', 'signin'); }
@@ -5051,10 +5203,9 @@ function applySessionChrome() {
   document.body.classList.toggle('session-staff', isStaffSession());
   document.body.classList.toggle('session-lead', isLeadSession());
   document.body.classList.toggle('session-mgmt', canMutateDesk());
-  if ($('sessionChip')) {
-    $('sessionChip').textContent = sessionUser.username + ' · ' + sessionUser.role;
-    $('sessionChip').title = sessionUser.name + ' logged in';
-  }
+  const uname = sessionUser.username || sessionUser.name || 'Staff';
+  const initial = (sessionUser.name || uname || '?').trim().charAt(0) || '?';
+  setAccount(uname, sessionUser.role || 'Staff', sessionUser.name || uname, initial, (sessionUser.name || uname) + ' logged in');
   document.querySelectorAll('.nav button[data-view]').forEach(btn => {
     const view = btn.getAttribute('data-view');
     const ok = canAccessView(view);
