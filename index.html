@@ -1678,6 +1678,49 @@ body{
 .snapshot-row:last-child{border-bottom:0}
 .ov-tip-tools{display:inline-flex;align-items:center;gap:6px;flex-wrap:wrap}
 
+/* ===== Desk v12 — staff login ===== */
+body.login-locked .shell{filter:blur(2px);pointer-events:none;user-select:none}
+#loginGate{
+  position:fixed;inset:0;z-index:10000;display:none;align-items:center;justify-content:center;
+  padding:24px;background:
+    radial-gradient(900px 500px at 10% 0%, oklch(40% .06 155 / .55), transparent 60%),
+    radial-gradient(800px 480px at 100% 100%, oklch(55% .1 82 / .35), transparent 55%),
+    linear-gradient(160deg, oklch(22% .03 155), oklch(28% .04 155) 45%, oklch(24% .03 155));
+}
+#loginGate.open{display:flex}
+.login-card{
+  width:min(420px,100%);padding:28px 26px 24px;border-radius:16px;
+  background:linear-gradient(180deg, oklch(99% .006 84), var(--paper));
+  border:1px solid oklch(84% .03 84);box-shadow:0 24px 60px oklch(10% .02 155 / .45);
+}
+.login-card .brand{font:700 1.35rem/1.15 'Playfair Display',serif;color:var(--navy);margin:0 0 4px}
+.login-card .sub{color:var(--muted);font-size:.78rem;margin:0 0 18px}
+.login-card .field{margin:0 0 12px}
+.login-card label{display:block;font-size:.68rem;font-weight:700;letter-spacing:.06em;text-transform:uppercase;color:var(--muted);margin:0 0 5px}
+.login-card input{
+  width:100%;min-height:42px;padding:8px 12px;border:1px solid var(--line);border-radius:10px;
+  background:var(--cream);color:var(--ink);
+}
+.login-card .actions{display:flex;gap:8px;flex-wrap:wrap;margin-top:8px}
+.login-err{min-height:1.2em;color:var(--danger);font-size:.76rem;font-weight:600;margin:4px 0 0}
+.session-chip{
+  font:600 .68rem 'JetBrains Mono',monospace;padding:5px 9px;border-radius:8px;
+  background:var(--sage);color:var(--navy);border:1px solid transparent;max-width:220px;
+  overflow:hidden;text-overflow:ellipsis;white-space:nowrap;
+}
+body.session-staff .nba-card,
+body.session-staff .unpaid-desk,
+body.session-staff #compareStrip,
+body.session-staff #healthStrip,
+body.session-staff #bulkHoursBtn,
+body.session-staff #markAllPaid,
+body.session-staff #newPeriod,
+body.session-staff #closePeriod,
+body.session-staff #undoBtn{display:none!important}
+body.session-staff .overview-tools .ov-tip-tools{display:none}
+.staff-welcome{margin:0 0 14px;padding:14px 16px;border-radius:12px;border:1px solid var(--line);background:linear-gradient(135deg,var(--goldwash),oklch(98% .01 84))}
+.staff-welcome b{color:var(--navy)}
+
 /* ===== Desk v10 — clean UI ===== */
 .fold{
   border:1px solid var(--line);border-radius:12px;background:var(--paper);
@@ -1835,6 +1878,25 @@ body.compact-todos .attn-detail{display:none}
 </style>
 </head>
 <body>
+<div id="loginGate" class="open" role="dialog" aria-modal="true" aria-labelledby="loginTitle">
+  <form class="login-card" id="loginForm" autocomplete="on">
+    <div class="brand" id="loginTitle">Frenchie's desk</div>
+    <p class="sub">Staff login · Username is Firstname_Lastname · House password for everyone</p>
+    <div class="field">
+      <label for="loginUser">Username</label>
+      <input id="loginUser" name="username" placeholder="Kenzie_Long" autocomplete="username" required>
+    </div>
+    <div class="field">
+      <label for="loginPass">Password</label>
+      <input id="loginPass" name="password" type="password" placeholder="House password" autocomplete="current-password" required>
+    </div>
+    <div class="login-err" id="loginErr" role="status"></div>
+    <div class="actions">
+      <button type="submit" class="btn primary" id="loginSubmit">Sign in</button>
+    </div>
+    <p class="sub" style="margin:14px 0 0">Access is granted only after your <b>Account login information</b> paper is signed and filed by HR. Owner / HR / Ops already have access.</p>
+  </form>
+</div>
 <a class="skip-link" href="#mainContent">Skip to main content</a>
 <div class="live-region" id="a11yAnnounce" aria-live="polite" aria-atomic="true"></div>
 <div class="backdrop" id="backdrop" hidden></div>
@@ -1907,10 +1969,12 @@ body.compact-todos .attn-detail{display:none}
       <option value="backup">Backup</option>
     </select>
     <button type="button" class="help-btn" id="helpShortcuts" title="Keyboard shortcuts" aria-haspopup="dialog" aria-controls="shortcutSheet">?</button>
-    <span class="build-chip" title="Desk build marker">v11</span>
+    <span class="build-chip" title="Desk build marker">v12</span>
     <span class="sync-chip live" id="syncChip" title="Realtime sync across tabs in this browser">LIVE</span>
+    <span class="session-chip" id="sessionChip" title="Signed-in staff">Signed out</span>
+    <button type="button" class="btn tiny soft" id="logoutBtn" title="Sign out">Logout</button>
     <button type="button" class="btn tiny soft" id="syncNowBtn" title="Pull latest from other tabs">Sync</button>
-    <button type="button" class="btn tiny soft" id="openSettingsBtn" title="Desk settings">Settings</button>
+    <button type="button" class="btn tiny soft" id="openSettingsBtn" title="Desk settings" data-mgmt-only>Settings</button>
     <button type="button" class="btn tiny" id="openCmdBtn" title="Command palette (Ctrl+K)">⌘K</button>
     <span class="kbd-hint" title="Press ? for shortcuts">g then key</span>
     <div class="payday"><span id="saveBadge" class="rel" title="Autosave status">Saved</span><span class="payday-sep" aria-hidden="true">·</span><span>Payday: Sunday, 9:00 AM</span></div>
@@ -1921,12 +1985,13 @@ body.compact-todos .attn-detail{display:none}
 <!-- OVERVIEW -->
 <section class="view active" id="view-overview" role="region" aria-labelledby="title-overview" tabindex="-1">
   <div class="compact-banner" id="buildBanner" role="status">
-    <b>Desk v11</b>
-    <span>Realtime sync · personnel dossier · snapshots</span>
+    <b>Desk v12</b>
+    <span>Staff login · account paper · role access</span>
     <button type="button" class="btn tiny soft" id="openChangelogBtn">What&apos;s new</button>
     <button type="button" class="btn tiny soft" id="toggleHeroBtn" title="Show or hide brand hero">Hero</button>
     <span class="pill green" id="buildStamp">SYNC</span>
   </div>
+  <div class="staff-welcome" id="staffWelcome" style="display:none"></div>
   <details class="fold quiet" id="heroFold" style="margin-bottom:12px">
     <summary>Frenchie&apos;s desk <span class="pill gray" id="heroPeriodPill">Period</span></summary>
     <div class="fold-body">
@@ -2086,7 +2151,7 @@ body.compact-todos .attn-detail{display:none}
 <!-- HIRING -->
 <section class="view" id="view-hiring" role="region" aria-labelledby="title-hiring" tabindex="-1">
   <div class="header">
-    <div><div class="eyebrow">Recruitment</div><h1 class="title" id="title-hiring">Hiring</h1><div class="subtitle">Application → interview → offer → hire → contract → packet.</div></div>
+    <div><div class="eyebrow">Recruitment</div><h1 class="title" id="title-hiring">Hiring</h1><div class="subtitle">Application → interview → offer → hire → contract → packet → account login.</div></div>
     <div class="actions hire-forms">
       <button class="btn soft" id="importReplyBtn">Import reply</button>
       <button class="btn primary" id="addApp">New application</button>
@@ -2108,7 +2173,7 @@ body.compact-todos .attn-detail{display:none}
     <summary>Hiring standards &amp; paper path</summary>
     <div class="fold-body">
       <p class="ui-hint">Every applicant fills the Application, interviews with HR, and starts on seven-day probation. City standing + no recent felony required. Terrorism or gov-employee murder is a hard bar.</p>
-      <p class="ui-hint"><b>Before hire:</b> Application → Invitation → Questions → Offer → Hire. <b>After hire:</b> Send contract (you sign first) → Import reply → New-hire packet.</p>
+      <p class="ui-hint"><b>Before hire:</b> Application → Invitation → Questions → Offer → Hire. <b>After hire:</b> Send contract (you sign first) → Import reply → New-hire packet → Account login information (access granted when filed).</p>
     </div>
   </details>
   <div class="metrics" id="hireMetrics">
@@ -2125,6 +2190,7 @@ body.compact-todos .attn-detail{display:none}
     <i></i><span data-step="hired">Hire</span>
     <i></i><span data-step="contract">Contract</span>
     <i></i><span data-step="packet">Packet</span>
+    <i></i><span data-step="login">Account login</span>
   </div>
   <div class="grid-2" style="margin-bottom:12px">
     <details class="fold" open>
@@ -2703,14 +2769,16 @@ body.compact-todos .attn-detail{display:none}
       <div class="fold-body">
         <div id="empDocs" class="doc-list"></div>
         <div class="doc-next" id="empDocActions">
-          <span class="hint" id="empDocHint">Next: send contract, then new-hire packet.</span>
+          <span class="hint" id="empDocHint">Next: send contract, then packet, then account login.</span>
           <button class="btn tiny soft" id="sendEmpContract">Send contract</button>
           <button class="btn tiny soft" id="sendEmpPacket">Send packet</button>
+          <button class="btn tiny soft" id="sendEmpLogin">Send account login</button>
           <button class="btn tiny" id="openHirePapersBtn" type="button" style="display:none">Hiring file</button>
         </div>
         <button class="btn tiny" id="genOffer" hidden>View offer</button>
         <button class="btn tiny" id="genContract" hidden>View contract</button>
         <button class="btn tiny" id="genPacket" hidden>View packet</button>
+        <button class="btn tiny" id="genLogin" hidden>View login sheet</button>
       </div>
     </details>
   </div>
@@ -3162,7 +3230,19 @@ const LOG_TYPES = {
 };
 const TIP_ROLES_DEFAULT = ['Waiter', 'Hostess', 'Cook'];
 const TIP_ROLES = TIP_ROLES_DEFAULT; /* legacy alias — use tipRoles() */
-const DESK_BUILD = 'v11';
+const DESK_BUILD = 'v12';
+const HOUSE_LOGIN_PASSWORD = 'frenchies636';
+const SESSION_KEY = 'frenchies_desk_session';
+const MGMT_ROLES = ['Owner', 'District Manager', 'Store Manager', 'HR Director', 'Operations Manager'];
+const LEAD_ROLES = ['Shift Lead'];
+const STAFF_ROLES = ['Cook', 'Waiter', 'Hostess', 'New Hire'];
+const ROLE_VIEWS = {
+  owner: '*',
+  mgmt: '*',
+  lead: ['overview', 'periods', 'events', 'paystubs', 'employees', 'shifts', 'compliance'],
+  staff: ['overview', 'paystubs', 'shifts', 'compliance']
+};
+let sessionUser = null;
 const UPGRADE_LIST = [
   'Weighted tip split','Editable tip roles','Period vs last week','High-hours warnings','Bulk hours grid','Pay method on mark-paid','Auto closeout check','Per-stub Discord blurb','Period health score','Close notes warning',
   'Applicant rating','Decline reason required','Paperwork % column','Pipeline aging badge','Interview agenda card','Ready-to-hire spotlight','Duplicate hard warn','Hire checklist','Awaiting-reply filter','Clickable stage metrics',
@@ -3238,11 +3318,12 @@ const PAPER_KINDS = {
   offer: { title: 'Offer letter', short: 'Offer letter', sendable: true, note: 'The job offer only — Contract comes after they accept.' },
   contract: { title: 'Contract', short: 'Contract', sendable: true, note: 'Binding employment agreement — separate from the offer and the packet.' },
   packet: { title: 'New-hire packet', short: 'New-hire packet', sendable: true, note: 'Week-one orientation checklist — not the contract.' },
+  login: { title: 'Account login information', short: 'Account login', sendable: true, note: 'Last hire step — credentials sheet. When the signed reply is filed, desk access is granted.' },
   decline: { title: 'Decline letter', short: 'Decline letter', sendable: true, note: 'Polite outcome letter when we do not take them forward.' }
 };
-const PAPER_ORDER = ['application', 'screening', 'invite', 'interviewIc', 'interviewOoc', 'offer', 'contract', 'packet', 'decline'];
+const PAPER_ORDER = ['application', 'screening', 'invite', 'interviewIc', 'interviewOoc', 'offer', 'contract', 'packet', 'login', 'decline'];
 const PAPER_RANK = { none: 0, draft: 1, sent: 2, returned: 3, signed: 4, confirmed: 4, accepted: 5, declined: 5 };
-const DEFAULT_DECISION = { application: 'submitted', interviewIc: 'submitted', packet: 'confirm', decline: 'acknowledged' };
+const DEFAULT_DECISION = { application: 'submitted', interviewIc: 'submitted', packet: 'confirm', login: 'accept', decline: 'acknowledged' };
 
 /* Required answers before Download reply — radioOrOther = radio OR write-in; multiMin = at least N checks */
 const PACKET_RULES = {
@@ -3291,6 +3372,14 @@ const PACKET_RULES = {
     radios: [],
     radioOrOther: [],
     multiMin: {},
+    multiOrOther: [],
+    decision: true
+  },
+  login: {
+    text: [],
+    radios: [],
+    radioOrOther: [],
+    multiMin: { loginAck: 3 },
     multiOrOther: [],
     decision: true
   },
@@ -3457,6 +3546,14 @@ function normalizeEmployee(e, fallbackDate) {
   e.uniformSize = e.uniformSize || '';
   e.emergencyName = e.emergencyName || '';
   e.emergencyPhone = e.emergencyPhone || '';
+  e.loginUsername = e.loginUsername || loginUsernameFromName(e.name);
+  if (!('loginAccess' in e)) e.loginAccess = false;
+  e.loginAccess = !!e.loginAccess;
+  e.loginGrantedAt = e.loginGrantedAt || '';
+  if (MGMT_ROLES.indexOf(e.role) >= 0 && e.status === 'active' && !e.loginAccess) {
+    e.loginAccess = true;
+    e.loginGrantedAt = e.loginGrantedAt || (e.hire || today());
+  }
   if (e.probationReview && typeof e.probationReview === 'object') {
     e.probationReview = {
       date: e.probationReview.date || '',
@@ -4069,7 +4166,13 @@ function initRealtimeSync() {
 }
 
 
-function toast(msg) { const t = $('toast'); t.textContent = msg; t.classList.add('show'); setTimeout(() => t.classList.remove('show'), 2200); }
+function toast(msg) { const t = $('toast'); if (!t) return; t.textContent = msg; t.classList.add('show'); setTimeout(() => t.classList.remove('show'), 2200); }
+
+function requireMgmt(actionLabel) {
+  if (canMutateDesk()) return true;
+  toast((actionLabel || 'That action') + ' is for Owner / HR / Ops');
+  return false;
+}
 
 function maybeBackupNudge(reason) {
   ensureMeta();
@@ -4344,8 +4447,8 @@ function paperKindsFor(a) {
   const out = ['application', 'screening'];
   if (idx >= 2 || hired) out.push('invite', 'interviewIc', 'interviewOoc');
   if (idx >= 3 || hired) out.push('offer');
-  /* Contract + packet only after hire (Paper path) */
-  if (hired) out.push('contract', 'packet');
+  /* Contract + packet + account login only after hire (Paper path) */
+  if (hired) out.push('contract', 'packet', 'login');
   if (a.stage === 'rejected') out.push('decline');
   Object.keys(a.paperwork || {}).forEach(k => { if (PAPER_KINDS[k] && out.indexOf(k) < 0) out.push(k); });
   return PAPER_ORDER.filter(k => out.indexOf(k) > -1);
@@ -4363,7 +4466,9 @@ function nextHireAction(a) {
     }
     if (!empHasPacket(e)) return 'File & send packet';
     if (!empHasAcknowledgedPacket(e)) return 'Awaiting packet reply';
-    return 'On roster';
+    if (!empHasLoginPaper(e)) return 'Send account login info';
+    if (!empHasLoginAccess(e)) return 'Awaiting login acknowledgement';
+    return 'Desk access granted';
   }
   ensurePaperwork(a);
   const app = a.paperwork.application;
@@ -4535,6 +4640,193 @@ function empPacketStatus(e) {
 function empHasAcknowledgedPacket(e) {
   return empPacketStatus(e) === 'acked';
 }
+
+function loginUsernameFromName(name) {
+  const parts = String(name || '').trim().split(/\s+/).filter(Boolean);
+  if (!parts.length) return '';
+  const clean = p => String(p).replace(/[^A-Za-z0-9]/g, '');
+  if (parts.length === 1) return clean(parts[0]);
+  return clean(parts[0]) + '_' + clean(parts[parts.length - 1]);
+}
+function roleAccessBand(role) {
+  if (role === 'Owner') return 'owner';
+  if (MGMT_ROLES.indexOf(role) >= 0) return 'mgmt';
+  if (LEAD_ROLES.indexOf(role) >= 0) return 'lead';
+  return 'staff';
+}
+function empHasLoginPaper(e) {
+  return !!(e && (e.documents || []).some(d => d.kind === 'login'));
+}
+function empLoginPaperStatus(e) {
+  const d = findEmpDoc(e, 'login');
+  if (!d) return 'none';
+  if (d.status === 'signed' || d.status === 'accepted' || d.status === 'acknowledged' || d.status === 'confirmed') return 'signed';
+  if (d.status === 'sent') return 'sent';
+  return d.status || 'draft';
+}
+function empHasLoginAccess(e) {
+  if (!e || e.status === 'terminated' || e.status === 'suspended') return false;
+  if (e.loginAccess) return true;
+  /* Established house management keeps access without the hire paper */
+  if (MGMT_ROLES.indexOf(e.role) >= 0 && e.status === 'active') return true;
+  return empLoginPaperStatus(e) === 'signed';
+}
+function ensureEmpLoginUsername(e) {
+  if (!e) return '';
+  const u = loginUsernameFromName(e.name);
+  if (u && e.loginUsername !== u) e.loginUsername = u;
+  return e.loginUsername || u;
+}
+function grantEmpLoginAccess(e, detail) {
+  if (!e) return false;
+  ensureEmpLoginUsername(e);
+  const was = !!e.loginAccess;
+  e.loginAccess = true;
+  e.loginGrantedAt = e.loginGrantedAt || today();
+  if (!was) {
+    try {
+      pushEmpLog(e, {
+        type: 'status',
+        summary: 'Desk login access granted',
+        detail: detail || ('Username ' + e.loginUsername + ' · house password')
+      });
+    } catch (err) {}
+  }
+  return true;
+}
+function viewsForSession() {
+  if (!sessionUser) return [];
+  const band = roleAccessBand(sessionUser.role);
+  const views = ROLE_VIEWS[band] || ROLE_VIEWS.staff;
+  return views === '*' ? null : views.slice();
+}
+function canAccessView(viewName) {
+  if (!sessionUser) return false;
+  const views = viewsForSession();
+  if (views == null) return true;
+  return views.indexOf(viewName) >= 0;
+}
+function canMutateDesk() {
+  if (!sessionUser) return false;
+  const band = roleAccessBand(sessionUser.role);
+  return band === 'owner' || band === 'mgmt';
+}
+function isStaffSession() {
+  return !!sessionUser && roleAccessBand(sessionUser.role) === 'staff';
+}
+function isLeadSession() {
+  return !!sessionUser && roleAccessBand(sessionUser.role) === 'lead';
+}
+function sessionEmp() {
+  return sessionUser ? empById(sessionUser.empId) : null;
+}
+function loadSession() {
+  try {
+    const raw = sessionStorage.getItem(SESSION_KEY);
+    if (!raw) return null;
+    const data = JSON.parse(raw);
+    if (!data || !data.empId) return null;
+    const e = empById(data.empId);
+    if (!e || !empHasLoginAccess(e)) return null;
+    return {
+      empId: e.id,
+      name: e.name,
+      role: e.role,
+      username: e.loginUsername || loginUsernameFromName(e.name)
+    };
+  } catch (err) { return null; }
+}
+function persistSession(user) {
+  try {
+    if (!user) sessionStorage.removeItem(SESSION_KEY);
+    else sessionStorage.setItem(SESSION_KEY, JSON.stringify(user));
+  } catch (err) {}
+}
+function applySessionChrome() {
+  const gate = $('loginGate');
+  const shell = document.querySelector('.shell');
+  if (!sessionUser) {
+    if (gate) { gate.classList.add('open'); gate.removeAttribute('hidden'); }
+    if (shell) shell.setAttribute('aria-hidden', 'true');
+    document.body.classList.add('login-locked');
+    return;
+  }
+  if (gate) { gate.classList.remove('open'); gate.setAttribute('hidden', ''); }
+  if (shell) shell.removeAttribute('aria-hidden');
+  document.body.classList.remove('login-locked');
+  document.body.classList.toggle('session-staff', isStaffSession());
+  document.body.classList.toggle('session-lead', isLeadSession());
+  document.body.classList.toggle('session-mgmt', canMutateDesk());
+  if ($('sessionChip')) {
+    $('sessionChip').textContent = sessionUser.username + ' · ' + sessionUser.role;
+    $('sessionChip').title = sessionUser.name + ' logged in';
+  }
+  document.querySelectorAll('.nav button[data-view]').forEach(btn => {
+    const view = btn.getAttribute('data-view');
+    const ok = canAccessView(view);
+    btn.classList.toggle('nav-locked', !ok);
+    btn.disabled = !ok;
+    btn.style.display = ok ? '' : 'none';
+  });
+  document.querySelectorAll('.nav-group').forEach(g => {
+    const any = Array.from(g.querySelectorAll('.nav button[data-view]')).some(b => b.style.display !== 'none');
+    g.style.display = any ? '' : 'none';
+  });
+  if ($('quickJump')) {
+    Array.from($('quickJump').options).forEach(opt => {
+      opt.hidden = !canAccessView(opt.value);
+      opt.disabled = !canAccessView(opt.value);
+    });
+  }
+  const mutate = canMutateDesk();
+  document.querySelectorAll('[data-mgmt-only]').forEach(el => {
+    el.style.display = mutate ? '' : 'none';
+  });
+}
+function loginAsEmployee(username, password) {
+  const u = String(username || '').trim();
+  const p = String(password || '');
+  if (!u) return { ok: false, msg: 'Enter your username (Firstname_Lastname)' };
+  if (p !== HOUSE_LOGIN_PASSWORD) return { ok: false, msg: 'Wrong password' };
+  const want = u.replace(/\s+/g, '_');
+  const e = s.employees.find(x => {
+    const un = (x.loginUsername || loginUsernameFromName(x.name) || '').toLowerCase();
+    return un === want.toLowerCase();
+  });
+  if (!e) return { ok: false, msg: 'No staff file matches that username' };
+  if (e.status === 'terminated') return { ok: false, msg: 'That file is closed — see HR' };
+  if (e.status === 'suspended') return { ok: false, msg: 'Access suspended — see HR' };
+  if (!empHasLoginAccess(e)) {
+    return { ok: false, msg: 'Access not granted yet — finish Account login information with HR' };
+  }
+  ensureEmpLoginUsername(e);
+  sessionUser = {
+    empId: e.id,
+    name: e.name,
+    role: e.role,
+    username: e.loginUsername
+  };
+  persistSession(sessionUser);
+  applySessionChrome();
+  const start = canAccessView('overview') ? 'overview' : (viewsForSession() || ['overview'])[0];
+  activateView(start, { focusView: true });
+  render();
+  log(e.name + ' logged into the desk');
+  save({ quiet: true, skipSnapshot: true });
+  return { ok: true, emp: e };
+}
+function logoutDesk() {
+  const who = sessionUser && sessionUser.name;
+  sessionUser = null;
+  persistSession(null);
+  applySessionChrome();
+  if ($('loginUser')) $('loginUser').value = '';
+  if ($('loginPass')) $('loginPass').value = '';
+  if ($('loginErr')) $('loginErr').textContent = '';
+  if (who) toast(who + ' signed out');
+  setTimeout(() => { try { $('loginUser').focus(); } catch (err) {} }, 40);
+}
+
 function empInitials(name) {
   const parts = String(name || '').trim().split(/\s+/).filter(Boolean);
   if (!parts.length) return '?';
@@ -4565,11 +4857,14 @@ function empFileCompleteness(e) {
   bits.push({ key: 'onboard', ok: onbDone === onbKeys.length, label: 'Onboarding ' + onbDone + '/' + onbKeys.length });
   bits.push({ key: 'contract', ok: signed, label: signed ? 'Contract signed' : (hasContract ? 'Contract on file' : 'Contract missing') });
   bits.push({ key: 'packet', ok: acked || (e.status !== 'probation' && hasPacket), label: acked ? 'Packet ack' : (hasPacket ? 'Packet filed' : 'Packet missing') });
+  const loginOk = empHasLoginAccess(e);
+  bits.push({ key: 'login', ok: loginOk, label: loginOk ? ('Login ' + (e.loginUsername || loginUsernameFromName(e.name))) : 'Login access closed' });
   const needPacket = e.status === 'probation' || hasPacket || hasContract;
   const checks = [
     onbDone / onbKeys.length,
     signed ? 1 : (hasContract ? 0.5 : 0),
-    needPacket ? (acked ? 1 : (hasPacket ? 0.55 : 0)) : 1
+    needPacket ? (acked ? 1 : (hasPacket ? 0.55 : 0)) : 1,
+    loginOk ? 1 : 0
   ];
   const pct = Math.round((checks.reduce((a, b) => a + b, 0) / checks.length) * 100);
   let label = 'File ' + pct + '% complete';
@@ -4701,6 +4996,26 @@ function buildTodos() {
         tag: 'Packet',
         title: 'Awaiting packet acknowledgement',
         detail: e.name + ' — packet sent, waiting on their reply.',
+        go: { type: 'emp', id: e.id }
+      });
+    } else if (!empHasLoginPaper(e)) {
+      push({
+        id: 'hire-login-' + e.id,
+        group: 'hires',
+        tone: 'warn',
+        tag: 'Login',
+        title: 'Send account login information',
+        detail: e.name + ' — last hire paper before desk access.',
+        go: { type: 'emp', id: e.id }
+      });
+    } else if (!empHasLoginAccess(e)) {
+      push({
+        id: 'hire-login-wait-' + e.id,
+        group: 'hires',
+        tone: 'warn',
+        tag: 'Login',
+        title: 'Awaiting login acknowledgement',
+        detail: e.name + ' — username ' + (e.loginUsername || loginUsernameFromName(e.name)) + ' waiting on signed reply.',
         go: { type: 'emp', id: e.id }
       });
     }
@@ -5817,6 +6132,8 @@ function batchClearVisibleTodos() {
    RENDER
 ===================================================== */
 function render() {
+  if (!sessionUser) { applySessionChrome(); return; }
+  applySessionChrome();
   if (!s.periods.length) s.periods = seedState().periods;
   const sel = $('period');
   const old = Number(sel.value) || 0;
@@ -5834,6 +6151,19 @@ function render() {
   if ($('owedSub')) $('owedSub').textContent = money(owedGrossOf(p)) + ' still owed';
   if ($('periodHealthSub')) {
     $('periodHealthSub').textContent = shortLabel(p) + ' · tip pool ' + money(p.tipPool || 0);
+  }
+  if ($('staffWelcome')) {
+    if (isStaffSession() && sessionUser) {
+      $('staffWelcome').style.display = '';
+      $('staffWelcome').innerHTML = '<b>Welcome, ' + esc(sessionUser.name) + '</b><div class="mini-note" style="margin:4px 0 0">Signed in as ' +
+        esc(sessionUser.username) + ' · ' + esc(sessionUser.role) + '. Open your stubs and shifts from the side nav. Need a change? Radio HR (636).</div>' +
+        '<div class="actions" style="margin-top:10px"><button type="button" class="btn tiny primary" id="staffOpenFileBtn">Open my file</button></div>';
+      const btn = $('staffOpenFileBtn');
+      if (btn) btn.onclick = () => editEmployee(sessionUser.empId);
+    } else {
+      $('staffWelcome').style.display = 'none';
+      $('staffWelcome').innerHTML = '';
+    }
   }
   if ($('heroGlance')) {
     $('heroGlance').textContent = unpaidCount(p) + ' unpaid · tip pool ' + money(p.tipPool || 0) + ' · ' +
@@ -6396,13 +6726,14 @@ function renderEmployees() {
   const q = ($('search').value || '').toLowerCase();
   const st = $('statusFilter').value;
   const list = s.employees.filter(e => {
-    const hay = (e.name + ' ' + e.role + ' ' + (e.phone || '') + ' ' + (e.emergencyPhone || '')).toLowerCase();
+    if (isStaffSession() && sessionUser && String(e.id) !== String(sessionUser.empId)) return false;
+    const hay = (e.name + ' ' + e.role + ' ' + (e.phone || '') + ' ' + (e.emergencyPhone || '') + ' ' + (e.loginUsername || '')).toLowerCase();
     return hay.includes(q) && (st ? e.status === st : true);
   });
   $('shown').textContent = list.length + ' shown';
   const activeN = s.employees.filter(e => e.status === 'active' || e.status === 'probation').length;
   const probN = s.employees.filter(e => e.status === 'probation').length;
-  const docsGap = s.employees.filter(e => e.status !== 'terminated' && (!empHasSignedContract(e) || !empHasPacket(e))).length;
+  const docsGap = s.employees.filter(e => e.status !== 'terminated' && (!empHasSignedContract(e) || !empHasPacket(e) || !empHasLoginAccess(e))).length;
   const strikeN = s.employees.reduce((a, e) => a + (Number(e.strikes) || 0), 0);
   if ($('rosterActive')) $('rosterActive').textContent = String(activeN);
   if ($('rosterProbation')) $('rosterProbation').textContent = String(probN);
@@ -6430,6 +6761,8 @@ function renderEmployees() {
     const badges = [];
     if (!empHasSignedContract(e) && e.status !== 'terminated') badges.push('<span class="pill danger">Contract open</span>');
     else if (!empHasPacket(e) && e.status === 'probation') badges.push('<span class="pill warn">Packet open</span>');
+    else if (!empHasLoginAccess(e) && e.status !== 'terminated') badges.push('<span class="pill warn">Login closed</span>');
+    else if (empHasLoginAccess(e)) badges.push('<span class="pill green">Login</span>');
     if (docs) badges.push('<span class="pill gray">' + docs + ' doc' + (docs === 1 ? '' : 's') + '</span>');
     const quick = e.status === 'terminated'
       ? '<button class="btn tiny soft" onclick="rehireEmployee(' + e.id + ')">Rehire</button> '
@@ -7375,6 +7708,7 @@ function stubRosterList(p) {
     return a.name.localeCompare(b.name);
   });
   return list.filter(e => {
+    if (isStaffSession() && sessionUser && String(e.id) !== String(sessionUser.empId)) return false;
     const x = entry(p, e.id);
     const g = lineGross(e, x);
     if (hideZero && g <= 0) return false;
@@ -7517,6 +7851,10 @@ function discordPostBlurb(name, kind, packetId) {
   if (kind === 'packet') {
     return "Frenchie's HR — New-hire packet for " + who + idPart +
       '. Open the .html, complete every starred field and declarations, sign, hit Download reply, and send that acknowledgement back to HR.';
+  }
+  if (kind === 'login') {
+    return "Frenchie's HR — Account login information for " + who + idPart +
+      '. Open the .html, review your username and house password, tick the acknowledgements, sign, hit Download reply, and send that file back to HR. Access starts when we file it.';
   }
   if (kind === 'offer') {
     return "Frenchie's HR — Offer letter for " + who + idPart +
@@ -7956,6 +8294,24 @@ function letterPacket(c) {
   return wrapLetter('New-hire packet', body, (c.name || 'New hire') + ' · ' + c.role + ' · ' + today());
 }
 
+function letterLogin(c) {
+  const user = loginUsernameFromName(c.name);
+  const body =
+    '<p><b>Account login information</b></p>' +
+    '<p>This is the last paper in the hire path. Once you sign and HR files your reply, you may log into the Frenchie\'s HR &amp; Payroll desk.</p>' +
+    ff('Employee', c.name) +
+    ff('Role', c.role) +
+    ff('Username', user) +
+    ff('Password', HOUSE_LOGIN_PASSWORD) +
+    '<div class="letter-note">Username format is Firstname_Lastname from your legal name on file. The house password is shared for all staff logins — do not post it in public Discord channels.</div>' +
+    '<h4>What you can see</h4>' +
+    '<p>Access follows your role on the ladder. Owner and management see the full desk. Shift Leads see coverage and roster tools. Floor staff see their pay stubs, shifts, and handbook.</p>' +
+    '<h4>Acknowledgement</h4>' +
+    '<p>By signing you confirm you received these credentials, will keep the password off public chats, and understand desk access starts only after HR files this signed reply.</p>' +
+    signGrid('Employee — ' + (c.name || ''), '', 'Date', '');
+  return wrapLetter('Account login information', body, (c.name || 'Employee') + ' · desk login · ' + today());
+}
+
 function letterDecline(a) {
   const c = appOfferCtx(a);
   const body =
@@ -7979,6 +8335,7 @@ function buildPaperHtml(a, kind) {
     case 'offer': return letterOffer(appOfferCtx(a));
     case 'contract': return letterContract(appOfferCtx(a));
     case 'packet': return letterPacket(appOfferCtx(a));
+    case 'login': return letterLogin(appOfferCtx(a));
     case 'decline': return letterDecline(a);
     default: return wrapLetter('Document', '<p>Nothing on file.</p>');
   }
@@ -8002,9 +8359,10 @@ function setPaper(a, kind, html, patch) {
 const EMP_DOC_BUILDERS = {
   offer: { title: 'Offer letter', build: e => letterOffer(empCtx(e)) },
   contract: { title: 'Contract', build: e => letterContract(empCtx(e)) },
-  packet: { title: 'New-hire packet', build: e => letterPacket(empCtx(e)) }
+  packet: { title: 'New-hire packet', build: e => letterPacket(empCtx(e)) },
+  login: { title: 'Account login information', build: e => letterLogin(empCtx(e)) }
 };
-const EMP_ARCHIVE_KINDS = ['application', 'screening', 'invite', 'interviewIc', 'interviewOoc', 'offer', 'contract', 'packet', 'decline'];
+const EMP_ARCHIVE_KINDS = ['application', 'screening', 'invite', 'interviewIc', 'interviewOoc', 'offer', 'contract', 'packet', 'login', 'decline'];
 
 function addDocument(e, kind) {
   const def = EMP_DOC_BUILDERS[kind];
@@ -8263,6 +8621,7 @@ const SEND_PICK_STAGES = {
   offer: ['offer'],
   contract: ['hired'],
   packet: ['hired'],
+  login: ['hired'],
   decline: ['application', 'eligibility', 'interview', 'offer', 'rejected']
 };
 
@@ -8904,6 +9263,29 @@ function packetBody(a, kind, c) {
       '<p class="pk-hint">Press <b>Download reply</b> and send the completed .html back to HR.</p>';
   }
 
+  if (kind === 'login') {
+    const user = loginUsernameFromName(c.name);
+    return '<p>Welcome, <b>' + esc(c.name || 'employee') + '</b>. This is your <b>Account login information</b> — the last hire paper before desk access.</p>' +
+      pkTerms([
+        ['Your username', user],
+        ['House password', HOUSE_LOGIN_PASSWORD],
+        ['Your role', c.role],
+        ['Access starts', 'After HR files this signed reply']
+      ]) +
+      '<div class="note">Username is Firstname_Lastname from your name on file. Keep the password out of public Discord. Floor staff see stubs, shifts, and the handbook; management sees the full desk.</div>' +
+      '<h2>Acknowledgements *</h2>' +
+      '<p class="pk-hint">Tick every box before you sign:</p>' +
+      pkBoxes('loginAck', [
+        'I received my username and the house password',
+        'I will not post the password in public channels',
+        'I understand access starts only after HR files this signed reply'
+      ], true, true) +
+      '<h2>Your answer *</h2>' +
+      pkChoice('accept', 'I acknowledge these login details', 'HR will file this reply and grant desk access.') +
+      pkTa('Anything to add for HR', 'note', 3) +
+      '<p class="pk-hint">Press <b>Download reply</b> and send the completed .html back to HR.</p>';
+  }
+
   if (kind === 'decline') {
     return '<p>Dear ' + esc(c.name || 'applicant') + ',</p>' +
       '<p>Thank you for applying to Frenchie\'s Restaurant, and for the time you gave us through the process.</p>' +
@@ -9281,8 +9663,14 @@ function applyReply(reply) {
     }
   } else if (kind === 'packet') {
     extra = status === 'acknowledged' || status === 'confirmed' || status === 'accepted'
-      ? 'new-hire packet acknowledged'
+      ? 'new-hire packet acknowledged — next: send Account login information'
       : 'new-hire packet returned';
+  } else if (kind === 'login') {
+    if (status === 'accepted' || status === 'signed' || status === 'acknowledged' || status === 'confirmed') {
+      extra = 'account login acknowledged — desk access granted';
+    } else {
+      extra = 'account login reply returned';
+    }
   } else if (kind === 'decline') {
     extra = reply.decision === 'reapply' ? 'may apply again later' : 'decline acknowledged';
   }
@@ -9295,6 +9683,10 @@ function applyReply(reply) {
     syncPaperToEmpDoc(emp, a, kind, { reply, status, force: true });
     if (kind === 'contract' && status === 'accepted') emp.contractSignedAt = reply.signedAt || today();
     if (kind === 'packet' && mapPacketOnboarding(emp, f)) extra += ' · onboarding ticks copied';
+    if (kind === 'login' && (status === 'accepted' || status === 'signed' || status === 'acknowledged' || status === 'confirmed')) {
+      grantEmpLoginAccess(emp, 'Account login information filed');
+      extra += ' · login ' + (emp.loginUsername || loginUsernameFromName(emp.name));
+    }
     if (EMP_ARCHIVE_KINDS.indexOf(kind) >= 0) extra += ' · employee file updated';
   }
 
@@ -9332,6 +9724,23 @@ function applyReply(reply) {
         }, 80);
       }
     }, 80);
+  } else if (kind === 'packet' && (status === 'acknowledged' || status === 'confirmed' || status === 'accepted') && emp) {
+    setTimeout(() => {
+      if (empHasLoginAccess(emp) && empHasLoginPaper(emp)) return;
+      if (confirm(a.name + ' acknowledged the packet. Send Account login information next?')) {
+        editId = emp.id;
+        goView('employees');
+        setTimeout(() => {
+          editEmployee(emp.id);
+          setTimeout(() => { if ($('sendEmpLogin')) $('sendEmpLogin').click(); }, 60);
+        }, 80);
+      }
+    }, 80);
+  } else if (kind === 'login' && (status === 'accepted' || status === 'signed' || status === 'acknowledged' || status === 'confirmed') && emp) {
+    setTimeout(() => {
+      toast(emp.name + ' can log in as ' + (emp.loginUsername || loginUsernameFromName(emp.name)));
+      announce('Desk access granted for ' + emp.name);
+    }, 40);
   } else if (kind === 'contract' && status === 'declined' && emp) {
     setTimeout(() => {
       if (confirm(a.name + ' declined the contract. Mark them terminated on the roster?')) {
@@ -9613,6 +10022,10 @@ function fillEmpDossierChrome(e) {
 window.editEmployee = function (id) {
   const e = empById(id);
   if (!e) return;
+  if (isStaffSession() && sessionUser && String(id) !== String(sessionUser.empId)) {
+    toast('You can only open your own file');
+    return;
+  }
   editId = id;
   window.__empLogFilter = 'all';
   $('promoField').style.display = 'block';
@@ -10162,7 +10575,7 @@ function renderEmployeeFile(e) {
 
   const linkedApp = appForEmployee(e);
   const docs = e.documents || [];
-  const kinds = ['offer', 'contract', 'packet'];
+  const kinds = ['offer', 'contract', 'packet', 'login'];
   const extras = docs.filter(d => kinds.indexOf(d.kind) < 0);
   let docsHtml = '';
   if (e.status === 'probation' && e.probationEnd) {
@@ -10183,7 +10596,9 @@ function renderEmployeeFile(e) {
         '<button class="btn tiny danger" onclick="deleteDoc(' + e.id + ',' + d.id + ')">Delete</button>' +
         '</div></div>';
     } else {
-      const next = k === 'contract' ? 'Use Send contract below' : (k === 'packet' ? 'Use Send packet below' : 'Comes from hiring file');
+      const next = k === 'contract' ? 'Use Send contract below'
+        : (k === 'packet' ? 'Use Send packet below'
+          : (k === 'login' ? 'Use Send account login below' : 'Comes from hiring file'));
       docsHtml += '<div class="doc-row"><div><b>' + esc(label) + '</b><div class="paper-sub">' + next + '</div></div>' +
         '<div class="paper-actions"><span class="pill gray">needed</span></div></div>';
     }
@@ -10198,17 +10613,21 @@ function renderEmployeeFile(e) {
   $('empDocs').innerHTML = docsHtml || '<div class="ui-hint">No documents yet.</div>';
   if ($('empDocPill')) {
     const onFile = kinds.filter(k => findEmpDoc(e, k)).length;
-    $('empDocPill').textContent = onFile + '/3';
+    $('empDocPill').textContent = onFile + '/4';
   }
   fillEmpDossierChrome(e);
 
   const hasOffer = !!findEmpDoc(e, 'offer');
   const hasContract = !!findEmpDoc(e, 'contract');
   const hasPacket = !!findEmpDoc(e, 'packet');
+  const hasLogin = !!findEmpDoc(e, 'login');
   const signedContract = empHasSignedContract(e);
+  const packetAcked = empHasAcknowledgedPacket(e);
+  const loginOk = empHasLoginAccess(e);
   if ($('genOffer')) { $('genOffer').hidden = true; $('genOffer').disabled = !hasOffer; }
   if ($('genContract')) { $('genContract').hidden = true; $('genContract').disabled = !hasContract; }
   if ($('genPacket')) { $('genPacket').hidden = true; $('genPacket').disabled = !hasPacket; }
+  if ($('genLogin')) { $('genLogin').hidden = true; $('genLogin').disabled = !hasLogin; }
   if ($('sendEmpContract')) {
     $('sendEmpContract').textContent = signedContract ? 'Re-send contract' : 'Send contract';
     $('sendEmpContract').className = signedContract ? 'btn tiny' : 'btn tiny primary';
@@ -10218,10 +10637,18 @@ function renderEmployeeFile(e) {
     $('sendEmpPacket').className = (!signedContract || hasPacket) ? 'btn tiny' : 'btn tiny soft';
     $('sendEmpPacket').disabled = false;
   }
+  if ($('sendEmpLogin')) {
+    $('sendEmpLogin').textContent = hasLogin ? 'Re-send account login' : 'Send account login';
+    $('sendEmpLogin').className = (packetAcked && !loginOk) ? 'btn tiny primary' : 'btn tiny soft';
+    $('sendEmpLogin').disabled = false;
+  }
   if ($('empDocHint')) {
     if (!signedContract) $('empDocHint').textContent = 'Next: send contract (you sign first), then import their reply.';
     else if (!hasPacket) $('empDocHint').textContent = 'Contract signed — send the new-hire packet next.';
-    else $('empDocHint').textContent = 'Hire papers on file. Re-send only if needed.';
+    else if (!packetAcked) $('empDocHint').textContent = 'Packet sent — await acknowledgement, then send account login.';
+    else if (!hasLogin) $('empDocHint').textContent = 'Packet acknowledged — send Account login information next.';
+    else if (!loginOk) $('empDocHint').textContent = 'Login sheet sent — file the signed reply to grant access.';
+    else $('empDocHint').textContent = 'Desk access granted · ' + (e.loginUsername || loginUsernameFromName(e.name)) + ' / house password.';
   }
   if ($('openHirePapersBtn')) {
     if (linkedApp) {
@@ -10477,6 +10904,7 @@ function nameOnRoster(name) {
 }
 
 function hireApplicant(a) {
+  if (!requireMgmt('Hiring')) return;
   if (nameOnRoster(a.name)) {
     if (!confirm(a.name + ' already appears on the active roster. Hire a second file anyway?')) return;
   }
@@ -10528,8 +10956,8 @@ function hireApplicant(a) {
   $('appModal').classList.remove('open');
   $('paperModal').classList.remove('open');
   render();
-  toast(e.name + ' hired — Send contract next (you sign first), then the new-hire packet');
-  announce(e.name + ' hired. Next step: send employment contract.');
+  toast(e.name + ' hired — Contract → packet → account login');
+  announce(e.name + ' hired. Next: send employment contract.');
   editId = e.id;
   const empBtn = document.querySelector('[data-view="employees"]');
   if (empBtn) empBtn.click();
@@ -10611,6 +11039,12 @@ function openShortcutSheet() {
 
 function activateView(viewName, opts) {
   opts = opts || {};
+  if (sessionUser && !canAccessView(viewName)) {
+    toast('Your role cannot open that tab');
+    const fallback = (viewsForSession() || ['overview']).find(canAccessView) || 'overview';
+    if (fallback !== viewName) return activateView(fallback, opts);
+    return false;
+  }
   const btn = document.querySelector('.nav button[data-view="' + viewName + '"]');
   if (!btn) return false;
   document.querySelectorAll('.nav button[data-view]').forEach(x => {
@@ -11370,6 +11804,34 @@ $('sendEmpPacket').onclick = () => {
   renderEmployeeFile(e);
   copyText(discordPostBlurb(e.name, 'packet', packetId), 'New-hire packet on file · Discord blurb copied');
   announce('New-hire packet filed for ' + e.name);
+};
+
+if ($('sendEmpLogin')) $('sendEmpLogin').onclick = () => {
+  const e = empById(editId);
+  if (!e) return toast('Save the file first');
+  if (!empHasSignedContract(e)) {
+    toast('Signed contract required before account login info');
+    if (!confirm('Override and send login info for ' + e.name + ' without a signed contract?')) return;
+  }
+  if (!empHasAcknowledgedPacket(e)) {
+    toast('Packet acknowledgement preferred before login info');
+    if (!confirm('Send Account login information for ' + e.name + ' before the packet is acknowledged?')) return;
+  }
+  ensureEmpLoginUsername(e);
+  const a = syncEmpCtxOntoApp(ensureAppForEmployee(e), e);
+  const html = letterLogin(empCtx(e));
+  ensurePaperwork(a);
+  if (!s.nextPacketId) s.nextPacketId = 1;
+  const packetId = (a.paperwork.login && a.paperwork.login.packetId) || ('FR-' + String(s.nextPacketId++).padStart(4, '0'));
+  setPaper(a, 'login', html, { sendStatus: 'sent', sentAt: today(), packetId });
+  syncPaperToEmpDoc(e, a, 'login', { html, status: 'sent', force: true });
+  const keep = buildSendPacket(a, 'login', packetId);
+  openPacketWindow(keep, 'Frenchies-Account-Login-' + safeName(e.name) + '.html');
+  log('Account login information filed and downloaded for ' + e.name + ' · ' + e.loginUsername);
+  save();
+  renderEmployeeFile(e);
+  copyText(discordPostBlurb(e.name, 'login', packetId), 'Account login sheet on file · Discord blurb copied');
+  announce('Account login sheet filed for ' + e.name);
 };
 
 $('cancelHrSign').onclick = () => {
@@ -12243,14 +12705,34 @@ roleOptions($('role'), 'New Hire');
 roleOptions($('appRole'), 'New Hire');
 fillSupervisors(null);
 ensureMeta();
+(s.employees || []).forEach(e => {
+  ensureEmpLoginUsername(e);
+  if (MGMT_ROLES.indexOf(e.role) >= 0 && e.status === 'active') grantEmpLoginAccess(e, 'House management access');
+});
 save({ skipRevBump: true, silentBroadcast: true, skipSnapshot: true, skipRevCheck: true });
 initRealtimeSync();
+sessionUser = loadSession();
+applySessionChrome();
+if ($('loginForm')) {
+  $('loginForm').onsubmit = (ev) => {
+    ev.preventDefault();
+    const res = loginAsEmployee($('loginUser').value, $('loginPass').value);
+    if ($('loginErr')) $('loginErr').textContent = res.ok ? '' : (res.msg || 'Sign-in failed');
+    if (res.ok) toast('Welcome, ' + res.emp.name);
+  };
+}
+if ($('logoutBtn')) $('logoutBtn').onclick = () => logoutDesk();
 (function bootNav() {
+  if (!sessionUser) {
+    setTimeout(() => { try { $('loginUser').focus(); } catch (err) {} }, 60);
+    return;
+  }
   const fromHash = (location.hash || '').replace(/^#/, '');
-  const start = (fromHash && document.querySelector('.nav button[data-view="' + fromHash + '"]')) ? fromHash : 'overview';
+  let start = (fromHash && canAccessView(fromHash)) ? fromHash : 'overview';
+  if (!canAccessView(start)) start = (viewsForSession() || ['overview'])[0];
   activateView(start, { skipRender: true, skipHash: !!fromHash, focusView: false });
 })();
-render();
+if (sessionUser) render();
 updateSaveBadge();
 setSyncChip(syncChannel ? 'live' : 'offline');
 try { renderSnapshots(); } catch (err) {}
@@ -12263,9 +12745,15 @@ document.querySelectorAll('#view-hiring details.fold').forEach(fold => {
 window.__desk = {
   get s() { return s; },
   set s(v) { s = v; },
+  get session() { return sessionUser; },
   save,
   pullRemote,
   pushSnapshot,
+  loginAsEmployee,
+  logoutDesk,
+  empHasLoginAccess,
+  loginUsernameFromName,
+  HOUSE_LOGIN_PASSWORD,
   CLIENT_ID,
   V11_IMPROVEMENTS,
   DESK_BUILD,
