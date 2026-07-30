@@ -789,6 +789,530 @@ td,th{padding-block:11px}
   .skip-link,.shortcut-sheet,.live-region,.nav-search-wrap,.help-btn,.kbd-hint{display:none!important}
 }
 
+/* ===== Layout system v2 ===== */
+:root{
+  --space-1:6px;--space-2:10px;--space-3:14px;--space-4:18px;--space-5:24px;--space-6:32px;
+  --side-w:252px;--content-max:1480px;--r:12px;
+  --panel:oklch(99.2% .005 84);
+  --ink:oklch(20% .02 155);--muted:oklch(48% .02 155);
+}
+.shell{grid-template-columns:var(--side-w) minmax(0,1fr)}
+.side{padding:22px 12px 18px;gap:2px}
+.logo{padding:4px 8px 18px}
+.logo svg{width:176px}
+.main{display:flex;flex-direction:column;min-height:100vh;background:
+  linear-gradient(180deg, oklch(98.6% .008 84), transparent 180px)}
+.content{
+  width:100%;max-width:var(--content-max);margin:0 auto;
+  padding:28px 32px 80px;
+}
+.view.active{
+  display:flex;flex-direction:column;gap:var(--space-4);
+  animation:viewIn .2s var(--ease,ease);
+}
+.view > .header{
+  margin-bottom:0;padding-bottom:16px;align-items:flex-end;gap:16px;
+  border-bottom:1px solid var(--line);
+}
+.view > .header:after{width:88px;height:3px;bottom:-2px}
+.header .title{font-size:clamp(1.55rem,2vw,1.95rem);margin:4px 0 6px;line-height:1.15}
+.header .subtitle{font-size:.82rem;max-width:48rem}
+.header .actions{justify-content:flex-end}
+.eyebrow{
+  display:inline-flex;align-items:center;gap:8px;
+  padding:3px 0;color:oklch(46% .04 155);
+}
+
+/* Control strips / filter rails */
+.period,.action-bar,.toolbar,.filter-rail{
+  display:flex;flex-wrap:wrap;align-items:center;gap:10px;
+  padding:12px 16px;margin:0;
+  background:linear-gradient(180deg, var(--paper), oklch(97.6% .01 84));
+  border:1px solid var(--line);border-radius:14px;
+  box-shadow:0 1px 2px oklch(30% .02 155 / .04);
+}
+.period{
+  background:linear-gradient(135deg, oklch(93% .035 155), oklch(96% .02 155) 55%, var(--paper));
+  border-color:oklch(84% .04 155);
+  gap:12px;
+}
+.period b{
+  font-size:.68rem;letter-spacing:.08em;text-transform:uppercase;color:var(--navy);
+  padding:4px 8px;border-radius:999px;background:oklch(100% 0 0 / .45);border:1px solid oklch(84% .04 155);
+}
+.period select{
+  flex:1 1 220px;min-width:200px;max-width:420px;
+  border:1px solid oklch(84% .04 155);border-radius:9px;padding:8px 10px;background:var(--paper);
+}
+.period .btn,.action-bar .btn{flex:none}
+.period-tip{
+  display:inline-flex;align-items:center;gap:8px;
+  font-size:.72rem;color:var(--navy);font-weight:600;
+  padding:4px 8px;border-radius:9px;background:oklch(100% 0 0 / .4);
+}
+.period-tip input{
+  width:104px;border:1px solid oklch(84% .04 155);border-radius:7px;
+  padding:7px 8px;background:var(--paper);text-align:right;font-weight:600;
+}
+.toolbar{margin-bottom:0}
+.toolbar .search,.filter-rail .search{flex:1 1 200px;min-width:160px}
+.toolbar select,.filter-rail select{min-width:140px}
+.jump-row{
+  padding:8px 12px;background:transparent;border-style:dashed;box-shadow:none;
+  margin-top:-4px;
+}
+
+/* Metrics band */
+.metrics{
+  display:grid;grid-template-columns:repeat(4,minmax(0,1fr));
+  gap:12px;margin:0;
+}
+.metrics.metrics-dense{gap:10px}
+.metric{
+  padding:16px 16px 14px;border-radius:14px;background:var(--panel);
+  min-height:102px;display:flex;flex-direction:column;justify-content:flex-start;
+}
+.metric strong{font-size:clamp(1.05rem,1.6vw,1.3rem);margin-top:8px}
+.metric span{margin-top:auto;padding-top:6px}
+
+/* Desk grids */
+.grid{
+  display:grid;grid-template-columns:minmax(0,1.45fr) minmax(300px,.95fr);
+  gap:18px;align-items:start;margin:0;
+}
+.grid-2{
+  display:grid;grid-template-columns:repeat(2,minmax(0,1fr));
+  gap:18px;align-items:start;margin:0;
+}
+.stack-col{display:flex;flex-direction:column;gap:16px;min-width:0}
+.stack-col > .card{margin-bottom:0}
+.split-desk{
+  display:grid;grid-template-columns:minmax(0,1.35fr) minmax(280px,.9fr);
+  gap:18px;align-items:start;
+}
+.split-desk > .card{margin-bottom:0}
+.panel-note{
+  padding:10px 16px 0;font-size:.72rem;color:var(--muted);line-height:1.5;
+}
+
+/* Cards */
+.card{
+  margin-bottom:0;border-radius:14px;overflow:hidden;
+  background:var(--panel);border:1px solid var(--line);
+  display:flex;flex-direction:column;min-width:0;
+}
+.card-head{
+  padding:13px 16px;position:sticky;top:0;z-index:1;
+  background:linear-gradient(180deg, oklch(99.4% .004 84), oklch(97.8% .008 84));
+}
+.card-head b{font-size:.86rem;font-weight:700;letter-spacing:.005em}
+.card-body{padding:16px}
+.card > .table-scroll{flex:1}
+.card > table{width:100%}
+.mini-note{padding-left:16px;padding-right:16px}
+
+/* Tables */
+.table-scroll{
+  overflow:auto;max-width:100%;
+  border-radius:0 0 14px 14px;
+}
+.card > table thead th,
+.table-scroll table thead th{
+  position:sticky;top:0;z-index:1;
+  box-shadow:0 1px 0 var(--line);
+}
+th{padding:11px 14px}
+td{padding:11px 14px;font-size:.79rem}
+td .btn.tiny{white-space:nowrap}
+
+/* Callouts / path */
+.callout{
+  margin:0;border-radius:14px;padding:14px 16px;
+}
+.hire-path{
+  margin:0;border-radius:14px;padding:14px 16px;
+  justify-content:flex-start;
+}
+.hire-path span{padding:6px 12px;font-size:.68rem}
+.action-bar{margin:0}
+.action-bar .bar-label{
+  padding:4px 8px;border-radius:999px;background:var(--sage);color:var(--navy);
+}
+
+/* Stub desk */
+.stub-desk{
+  display:grid;grid-template-columns:minmax(0,1.05fr) minmax(300px,.95fr);
+  gap:18px;align-items:start;margin:0;
+}
+.stub-desk > .card{margin-bottom:0}
+.stub-chrome{
+  display:flex;align-items:center;justify-content:space-between;gap:10px;
+  padding:8px 4px 10px;
+}
+
+/* Top bar tighten */
+.top{
+  padding:10px 28px;min-height:60px;
+  border-bottom:1px solid var(--line);
+  background:linear-gradient(180deg, oklch(99.9% .003 84), oklch(98.5% .006 84));
+}
+.quick-jump{min-width:168px;border-radius:9px}
+
+/* Chart wells */
+.chart-well{
+  height:160px;padding:16px 18px 14px;
+}
+.chart-well.tall{height:200px;padding:18px 20px}
+.chart-well > div{
+  width:100%;height:100%;display:flex;align-items:end;gap:6px;
+  border-bottom:1px solid var(--line);min-height:0;
+}
+
+/* Backup / roles / simple pages */
+.page-narrow{max-width:920px}
+.backup-actions .card-body{display:flex;flex-direction:column;gap:12px;min-height:140px}
+
+/* Dense report metrics */
+#view-reports .metrics{margin:0}
+#view-reports .metrics + .metrics{margin-top:-6px}
+.report-metrics{
+  display:grid;gap:12px;
+}
+.report-metrics .metrics{margin:0}
+
+/* Empty & log */
+.empty{border-radius:12px;margin:8px}
+.log{max-height:280px}
+
+/* Sunday closeout padding */
+.closeout-body{padding:8px 16px 14px}
+
+/* Responsive layout */
+@media(max-width:1200px){
+  .grid,.split-desk,.stub-desk{grid-template-columns:1fr}
+  .metrics{grid-template-columns:repeat(2,minmax(0,1fr))}
+}
+@media(max-width:1000px){
+  .shell{grid-template-columns:1fr}
+  .content{padding:22px 16px 64px}
+  .header{align-items:stretch}
+  .header .actions{width:100%;justify-content:stretch}
+  .header .actions .btn{flex:1 1 auto}
+}
+@media(max-width:720px){
+  .metrics,.emp-metrics{grid-template-columns:1fr 1fr}
+  .grid-2{grid-template-columns:1fr}
+  .period .btn,.period-tip{width:100%}
+  .period select{max-width:none}
+  .metric{min-height:0}
+}
+@media(max-width:520px){
+  .metrics{grid-template-columns:1fr}
+}
+
+/* Layout polish pass */
+.toolbar.filter-rail select,
+.toolbar.filter-rail .search,
+.period select{
+  min-height:38px;
+}
+.side .nav-group{margin-bottom:4px}
+.logo{
+  border-bottom:1px solid oklch(38% .03 155 / .65);
+  margin-bottom:10px;padding-bottom:16px;
+}
+.content > .view > .header .actions .btn.primary{
+  min-width:132px;
+}
+.card-head .pill{margin-left:auto}
+.todo-card{align-self:stretch}
+.todo-panel{max-height:min(52vh,480px)}
+.unpaid-desk{order:0}
+@media(min-width:1201px){
+  .desk-split{grid-template-columns:minmax(0,1.5fr) minmax(320px,.9fr)}
+  .split-desk{grid-template-columns:minmax(0,1.4fr) minmax(300px,.95fr)}
+}
+
+/* ===== Desk Pro UI v3 ===== */
+:root{
+  --ink:oklch(18% .022 155);
+  --muted:oklch(46% .02 155);
+  --paper:oklch(99.6% .004 84);
+  --cream:oklch(97% .012 84);
+  --line:oklch(88% .016 84);
+  --navy:oklch(24% .04 155);
+  --navy2:oklch(32% .06 155);
+  --green:oklch(44% .11 155);
+  --sage:oklch(93% .04 155);
+  --gold:oklch(74% .13 82);
+  --goldwash:oklch(93% .055 82);
+  --warn:oklch(52% .15 55);
+  --warnwash:oklch(95% .045 55);
+  --danger:oklch(46% .17 25);
+  --dangerwash:oklch(96% .03 25);
+  --r:14px;
+  --side-w:268px;
+  --content-max:1520px;
+  --shadow-sm:0 1px 2px oklch(20% .02 155 / .06);
+  --shadow-md:0 10px 28px oklch(20% .025 155 / .1);
+  --shadow-lg:0 24px 60px oklch(18% .03 155 / .22);
+}
+html{scroll-behavior:smooth}
+body{
+  font:15px/1.55 'DM Sans',system-ui,sans-serif;
+  background:
+    radial-gradient(1100px 520px at 8% -8%, oklch(94% .04 82 / .7), transparent 55%),
+    radial-gradient(900px 480px at 100% 0%, oklch(92% .035 155 / .45), transparent 50%),
+    radial-gradient(700px 400px at 70% 100%, oklch(95% .02 84 / .5), transparent 45%),
+    linear-gradient(180deg, oklch(98.5% .01 84), var(--cream) 40%, oklch(96% .014 84));
+  color:var(--ink);
+}
+.shell{grid-template-columns:var(--side-w) minmax(0,1fr)}
+.side{
+  background:
+    linear-gradient(165deg, oklch(30% .05 155) 0%, var(--navy) 42%, oklch(20% .03 155) 100%);
+  padding:20px 14px 18px;
+  box-shadow:6px 0 32px oklch(16% .03 155 / .28);
+}
+.logo{text-align:center;padding:6px 6px 18px;margin-bottom:8px;border-bottom:1px solid oklch(42% .04 155 / .55)}
+.logo svg{width:198px;filter:drop-shadow(0 6px 16px oklch(10% .02 155 / .35))}
+.logo small{margin-top:6px;letter-spacing:.18em;color:oklch(78% .04 82);font-weight:700}
+.nav-search{
+  border-radius:11px;padding:11px 12px;font-size:.74rem;
+  background:oklch(18% .03 155);border-color:oklch(42% .04 155);
+}
+.side button[data-view]{
+  min-height:42px;border-radius:11px;padding:10px 12px 10px 13px;
+  font-size:.8rem;letter-spacing:.01em;
+}
+.side button[data-view]:hover{
+  background:oklch(36% .05 155);transform:translateX(2px);
+}
+.side button[aria-current="page"],.side button.active{
+  background:linear-gradient(90deg, oklch(38% .07 155), oklch(30% .05 155));
+  box-shadow:inset 3px 0 0 var(--gold), 0 8px 18px oklch(10% .02 155 / .2);
+}
+.side-label{color:oklch(68% .03 155);letter-spacing:.14em;padding:18px 12px 8px}
+.side-foot{font-size:.72rem;color:oklch(72% .025 155);padding-top:16px}
+
+.main{background:transparent}
+.top{
+  min-height:64px;padding:12px 30px;
+  background:oklch(99.5% .004 84 / .86);
+  backdrop-filter:blur(12px) saturate(1.15);
+  border-bottom:1px solid oklch(88% .02 84 / .9);
+  box-shadow:0 1px 0 oklch(100% 0 0 / .5), var(--shadow-sm);
+}
+.crumb b#crumb{font-size:.86rem;font-family:'Playfair Display',serif;font-weight:600}
+.quick-jump{
+  min-width:180px;min-height:40px;border-radius:11px;font-size:.74rem;
+  border:1px solid var(--line);background:var(--paper);box-shadow:var(--shadow-sm);
+}
+.help-btn{
+  width:40px;height:40px;border-radius:11px;font-family:'Playfair Display',serif;font-size:.95rem;
+  background:var(--navy);color:var(--gold);border-color:var(--navy);
+}
+.payday{color:var(--green);font-size:.76rem}
+#saveBadge{padding:4px 8px;border-radius:999px;background:var(--sage);color:var(--navy);font-size:.66rem}
+
+.content{max-width:var(--content-max);padding:30px 34px 96px}
+.view.active{gap:20px}
+.header{
+  padding:4px 0 18px;margin:0;border:0;
+  background:linear-gradient(180deg, oklch(99% .006 84 / .5), transparent);
+}
+.header:after{width:110px;height:3px;bottom:0;background:linear-gradient(90deg,var(--gold),oklch(82% .1 82),transparent)}
+.eyebrow{
+  display:inline-flex;align-items:center;gap:8px;
+  padding:4px 10px;border-radius:999px;
+  background:var(--sage);color:var(--navy);border:1px solid oklch(86% .04 155);
+  font-size:.62rem;letter-spacing:.1em;
+}
+.title{
+  font:700 clamp(1.7rem,2.4vw,2.2rem)/1.12 'Playfair Display',serif;
+  margin:10px 0 8px;letter-spacing:-.025em;color:var(--navy);
+}
+.subtitle{font-size:.86rem;color:var(--muted);max-width:52rem}
+
+.btn{
+  min-height:40px;padding:10px 16px;border-radius:11px;font-size:.76rem;
+  box-shadow:var(--shadow-sm);
+}
+.btn.primary{
+  background:linear-gradient(180deg, oklch(30% .05 155), var(--navy));
+  color:var(--gold);border-color:var(--navy);
+  box-shadow:0 2px 0 oklch(16% .03 155 / .35), var(--shadow-sm);
+}
+.btn.primary:hover{background:linear-gradient(180deg, var(--navy2), oklch(28% .05 155))}
+.btn.soft{background:linear-gradient(180deg, oklch(95% .03 155), var(--sage))}
+.btn.tiny{min-height:32px;border-radius:9px}
+
+.period,.action-bar,.toolbar,.filter-rail{
+  border-radius:16px;padding:14px 16px;gap:10px;
+  background:
+    linear-gradient(180deg, oklch(100% 0 0 / .65), oklch(97.5% .01 84 / .9)),
+    var(--paper);
+  border:1px solid var(--line);
+  box-shadow:var(--shadow-sm);
+}
+.period{
+  background:
+    linear-gradient(135deg, oklch(92% .04 155), oklch(96% .02 155) 45%, oklch(99% .005 84));
+  border-color:oklch(82% .045 155);
+  padding:16px;
+}
+.period b{
+  background:var(--navy);color:var(--gold);border-color:transparent;
+  padding:6px 11px;font-size:.64rem;
+}
+.metrics{gap:14px}
+.metric{
+  border-radius:16px;padding:18px 18px 16px;min-height:112px;
+  background:
+    linear-gradient(180deg, oklch(100% 0 0 / .8), var(--paper));
+  box-shadow:var(--shadow-sm);
+  border:1px solid var(--line);
+}
+.metric:before{left:16px;right:16px;height:3px;border-radius:0 0 3px 3px;background:linear-gradient(90deg,var(--gold),oklch(85% .1 82))}
+.metric:hover{transform:translateY(-3px);box-shadow:var(--shadow-md)}
+.metric label{font-size:.62rem}
+.metric strong{font-size:clamp(1.15rem,1.8vw,1.4rem);color:var(--navy)}
+
+.card{
+  border-radius:16px;background:linear-gradient(180deg, oklch(100% 0 0 / .9), var(--paper));
+  box-shadow:var(--shadow-sm);border:1px solid var(--line);
+}
+.card:hover{border-color:oklch(82% .025 84);box-shadow:var(--shadow-md)}
+.card-head{
+  padding:14px 18px;
+  background:linear-gradient(180deg, oklch(99.5% .004 84), oklch(97.2% .01 84));
+}
+.card-head b{font-size:.9rem;color:var(--navy)}
+.callout{
+  border-radius:16px;padding:16px 18px;font-size:.8rem;
+  box-shadow:var(--shadow-sm);
+}
+.hire-path{border-radius:16px;padding:14px 16px;gap:8px}
+.hire-path span{padding:7px 12px;font-size:.7rem;border-radius:999px}
+
+.desk-hero{
+  display:grid;grid-template-columns:minmax(0,1.2fr) minmax(240px,.8fr);
+  gap:16px;align-items:stretch;
+}
+.desk-hero-main{
+  border-radius:18px;padding:22px 24px;
+  background:
+    linear-gradient(135deg, oklch(26% .04 155), oklch(32% .06 155) 55%, oklch(28% .045 155)),
+    var(--navy);
+  color:oklch(96% .01 84);
+  box-shadow:var(--shadow-md);
+  position:relative;overflow:hidden;
+}
+.desk-hero-main:before{
+  content:'';position:absolute;right:-40px;top:-50px;width:220px;height:220px;border-radius:50%;
+  background:radial-gradient(circle, oklch(74% .12 82 / .35), transparent 68%);
+}
+.desk-hero-brand{
+  font:700 1.05rem 'Playfair Display',serif;color:var(--gold);letter-spacing:.02em;margin:0 0 6px;
+}
+.desk-hero-main h2{
+  font:600 clamp(1.35rem,2vw,1.7rem)/1.2 'Playfair Display',serif;margin:0 0 8px;position:relative;
+}
+.desk-hero-main p{margin:0;max-width:36rem;font-size:.84rem;color:oklch(88% .02 155);position:relative;line-height:1.5}
+.desk-hero-actions{display:flex;flex-wrap:wrap;gap:8px;margin-top:16px;position:relative}
+.desk-hero-side{
+  border-radius:18px;padding:18px 20px;
+  background:linear-gradient(180deg, var(--goldwash), oklch(96% .03 82));
+  border:1px solid oklch(88% .05 82);
+  display:flex;flex-direction:column;justify-content:center;gap:8px;
+  box-shadow:var(--shadow-sm);
+}
+.desk-hero-side b{font:600 1rem 'Playfair Display',serif;color:var(--navy)}
+.desk-hero-side span{font-size:.78rem;color:oklch(42% .08 82);line-height:1.45}
+.tip-warn{
+  display:none;margin:0;padding:10px 14px;border-radius:12px;font-size:.76rem;font-weight:600;
+  background:var(--warnwash);color:var(--warn);border:1px solid oklch(88% .05 55);
+}
+.tip-warn.show{display:block}
+
+.feature-banner{
+  display:flex;flex-wrap:wrap;gap:10px 14px;align-items:center;
+  padding:12px 14px;border-radius:14px;
+  background:linear-gradient(90deg, var(--sage), oklch(97% .015 84));
+  border:1px solid oklch(86% .04 155);font-size:.76rem;color:var(--navy);
+}
+.feature-banner b{font-weight:700}
+.feature-banner .pill{margin-left:auto}
+
+.avail-grid{
+  display:grid;grid-template-columns:repeat(auto-fill,minmax(220px,1fr));gap:12px;padding:14px;
+}
+.avail-card{
+  border:1px solid var(--line);border-radius:12px;padding:12px 14px;background:oklch(98.5% .005 84);
+}
+.avail-card b{display:block;font-size:.84rem;color:var(--navy);margin-bottom:4px}
+.avail-card .days{display:flex;flex-wrap:wrap;gap:4px;margin:8px 0}
+.avail-card .day{
+  font-size:.62rem;font-weight:700;padding:3px 7px;border-radius:6px;
+  background:var(--sage);color:var(--navy);
+}
+.avail-card .day.off{background:oklch(94% .01 155);color:var(--muted)}
+.avail-card small{display:block;color:var(--muted);font-size:.7rem;line-height:1.4}
+
+.file-tabs{
+  display:flex;flex-wrap:wrap;gap:6px;margin:0 0 14px;padding:6px;
+  background:oklch(96.5% .01 84);border:1px solid var(--line);border-radius:12px;
+}
+.file-tab{
+  border:0;background:transparent;color:var(--muted);padding:8px 12px;border-radius:9px;
+  font-size:.72rem;font-weight:700;cursor:pointer;
+}
+.file-tab:hover{background:var(--paper);color:var(--navy)}
+.file-tab.active{background:var(--navy);color:var(--gold)}
+.file-panel{display:none}
+.file-panel.active{display:block}
+.probation-box{
+  margin-top:12px;padding:14px;border-radius:12px;
+  background:linear-gradient(135deg, var(--goldwash), oklch(98% .01 84));
+  border:1px solid oklch(88% .05 82);
+}
+.probation-box h3{margin:0 0 8px;color:var(--navy)}
+.sunday-preview{
+  white-space:pre-wrap;font:500 .74rem/1.55 'JetBrains Mono',monospace;
+  background:oklch(97% .008 84);border:1px solid var(--line);border-radius:12px;
+  padding:14px;max-height:50vh;overflow:auto;
+}
+
+.dialog{border-radius:18px;box-shadow:var(--shadow-lg)}
+.dialog h2{font-size:1.25rem;border-bottom-color:oklch(90% .02 84)}
+.toast{
+  border-radius:12px;padding:13px 18px;font-size:.8rem;
+  background:linear-gradient(180deg, oklch(30% .05 155), var(--navy));
+}
+
+.empty{
+  padding:40px 24px!important;font-size:.84rem;
+  background:
+    radial-gradient(circle at 50% 30%, oklch(95% .03 82 / .55), transparent 60%),
+    oklch(98.5% .005 84);
+}
+
+@media(max-width:1100px){
+  .desk-hero{grid-template-columns:1fr}
+}
+@media(max-width:1000px){
+  .side{width:min(300px,90vw)}
+  .content{padding:22px 16px 72px}
+  .title{font-size:1.55rem}
+}
+@media(max-width:720px){
+  .desk-hero-actions .btn{width:100%}
+  .feature-banner .pill{margin-left:0}
+}
+@media(prefers-reduced-motion:reduce){
+  .side button[data-view]:hover,.metric:hover{transform:none}
+}
+
 </style>
 </head>
 <body>
@@ -872,60 +1396,78 @@ td,th{padding-block:11px}
 
 <!-- OVERVIEW -->
 <section class="view active" id="view-overview" role="region" aria-labelledby="title-overview" tabindex="-1">
+  <div class="desk-hero">
+    <div class="desk-hero-main">
+      <div class="desk-hero-brand">Frenchie's Restaurant</div>
+      <h2>HR &amp; Payroll desk</h2>
+      <p>Kenzie Long · Legion Square · Payday Sunday 9:00 AM from the house. Close the week, clear the unpaid queue, and keep hiring paperwork moving.</p>
+      <div class="desk-hero-actions">
+        <button class="btn primary" type="button" id="copySundayRun">Copy Sunday pay run</button>
+        <button class="btn soft" type="button" id="gotoStubs">Open stubs</button>
+        <button class="btn" type="button" id="downloadCsv">Download CSV</button>
+        <button class="btn" type="button" id="addEmployee">Add employee</button>
+      </div>
+    </div>
+    <div class="desk-hero-side">
+      <b>This week at a glance</b>
+      <span id="heroGlance">Open the current period, tip pool, and unpaid queue below.</span>
+      <span class="pill gray" id="heroPeriodPill">Period</span>
+    </div>
+  </div>
   <div class="header">
     <div><div class="eyebrow">Payroll</div><h1 class="title" id="title-overview">Overview</h1><div class="subtitle">Current period, Sunday closeout, and desk priorities.</div></div>
     <div class="actions">
-      <button class="btn" id="gotoStubs">Open stubs</button>
-      <button class="btn" id="downloadCsv">Download CSV</button>
-      <button class="btn primary" id="addEmployee">Add employee</button>
+      <button class="btn soft" type="button" id="previewSundayRun">Preview pay run</button>
+      <button class="btn primary" type="button" id="closePeriodTop">Close &amp; roll next</button>
     </div>
   </div>
   <div class="period">
     <b>Current period</b>
     <label class="sr-only" for="period">Pay period</label>
     <select id="period" aria-label="Pay period"></select>
-    <label style="font-size:.72rem;color:var(--navy);font-weight:600">Tip pool $
-      <input id="tipPool" type="number" min="0" step="1" style="width:110px;border:1px solid oklch(84% .04 155);border-radius:6px;padding:6px 8px;background:var(--paper);text-align:right">
+    <label class="period-tip">Tip pool $
+      <input id="tipPool" type="number" min="0" step="1" aria-label="Tip pool amount">
     </label>
     <button class="btn" id="newPeriod">New period</button>
     <button class="btn" id="markAllPaid">Mark all paid</button>
     <button class="btn primary" id="closePeriod">Close &amp; roll next</button>
   </div>
+  <div class="tip-warn" id="tipWarn" role="status">Tip pool is set, but no Waiter / Hostess / Cook with hours is eligible to share it.</div>
   <div class="metrics">
     <div class="metric"><label>Gross payroll</label><strong id="gross">$0</strong><span id="periodHealthSub">This week</span></div>
     <div class="metric"><label>Hours</label><strong id="hours">0.00</strong><span>Logged this period</span></div>
     <div class="metric"><label>Unpaid stubs</label><strong id="owedCount">0</strong><span id="owedSub">Still owed</span></div>
     <div class="metric"><label>Paid out</label><strong id="paidOutMetric">$0</strong><span>Marked paid this period</span></div>
   </div>
-  <div class="toolbar" style="margin-top:-6px">
+  <div class="toolbar jump-row" aria-label="Quick links">
     <button class="btn tiny soft" type="button" id="ovGotoReports">Year reports</button>
     <button class="btn tiny soft" type="button" id="ovGotoExpenses">Expense rebates</button>
     <button class="btn tiny soft" type="button" id="ovGotoUnpaidStubs">Unpaid stubs</button>
   </div>
-  <div class="grid">
-    <div>
-      <div class="card unpaid-desk"><div class="card-head"><b>Unpaid desk</b><span class="pill warn" id="unpaidDeskCount">0</span></div>
-        <div class="mini-note" style="padding:8px 16px 0">Sunday queue — everyone still owed for this period.</div>
-        <table><thead><tr><th>Employee</th><th class="r">Hours</th><th class="r">Gross</th><th class="r">Action</th></tr></thead><tbody id="unpaidDesk"></tbody></table>
+  <div class="grid desk-split">
+    <div class="stack-col">
+      <div class="card unpaid-desk"><div class="card-head"><b>Unpaid desk</b><span class="pill warn" id="unpaidDeskCount">0</span><button class="btn tiny soft" type="button" id="copySundayRun2">Copy Sunday run</button></div>
+        <div class="panel-note">Sunday queue — everyone still owed for this period.</div>
+        <div class="table-scroll"><table><thead><tr><th>Employee</th><th class="r">Hours</th><th class="r">Gross</th><th class="r">Action</th></tr></thead><tbody id="unpaidDesk"></tbody></table></div>
       </div>
       <div class="card"><div class="card-head"><b>Current period</b><span class="pill" id="state">OPEN</span></div>
-        <table><thead><tr><th>Employee</th><th>Role</th><th class="r">Hours</th><th class="r">Bonus</th><th class="r">Tips</th><th class="r">Gross</th><th class="r">Paid</th><th class="r">Action</th></tr></thead><tbody id="payroll"></tbody></table>
+        <div class="table-scroll"><table><thead><tr><th>Employee</th><th>Role</th><th class="r">Hours</th><th class="r">Bonus</th><th class="r">Tips</th><th class="r">Gross</th><th class="r">Paid</th><th class="r">Action</th></tr></thead><tbody id="payroll"></tbody></table></div>
       </div>
       <div class="card"><div class="card-head"><b>Period notes</b><button class="btn tiny" id="savePeriodNotes">Save notes</button></div>
         <div class="card-body"><textarea id="periodNotes" placeholder="Notes for this pay period — coverage, closures, Sunday pay remarks..."></textarea></div>
       </div>
     </div>
-    <div>
+    <div class="stack-col">
       <div class="card todo-card"><div class="card-head"><b>To-do desk</b><span class="pill warn" id="attnCount">0</span></div>
         <div class="todo-summary" id="todoSummary">Payday pings Fri–Sun · Sunday 9:00 AM</div>
         <div class="todo-filters" id="todoFilters">
-          <button type="button" class="todo-chip active" data-todo-filter="all">All</button>
-          <button type="button" class="todo-chip" data-todo-filter="urgent">Urgent</button>
-          <button type="button" class="todo-chip" data-todo-filter="payroll">Payroll</button>
-          <button type="button" class="todo-chip" data-todo-filter="hires">Hires</button>
-          <button type="button" class="todo-chip" data-todo-filter="pipeline">Pipeline</button>
-          <button type="button" class="todo-chip" data-todo-filter="desk">Desk</button>
-          <button type="button" class="todo-chip" data-todo-filter="yours">Yours</button>
+          <button type="button" class="todo-chip active" data-todo-filter="all" aria-pressed="true">All</button>
+          <button type="button" class="todo-chip" data-todo-filter="urgent" aria-pressed="false">Urgent</button>
+          <button type="button" class="todo-chip" data-todo-filter="payroll" aria-pressed="false">Payroll</button>
+          <button type="button" class="todo-chip" data-todo-filter="hires" aria-pressed="false">Hires</button>
+          <button type="button" class="todo-chip" data-todo-filter="pipeline" aria-pressed="false">Pipeline</button>
+          <button type="button" class="todo-chip" data-todo-filter="desk" aria-pressed="false">Desk</button>
+          <button type="button" class="todo-chip" data-todo-filter="yours" aria-pressed="false">Yours</button>
         </div>
         <div class="todo-panel" id="attn"></div>
         <div class="todo-add">
@@ -934,7 +1476,7 @@ td,th{padding-block:11px}
           <button class="btn tiny primary" id="todoAddBtn">Add</button>
         </div>
       </div>
-      <div class="card"><div class="card-head"><b>Sunday closeout</b><span class="pill gray">9 AM</span></div><div style="padding:8px 16px" id="checks"></div></div>
+      <div class="card"><div class="card-head"><b>Sunday closeout</b><span class="pill gray">9 AM</span></div><div class="closeout-body" id="checks"></div></div>
       <div class="card"><div class="card-head"><b>Recent activity</b></div><div class="log" id="activity"></div></div>
     </div>
   </div>
@@ -942,6 +1484,7 @@ td,th{padding-block:11px}
 
 <!-- HIRING -->
 <section class="view" id="view-hiring" role="region" aria-labelledby="title-hiring" tabindex="-1">
+  <div class="feature-banner"><b>Desk upgrade:</b> Offer-gated hire, paper path, and employee sync stay in force — use Preview / Import for Discord forms.<span class="pill gray">Hiring</span></div>
   <div class="header">
     <div><div class="eyebrow">Recruitment</div><h1 class="title" id="title-hiring">Hiring</h1><div class="subtitle">Application → eligibility → interview → offer → hire → contract → packet.</div></div>
     <div class="actions hire-forms">
@@ -982,19 +1525,21 @@ td,th{padding-block:11px}
     <i></i><span data-step="contract">Contract</span>
     <i></i><span data-step="packet">Packet</span>
   </div>
-  <div class="toolbar" style="margin-bottom:12px">
+  <div class="toolbar filter-rail">
     <input class="search" id="hireSearch" placeholder="Search applicant" aria-label="Search applicants">
     <button type="button" class="btn tiny soft" id="hireFilterPipe" data-hire-filter="pipeline">Pipeline</button>
     <button type="button" class="btn tiny" id="hireFilterClosed" data-hire-filter="closed">Closed files</button>
     <button type="button" class="btn tiny" id="hireFilterAll" data-hire-filter="all">All applications</button>
     <span class="pill gray" id="hireFilterLabel">Showing pipeline</span>
   </div>
-  <div class="card"><div class="card-head"><b>Applications</b><span class="pill gray" id="appCount"></span></div>
-    <table><thead><tr><th>Applicant</th><th>Stage</th><th>Applied</th><th>Standing</th><th>Record</th><th>Paperwork</th><th class="r">Move</th><th class="r">Action</th></tr></thead><tbody id="apps"></tbody></table>
-  </div>
-  <div class="card"><div class="card-head"><b>Filed replies</b><span class="pill gray" id="filedCount"></span></div>
-    <div class="mini-note" style="padding:0 16px 8px">Completed forms land here after Import reply.</div>
-    <table><thead><tr><th>Returned</th><th>Applicant</th><th>Document</th><th>Decision</th><th>Signed by</th><th class="r">Action</th></tr></thead><tbody id="filedReplies"></tbody></table>
+  <div class="split-desk">
+    <div class="card"><div class="card-head"><b>Applications</b><span class="pill gray" id="appCount"></span></div>
+      <div class="table-scroll"><table><thead><tr><th>Applicant</th><th>Stage</th><th>Applied</th><th>Standing</th><th>Record</th><th>Paperwork</th><th class="r">Move</th><th class="r">Action</th></tr></thead><tbody id="apps"></tbody></table></div>
+    </div>
+    <div class="card"><div class="card-head"><b>Filed replies</b><span class="pill gray" id="filedCount"></span></div>
+      <div class="panel-note">Completed forms land here after Import reply.</div>
+      <div class="table-scroll"><table><thead><tr><th>Returned</th><th>Applicant</th><th>Document</th><th>Decision</th><th>Signed by</th><th class="r">Action</th></tr></thead><tbody id="filedReplies"></tbody></table></div>
+    </div>
   </div>
   <div class="card"><div class="card-head"><b>Paper path</b></div>
     <div class="card-body policy">
@@ -1017,15 +1562,19 @@ td,th{padding-block:11px}
     <div><div class="eyebrow">Roster</div><h1 class="title" id="title-employees">Employees</h1><div class="subtitle">Staff files, timeline, probation, and hire paperwork.</div></div>
     <div class="actions"><button class="btn soft" id="pdfEmployees">Export roster PDF</button><button class="btn primary" id="addEmployee2">Add employee</button></div>
   </div>
-  <div class="toolbar">
+  <div class="toolbar filter-rail">
     <input class="search" id="search" placeholder="Search name or role" aria-label="Search employees">
     <select id="statusFilter"><option value="">All statuses</option><option value="active">Active</option><option value="probation">Probation</option><option value="suspended">Suspended</option><option value="terminated">Terminated</option></select>
     <span class="pill gray" id="shown"></span>
   </div>
-  <div class="card"><table><thead><tr><th>Name</th><th>Role</th><th>Status</th><th class="r">Rate</th><th class="r">Hired</th><th class="r">Strikes</th><th class="r">Action</th></tr></thead><tbody id="employees"></tbody></table></div>
-  <div class="card"><div class="card-head"><b>Staff documents on file</b><span class="pill gray" id="empDocCount"></span></div>
-    <div class="mini-note" style="padding:0 16px 8px">Offer letters, contracts, and new-hire packets from employee files — open a row to read the letter.</div>
-    <table><thead><tr><th>Date</th><th>Employee</th><th>Document</th><th class="r">Action</th></tr></thead><tbody id="empDocsIndex"></tbody></table>
+  <div class="split-desk">
+    <div class="card"><div class="card-head"><b>Roster</b></div>
+      <div class="table-scroll"><table><thead><tr><th>Name</th><th>Role</th><th>Status</th><th class="r">Rate</th><th class="r">Hired</th><th class="r">Strikes</th><th class="r">Action</th></tr></thead><tbody id="employees"></tbody></table></div>
+    </div>
+    <div class="card"><div class="card-head"><b>Staff documents on file</b><span class="pill gray" id="empDocCount"></span></div>
+      <div class="panel-note">Offer letters, contracts, and new-hire packets — open a row to read.</div>
+      <div class="table-scroll"><table><thead><tr><th>Date</th><th>Employee</th><th>Document</th><th class="r">Action</th></tr></thead><tbody id="empDocsIndex"></tbody></table></div>
+    </div>
   </div>
 </section>
 
@@ -1035,12 +1584,16 @@ td,th{padding-block:11px}
     <div><div class="eyebrow">Payroll</div><h1 class="title" id="title-periods">Time &amp; Pay</h1><div class="subtitle">Weekly periods — hours, tips, bonuses, and paid flags.</div></div>
     <div class="actions"><button class="btn soft" id="pdfPeriods">Export periods PDF</button><button class="btn primary" id="newPeriod2">Create next period</button></div>
   </div>
-  <div class="card"><table><thead><tr><th>Period</th><th>Status</th><th class="r">Staff</th><th class="r">Hours</th><th class="r">Tips</th><th class="r">Gross</th><th class="r">Unpaid</th><th class="r">Action</th></tr></thead><tbody id="periods"></tbody></table></div>
-  <div class="card"><div class="card-head"><b>Closed records</b></div>
-    <table><thead><tr><th>Period</th><th class="r">Hours</th><th class="r">Gross paid</th><th>Notes</th></tr></thead><tbody id="records"></tbody></table>
+  <div class="card"><div class="card-head"><b>Open &amp; recent periods</b></div>
+    <div class="table-scroll"><table><thead><tr><th>Period</th><th>Status</th><th class="r">Staff</th><th class="r">Hours</th><th class="r">Tips</th><th class="r">Gross</th><th class="r">Unpaid</th><th class="r">Action</th></tr></thead><tbody id="periods"></tbody></table></div>
   </div>
-  <div class="card"><div class="card-head"><b>Sunday pay log</b><button class="btn tiny" id="copyPayLog">Copy log</button></div>
-    <table><thead><tr><th>Date</th><th>Employee</th><th>Period</th><th class="r">Amount</th><th>Method</th></tr></thead><tbody id="payLog"></tbody></table>
+  <div class="grid-2">
+    <div class="card"><div class="card-head"><b>Closed records</b></div>
+      <div class="table-scroll"><table><thead><tr><th>Period</th><th class="r">Hours</th><th class="r">Gross paid</th><th>Notes</th></tr></thead><tbody id="records"></tbody></table></div>
+    </div>
+    <div class="card"><div class="card-head"><b>Sunday pay log</b><button class="btn tiny" id="copyPayLog">Copy log</button></div>
+      <div class="table-scroll"><table><thead><tr><th>Date</th><th>Employee</th><th>Period</th><th class="r">Amount</th><th>Method</th></tr></thead><tbody id="payLog"></tbody></table></div>
+    </div>
   </div>
 </section>
 
@@ -1050,7 +1603,7 @@ td,th{padding-block:11px}
     <div><div class="eyebrow">Payroll</div><h1 class="title" id="title-events">Events</h1><div class="subtitle">Raffles, entertainment nights, and shift bonuses — separate from base hours.</div></div>
     <div class="actions"><button class="btn primary" id="addEvent">Log event</button></div>
   </div>
-  <div class="card"><table><thead><tr><th>Date</th><th>Type</th><th>Event</th><th class="r">Staff</th><th class="r">Bonus total</th><th>Applied</th><th class="r">Action</th></tr></thead><tbody id="events"></tbody></table></div>
+  <div class="card"><div class="card-head"><b>Event log</b></div><div class="table-scroll"><table><thead><tr><th>Date</th><th>Type</th><th>Event</th><th class="r">Staff</th><th class="r">Bonus total</th><th>Applied</th><th class="r">Action</th></tr></thead><tbody id="events"></tbody></table></div></div>
 </section>
 
 <!-- EXPENSES -->
@@ -1070,11 +1623,11 @@ td,th{padding-block:11px}
     <div class="metric"><label>Reimbursable</label><strong id="expReimb">$0</strong></div>
     <div class="metric"><label>Top category</label><strong id="expTop">—</strong></div>
   </div>
-  <div class="toolbar">
+  <div class="toolbar filter-rail">
     <input class="search" id="expSearch" placeholder="Search vendor, receipt, notes">
     <select id="expMonth"><option value="">All months</option></select>
-    <input id="expFrom" type="date" title="From date" style="border:1px solid var(--line);border-radius:7px;padding:8px 10px;background:var(--paper)">
-    <input id="expTo" type="date" title="To date" style="border:1px solid var(--line);border-radius:7px;padding:8px 10px;background:var(--paper)">
+    <input class="search" id="expFrom" type="date" title="From date" aria-label="From date" style="min-width:140px">
+    <input class="search" id="expTo" type="date" title="To date" aria-label="To date" style="min-width:140px">
     <select id="expCategory"><option value="">All categories</option></select>
     <select id="expPaidByFilter"><option value="">All paid by</option></select>
     <select id="expReimbFilter">
@@ -1090,11 +1643,13 @@ td,th{padding-block:11px}
     </select>
     <span class="pill gray" id="expFilterLabel">Showing all</span>
   </div>
-  <div class="card"><div class="card-head"><b>Monthly spend</b><span class="pill gray" id="expBarsLabel">Filtered</span></div>
-    <div style="height:160px;padding:16px 20px"><div id="expBars" style="height:120px;display:flex;align-items:end;gap:6px;border-bottom:1px solid var(--line)"></div></div>
-  </div>
-  <div class="card"><div class="card-head"><b>Expense log</b><span class="pill gray" id="expTableCount">0</span></div>
-    <div class="table-scroll"><table><thead><tr><th>Date</th><th>Category</th><th>Vendor / item</th><th>Paid by</th><th class="r">Amount</th><th>Rebate</th><th>Status</th><th class="r">Action</th></tr></thead><tbody id="expenses"></tbody></table></div>
+  <div class="split-desk">
+    <div class="card"><div class="card-head"><b>Monthly spend</b><span class="pill gray" id="expBarsLabel">Filtered</span></div>
+      <div class="chart-well"><div id="expBars"></div></div>
+    </div>
+    <div class="card"><div class="card-head"><b>Expense log</b><span class="pill gray" id="expTableCount">0</span></div>
+      <div class="table-scroll"><table><thead><tr><th>Date</th><th>Category</th><th>Vendor / item</th><th>Paid by</th><th class="r">Amount</th><th>Rebate</th><th>Status</th><th class="r">Action</th></tr></thead><tbody id="expenses"></tbody></table></div>
+    </div>
   </div>
   <div class="grid-2">
     <div class="card"><div class="card-head"><b>By category</b><span class="pill gray" id="expCatLabel">Shown filters</span></div>
@@ -1122,7 +1677,7 @@ td,th{padding-block:11px}
     <div class="metric"><label>Unpaid</label><strong id="stubUnpaid">0</strong></div>
     <div class="metric"><label>Paid out</label><strong id="stubPaid">$0</strong></div>
   </div>
-  <div class="toolbar">
+  <div class="toolbar filter-rail">
     <select class="search" id="stubPeriod"></select>
     <select id="stubFilter">
       <option value="all">All stubs</option>
@@ -1139,9 +1694,9 @@ td,th{padding-block:11px}
   </div>
   <div class="stub-desk">
     <div class="card"><div class="card-head"><b>Period roster</b><span class="pill gray" id="stubRosterCount">0</span></div>
-      <table><thead><tr><th>Employee</th><th>Role</th><th class="r">Hours</th><th class="r">Gross</th><th>Paid</th><th class="r"></th></tr></thead><tbody id="stubRoster"></tbody></table>
+      <div class="table-scroll"><table><thead><tr><th>Employee</th><th>Role</th><th class="r">Hours</th><th class="r">Gross</th><th>Paid</th><th class="r"></th></tr></thead><tbody id="stubRoster"></tbody></table></div>
     </div>
-    <div>
+    <div class="stack-col">
       <div class="stub-chrome">
         <span class="pill gray" id="stubPaidPill">—</span>
         <button class="btn tiny" id="stubEditHours">Edit hours</button>
@@ -1160,7 +1715,7 @@ td,th{padding-block:11px}
     <div><div class="eyebrow">People</div><h1 class="title" id="title-relations">Relations</h1><div class="subtitle">Discipline, commendations, suspensions, and follow-ups.</div></div>
     <div class="actions"><button class="btn soft" id="pdfRelations">Export file PDF</button><button class="btn primary" id="addRelation">New entry</button></div>
   </div>
-  <div class="toolbar"><input class="search" id="relSearch" placeholder="Search employee or reason" aria-label="Search relations"></div>
+  <div class="toolbar filter-rail"><input class="search" id="relSearch" placeholder="Search employee or reason" aria-label="Search relations"></div>
   <div class="callout">
     <b>Three-strike system</b> &mdash; Strike one is a verbal warning noted in the file. Strike two is a written warning with a follow-up date.
     Strike three is termination. Suspension may be issued at any point while a matter is under review. Commendations are logged the same way
@@ -1172,11 +1727,13 @@ td,th{padding-block:11px}
     <div class="metric"><label>Commendations</label><strong id="mComm">0</strong><span>Good conduct</span></div>
     <div class="metric"><label>Suspended / terminated</label><strong id="mSusp">0</strong><span>Current roster</span></div>
   </div>
-  <div class="card"><div class="card-head"><b>Strike board</b></div>
-    <table><thead><tr><th>Employee</th><th>Role</th><th>Status</th><th class="r">Strikes</th><th>Standing</th></tr></thead><tbody id="strikeBoard"></tbody></table>
-  </div>
-  <div class="card"><div class="card-head"><b>Entries</b><span class="pill gray" id="relCount"></span></div>
-    <table><thead><tr><th>Date</th><th>Employee</th><th>Type</th><th>Reason</th><th>Issued by</th><th>Follow-up</th><th class="r">Action</th></tr></thead><tbody id="relations"></tbody></table>
+  <div class="split-desk">
+    <div class="card"><div class="card-head"><b>Strike board</b></div>
+      <div class="table-scroll"><table><thead><tr><th>Employee</th><th>Role</th><th>Status</th><th class="r">Strikes</th><th>Standing</th></tr></thead><tbody id="strikeBoard"></tbody></table></div>
+    </div>
+    <div class="card"><div class="card-head"><b>Entries</b><span class="pill gray" id="relCount"></span></div>
+      <div class="table-scroll"><table><thead><tr><th>Date</th><th>Employee</th><th>Type</th><th>Reason</th><th>Issued by</th><th>Follow-up</th><th class="r">Action</th></tr></thead><tbody id="relations"></tbody></table></div>
+    </div>
   </div>
 </section>
 
@@ -1186,8 +1743,13 @@ td,th{padding-block:11px}
     <div><div class="eyebrow">People</div><h1 class="title" id="title-shifts">Shifts</h1><div class="subtitle">Weekly station board — bar, kitchen, and floor.</div></div>
     <div class="actions"><button class="btn" id="shiftPrev">&larr; Prev week</button><button class="btn" id="shiftThis">This week</button><button class="btn" id="shiftNext">Next week &rarr;</button><button class="btn soft" id="pdfShifts" title="Print Discord week sheet">Print week sheet</button></div>
   </div>
+  <div class="feature-banner"><b>New:</b> Availability board pulls days and shift windows from hired applications — edit them on the employee file.<span class="pill green">Coverage</span></div>
   <div class="callout plain">Week of <b id="shiftWeekLabel">—</b> &mdash; clock in on radio with 10-1 and clock out with 10-2. Shift Lead posts coverage before open.</div>
-  <div class="card"><table><thead><tr><th>Employee</th><th>Mon</th><th>Tue</th><th>Wed</th><th>Thu</th><th>Fri</th><th>Sat</th><th>Sun</th><th class="r">On</th></tr></thead><tbody id="shiftBoard"></tbody></table></div>
+  <div class="card"><div class="card-head"><b>Week board</b><span class="pill gray" id="shiftWeekPill">Week</span></div><div class="table-scroll"><table><thead><tr><th>Employee</th><th>Mon</th><th>Tue</th><th>Wed</th><th>Thu</th><th>Fri</th><th>Sat</th><th>Sun</th><th class="r">On</th></tr></thead><tbody id="shiftBoard"></tbody></table></div></div>
+  <div class="card"><div class="card-head"><b>Availability &amp; coverage</b><span class="pill gray" id="availCount">0</span></div>
+    <div class="panel-note">From applications and employee files — use this when building the week board.</div>
+    <div class="avail-grid" id="availBoard"></div>
+  </div>
 </section>
 
 <!-- COMPLIANCE -->
@@ -1196,7 +1758,7 @@ td,th{padding-block:11px}
     <div><div class="eyebrow">Office</div><h1 class="title" id="title-compliance">Compliance</h1><div class="subtitle">Licenses, handbook excerpts, and chain of command.</div></div>
     <div class="actions"><button class="btn primary" id="addLicense">Add license / note</button></div>
   </div>
-  <div class="toolbar"><select id="licFilter"><option value="">All licenses</option><option value="active">Active</option><option value="pending">Pending</option><option value="expired">Expired / due soon</option><option value="note">Notes</option></select></div>
+  <div class="toolbar filter-rail"><label class="sr-only" for="licFilter">License filter</label><select id="licFilter" aria-label="License filter"><option value="">All licenses</option><option value="active">Active</option><option value="pending">Pending</option><option value="expired">Expired / due soon</option><option value="note">Notes</option></select></div>
   <div class="callout">Business direction: restaurant operations first, then raffle nights, then adult entertainment. Keep every license current &mdash; the office does not run an unlicensed floor.</div>
   <div class="card"><div class="table-scroll"><table><thead><tr><th>Item</th><th>Status</th><th>Issued</th><th>Expires</th><th>Notes</th><th class="r">Action</th></tr></thead><tbody id="licenses"></tbody></table></div></div>
 
@@ -1280,23 +1842,25 @@ td,th{padding-block:11px}
       <button class="btn soft" id="pdfMonthly">Export year PDF</button>
     </div>
   </div>
-  <div class="metrics">
-    <div class="metric"><label>Year to date</label><strong id="ytd">$0</strong><span id="ytdSub">Selected year</span></div>
-    <div class="metric"><label>Paid out</label><strong id="yearPaid">$0</strong><span id="yoySub">vs prior year</span></div>
-    <div class="metric"><label>Still owed</label><strong id="yearOwed">$0</strong></div>
-    <div class="metric"><label>Highest month</label><strong id="high">—</strong><span id="highSub">Gross payroll</span></div>
-  </div>
-  <div class="metrics" style="margin-top:-8px">
-    <div class="metric"><label>Wages</label><strong id="yearWages">$0</strong><span id="wageShare">Share of gross</span></div>
-    <div class="metric"><label>Bonuses</label><strong id="yearBonus">$0</strong></div>
-    <div class="metric"><label>Tips</label><strong id="yearTips">$0</strong><span id="tipShare">Share of gross</span></div>
-    <div class="metric"><label>Hours</label><strong id="yearHours">0</strong></div>
-  </div>
-  <div class="metrics" style="margin-top:-8px">
-    <div class="metric"><label>House spend</label><strong id="houseSpend">$0</strong><span>Payroll + expenses</span></div>
-    <div class="metric"><label>Expenses</label><strong id="yearExpenses">$0</strong><span id="yearExpReimb">Reimbursable</span></div>
-    <div class="metric"><label>Headcount</label><strong id="yearHeadcount">0</strong><span id="yearHeadSub">Active / probation / suspended</span></div>
-    <div class="metric"><label>Periods</label><strong id="yearPeriodSnap">0</strong><span id="yearPeriodSub">Open vs closed</span></div>
+  <div class="report-metrics">
+    <div class="metrics">
+      <div class="metric"><label>Year to date</label><strong id="ytd">$0</strong><span id="ytdSub">Selected year</span></div>
+      <div class="metric"><label>Paid out</label><strong id="yearPaid">$0</strong><span id="yoySub">vs prior year</span></div>
+      <div class="metric"><label>Still owed</label><strong id="yearOwed">$0</strong></div>
+      <div class="metric"><label>Highest month</label><strong id="high">—</strong><span id="highSub">Gross payroll</span></div>
+    </div>
+    <div class="metrics metrics-dense">
+      <div class="metric"><label>Wages</label><strong id="yearWages">$0</strong><span id="wageShare">Share of gross</span></div>
+      <div class="metric"><label>Bonuses</label><strong id="yearBonus">$0</strong></div>
+      <div class="metric"><label>Tips</label><strong id="yearTips">$0</strong><span id="tipShare">Share of gross</span></div>
+      <div class="metric"><label>Hours</label><strong id="yearHours">0</strong></div>
+    </div>
+    <div class="metrics metrics-dense">
+      <div class="metric"><label>House spend</label><strong id="houseSpend">$0</strong><span>Payroll + expenses</span></div>
+      <div class="metric"><label>Expenses</label><strong id="yearExpenses">$0</strong><span id="yearExpReimb">Reimbursable</span></div>
+      <div class="metric"><label>Headcount</label><strong id="yearHeadcount">0</strong><span id="yearHeadSub">Active / probation / suspended</span></div>
+      <div class="metric"><label>Periods</label><strong id="yearPeriodSnap">0</strong><span id="yearPeriodSub">Open vs closed</span></div>
+    </div>
   </div>
   <div class="card"><div class="card-head"><b>Monthly chart</b>
     <span style="display:flex;gap:6px;align-items:center;flex-wrap:wrap">
@@ -1307,7 +1871,7 @@ td,th{padding-block:11px}
       </select>
       <span class="pill gray" id="barsYearLabel">—</span>
     </span>
-  </div><div style="height:200px;padding:20px"><div id="bars" style="height:150px;display:flex;align-items:end;gap:8px;border-bottom:1px solid var(--line)"></div></div></div>
+  </div><div class="chart-well tall"><div id="bars"></div></div></div>
   <div class="card"><div class="card-head"><b>Monthly payroll</b><span class="pill gray" id="monthlyYearLabel">—</span></div>
     <div class="mini-note" style="padding:8px 16px 0">Totals by calendar month for the selected year.</div>
     <div class="table-scroll"><table><thead><tr><th>Month</th><th class="r">Periods</th><th class="r">Hours</th><th class="r">Wages</th><th class="r">Bonus</th><th class="r">Tips</th><th class="r">Gross</th><th class="r">Paid</th><th class="r">Owed</th></tr></thead><tbody id="monthly"></tbody></table></div>
@@ -1338,7 +1902,7 @@ td,th{padding-block:11px}
     <div class="actions"><button class="btn soft" id="pdfRoles">Export rates PDF</button></div>
   </div>
   <div class="callout plain">Changing a rate here sets the standard for future hires and new hour entries. Use <b>Apply to all</b> to push a rate onto everyone currently holding that role. Already-saved period entries keep the rate they were logged at.</div>
-  <div class="card"><table><thead><tr><th>Role</th><th class="r">Staff</th><th class="r">Avg logged / yr</th><th class="r">Standard rate / hr</th><th class="r">Action</th></tr></thead><tbody id="roles"></tbody></table></div>
+  <div class="card"><div class="card-head"><b>House ladder</b></div><div class="table-scroll"><table><thead><tr><th>Role</th><th class="r">Staff</th><th class="r">Avg logged / yr</th><th class="r">Standard rate / hr</th><th class="r">Action</th></tr></thead><tbody id="roles"></tbody></table></div></div>
 </section>
 
 <!-- BACKUP -->
@@ -1351,7 +1915,7 @@ td,th{padding-block:11px}
     <div class="metric"><label>Pay log</label><strong id="backupPayCount">0</strong><span>Sunday payment rows</span></div>
   </div>
   <div class="callout plain">Autosave keeps the roster, hours, applications, expenses, relations, shifts, licenses, pay log, and activity history. Export a JSON file after big days — that copy is yours even if the browser is cleared.</div>
-  <div class="grid-2">
+  <div class="grid-2 backup-actions">
     <div class="card"><div class="card-head"><b>Export</b></div><div class="card-body">
       <p class="subtitle" style="margin-bottom:14px">Download a full backup of employees, applications, periods, events, expenses, relations, shifts, licenses, pay log, and activity.</p>
       <div class="actions">
@@ -1392,6 +1956,13 @@ td,th{padding-block:11px}
   </div>
   <div class="field" id="promoField" style="display:none"><label>Change note</label><input id="promoReason" placeholder="Why this change? (role, rate, status, etc.)"></div>
 
+  <div class="file-tabs" id="empFileTabs" role="tablist" aria-label="Employee file sections">
+    <button type="button" class="file-tab active" data-emp-tab="onboard" role="tab" aria-selected="true">Onboarding</button>
+    <button type="button" class="file-tab" data-emp-tab="avail" role="tab" aria-selected="false">Availability</button>
+    <button type="button" class="file-tab" data-emp-tab="file" role="tab" aria-selected="false" id="empTabFile" style="display:none">File &amp; pay</button>
+  </div>
+
+  <div class="file-panel active" data-emp-panel="onboard">
   <h3>Onboarding</h3>
   <div class="field-row">
     <label class="checkline"><input type="checkbox" id="obUniform"><span>Uniform issued</span></label>
@@ -1404,8 +1975,29 @@ td,th{padding-block:11px}
   <div class="field-row">
     <label class="checkline"><input type="checkbox" id="obLead"><span>Met Shift Lead</span></label>
   </div>
+  <div class="probation-box" id="probationBox" style="display:none">
+    <h3>Probation review</h3>
+    <div class="mini-note" id="probationBoxNote">Pass them into a house role, or end probation.</div>
+    <div class="field-row">
+      <div class="field"><label>Pass into role</label><select id="probPassRole"></select></div>
+      <div class="field"><label>Review notes</label><input id="probNotes" placeholder="Floor notes, radio comfort, reliability…"></div>
+    </div>
+    <div class="actions" style="margin-top:8px">
+      <button type="button" class="btn primary" id="probPassBtn">Pass probation</button>
+      <button type="button" class="btn danger" id="probFailBtn">End / fail probation</button>
+    </div>
+  </div>
+  </div>
 
-  <div id="fileExtras" style="display:none">
+  <div class="file-panel" data-emp-panel="avail">
+    <h3>Availability</h3>
+    <div class="mini-note">Copied from the application when hired — edit anytime for the coverage board.</div>
+    <div class="field"><label>Days available (comma or checklist text)</label><input id="availDays" placeholder="Monday, Wednesday, Friday"></div>
+    <div class="field"><label>Shift window</label><input id="availWindow" placeholder="e.g. Evenings / after 6 PM"></div>
+    <div class="field"><label>Coverage notes</label><textarea id="availNotes" placeholder="Timezone, peak hours, station preference…"></textarea></div>
+  </div>
+
+  <div id="fileExtras" class="file-panel" data-emp-panel="file" style="display:none">
     <h3>Earnings</h3>
     <div class="emp-metrics" id="empPayMetrics"></div>
     <div style="margin-bottom:12px"><button class="btn tiny soft" type="button" id="empOpenStub">Open latest stub</button></div>
@@ -1721,6 +2313,19 @@ td,th{padding-block:11px}
   </div>
 </div>
 
+
+<div class="modal" id="sundayRunModal" role="dialog" aria-modal="true" aria-labelledby="sundayRunTitle" hidden>
+  <div class="dialog wide" role="document" tabindex="-1">
+    <h2 id="sundayRunTitle">Sunday pay run</h2>
+    <div class="mini-note">Discord-ready paste for the house — unpaid stubs, tip pool, and period label.</div>
+    <div class="sunday-preview" id="sundayRunPreview"></div>
+    <div class="dialog-foot">
+      <button type="button" class="btn" id="closeSundayRun">Close</button>
+      <button type="button" class="btn primary" id="copySundayRunModal">Copy to clipboard</button>
+    </div>
+  </div>
+</div>
+
 <div class="toast" id="toast" role="status" aria-live="polite" aria-atomic="true"></div>
 
 <script>
@@ -1941,6 +2546,8 @@ function seedState() {
     activity: [{ text: 'HR & Payroll office file opened (v7)', date: '2026-07-28' }],
     lastForumPost: '',
     meta: { lastSaved: '', lastExport: '', saveCount: 0 },
+    todos: [],
+    todoDismissed: {},
     nextId: 7, nextAppId: 1, nextEventId: 1, nextLicId: 4, nextRelId: 1, nextDocId: 1, nextPacketId: 1, nextExpenseId: 1
   };
 }
@@ -1984,6 +2591,25 @@ function normalizeEmployee(e, fallbackDate) {
   e.documents = e.documents || [];
   e.history = e.history || [{ date: e.hire || fallbackDate, type: 'hire', summary: 'Hired as ' + e.role, from: null, to: e.role, detail: 'Migrated' }];
   e.history = e.history.map(normalizeHistEntry);
+  if (!e.availability || typeof e.availability !== 'object') e.availability = { days: [], window: '', notes: '' };
+  if (!Array.isArray(e.availability.days)) {
+    e.availability.days = String(e.availability.days || '')
+      .split(/[,|/]/)
+      .map(x => x.trim())
+      .filter(Boolean);
+  }
+  e.availability.window = String(e.availability.window || '');
+  e.availability.notes = String(e.availability.notes || '');
+  if (e.probationReview && typeof e.probationReview === 'object') {
+    e.probationReview = {
+      date: e.probationReview.date || '',
+      passed: !!e.probationReview.passed,
+      notes: String(e.probationReview.notes || ''),
+      toRole: e.probationReview.toRole || ''
+    };
+  } else {
+    e.probationReview = null;
+  }
   return e;
 }
 
@@ -2098,13 +2724,47 @@ function migrate(raw) {
     if (!('appliedToPeriodId' in ev)) ev.appliedToPeriodId = null;
   });
   out.expenses = (out.expenses || []).map(normalizeExpense).filter(Boolean);
-  if (!out.nextExpenseId) {
-    out.nextExpenseId = (out.expenses.reduce((m, x) => Math.max(m, Number(x.id) || 0), 0) || 0) + 1;
-  }
   out.relations.forEach(r => { r.resolved = !!r.resolved; });
+  out.todos = Array.isArray(raw.todos) ? raw.todos.map(t => ({
+    id: t.id || ('todo-' + Date.now() + '-' + Math.random().toString(36).slice(2, 7)),
+    text: String(t.text || '').trim(),
+    due: t.due || '',
+    done: !!t.done,
+    created: t.created || today()
+  })).filter(t => t.text) : [];
+  out.todoDismissed = (raw.todoDismissed && typeof raw.todoDismissed === 'object') ? { ...raw.todoDismissed } : {};
 
   if (!out.employees.length) return base;
   if (!out.periods.length) out.periods = base.periods;
+
+  const maxEmp = out.employees.reduce((m, e) => Math.max(m, Number(e.id) || 0), 0);
+  const maxApp = out.applications.reduce((m, a) => Math.max(m, Number(a.id) || 0), 0);
+  const maxEv = out.events.reduce((m, e) => Math.max(m, Number(e.id) || 0), 0);
+  const maxLic = (out.licenses || []).reduce((m, l) => Math.max(m, Number(l.id) || 0), 0);
+  const maxRel = out.relations.reduce((m, r) => Math.max(m, Number(r.id) || 0), 0);
+  const maxExp = out.expenses.reduce((m, x) => Math.max(m, Number(x.id) || 0), 0);
+  let maxDoc = 0, maxPacket = 0;
+  out.employees.forEach(e => (e.documents || []).forEach(d => {
+    maxDoc = Math.max(maxDoc, Number(d.id) || 0);
+    if (d.packetId) {
+      const n = Number(String(d.packetId).replace(/\D/g, '')) || 0;
+      maxPacket = Math.max(maxPacket, n);
+    }
+  }));
+  out.applications.forEach(a => Object.values(a.paperwork || {}).forEach(r => {
+    if (r && r.packetId) {
+      const n = Number(String(r.packetId).replace(/\D/g, '')) || 0;
+      maxPacket = Math.max(maxPacket, n);
+    }
+  }));
+  out.nextId = Math.max(Number(out.nextId) || 1, maxEmp + 1);
+  out.nextAppId = Math.max(Number(out.nextAppId) || 1, maxApp + 1);
+  out.nextEventId = Math.max(Number(out.nextEventId) || 1, maxEv + 1);
+  out.nextLicId = Math.max(Number(out.nextLicId) || 1, maxLic + 1);
+  out.nextRelId = Math.max(Number(out.nextRelId) || 1, maxRel + 1);
+  out.nextExpenseId = Math.max(Number(out.nextExpenseId) || 1, maxExp + 1);
+  out.nextDocId = Math.max(Number(out.nextDocId) || 1, maxDoc + 1);
+  out.nextPacketId = Math.max(Number(out.nextPacketId) || 1, maxPacket + 1);
 
   const wasOld = !raw.version || raw.version < 7;
   if (wasOld) out.activity.unshift({ text: 'Office file upgraded to v7 — relations, shifts, tips, and paperwork added', date: today() });
@@ -2239,8 +2899,9 @@ function maybeBackupNudge(reason) {
   setTimeout(() => toast('Tip: export a JSON backup from Backup after busy ' + (reason || 'desk') + ' work'), 2400);
 }
 
-function emptyState(msg, hint) {
-  return '<tr><td colspan="12" class="empty">' + esc(msg) +
+function emptyState(msg, hint, cols) {
+  const span = Math.max(2, Number(cols) || 100);
+  return '<tr><td colspan="' + span + '" class="empty">' + esc(msg) +
     (hint ? '<div class="history" style="margin-top:6px">' + esc(hint) + '</div>' : '') +
     '</td></tr>';
 }
@@ -2536,19 +3197,43 @@ function paperSummary(a) {
 }
 
 /* ---------------- tips ---------------- */
-function distributeTips(p) {
-  if (!p || p.status === 'closed') return;
-  const pool = Number(p.tipPool || 0);
-  Object.keys(p.entries).forEach(id => { p.entries[id].tips = 0; });
-  if (pool <= 0) return;
-  const eligibleIds = Object.keys(p.entries).filter(id => {
+function tipEligibleIds(p) {
+  if (!p) return [];
+  return Object.keys(p.entries || {}).filter(id => {
     const e = empById(id);
-    return e && PAY_STATUSES.includes(e.status) && TIP_ROLES.includes(e.role) && Number(p.entries[id].hours || 0) > 0;
+    const x = p.entries[id];
+    return e && PAY_STATUSES.includes(e.status) && TIP_ROLES.includes(e.role) && Number(x.hours || 0) > 0;
   });
-  if (!eligibleIds.length) return;
-  const share = Math.floor(pool / eligibleIds.length);
-  let remainder = pool - share * eligibleIds.length;
+}
+function distributeTips(p) {
+  if (!p || p.status === 'closed') return { ok: true, eligible: 0, locked: 0 };
+  const pool = Number(p.tipPool || 0);
+  const lockedTips = {};
+  Object.keys(p.entries || {}).forEach(id => {
+    if (p.entries[id].paidOut) lockedTips[id] = Number(p.entries[id].tips || 0);
+    else p.entries[id].tips = 0;
+  });
+  const lockedSum = Object.values(lockedTips).reduce((a, b) => a + b, 0);
+  const remaining = Math.max(0, pool - lockedSum);
+  if (pool <= 0) return { ok: true, eligible: 0, locked: Object.keys(lockedTips).length };
+  const eligibleIds = tipEligibleIds(p).filter(id => !p.entries[id].paidOut);
+  if (!eligibleIds.length) {
+    Object.keys(lockedTips).forEach(id => { p.entries[id].tips = lockedTips[id]; });
+    return { ok: pool <= lockedSum, eligible: 0, locked: Object.keys(lockedTips).length, remaining };
+  }
+  const share = Math.floor(remaining / eligibleIds.length);
+  let remainder = remaining - share * eligibleIds.length;
   eligibleIds.forEach((id, i) => { p.entries[id].tips = share + (i < remainder ? 1 : 0); });
+  Object.keys(lockedTips).forEach(id => { p.entries[id].tips = lockedTips[id]; });
+  return { ok: true, eligible: eligibleIds.length, locked: Object.keys(lockedTips).length, remaining };
+}
+function updateTipWarn(p) {
+  const el = $('tipWarn');
+  if (!el || !p) return;
+  const pool = Number(p.tipPool || 0);
+  const eligible = tipEligibleIds(p);
+  const show = p.status === 'open' && pool > 0 && !eligible.length;
+  el.classList.toggle('show', show);
 }
 
 /* ---------------- pay log ---------------- */
@@ -3114,6 +3799,7 @@ function render() {
 
   const p = current();
   if (p.status === 'open') distributeTips(p);
+  updateTipWarn(p);
 
   $('gross').textContent = money(grossOf(p));
   $('hours').textContent = dec(hoursOf(p));
@@ -3123,6 +3809,11 @@ function render() {
   if ($('periodHealthSub')) {
     $('periodHealthSub').textContent = shortLabel(p) + ' · tip pool ' + money(p.tipPool || 0);
   }
+  if ($('heroGlance')) {
+    $('heroGlance').textContent = unpaidCount(p) + ' unpaid · tip pool ' + money(p.tipPool || 0) + ' · ' +
+      activeEmployees().length + ' on roster · ' + (p.status === 'open' ? 'period open' : 'period closed');
+  }
+  if ($('heroPeriodPill')) $('heroPeriodPill').textContent = shortLabel(p);
 
   $('state').textContent = String(p.status).toUpperCase();
   $('state').className = 'pill ' + (p.status === 'closed' ? 'gray' : 'green');
@@ -4054,7 +4745,9 @@ function renderRelations() {
 }
 
 function renderShifts() {
-  $('shiftWeekLabel').textContent = new Date(shiftWeek + 'T00:00:00').toLocaleDateString('en-US', { month: 'long', day: 'numeric', year: 'numeric' });
+  const weekTxt = new Date(shiftWeek + 'T00:00:00').toLocaleDateString('en-US', { month: 'long', day: 'numeric', year: 'numeric' });
+  $('shiftWeekLabel').textContent = weekTxt;
+  if ($('shiftWeekPill')) $('shiftWeekPill').textContent = weekTxt;
   if (!s.shifts[shiftWeek]) s.shifts[shiftWeek] = {};
   const week = s.shifts[shiftWeek];
   const list = activeEmployees();
@@ -4069,6 +4762,49 @@ function renderShifts() {
     const on = row.filter(x => x !== 'Off').length;
     return '<tr><td class="name">' + esc(e.name) + '<div class="history">' + esc(e.role) + '</div></td>' + cells + '<td class="r mono">' + on + '</td></tr>';
   }).join('') : '<tr><td colspan="9" class="empty">No staff on roster.</td></tr>';
+  renderAvailabilityBoard();
+}
+
+function availabilityFromFormData(fd) {
+  fd = fd || {};
+  let days = fd.availableDays;
+  if (Array.isArray(days)) days = days.slice();
+  else if (typeof days === 'string') days = days.split(/[,|/]/).map(x => x.trim()).filter(Boolean);
+  else days = [];
+  let window = fd.shiftWindow || fd.shiftWindowOther || fd.hoursPerWeek || '';
+  if (Array.isArray(window)) window = window.join(', ');
+  return {
+    days,
+    window: String(window || '').trim(),
+    notes: String(fd.coverageNotes || fd.whyFrenchies || '').trim().slice(0, 240)
+  };
+}
+
+function renderAvailabilityBoard() {
+  const board = $('availBoard');
+  if (!board) return;
+  const list = activeEmployees();
+  const dayOrder = ['Monday','Tuesday','Wednesday','Thursday','Friday','Saturday','Sunday'];
+  const cards = list.map(e => {
+    const a = e.availability || { days: [], window: '', notes: '' };
+    const days = a.days || [];
+    const dayHtml = dayOrder.map(d => {
+      const on = days.some(x => String(x).toLowerCase().startsWith(d.slice(0, 3).toLowerCase()) || String(x).toLowerCase() === d.toLowerCase());
+      return '<span class="day' + (on ? '' : ' off') + '">' + d.slice(0, 3) + '</span>';
+    }).join('');
+    const has = days.length || a.window || a.notes;
+    return '<div class="avail-card"><b>' + esc(e.name) + '</b><div class="history">' + esc(e.role) +
+      (e.status === 'probation' ? ' · probation' : '') + '</div>' +
+      '<div class="days">' + dayHtml + '</div>' +
+      '<small>' + esc(a.window || (has ? 'No shift window set' : 'No availability on file — edit the employee')) + '</small>' +
+      (a.notes ? '<small style="margin-top:4px">' + esc(a.notes) + '</small>' : '') +
+      '</div>';
+  });
+  board.innerHTML = cards.length ? cards.join('') : '<div class="empty">No staff on roster.</div>';
+  if ($('availCount')) {
+    const known = list.filter(e => (e.availability && ((e.availability.days || []).length || e.availability.window))).length;
+    $('availCount').textContent = known + ' / ' + list.length + ' listed';
+  }
 }
 
 function renderLicenses() {
@@ -6673,10 +7409,15 @@ window.editEmployee = function (id) {
   $('obMenu').checked = !!e.onboarding.menu;
   $('obShadow').checked = !!e.onboarding.shadow;
   if ($('obLead')) $('obLead').checked = !!e.onboarding.lead;
+  if ($('availDays')) $('availDays').value = ((e.availability && e.availability.days) || []).join(', ');
+  if ($('availWindow')) $('availWindow').value = (e.availability && e.availability.window) || '';
+  if ($('availNotes')) $('availNotes').value = (e.availability && e.availability.notes) || '';
   $('deleteEmployee').style.display = 'inline-block';
-  $('fileExtras').style.display = 'block';
+  if ($('empTabFile')) $('empTabFile').style.display = 'inline-flex';
   renderEmployeeFile(e);
+  syncProbationBox(e);
   $('employeeModal').classList.add('open');
+  setEmpFileTab('onboard');
 };
 
 window.saveRole = function (inp) {
@@ -7291,6 +8032,140 @@ function fillRelEmployees(selected) {
   ).join('');
 }
 
+
+/* =====================================================
+   SUNDAY PAY RUN + PROBATION REVIEW
+===================================================== */
+function buildSundayRunText(p) {
+  p = p || current();
+  if (!p) return 'No period selected.';
+  const unpaid = unpaidPayable(p);
+  const lines = [];
+  lines.push("Frenchie's Sunday pay run");
+  lines.push(label(p) + ' · ' + String(p.status).toUpperCase());
+  lines.push('Tip pool: ' + money(p.tipPool || 0) + ' (Waiter / Hostess / Cook with hours)');
+  lines.push('Payday: Sunday 9:00 AM from the house');
+  lines.push('');
+  if (!unpaid.length) {
+    lines.push('All payable stubs marked paid. Nothing left in the unpaid queue.');
+  } else {
+    lines.push('Unpaid queue (' + unpaid.length + '):');
+    unpaid.forEach(e => {
+      const x = entry(p, e.id);
+      lines.push('• ' + e.name + ' — ' + e.role + ' — ' + dec(x.hours) + 'h — ' + money(lineGross(e, x)));
+    });
+    lines.push('');
+    lines.push('Total still owed: ' + money(owedGrossOf(p)));
+  }
+  lines.push('');
+  lines.push('— Kenzie Long, HR · 8 Elgin Ave');
+  return lines.join('\n');
+}
+
+function openSundayRunPreview() {
+  const text = buildSundayRunText(current());
+  if ($('sundayRunPreview')) $('sundayRunPreview').textContent = text;
+  if ($('sundayRunModal')) $('sundayRunModal').classList.add('open');
+}
+
+function copySundayRun() {
+  const text = buildSundayRunText(current());
+  const done = () => toast('Sunday pay run copied');
+  if (navigator.clipboard && navigator.clipboard.writeText) {
+    navigator.clipboard.writeText(text).then(done).catch(() => {
+      window.prompt('Copy Sunday pay run:', text);
+      done();
+    });
+  } else {
+    window.prompt('Copy Sunday pay run:', text);
+    done();
+  }
+  if ($('sundayRunPreview')) $('sundayRunPreview').textContent = text;
+}
+
+function setEmpFileTab(name) {
+  const allowed = name === 'file' && editId == null ? 'onboard' : name;
+  document.querySelectorAll('#empFileTabs .file-tab').forEach(btn => {
+    const on = btn.getAttribute('data-emp-tab') === allowed;
+    btn.classList.toggle('active', on);
+    btn.setAttribute('aria-selected', on ? 'true' : 'false');
+  });
+  document.querySelectorAll('#employeeModal [data-emp-panel]').forEach(panel => {
+    const on = panel.getAttribute('data-emp-panel') === allowed;
+    panel.classList.toggle('active', on);
+    if (panel.id === 'fileExtras') panel.style.display = (on && editId != null) ? 'block' : 'none';
+    else panel.style.display = on ? 'block' : 'none';
+  });
+}
+
+function syncProbationBox(e) {
+  const box = $('probationBox');
+  if (!box) return;
+  const show = !!(e && e.status === 'probation');
+  box.style.display = show ? 'block' : 'none';
+  if (!show) return;
+  const left = e.probationEnd ? daysBetween(today(), e.probationEnd) : null;
+  if ($('probationBoxNote')) {
+    $('probationBoxNote').textContent = e.probationEnd
+      ? ('Ends ' + e.probationEnd + (left == null ? '' : (left < 0 ? ' · overdue by ' + Math.abs(left) + 'd' : ' · ' + left + 'd left')))
+      : 'No probation end date set.';
+  }
+  if ($('probPassRole')) {
+    const prefer = (e.probationReview && e.probationReview.toRole) || (e.role === 'New Hire' ? 'Waiter' : e.role);
+    roleOptions($('probPassRole'), prefer);
+  }
+  if ($('probNotes')) $('probNotes').value = (e.probationReview && e.probationReview.notes) || '';
+}
+
+function completeProbation(pass) {
+  if (editId == null) return toast('Open an employee file first');
+  const e = empById(editId);
+  if (!e) return;
+  if (e.status !== 'probation') return toast('Not on probation');
+  const notes = ($('probNotes') && $('probNotes').value || '').trim();
+  if (pass) {
+    const toRole = ($('probPassRole') && $('probPassRole').value) || 'Waiter';
+    const rate = Number(s.roles[toRole] || e.rate || 0);
+    const fromRole = e.role;
+    const fromStatus = e.status;
+    e.status = 'active';
+    e.role = toRole;
+    e.rate = rate;
+    e.probationEnd = e.probationEnd || today();
+    e.probationReview = { date: today(), passed: true, notes, toRole };
+    pushEmpLog(e, {
+      type: 'probation',
+      summary: 'Passed probation → ' + toRole,
+      from: fromRole,
+      to: toRole,
+      detail: notes || ('Status ' + fromStatus + ' → active')
+    });
+    if (fromRole !== toRole) {
+      pushEmpLog(e, { type: 'role', summary: roleMoveLabel(fromRole, toRole) + ': ' + fromRole + ' → ' + toRole, from: fromRole, to: toRole, detail: 'Probation pass' });
+    }
+    log('Passed probation: ' + e.name + ' → ' + toRole);
+    toast(e.name + ' passed probation as ' + toRole);
+  } else {
+    if (!confirmDanger('End probation and terminate ' + e.name + '?', notes || 'They will be marked terminated.')) return;
+    const fromStatus = e.status;
+    e.status = 'terminated';
+    e.probationReview = { date: today(), passed: false, notes, toRole: '' };
+    pushEmpLog(e, {
+      type: 'probation',
+      summary: 'Probation ended — terminated',
+      from: fromStatus,
+      to: 'terminated',
+      detail: notes || 'Failed / ended probation'
+    });
+    log('Ended probation (terminated): ' + e.name);
+    toast(e.name + ' terminated after probation');
+  }
+  save();
+  render();
+  editEmployee(e.id);
+  setEmpFileTab('onboard');
+}
+
 /* =====================================================
    HIRE FLOW
 ===================================================== */
@@ -7307,6 +8182,7 @@ function hireApplicant(a) {
   }
   const role = a.offerRole || 'New Hire';
   const hire = today();
+  const avail = availabilityFromFormData(a.formData || {});
   const e = normalizeEmployee({
     id: s.nextId++,
     name: a.name,
@@ -7321,6 +8197,7 @@ function hireApplicant(a) {
     strikes: 0,
     documents: [],
     applicationId: a.id,
+    availability: avail,
     history: [{ date: hire, type: 'hire', summary: 'Hired as ' + role, from: null, to: role, detail: 'Hired from application' }]
   }, hire);
   s.employees.push(e);
@@ -7656,9 +8533,11 @@ $('tipPool').onchange = () => {
   const p = current();
   if (p.status === 'closed') { toast('This period is closed'); render(); return; }
   p.tipPool = Math.max(0, Number($('tipPool').value) || 0);
-  distributeTips(p);
+  const tipRes = distributeTips(p);
   log('Tip pool for ' + shortLabel(p) + ' set to ' + money(p.tipPool));
-  save(); render(); toast('Tip pool split across the floor');
+  save(); render();
+  if (p.tipPool > 0 && tipRes && tipRes.eligible === 0) toast('Tip pool saved — no eligible tip roles with hours yet');
+  else toast(tipRes && tipRes.locked ? 'Tip pool updated (paid stubs kept locked tips)' : 'Tip pool split across the floor');
 };
 
 $('savePeriodNotes').onclick = () => {
@@ -7718,6 +8597,33 @@ $('copyPayLog').onclick = () => {
   copyText(text, 'Pay log copied');
 };
 
+
+/* ---------- desk pro feature wiring ---------- */
+function bindClick(id, fn) { const el = $(id); if (el) el.onclick = fn; }
+bindClick('copySundayRun', copySundayRun);
+bindClick('copySundayRun2', copySundayRun);
+bindClick('previewSundayRun', openSundayRunPreview);
+bindClick('copySundayRunModal', () => { copySundayRun(); });
+bindClick('closeSundayRun', () => { if ($('sundayRunModal')) $('sundayRunModal').classList.remove('open'); });
+bindClick('closePeriodTop', () => closePeriodAndRoll(current()));
+bindClick('probPassBtn', () => completeProbation(true));
+bindClick('probFailBtn', () => completeProbation(false));
+document.querySelectorAll('#empFileTabs .file-tab').forEach(btn => {
+  btn.onclick = () => setEmpFileTab(btn.getAttribute('data-emp-tab') || 'onboard');
+});
+if ($('sundayRunModal')) {
+  document.querySelectorAll('.modal').forEach(m => {
+    /* already wired; ensure sunday modal observed */
+  });
+  const mo = document.querySelector('#sundayRunModal');
+  if (mo && typeof _modalObserver !== 'undefined') {
+    try { _modalObserver.observe(mo, { attributes: true }); } catch (err) {}
+  }
+}
+$('empStatus').addEventListener('change', () => {
+  if (editId != null) syncProbationBox({ status: $('empStatus').value, probationEnd: $('probationEnd').value, role: $('role').value, probationReview: null });
+});
+
 /* ---------- employee modal ---------- */
 function openAddEmployee() {
   editId = null;
@@ -7733,9 +8639,15 @@ function openAddEmployee() {
   $('probationEnd').value = addDays(today(), 7);
   fillSupervisors(null);
   ['obUniform', 'obStation', 'obMenu', 'obShadow', 'obLead'].forEach(k => { if ($(k)) $(k).checked = false; });
+  if ($('availDays')) $('availDays').value = '';
+  if ($('availWindow')) $('availWindow').value = '';
+  if ($('availNotes')) $('availNotes').value = '';
   $('deleteEmployee').style.display = 'none';
-  $('fileExtras').style.display = 'none';
+  if ($('empTabFile')) $('empTabFile').style.display = 'none';
+  if ($('probationBox')) $('probationBox').style.display = 'none';
+  if ($('probNotes')) $('probNotes').value = '';
   $('employeeModal').classList.add('open');
+  setEmpFileTab('onboard');
 }
 $('addEmployee').onclick = $('addEmployee2').onclick = openAddEmployee;
 $('role').onchange = () => { $('rate').value = s.roles[$('role').value] || 3000; };
@@ -7849,13 +8761,23 @@ $('save').onclick = () => {
       logged.push('onboarding');
     });
 
-    Object.assign(e, { name: n, role: r, rate, hire: h, status: st, phone, supervisorId, probationEnd, onboarding });
+    const availability = {
+      days: String(($('availDays') && $('availDays').value) || '').split(/[,|/]/).map(x => x.trim()).filter(Boolean),
+      window: String(($('availWindow') && $('availWindow').value) || '').trim(),
+      notes: String(($('availNotes') && $('availNotes').value) || '').trim()
+    };
+    Object.assign(e, { name: n, role: r, rate, hire: h, status: st, phone, supervisorId, probationEnd, onboarding, availability });
     log('Updated file: ' + n + (logged.length ? ' (' + logged.join(', ') + ')' : ''));
   } else {
     if (nameOnRoster(n) && !confirm(n + ' is already on the roster. Add a second file?')) return;
+    const availability = {
+      days: String(($('availDays') && $('availDays').value) || '').split(/[,|/]/).map(x => x.trim()).filter(Boolean),
+      window: String(($('availWindow') && $('availWindow').value) || '').trim(),
+      notes: String(($('availNotes') && $('availNotes').value) || '').trim()
+    };
     const e = normalizeEmployee({
       id: s.nextId++, name: n, role: r, rate, hire: h, status: st,
-      phone, supervisorId, probationEnd, onboarding, strikes: 0, documents: [],
+      phone, supervisorId, probationEnd, onboarding, availability, strikes: 0, documents: [],
       history: [{ date: h, type: 'hire', summary: 'Hired as ' + r, from: null, to: r, detail: note || 'Hired' }]
     }, h);
     s.employees.push(e);
