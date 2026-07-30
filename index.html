@@ -1711,7 +1711,166 @@ body.login-locked .shell{filter:blur(2px);pointer-events:none;user-select:none}
   background:var(--sage);color:var(--navy);border:1px solid transparent;max-width:220px;
   overflow:hidden;text-overflow:ellipsis;white-space:nowrap;
 }
+/* staff overview hides live in Overview revamp */
+.staff-welcome{margin:0 0 14px;padding:14px 16px;border-radius:12px;border:1px solid var(--line);background:linear-gradient(135deg,var(--goldwash),oklch(98% .01 84))}
+.staff-welcome b{color:var(--navy)}
+
+
+/* ===== Overview revamp ===== */
+#view-overview{max-width:100%}
+body.view-is-overview .kbd-hint{display:none}
+body.view-is-overview .payday{display:none}
+body.view-is-overview .top{
+  height:auto;min-height:64px;padding-top:10px;padding-bottom:10px;
+}
+body.view-is-overview .quick-jump{max-width:148px}
+@media(max-width:900px){
+  body.view-is-overview .quick-jump{display:none}
+  body.view-is-overview #openCmdBtn{display:none}
+}
+
+.ov-stage{
+  margin:0 0 18px;border-radius:18px;border:1px solid var(--line);overflow:hidden;
+  background:
+    linear-gradient(180deg, oklch(99.2% .007 84), var(--paper) 55%),
+    radial-gradient(900px 260px at 0% 0%, oklch(92% .045 155 / .5), transparent 70%);
+  box-shadow:0 12px 32px oklch(22% .02 155 / .07);
+}
+.ov-stage#buildBanner.sync-flash{animation:syncFlash .8s ease}
+
+.ov-hero{
+  display:grid;grid-template-columns:minmax(0,1.4fr) minmax(240px,.85fr);
+  gap:20px 28px;align-items:start;padding:26px 26px 18px;position:relative;
+}
+.ov-hero:before{
+  content:'';position:absolute;left:0;top:0;bottom:0;width:4px;
+  background:linear-gradient(180deg, var(--gold), var(--navy));
+}
+.ov-hero-copy{min-width:0;padding-left:10px}
+.ov-brand{
+  margin:0 0 10px;font:700 .66rem/1 'DM Sans',sans-serif;
+  letter-spacing:.16em;text-transform:uppercase;color:oklch(46% .06 155);
+}
+.ov-title{
+  margin:0 0 8px;font:700 clamp(1.85rem,2.6vw,2.35rem)/1.05 'Playfair Display',serif;
+  color:var(--navy);letter-spacing:-.025em;
+}
+.ov-period-line{
+  margin:0 0 14px;color:var(--muted);font-size:.8rem;line-height:1.45;
+  display:flex;flex-wrap:wrap;gap:6px 8px;align-items:center;
+}
+.ov-period-line .ov-period-name{color:var(--navy);font-weight:700}
+.ov-period-line .ov-sep{opacity:.45}
+.ov-glance{
+  display:flex;flex-wrap:wrap;gap:8px;margin:0;
+}
+.ov-chip{
+  display:inline-flex;align-items:center;gap:6px;
+  padding:7px 11px;border-radius:999px;font-size:.72rem;font-weight:600;
+  color:var(--navy);background:var(--sage);border:1px solid transparent;
+}
+.ov-chip.warn{background:var(--warnwash);color:var(--warn)}
+.ov-chip.ok{background:oklch(93% .04 155);color:var(--green)}
+.ov-chip.muted{background:oklch(96.5% .008 84);color:var(--muted);font-weight:600}
+
+.ov-hero-side{
+  display:flex;flex-direction:column;align-items:stretch;gap:10px;padding-top:4px;
+}
+.ov-cta-primary .btn{width:100%;min-height:44px;font-size:.8rem}
+.ov-cta-primary .btn.primary{box-shadow:0 8px 20px oklch(26% .035 155 / .2)}
+.ov-cta-row{display:flex;gap:8px;flex-wrap:wrap}
+.ov-cta-row .btn{flex:1 1 auto;min-height:38px;justify-content:center}
+.ov-meta{display:flex;justify-content:flex-end;gap:8px;align-items:center}
+.ov-meta .btn{min-height:30px}
+
+.ov-next{
+  display:flex;gap:14px;align-items:center;justify-content:space-between;
+  margin:0;padding:14px 22px 16px 36px;
+  border-top:1px solid oklch(90% .02 84);
+  background:linear-gradient(90deg, var(--goldwash), oklch(99% .006 84) 55%);
+}
+.ov-next.is-clear{background:oklch(98% .005 84)}
+.nba-copy{min-width:0;flex:1}
+.nba-kicker{
+  display:block;font-size:.6rem;font-weight:700;letter-spacing:.12em;text-transform:uppercase;
+  color:oklch(48% .08 82);margin:0 0 3px;
+}
+.ov-next #nbaText{font-size:.78rem;color:var(--muted);line-height:1.4}
+.ov-next #nbaText b{display:block;font-size:.9rem;color:var(--navy);margin:0 0 2px;font-weight:700}
+.nba-detail{display:block;margin-top:2px}
+.ov-next.is-clear{opacity:.85}
+
+.ov-rail{
+  display:grid;grid-template-columns:1.15fr .95fr .9fr;gap:12px;
+  margin:0 0 14px;
+}
+.ov-rail-card{
+  border:1px solid var(--line);border-radius:14px;background:var(--paper);
+  padding:14px 14px 12px;min-width:0;
+  box-shadow:0 4px 14px oklch(22% .02 155 / .04);
+}
+.ov-rail-card .ov-tool-label{display:block;margin:0 0 8px}
+.ov-rail-row{display:flex;flex-wrap:wrap;gap:8px;align-items:center}
+.ov-rail-card select,#period{
+  border:1px solid var(--line);background:var(--cream);border-radius:9px;
+  padding:8px 10px;font-size:.74rem;min-height:36px;max-width:100%;
+}
+.ov-rail-card #period{flex:1 1 160px;min-width:0}
+.ov-rail-card .period-tip{
+  display:inline-flex;align-items:center;gap:6px;font-size:.74rem;color:var(--muted);
+}
+.ov-rail-card .period-tip input{
+  width:92px;border:1px solid var(--line);border-radius:8px;padding:7px 8px;background:var(--cream);
+}
+.ov-health{
+  margin-top:10px;padding-top:10px;border-top:1px dashed var(--line);
+  display:flex;flex-wrap:wrap;gap:6px 10px;align-items:center;
+  font-size:.72rem;color:var(--muted);
+}
+.ov-health strong{font-family:'JetBrains Mono',monospace;font-size:.82rem}
+.ov-compare{
+  margin-top:10px;padding-top:10px;border-top:1px dashed var(--line);
+  display:flex;flex-wrap:wrap;gap:8px 12px;font-size:.72rem;color:var(--muted);
+}
+.ov-compare strong{font-family:'JetBrains Mono',monospace;color:var(--navy);font-weight:600}
+
+.ov-extras{margin:0 0 14px}
+.ov-extras-body{display:flex;flex-wrap:wrap;gap:8px}
+
+.ov-metrics{margin:0 0 18px;gap:14px}
+#view-overview .tip-warn{margin:0 0 12px}
+#view-overview .desk-split{gap:16px}
+#view-overview .panel-note{margin:0 16px 12px;color:var(--muted);font-size:.74rem;line-height:1.45}
+.ov-notes-foot{margin-top:8px;display:flex;justify-content:flex-end}
+
+#view-overview .todo-card-v2 .todo-head{padding:16px 16px 8px}
+#view-overview .todo-head-actions{gap:6px}
+#view-overview .todo-manage{position:relative}
+#view-overview .todo-manage > summary{
+  list-style:none;cursor:pointer;
+}
+#view-overview .todo-manage > summary::-webkit-details-marker{display:none}
+#view-overview .todo-manage > summary:after{display:none}
+#view-overview .todo-manage-menu{
+  position:absolute;right:0;top:calc(100% + 6px);z-index:5;
+  min-width:160px;padding:8px;border-radius:12px;border:1px solid var(--line);
+  background:var(--paper);box-shadow:0 12px 28px oklch(20% .02 155 / .16);
+  display:flex;flex-direction:column;gap:6px;
+}
+#view-overview .todo-manage-menu .btn{width:100%;justify-content:flex-start}
+#view-overview .todo-stats{padding:0 14px 10px}
+#view-overview .todo-stat{padding:8px 8px 7px}
+#view-overview .todo-filters{padding:0 12px 8px}
+
+body.session-staff .ov-cta-primary,
+body.session-staff .ov-cta-row,
+body.session-staff .ov-rail-tips,
+body.session-staff .ov-rail-pay,
+body.session-staff .ov-compare,
+body.session-staff .ov-health,
+body.session-staff .ov-extras,
 body.session-staff .nba-card,
+body.session-staff .ov-next,
 body.session-staff .unpaid-desk,
 body.session-staff #compareStrip,
 body.session-staff #healthStrip,
@@ -1722,124 +1881,24 @@ body.session-staff #closePeriod,
 body.session-staff #undoBtn,
 body.session-staff #previewSundayRun,
 body.session-staff #copySundayRun{display:none!important}
-body.session-staff .ov-tool-tips,
-body.session-staff .overview-tools .ov-tip-tools{display:none}
-.staff-welcome{margin:0 0 14px;padding:14px 16px;border-radius:12px;border:1px solid var(--line);background:linear-gradient(135deg,var(--goldwash),oklch(98% .01 84))}
-.staff-welcome b{color:var(--navy)}
 
-
-/* ===== Overview polish ===== */
-#view-overview{max-width:100%}
-.ov-top{
-  display:grid;grid-template-columns:minmax(0,1.35fr) auto;gap:18px 28px;
-  align-items:end;margin:0 0 16px;padding:22px 24px 20px;
-  border-radius:16px;border:1px solid var(--line);
-  background:
-    linear-gradient(180deg, oklch(99% .006 84), var(--paper)),
-    radial-gradient(720px 180px at 0% 0%, oklch(92% .04 155 / .55), transparent 70%);
-  box-shadow:0 10px 28px oklch(22% .02 155 / .06);
-  position:relative;overflow:hidden;
+@media(max-width:1100px){
+  .ov-rail{grid-template-columns:1fr 1fr}
+  .ov-rail-pay{grid-column:1 / -1}
 }
-.ov-top:before{
-  content:'';position:absolute;left:0;top:0;bottom:0;width:4px;
-  background:linear-gradient(180deg, var(--gold), var(--navy));
-}
-.ov-brand-block{min-width:0;padding-left:8px}
-.ov-brand{
-  font:700 .68rem/1 'DM Sans',sans-serif;letter-spacing:.14em;text-transform:uppercase;
-  color:oklch(48% .06 155);margin:0 0 8px;
-}
-.ov-title{
-  font:700 2rem/1.05 'Playfair Display',serif;color:var(--navy);margin:0 0 8px;
-  letter-spacing:-.02em;
-}
-.ov-lede{
-  margin:0 0 10px;color:var(--muted);font-size:.8rem;line-height:1.45;max-width:36rem;
-}
-.ov-glance{
-  margin:0;display:inline-flex;flex-wrap:wrap;gap:6px 10px;align-items:center;
-  padding:7px 12px;border-radius:999px;font-size:.74rem;font-weight:600;color:var(--navy);
-  background:var(--sage);border:1px solid transparent;max-width:100%;
-}
-.ov-top-actions{
-  display:flex;flex-direction:column;align-items:flex-end;gap:10px;justify-content:flex-end;
-}
-.ov-top-actions > .btn{min-width:148px;justify-content:center}
-.ov-top-actions .btn.primary{box-shadow:0 6px 16px oklch(26% .035 155 / .18)}
-.ov-meta{display:flex;flex-wrap:wrap;gap:6px;align-items:center;justify-content:flex-end}
-.ov-extras{margin:0 0 12px}
-.ov-extras-body{display:flex;flex-wrap:wrap;gap:8px}
-.nba-card{
-  display:flex;gap:14px;align-items:center;justify-content:space-between;
-  margin:0 0 14px;padding:14px 16px;border-radius:14px;
-  border:1px solid oklch(88% .05 82);
-  background:linear-gradient(135deg, var(--goldwash), oklch(99% .008 84));
-}
-.nba-copy{min-width:0;flex:1}
-.nba-kicker{
-  display:block;font-size:.62rem;font-weight:700;letter-spacing:.1em;text-transform:uppercase;
-  color:oklch(48% .08 82);margin:0 0 4px;
-}
-.nba-card #nbaText{font-size:.8rem;color:var(--muted);line-height:1.4}
-.nba-card #nbaText b{display:block;font-size:.92rem;color:var(--navy);margin:0 0 2px;font-weight:700}
-.nba-card.is-clear{opacity:.78;background:oklch(98% .006 84);border-color:var(--line)}
-.overview-tools{
-  display:flex;flex-wrap:wrap;gap:12px 16px;align-items:center;
-  margin:0 0 12px;padding:12px 14px;border:1px solid var(--line);border-radius:14px;
-  background:var(--paper);
-}
-.ov-tool-group{
-  display:inline-flex;flex-wrap:wrap;gap:8px;align-items:center;
-  padding-right:14px;border-right:1px solid var(--line);min-height:34px;
-}
-.ov-tool-group:last-child,.ov-tool-group.ov-compare{border-right:0;padding-right:0}
-.ov-tool-actions{margin-left:0}
-.ov-tool-label{
-  font-size:.62rem;font-weight:700;letter-spacing:.08em;text-transform:uppercase;color:var(--muted);
-}
-.ov-compare{
-  display:inline-flex;flex-wrap:wrap;gap:8px 12px;align-items:center;
-  margin-left:auto;font-size:.74rem;color:var(--muted);
-}
-.ov-compare strong{font-family:'JetBrains Mono',monospace;color:var(--navy);font-weight:600}
-.overview-tools select,#period{
-  border:1px solid var(--line);background:var(--cream);border-radius:8px;padding:7px 10px;font-size:.74rem;min-height:34px;
-}
-.overview-tools .period-tip{display:inline-flex;align-items:center;gap:6px;font-size:.74rem;color:var(--muted)}
-.overview-tools .period-tip input{width:88px;border:1px solid var(--line);border-radius:8px;padding:6px 8px;background:var(--cream)}
-.health-strip{
-  display:flex;flex-wrap:wrap;gap:8px 12px;align-items:center;
-  margin:0 0 14px;padding:11px 14px;border-radius:12px;border:1px solid var(--line);
-  background:oklch(98.5% .005 84);font-size:.76rem;color:var(--muted);
-}
-.health-strip strong{font-family:'JetBrains Mono',monospace;font-size:.9rem}
-.health-hints{line-height:1.4}
-.ov-metrics{margin-bottom:16px}
-.ov-notes-foot{margin-top:8px;display:flex;justify-content:flex-end}
-#view-overview .tip-warn{margin:0 0 12px}
-#view-overview .desk-split{gap:14px}
-#view-overview .panel-note{margin:0 14px 10px;color:var(--muted)}
-#view-overview .todo-card-v2 .todo-head-actions .btn{white-space:nowrap}
-body.session-staff .ov-top-actions > #previewSundayRun,
-body.session-staff .ov-top-actions > #copySundayRun,
-body.session-staff .ov-top-actions > #closePeriod,
-body.session-staff .ov-tool-tips,
-body.session-staff .ov-tool-actions,
-body.session-staff .ov-compare,
-body.session-staff .ov-extras{display:none!important}
 @media(max-width:900px){
-  .ov-top{grid-template-columns:1fr;padding:18px 16px}
-  .ov-top-actions{align-items:stretch}
-  .ov-top-actions > .btn{min-width:0;width:100%}
+  .ov-hero{grid-template-columns:1fr;padding:20px 16px 14px}
+  .ov-hero-side{align-items:stretch}
   .ov-meta{justify-content:flex-start}
-  .ov-title{font-size:1.65rem}
-  .ov-tool-group{border-right:0;padding-right:0}
-  .ov-compare{margin-left:0}
+  .ov-next{padding:12px 16px 14px 26px}
+  .ov-rail{grid-template-columns:1fr}
+  .ov-rail-pay{grid-column:auto}
 }
 @media(prefers-reduced-motion:reduce){
-  .ov-top,.nba-card{box-shadow:none}
+  .ov-stage{box-shadow:none}
 }
-/* ===== Overview polish end ===== */
+[hidden]{display:none!important}
+/* ===== Overview revamp end ===== */
 
 /* ===== Desk v10 — clean UI ===== */
 .fold{
@@ -2093,7 +2152,7 @@ body.compact-todos .attn-detail{display:none}
       <option value="backup">Backup</option>
     </select>
     <button type="button" class="help-btn" id="helpShortcuts" title="Keyboard shortcuts" aria-haspopup="dialog" aria-controls="shortcutSheet">?</button>
-    <span class="build-chip" title="Desk build marker">v12</span>
+    <span class="build-chip" title="Desk build marker">v13</span>
     <span class="sync-chip live" id="syncChip" title="Realtime sync across tabs in this browser">LIVE</span>
     <span class="session-chip" id="sessionChip" title="Signed-in staff">Signed out</span>
     <button type="button" class="btn tiny soft" id="logoutBtn" title="Sign out">Logout</button>
@@ -2108,90 +2167,112 @@ body.compact-todos .attn-detail{display:none}
 
 <!-- OVERVIEW -->
 <section class="view active" id="view-overview" role="region" aria-labelledby="title-overview" tabindex="-1">
-  <div class="ov-top" id="buildBanner" role="status">
-    <div class="ov-brand-block">
-      <div class="ov-brand">Frenchie&apos;s Restaurant</div>
-      <h1 class="ov-title" id="title-overview">Overview</h1>
-      <p class="ov-lede">HR &amp; payroll desk · Legion Square · Payday Sunday 9:00 AM</p>
-      <p class="ov-glance" id="heroGlance">Open the current period below.</p>
+  <div class="ov-stage" id="buildBanner" role="status">
+    <div class="ov-hero">
+      <div class="ov-hero-copy">
+        <div class="ov-brand">Frenchie&apos;s Restaurant</div>
+        <h1 class="ov-title" id="title-overview">This week&apos;s desk</h1>
+        <p class="ov-period-line">
+          <span class="ov-period-name" id="heroPeriodPill">Period</span>
+          <span class="ov-sep" aria-hidden="true">·</span>
+          <span id="ovPeriodStatus">Open</span>
+          <span class="ov-sep" aria-hidden="true">·</span>
+          <span>Payday Sunday 9:00 AM</span>
+        </p>
+        <div class="ov-glance" id="heroGlance" aria-live="polite"></div>
+      </div>
+      <div class="ov-hero-side">
+        <div class="ov-cta-primary">
+          <button class="btn primary" type="button" id="copySundayRun">Copy Sunday run</button>
+        </div>
+        <div class="ov-cta-row">
+          <button class="btn soft" type="button" id="previewSundayRun">Preview</button>
+          <button class="btn" type="button" id="closePeriod">Close &amp; roll</button>
+        </div>
+        <div class="ov-meta">
+          <button type="button" class="btn tiny soft" id="openChangelogBtn">What&apos;s new</button>
+        </div>
+      </div>
     </div>
-    <div class="ov-top-actions">
-      <div class="ov-cta-row">
-        <button class="btn soft" type="button" id="previewSundayRun">Preview Sunday run</button>
-        <button class="btn primary" type="button" id="copySundayRun">Copy Sunday run</button>
-        <button class="btn" type="button" id="closePeriod">Close &amp; roll next</button>
+    <div class="ov-next nba-card" id="nbaCard">
+      <div class="nba-copy">
+        <span class="nba-kicker">Next up</span>
+        <div id="nbaText">Scanning the desk…</div>
       </div>
-      <div class="ov-meta">
-        <button type="button" class="btn tiny soft" id="openChangelogBtn">What&apos;s new</button>
-      </div>
+      <button type="button" class="btn tiny primary" id="nbaGoBtn">Open</button>
     </div>
   </div>
+
   <div class="staff-welcome" id="staffWelcome" style="display:none"></div>
-  <details class="fold quiet ov-extras" id="heroFold">
-    <summary>More desk tools <span class="pill gray" id="heroPeriodPill">Period</span></summary>
-    <div class="fold-body ov-extras-body">
-      <button class="btn soft" type="button" id="gotoStubs">Open stubs</button>
-      <button class="btn" type="button" id="downloadCsv">Download CSV</button>
-      <button class="btn" type="button" id="addEmployee">Add employee</button>
-      <button class="btn soft" type="button" id="ovGotoUnpaidStubs">Unpaid stubs</button>
-      <button class="btn soft" type="button" id="ovGotoExpenses">Expenses</button>
-      <button class="btn soft" type="button" id="ovGotoReports">Reports</button>
-      <button class="btn soft" type="button" id="exportTodosBtn">Export to-dos</button>
+
+  <div class="ov-rail overview-tools" aria-label="Period controls">
+    <div class="ov-rail-card ov-rail-period">
+      <span class="ov-tool-label">Pay period</span>
+      <div class="ov-rail-row">
+        <label class="sr-only" for="period">Pay period</label>
+        <select id="period" aria-label="Pay period"></select>
+        <button class="btn tiny soft" id="newPeriod" type="button">New</button>
+      </div>
+      <div class="ov-health" id="healthStrip">
+        <span class="ov-tool-label" style="margin:0">Health</span>
+        <strong id="healthScoreLabel">—</strong>
+        <span id="healthHints" class="health-hints">—</span>
+        <strong id="periodHealthScore" hidden>—</strong>
+      </div>
+      <div class="ov-compare" id="compareStrip" aria-label="Period comparison">
+        <span>Vs last</span>
+        <span>Gross <strong id="cmpGross">—</strong></span>
+        <span>Hrs <strong id="cmpHours">—</strong></span>
+        <span>Tips <strong id="cmpTips">—</strong></span>
+      </div>
     </div>
-  </details>
-  <div class="nba-card" id="nbaCard">
-    <div class="nba-copy">
-      <span class="nba-kicker">Next up</span>
-      <div id="nbaText">Scanning the desk…</div>
+    <div class="ov-rail-card ov-rail-tips ov-tool-tips">
+      <span class="ov-tool-label">Tip pool</span>
+      <div class="ov-rail-row">
+        <label class="period-tip" for="tipPool">Amount $
+          <input id="tipPool" type="number" min="0" step="1" aria-label="Tip pool amount">
+        </label>
+        <select id="ovTipMode" aria-label="Tip split mode">
+          <option value="equal">Equal split</option>
+          <option value="hours">By hours</option>
+        </select>
+      </div>
     </div>
-    <button type="button" class="btn tiny primary" id="nbaGoBtn">Open</button>
+    <div class="ov-rail-card ov-rail-pay ov-tool-actions">
+      <span class="ov-tool-label">Payroll actions</span>
+      <div class="ov-rail-row">
+        <button class="btn tiny soft" id="bulkHoursBtn" type="button">Bulk hours</button>
+        <button class="btn tiny primary" id="markAllPaid" type="button">Mark all paid</button>
+        <button type="button" class="btn tiny soft" id="undoBtn" title="Undo last desk action">Undo</button>
+      </div>
+      <details class="fold quiet ov-extras" id="heroFold" style="margin:12px 0 0;border:0;background:transparent">
+        <summary style="padding:8px 0">More tools</summary>
+        <div class="fold-body ov-extras-body" style="padding:0">
+          <button class="btn soft" type="button" id="gotoStubs">Open stubs</button>
+          <button class="btn" type="button" id="downloadCsv">Download CSV</button>
+          <button class="btn" type="button" id="addEmployee">Add employee</button>
+          <button class="btn soft" type="button" id="ovGotoUnpaidStubs">Unpaid stubs</button>
+          <button class="btn soft" type="button" id="ovGotoExpenses">Expenses</button>
+          <button class="btn soft" type="button" id="ovGotoReports">Reports</button>
+          <button class="btn soft" type="button" id="exportTodosBtn">Export to-dos</button>
+        </div>
+      </details>
+    </div>
   </div>
-  <div class="overview-tools" aria-label="Period controls">
-    <div class="ov-tool-group">
-      <span class="ov-tool-label">Period</span>
-      <label class="sr-only" for="period">Pay period</label>
-      <select id="period" aria-label="Pay period"></select>
-      <button class="btn tiny" id="newPeriod" type="button">New</button>
-    </div>
-    <div class="ov-tool-group ov-tool-tips">
-      <span class="ov-tool-label">Tips</span>
-      <label class="period-tip" for="tipPool">Pool $
-        <input id="tipPool" type="number" min="0" step="1" aria-label="Tip pool amount">
-      </label>
-      <select id="ovTipMode" aria-label="Tip split mode">
-        <option value="equal">Equal split</option>
-        <option value="hours">By hours</option>
-      </select>
-    </div>
-    <div class="ov-tool-group ov-tool-actions">
-      <button class="btn tiny soft" id="bulkHoursBtn" type="button">Bulk hours</button>
-      <button class="btn tiny" id="markAllPaid" type="button">Mark all paid</button>
-      <button type="button" class="btn tiny soft" id="undoBtn" title="Undo last desk action">Undo</button>
-    </div>
-    <div class="ov-compare" id="compareStrip" aria-label="Period comparison">
-      <span class="ov-tool-label">Vs last</span>
-      <span>Gross <strong id="cmpGross">—</strong></span>
-      <span>Hrs <strong id="cmpHours">—</strong></span>
-      <span>Tips <strong id="cmpTips">—</strong></span>
-      <strong id="periodHealthScore" hidden>—</strong>
-    </div>
-  </div>
-  <div class="health-strip" id="healthStrip">
-    <span class="ov-tool-label">Period health</span>
-    <strong id="healthScoreLabel">—</strong>
-    <span id="healthHints" class="health-hints">—</span>
-  </div>
+
   <div class="tip-warn" id="tipWarn" role="status">Tip pool is set, but no Waiter / Hostess / Cook with hours can share it yet.</div>
+
   <div class="metrics ov-metrics">
     <div class="metric"><label>Gross payroll</label><strong id="gross">$0</strong><span id="periodHealthSub">This period</span></div>
     <div class="metric"><label>Hours logged</label><strong id="hours">0.00</strong><span>Across the roster</span></div>
     <div class="metric"><label>Still unpaid</label><strong id="owedCount">0</strong><span id="owedSub">Ready for Sunday</span></div>
     <div class="metric"><label>Paid out</label><strong id="paidOutMetric">$0</strong><span>Marked paid this period</span></div>
   </div>
+
   <div class="grid desk-split">
     <div class="stack-col">
       <div class="card unpaid-desk"><div class="card-head"><b>Unpaid desk</b><span class="pill warn" id="unpaidDeskCount">0</span></div>
-        <div class="panel-note">Still owed this period — copy the Sunday run above for Discord.</div>
+        <div class="panel-note">People still owed this period. Copy the Sunday run above when you paste pay into Discord.</div>
         <div class="table-scroll"><table><thead><tr><th>Employee</th><th class="r">Hours</th><th class="r">Gross</th><th class="r">Action</th></tr></thead><tbody id="unpaidDesk"></tbody></table></div>
       </div>
       <div class="card"><div class="card-head"><b>Current period</b><span class="pill" id="state">OPEN</span></div>
@@ -2215,9 +2296,14 @@ body.compact-todos .attn-detail{display:none}
           <div class="todo-head-actions">
             <span class="pill warn" id="attnCount">0</span>
             <button type="button" class="btn tiny soft" id="todoFocusBtn" title="Show only urgent / due soon">Focus</button>
-            <button type="button" class="btn tiny" id="todoCompactBtn" title="Tighter to-do rows">Compact</button>
-            <button type="button" class="btn tiny" id="batchClearTodosBtn" title="Mark visible to-dos done">Clear visible</button>
-            <button type="button" class="btn tiny" id="todoClearDismissed" title="Restore hidden system to-dos">Restore</button>
+            <details class="todo-manage">
+              <summary class="btn tiny soft">Manage</summary>
+              <div class="todo-manage-menu">
+                <button type="button" class="btn tiny" id="todoCompactBtn" title="Tighter to-do rows">Compact rows</button>
+                <button type="button" class="btn tiny" id="batchClearTodosBtn" title="Mark visible to-dos done">Clear visible</button>
+                <button type="button" class="btn tiny" id="todoClearDismissed" title="Restore hidden system to-dos">Restore hidden</button>
+              </div>
+            </details>
           </div>
         </div>
         <div class="todo-stats" id="todoStats" aria-label="To-do counts">
@@ -3350,7 +3436,7 @@ const LOG_TYPES = {
 };
 const TIP_ROLES_DEFAULT = ['Waiter', 'Hostess', 'Cook'];
 const TIP_ROLES = TIP_ROLES_DEFAULT; /* legacy alias — use tipRoles() */
-const DESK_BUILD = 'v12';
+const DESK_BUILD = 'v13';
 const HOUSE_LOGIN_PASSWORD = 'frenchies636';
 const SESSION_KEY = 'frenchies_desk_session';
 const MGMT_ROLES = ['Owner', 'District Manager', 'Store Manager', 'HR Director', 'Operations Manager'];
@@ -5840,6 +5926,10 @@ function renderCompareAndHealth(p) {
   if ($('cmpGross')) $('cmpGross').textContent = prev ? fmtDelta(grossOf(p), grossOf(prev), true) : '—';
   if ($('cmpHours')) $('cmpHours').textContent = prev ? fmtDelta(hoursOf(p), hoursOf(prev), false) : '—';
   if ($('cmpTips')) $('cmpTips').textContent = prev ? fmtDelta(tipsOf(p), tipsOf(prev), true) : '—';
+  if ($('compareStrip')) {
+    $('compareStrip').hidden = !prev;
+    if (prev) $('compareStrip').removeAttribute('hidden');
+  }
   const h = periodHealth(p);
   if ($('periodHealthScore')) $('periodHealthScore').textContent = h.score + '/100';
   if ($('healthScoreLabel')) {
@@ -6386,15 +6476,19 @@ function render() {
   }
   if ($('heroGlance')) {
     const unpaid = unpaidCount(p);
-    const bits = [
-      unpaid ? unpaid + ' unpaid' : 'All paid',
-      'Tip pool ' + money(p.tipPool || 0),
-      activeEmployees().length + ' on roster',
-      p.status === 'open' ? 'Period open' : 'Period closed'
+    const chips = [
+      { t: unpaid ? unpaid + ' unpaid' : 'All paid', c: unpaid ? 'warn' : 'ok' },
+      { t: 'Tips ' + money(p.tipPool || 0), c: 'muted' },
+      { t: activeEmployees().length + ' on roster', c: 'muted' }
     ];
-    $('heroGlance').textContent = bits.join(' · ');
+    $('heroGlance').innerHTML = chips.map(c =>
+      '<span class="ov-chip ' + c.c + '">' + esc(c.t) + '</span>'
+    ).join('');
   }
   if ($('heroPeriodPill')) $('heroPeriodPill').textContent = shortLabel(p);
+  if ($('ovPeriodStatus')) {
+    $('ovPeriodStatus').textContent = p.status === 'open' ? 'Open' : 'Closed';
+  }
   renderCompareAndHealth(p);
   renderNba();
   applyUiSettings();
@@ -11289,6 +11383,7 @@ function activateView(viewName, opts) {
   document.querySelectorAll('.view').forEach(x => x.classList.remove('active'));
   const view = $('view-' + viewName);
   if (view) view.classList.add('active');
+  document.body.classList.toggle('view-is-overview', viewName === 'overview');
   const label = btn.dataset.label || (btn.querySelector('.nav-label') ? btn.querySelector('.nav-label').textContent : btn.textContent).replace(/\d+$/, '').trim();
   if ($('crumb')) $('crumb').textContent = label;
   if ($('quickJump') && $('quickJump').value !== viewName) $('quickJump').value = viewName;
