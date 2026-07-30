@@ -1688,6 +1688,9 @@ body.login-locked .shell{filter:blur(2px);pointer-events:none;user-select:none}
     linear-gradient(160deg, oklch(22% .03 155), oklch(28% .04 155) 45%, oklch(24% .03 155));
 }
 #loginGate.open{display:flex}
+#loginGate .login-panel{display:none}
+#loginGate[data-mode="signin"] #loginSignInPanel{display:block}
+#loginGate[data-mode="setup"] #loginSetupPanel{display:block}
 .login-card{
   width:min(420px,100%);padding:28px 26px 24px;border-radius:16px;
   background:linear-gradient(180deg, oklch(99% .006 84), var(--paper));
@@ -1878,24 +1881,43 @@ body.compact-todos .attn-detail{display:none}
 </style>
 </head>
 <body>
-<div id="loginGate" class="open" role="dialog" aria-modal="true" aria-labelledby="loginTitle">
-  <form class="login-card" id="loginForm" autocomplete="on">
-    <div class="brand" id="loginTitle">Frenchie's desk</div>
-    <p class="sub">Staff login · Username is Firstname_Lastname · House password for everyone</p>
-    <div class="field">
-      <label for="loginUser">Username</label>
-      <input id="loginUser" name="username" placeholder="Kenzie_Long" autocomplete="username" required>
-    </div>
-    <div class="field">
-      <label for="loginPass">Password</label>
-      <input id="loginPass" name="password" type="password" placeholder="House password" autocomplete="current-password" required>
-    </div>
-    <div class="login-err" id="loginErr" role="status"></div>
-    <div class="actions">
-      <button type="submit" class="btn primary" id="loginSubmit">Sign in</button>
-    </div>
-    <p class="sub" style="margin:14px 0 0">Access is granted only after your <b>Account login information</b> paper is signed and filed by HR. Owner / HR / Ops already have access.</p>
-  </form>
+<div id="loginGate" class="open" data-mode="signin" role="dialog" aria-modal="true" aria-labelledby="loginTitle">
+  <div class="login-card">
+    <form class="login-panel" id="loginSignInPanel" autocomplete="on">
+      <div class="brand" id="loginTitle">Frenchie's desk</div>
+      <p class="sub">Staff login · Username is Firstname_Lastname · First sign-in uses the house password, then you create your own</p>
+      <div class="field">
+        <label for="loginUser">Username</label>
+        <input id="loginUser" name="username" placeholder="Kenzie_Long" autocomplete="username" required>
+      </div>
+      <div class="field">
+        <label for="loginPass">Password</label>
+        <input id="loginPass" name="password" type="password" placeholder="House or personal password" autocomplete="current-password" required>
+      </div>
+      <div class="login-err" id="loginErr" role="status"></div>
+      <div class="actions">
+        <button type="submit" class="btn primary" id="loginSubmit">Sign in</button>
+      </div>
+      <p class="sub" style="margin:14px 0 0">Access is granted only after your <b>Account login information</b> paper is signed and filed by HR. First time: sign in with <b>frenchies636</b>, then set your own password.</p>
+    </form>
+    <form class="login-panel" id="loginSetupPanel" autocomplete="off">
+      <div class="brand">Create your password</div>
+      <p class="sub" id="loginSetupSub">Choose a personal password for this desk. You will use it next time instead of the house password.</p>
+      <div class="field">
+        <label for="setupPass">New password</label>
+        <input id="setupPass" type="password" minlength="6" placeholder="At least 6 characters" autocomplete="new-password" required>
+      </div>
+      <div class="field">
+        <label for="setupPass2">Confirm password</label>
+        <input id="setupPass2" type="password" minlength="6" placeholder="Repeat password" autocomplete="new-password" required>
+      </div>
+      <div class="login-err" id="setupErr" role="status"></div>
+      <div class="actions">
+        <button type="submit" class="btn primary" id="setupSubmit">Save password &amp; enter desk</button>
+        <button type="button" class="btn" id="setupCancel">Cancel</button>
+      </div>
+    </form>
+  </div>
 </div>
 <a class="skip-link" href="#mainContent">Skip to main content</a>
 <div class="live-region" id="a11yAnnounce" aria-live="polite" aria-atomic="true"></div>
@@ -1986,7 +2008,7 @@ body.compact-todos .attn-detail{display:none}
 <section class="view active" id="view-overview" role="region" aria-labelledby="title-overview" tabindex="-1">
   <div class="compact-banner" id="buildBanner" role="status">
     <b>Desk v12</b>
-    <span>Staff login · account paper · role access</span>
+    <span>Staff login · first-time password setup · role access</span>
     <button type="button" class="btn tiny soft" id="openChangelogBtn">What&apos;s new</button>
     <button type="button" class="btn tiny soft" id="toggleHeroBtn" title="Show or hide brand hero">Hero</button>
     <span class="pill green" id="buildStamp">SYNC</span>
@@ -2773,6 +2795,7 @@ body.compact-todos .attn-detail{display:none}
           <button class="btn tiny soft" id="sendEmpContract">Send contract</button>
           <button class="btn tiny soft" id="sendEmpPacket">Send packet</button>
           <button class="btn tiny soft" id="sendEmpLogin">Send account login</button>
+          <button class="btn tiny" id="resetEmpPasswordBtn" type="button" title="Clear personal password — they sign in with house password again">Reset password</button>
           <button class="btn tiny" id="openHirePapersBtn" type="button" style="display:none">Hiring file</button>
         </div>
         <button class="btn tiny" id="genOffer" hidden>View offer</button>
@@ -3243,6 +3266,7 @@ const ROLE_VIEWS = {
   staff: ['overview', 'paystubs', 'shifts', 'compliance']
 };
 let sessionUser = null;
+let pendingPasswordEmpId = null;
 const UPGRADE_LIST = [
   'Weighted tip split','Editable tip roles','Period vs last week','High-hours warnings','Bulk hours grid','Pay method on mark-paid','Auto closeout check','Per-stub Discord blurb','Period health score','Close notes warning',
   'Applicant rating','Decline reason required','Paperwork % column','Pipeline aging badge','Interview agenda card','Ready-to-hire spotlight','Duplicate hard warn','Hire checklist','Awaiting-reply filter','Clickable stage metrics',
@@ -3550,6 +3574,8 @@ function normalizeEmployee(e, fallbackDate) {
   if (!('loginAccess' in e)) e.loginAccess = false;
   e.loginAccess = !!e.loginAccess;
   e.loginGrantedAt = e.loginGrantedAt || '';
+  e.loginPassword = String(e.loginPassword || '');
+  e.loginPasswordSetAt = e.loginPasswordSetAt || '';
   if (MGMT_ROLES.indexOf(e.role) >= 0 && e.status === 'active' && !e.loginAccess) {
     e.loginAccess = true;
     e.loginGrantedAt = e.loginGrantedAt || (e.hire || today());
@@ -4683,16 +4709,86 @@ function grantEmpLoginAccess(e, detail) {
   const was = !!e.loginAccess;
   e.loginAccess = true;
   e.loginGrantedAt = e.loginGrantedAt || today();
+  if (!('loginPassword' in e)) e.loginPassword = '';
   if (!was) {
     try {
       pushEmpLog(e, {
         type: 'status',
         summary: 'Desk login access granted',
-        detail: detail || ('Username ' + e.loginUsername + ' · house password')
+        detail: detail || ('Username ' + e.loginUsername + ' · first sign-in with house password, then create your own')
       });
     } catch (err) {}
   }
   return true;
+}
+function empHasOwnPassword(e) {
+  return !!(e && String(e.loginPassword || '').length);
+}
+function resetEmpLoginPassword(e, reason) {
+  if (!e) return false;
+  e.loginPassword = '';
+  e.loginPasswordSetAt = '';
+  pushEmpLog(e, {
+    type: 'status',
+    summary: 'Desk password reset',
+    detail: reason || 'Must sign in with house password and create a new personal password'
+  });
+  return true;
+}
+function setLoginGateMode(mode) {
+  const gate = $('loginGate');
+  if (!gate) return;
+  gate.setAttribute('data-mode', mode === 'setup' ? 'setup' : 'signin');
+  if (mode === 'setup') {
+    if ($('setupPass')) $('setupPass').value = '';
+    if ($('setupPass2')) $('setupPass2').value = '';
+    if ($('setupErr')) $('setupErr').textContent = '';
+    const e = empById(pendingPasswordEmpId);
+    if ($('loginSetupSub') && e) {
+      $('loginSetupSub').textContent = 'Welcome, ' + e.name + '. Create a personal password for ' +
+        (e.loginUsername || loginUsernameFromName(e.name)) + '. You will use this next time instead of the house password.';
+    }
+    setTimeout(() => { try { $('setupPass').focus(); } catch (err) {} }, 40);
+  } else {
+    pendingPasswordEmpId = null;
+    setTimeout(() => { try { $('loginUser').focus(); } catch (err) {} }, 40);
+  }
+}
+function enterDeskSession(e) {
+  ensureEmpLoginUsername(e);
+  sessionUser = {
+    empId: e.id,
+    name: e.name,
+    role: e.role,
+    username: e.loginUsername
+  };
+  pendingPasswordEmpId = null;
+  persistSession(sessionUser);
+  applySessionChrome();
+  const start = canAccessView('overview') ? 'overview' : (viewsForSession() || ['overview'])[0];
+  activateView(start, { focusView: true });
+  render();
+  log(e.name + ' logged into the desk');
+  save({ quiet: true, skipSnapshot: true });
+}
+function completePasswordSetup(pass1, pass2) {
+  const e = empById(pendingPasswordEmpId);
+  if (!e) return { ok: false, msg: 'Sign-in expired — start again' };
+  const a = String(pass1 || '');
+  const b = String(pass2 || '');
+  if (a.length < 6) return { ok: false, msg: 'Password must be at least 6 characters' };
+  if (a !== b) return { ok: false, msg: 'Passwords do not match' };
+  if (a === HOUSE_LOGIN_PASSWORD) return { ok: false, msg: 'Choose something other than the house password' };
+  e.loginPassword = a;
+  e.loginPasswordSetAt = today();
+  pushEmpLog(e, {
+    type: 'status',
+    summary: 'Personal desk password created',
+    detail: 'First-time password setup complete'
+  });
+  save();
+  enterDeskSession(e);
+  return { ok: true, emp: e };
 }
 function viewsForSession() {
   if (!sessionUser) return [];
@@ -4728,6 +4824,12 @@ function loadSession() {
     if (!data || !data.empId) return null;
     const e = empById(data.empId);
     if (!e || !empHasLoginAccess(e)) return null;
+    /* Old sessions without a personal password must set one before desk use */
+    if (!empHasOwnPassword(e)) {
+      pendingPasswordEmpId = e.id;
+      try { sessionStorage.removeItem(SESSION_KEY); } catch (err) {}
+      return null;
+    }
     return {
       empId: e.id,
       name: e.name,
@@ -4745,13 +4847,22 @@ function persistSession(user) {
 function applySessionChrome() {
   const gate = $('loginGate');
   const shell = document.querySelector('.shell');
-  if (!sessionUser) {
-    if (gate) { gate.classList.add('open'); gate.removeAttribute('hidden'); }
+  const needsSetup = !!pendingPasswordEmpId;
+  if (!sessionUser || needsSetup) {
+    if (gate) {
+      gate.classList.add('open');
+      gate.removeAttribute('hidden');
+      setLoginGateMode(needsSetup ? 'setup' : 'signin');
+    }
     if (shell) shell.setAttribute('aria-hidden', 'true');
     document.body.classList.add('login-locked');
+    if ($('sessionChip')) {
+      $('sessionChip').textContent = needsSetup ? 'Set password' : 'Signed out';
+      $('sessionChip').title = needsSetup ? 'Create your personal password to continue' : 'Not signed in';
+    }
     return;
   }
-  if (gate) { gate.classList.remove('open'); gate.setAttribute('hidden', ''); }
+  if (gate) { gate.classList.remove('open'); gate.setAttribute('hidden', ''); gate.setAttribute('data-mode', 'signin'); }
   if (shell) shell.removeAttribute('aria-hidden');
   document.body.classList.remove('login-locked');
   document.body.classList.toggle('session-staff', isStaffSession());
@@ -4787,7 +4898,7 @@ function loginAsEmployee(username, password) {
   const u = String(username || '').trim();
   const p = String(password || '');
   if (!u) return { ok: false, msg: 'Enter your username (Firstname_Lastname)' };
-  if (p !== HOUSE_LOGIN_PASSWORD) return { ok: false, msg: 'Wrong password' };
+  if (!p) return { ok: false, msg: 'Enter your password' };
   const want = u.replace(/\s+/g, '_');
   const e = s.employees.find(x => {
     const un = (x.loginUsername || loginUsernameFromName(x.name) || '').toLowerCase();
@@ -4800,29 +4911,38 @@ function loginAsEmployee(username, password) {
     return { ok: false, msg: 'Access not granted yet — finish Account login information with HR' };
   }
   ensureEmpLoginUsername(e);
-  sessionUser = {
-    empId: e.id,
-    name: e.name,
-    role: e.role,
-    username: e.loginUsername
-  };
-  persistSession(sessionUser);
+  const hasOwn = empHasOwnPassword(e);
+  if (hasOwn) {
+    if (p !== String(e.loginPassword)) {
+      if (p === HOUSE_LOGIN_PASSWORD) {
+        return { ok: false, msg: 'House password no longer works — use your personal password (HR can reset)' };
+      }
+      return { ok: false, msg: 'Wrong password' };
+    }
+    enterDeskSession(e);
+    return { ok: true, emp: e, needPassword: false };
+  }
+  if (p !== HOUSE_LOGIN_PASSWORD) {
+    return { ok: false, msg: 'First sign-in uses the house password (frenchies636)' };
+  }
+  /* First-time: house password accepted → force personal password setup before desk */
+  sessionUser = null;
+  persistSession(null);
+  pendingPasswordEmpId = e.id;
   applySessionChrome();
-  const start = canAccessView('overview') ? 'overview' : (viewsForSession() || ['overview'])[0];
-  activateView(start, { focusView: true });
-  render();
-  log(e.name + ' logged into the desk');
-  save({ quiet: true, skipSnapshot: true });
-  return { ok: true, emp: e };
+  return { ok: true, emp: e, needPassword: true };
 }
 function logoutDesk() {
   const who = sessionUser && sessionUser.name;
   sessionUser = null;
+  pendingPasswordEmpId = null;
   persistSession(null);
   applySessionChrome();
   if ($('loginUser')) $('loginUser').value = '';
   if ($('loginPass')) $('loginPass').value = '';
   if ($('loginErr')) $('loginErr').textContent = '';
+  if ($('setupErr')) $('setupErr').textContent = '';
+  setLoginGateMode('signin');
   if (who) toast(who + ' signed out');
   setTimeout(() => { try { $('loginUser').focus(); } catch (err) {} }, 40);
 }
@@ -8302,12 +8422,12 @@ function letterLogin(c) {
     ff('Employee', c.name) +
     ff('Role', c.role) +
     ff('Username', user) +
-    ff('Password', HOUSE_LOGIN_PASSWORD) +
-    '<div class="letter-note">Username format is Firstname_Lastname from your legal name on file. The house password is shared for all staff logins — do not post it in public Discord channels.</div>' +
+    ff('First sign-in password', HOUSE_LOGIN_PASSWORD + ' (house password)') +
+    '<div class="letter-note">Username format is Firstname_Lastname from your legal name on file. Sign in once with the house password — the desk will ask you to create your own password before you continue. Do not post either password in public Discord channels.</div>' +
     '<h4>What you can see</h4>' +
     '<p>Access follows your role on the ladder. Owner and management see the full desk. Shift Leads see coverage and roster tools. Floor staff see their pay stubs, shifts, and handbook.</p>' +
     '<h4>Acknowledgement</h4>' +
-    '<p>By signing you confirm you received these credentials, will keep the password off public chats, and understand desk access starts only after HR files this signed reply.</p>' +
+    '<p>By signing you confirm you received these credentials, will create your own password on first sign-in, will keep passwords off public chats, and understand desk access starts only after HR files this signed reply.</p>' +
     signGrid('Employee — ' + (c.name || ''), '', 'Date', '');
   return wrapLetter('Account login information', body, (c.name || 'Employee') + ' · desk login · ' + today());
 }
@@ -9268,16 +9388,17 @@ function packetBody(a, kind, c) {
     return '<p>Welcome, <b>' + esc(c.name || 'employee') + '</b>. This is your <b>Account login information</b> — the last hire paper before desk access.</p>' +
       pkTerms([
         ['Your username', user],
-        ['House password', HOUSE_LOGIN_PASSWORD],
+        ['First sign-in password', HOUSE_LOGIN_PASSWORD + ' (house)'],
+        ['Then', 'Create your own password on first desk sign-in'],
         ['Your role', c.role],
         ['Access starts', 'After HR files this signed reply']
       ]) +
-      '<div class="note">Username is Firstname_Lastname from your name on file. Keep the password out of public Discord. Floor staff see stubs, shifts, and the handbook; management sees the full desk.</div>' +
+      '<div class="note">Username is Firstname_Lastname from your name on file. First login uses the house password, then you must create your own. Keep passwords out of public Discord. Floor staff see stubs, shifts, and the handbook; management sees the full desk.</div>' +
       '<h2>Acknowledgements *</h2>' +
       '<p class="pk-hint">Tick every box before you sign:</p>' +
       pkBoxes('loginAck', [
-        'I received my username and the house password',
-        'I will not post the password in public channels',
+        'I received my username and the house password for first sign-in',
+        'I will create my own password when the desk asks, and keep it private',
         'I understand access starts only after HR files this signed reply'
       ], true, true) +
       '<h2>Your answer *</h2>' +
@@ -10642,13 +10763,20 @@ function renderEmployeeFile(e) {
     $('sendEmpLogin').className = (packetAcked && !loginOk) ? 'btn tiny primary' : 'btn tiny soft';
     $('sendEmpLogin').disabled = false;
   }
+  if ($('resetEmpPasswordBtn')) {
+    const hasPw = empHasOwnPassword(e);
+    $('resetEmpPasswordBtn').style.display = canMutateDesk() ? '' : 'none';
+    $('resetEmpPasswordBtn').disabled = !hasPw;
+    $('resetEmpPasswordBtn').textContent = hasPw ? 'Reset password' : 'No password set';
+  }
   if ($('empDocHint')) {
     if (!signedContract) $('empDocHint').textContent = 'Next: send contract (you sign first), then import their reply.';
     else if (!hasPacket) $('empDocHint').textContent = 'Contract signed — send the new-hire packet next.';
     else if (!packetAcked) $('empDocHint').textContent = 'Packet sent — await acknowledgement, then send account login.';
     else if (!hasLogin) $('empDocHint').textContent = 'Packet acknowledged — send Account login information next.';
     else if (!loginOk) $('empDocHint').textContent = 'Login sheet sent — file the signed reply to grant access.';
-    else $('empDocHint').textContent = 'Desk access granted · ' + (e.loginUsername || loginUsernameFromName(e.name)) + ' / house password.';
+    else $('empDocHint').textContent = 'Desk access granted · ' + (e.loginUsername || loginUsernameFromName(e.name)) +
+      (empHasOwnPassword(e) ? ' · personal password set' : ' · first sign-in with house password, then create their own');
   }
   if ($('openHirePapersBtn')) {
     if (linkedApp) {
@@ -11806,6 +11934,18 @@ $('sendEmpPacket').onclick = () => {
   announce('New-hire packet filed for ' + e.name);
 };
 
+if ($('resetEmpPasswordBtn')) $('resetEmpPasswordBtn').onclick = () => {
+  if (!requireMgmt('Password reset')) return;
+  const e = empById(editId);
+  if (!e) return toast('Save the file first');
+  if (!empHasOwnPassword(e)) return toast('No personal password on file yet');
+  if (!confirm('Reset desk password for ' + e.name + '? They must sign in with the house password and create a new one.')) return;
+  resetEmpLoginPassword(e, 'Reset by ' + ((sessionUser && sessionUser.name) || 'HR'));
+  save();
+  renderEmployeeFile(e);
+  toast('Password reset · ' + e.name + ' uses house password next');
+};
+
 if ($('sendEmpLogin')) $('sendEmpLogin').onclick = () => {
   const e = empById(editId);
   if (!e) return toast('Save the file first');
@@ -12713,18 +12853,42 @@ save({ skipRevBump: true, silentBroadcast: true, skipSnapshot: true, skipRevChec
 initRealtimeSync();
 sessionUser = loadSession();
 applySessionChrome();
-if ($('loginForm')) {
-  $('loginForm').onsubmit = (ev) => {
+if ($('loginSignInPanel')) {
+  $('loginSignInPanel').onsubmit = (ev) => {
     ev.preventDefault();
     const res = loginAsEmployee($('loginUser').value, $('loginPass').value);
     if ($('loginErr')) $('loginErr').textContent = res.ok ? '' : (res.msg || 'Sign-in failed');
-    if (res.ok) toast('Welcome, ' + res.emp.name);
+    if (res.ok && res.needPassword) {
+      if ($('loginErr')) $('loginErr').textContent = '';
+      toast('Create your own password to continue');
+    } else if (res.ok) toast('Welcome, ' + res.emp.name);
+  };
+}
+if ($('loginSetupPanel')) {
+  $('loginSetupPanel').onsubmit = (ev) => {
+    ev.preventDefault();
+    const res = completePasswordSetup($('setupPass').value, $('setupPass2').value);
+    if ($('setupErr')) $('setupErr').textContent = res.ok ? '' : (res.msg || 'Could not save password');
+    if (res.ok) toast('Password saved · welcome, ' + res.emp.name);
+  };
+}
+if ($('setupCancel')) {
+  $('setupCancel').onclick = () => {
+    pendingPasswordEmpId = null;
+    setLoginGateMode('signin');
+    applySessionChrome();
+    if ($('loginPass')) $('loginPass').value = '';
   };
 }
 if ($('logoutBtn')) $('logoutBtn').onclick = () => logoutDesk();
 (function bootNav() {
-  if (!sessionUser) {
-    setTimeout(() => { try { $('loginUser').focus(); } catch (err) {} }, 60);
+  if (!sessionUser || pendingPasswordEmpId) {
+    setTimeout(() => {
+      try {
+        if (pendingPasswordEmpId) $('setupPass').focus();
+        else $('loginUser').focus();
+      } catch (err) {}
+    }, 60);
     return;
   }
   const fromHash = (location.hash || '').replace(/^#/, '');
@@ -12751,9 +12915,13 @@ window.__desk = {
   pushSnapshot,
   loginAsEmployee,
   logoutDesk,
+  completePasswordSetup,
+  resetEmpLoginPassword,
+  empHasOwnPassword,
   empHasLoginAccess,
   loginUsernameFromName,
   HOUSE_LOGIN_PASSWORD,
+  get pendingPasswordEmpId() { return pendingPasswordEmpId; },
   CLIENT_ID,
   V11_IMPROVEMENTS,
   DESK_BUILD,
