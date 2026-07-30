@@ -2143,8 +2143,47 @@ body.session-staff #copySundayRun{display:none!important}
 .dialog.wide{max-width:min(720px,96vw);max-height:min(92vh,860px);display:flex;flex-direction:column}
 .dialog{max-height:min(92vh,820px);display:flex;flex-direction:column}
 .dialog > h2{flex:none}
-.dialog-scroll{flex:1;min-height:0;overflow:auto;padding-right:2px;margin:0 -2px}
-.dialog-foot{flex:none;position:sticky;bottom:0;background:linear-gradient(180deg, transparent, var(--paper) 28%);padding-top:16px;margin-top:8px;z-index:2}
+.dialog-scroll{flex:1;min-height:0;overflow:auto;padding-right:4px;margin:0 -2px 0 0;padding-bottom:8px;overscroll-behavior:contain;-webkit-overflow-scrolling:touch}
+.dialog-foot{flex:none;position:relative;bottom:auto;background:var(--paper);padding-top:14px;margin-top:0;z-index:2;border-top:1px solid var(--line);box-shadow:0 -8px 16px oklch(30% .02 155 / .04)}
+#eventModal .event-dialog{width:min(640px,96vw);max-height:min(90vh,820px)}
+#eventModal .dialog-scroll{padding-bottom:12px}
+.ev-section{margin:18px 0 0;padding:14px 14px 12px;border:1px solid var(--line);border-radius:12px;background:oklch(99% .004 84)}
+.ev-section-head{display:flex;align-items:center;justify-content:space-between;gap:10px;flex-wrap:wrap;margin:0 0 4px}
+.ev-section-head h3{margin:0;font:700 .68rem 'DM Sans',sans-serif;letter-spacing:.08em;text-transform:uppercase;color:var(--muted)}
+.ev-section-actions{display:flex;gap:6px}
+.ev-section-hint{margin:0 0 10px;font-size:.72rem}
+.ev-staff-grid{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:6px}
+.ev-staff-grid .ev-staff-opt{
+  display:flex;gap:8px;align-items:flex-start;margin:0;padding:9px 10px;
+  border:1px solid var(--line);border-radius:9px;background:var(--paper);cursor:pointer;
+  font-size:.78rem;line-height:1.35;transition:border-color .12s, background .12s;
+}
+.ev-staff-grid .ev-staff-opt:hover{border-color:oklch(78% .06 84)}
+.ev-staff-grid .ev-staff-opt:has(input:checked){
+  border-color:oklch(72% .08 155);background:oklch(97% .015 155);
+}
+.ev-staff-grid .ev-staff-opt input{margin-top:2px;flex:none;accent-color:var(--green)}
+.ev-staff-grid .ev-staff-opt b{display:block;font-weight:650;color:var(--navy);font-size:.8rem}
+.ev-staff-grid .ev-staff-opt small{display:block;color:var(--muted);font-size:.68rem}
+.ev-bonus-list{display:flex;flex-direction:column;gap:6px}
+.ev-bonus-row{
+  display:grid;grid-template-columns:minmax(0,1fr) 96px;gap:10px;align-items:center;
+  padding:8px 10px;border:1px solid var(--line);border-radius:9px;background:var(--paper);
+}
+.ev-bonus-row .ev-bonus-name{font-size:.8rem;font-weight:650;color:var(--navy);min-width:0}
+.ev-bonus-row .ev-bonus-name small{display:block;font-weight:500;color:var(--muted);font-size:.68rem}
+.ev-bonus-row input[type=number]{
+  width:100%;padding:7px 8px;border:1px solid var(--line);border-radius:7px;
+  background:var(--cream);font:600 .82rem 'DM Sans',sans-serif;text-align:right;
+}
+.ev-bonus-row input[type=number]:focus{outline:2px solid oklch(72% .12 82 / .35);outline-offset:1px}
+.ev-apply-block{margin-top:14px;padding:12px 14px;border-radius:11px;background:var(--sage);border:1px solid transparent}
+.ev-apply-block .checkline{margin:0}
+.ev-apply-block .mini-note{margin-top:6px}
+@media (max-width:560px){
+  .ev-staff-grid{grid-template-columns:1fr}
+  .ev-bonus-row{grid-template-columns:minmax(0,1fr) 84px}
+}
 .file-section{margin:0 0 16px}
 .file-section > h3{
   margin:0 0 10px;font:700 .72rem 'DM Sans',sans-serif;letter-spacing:.08em;
@@ -2388,7 +2427,7 @@ body.compact-todos .attn-detail{display:none}
         <button type="button" class="top-account-item" id="helpShortcuts" role="menuitem" aria-haspopup="dialog" aria-controls="shortcutSheet">Keyboard shortcuts</button>
         <button type="button" class="top-account-item danger" id="logoutBtn" role="menuitem">Sign out</button>
         <div class="top-account-foot">
-          <span class="build-chip" title="Desk build">v15</span>
+          <span class="build-chip" title="Desk build">v16</span>
           <label class="top-jump-label" for="quickJump">Jump to</label>
           <select class="top-jump" id="quickJump" title="Jump to any tab">
             <option value="overview">Overview</option>
@@ -3371,23 +3410,45 @@ body.compact-todos .attn-detail{display:none}
 </div></div>
 
 <!-- Event modal -->
-<div class="modal" id="eventModal" role="dialog" aria-modal="true" aria-labelledby="eventTitle" hidden><div class="dialog wide" role="document" tabindex="-1">
+<div class="modal" id="eventModal" role="dialog" aria-modal="true" aria-labelledby="eventTitle" hidden><div class="dialog wide event-dialog" role="document" tabindex="-1">
   <h2 id="eventTitle">Log event</h2>
-  <div class="field-row">
-    <div class="field"><label>Date</label><input id="evDate" type="date"></div>
-    <div class="field"><label>Type</label><select id="evType"><option value="raffle">Raffle night</option><option value="adult-ent">Adult entertainment</option><option value="special">Special / other</option></select></div>
+  <div class="dialog-scroll">
+    <div class="field-row">
+      <div class="field"><label>Date</label><input id="evDate" type="date"></div>
+      <div class="field"><label>Type</label><select id="evType"><option value="raffle">Raffle night</option><option value="adult-ent">Adult entertainment</option><option value="special">Special / other</option></select></div>
+    </div>
+    <div class="field"><label>Event name</label><input id="evName" placeholder="e.g. Friday raffle"></div>
+    <div class="field"><label>Notes</label><textarea id="evNotes" rows="3" placeholder="Optional — what ran, guest notes, house callouts"></textarea></div>
+
+    <div class="ev-section">
+      <div class="ev-section-head">
+        <h3>Worked the night</h3>
+        <div class="ev-section-actions">
+          <button type="button" class="btn tiny soft" id="evStaffAll">All</button>
+          <button type="button" class="btn tiny" id="evStaffNone">None</button>
+        </div>
+      </div>
+      <p class="ui-hint ev-section-hint">Tick who worked this event.</p>
+      <div id="evStaff" class="ev-staff-grid"></div>
+    </div>
+
+    <div class="ev-section">
+      <div class="ev-section-head">
+        <h3>Bonuses by employee ($)</h3>
+      </div>
+      <p class="ui-hint ev-section-hint">Enter a dollar amount only for staff who earned a bonus.</p>
+      <div id="evBonuses" class="ev-bonus-list"></div>
+    </div>
+
+    <div class="ev-apply-block">
+      <label class="checkline"><input type="checkbox" id="evApplyPeriod"><span>Also add these bonuses to the open period</span></label>
+      <div class="mini-note" id="evAppliedNote"></div>
+    </div>
   </div>
-  <div class="field"><label>Event name</label><input id="evName" placeholder="e.g. Friday raffle"></div>
-  <div class="field"><label>Notes</label><textarea id="evNotes"></textarea></div>
-  <h3>Worked the night</h3>
-  <div id="evStaff"></div>
-  <h3>Bonuses by employee ($)</h3>
-  <div id="evBonuses"></div>
-  <label class="checkline" style="margin-top:12px"><input type="checkbox" id="evApplyPeriod"><span>Also add these bonuses to the open period</span></label>
-  <div class="mini-note" id="evAppliedNote"></div>
   <div class="dialog-foot">
     <button class="btn danger" id="deleteEvent" style="margin-right:auto;display:none">Delete</button>
-    <button class="btn" id="cancelEvent">Cancel</button><button class="btn primary" id="saveEvent">Save event</button>
+    <button class="btn" id="cancelEvent">Cancel</button>
+    <button class="btn primary" id="saveEvent">Save event</button>
   </div>
 </div></div>
 
@@ -3732,7 +3793,7 @@ const LOG_TYPES = {
 };
 const TIP_ROLES_DEFAULT = ['Waiter', 'Hostess', 'Cook'];
 const TIP_ROLES = TIP_ROLES_DEFAULT; /* legacy alias — use tipRoles() */
-const DESK_BUILD = 'v15';
+const DESK_BUILD = 'v16';
 const HOUSE_LOGIN_PASSWORD = 'frenchies636';
 const SESSION_KEY = 'frenchies_desk_session';
 const MGMT_ROLES = ['Owner', 'District Manager', 'Store Manager', 'HR Director', 'Operations Manager'];
@@ -11210,6 +11271,8 @@ window.editEvent = function (id) {
     : 'These bonuses have not been added to a pay period yet.';
   $('deleteEvent').style.display = 'inline-block';
   $('eventModal').classList.add('open');
+  const sc = $('eventModal').querySelector('.dialog-scroll');
+  if (sc) sc.scrollTop = 0;
 };
 
 window.delEvent = function (id) {
@@ -11789,16 +11852,26 @@ window.filterEmpLog = function (type) {
 /* ---------------- events modal helpers ---------------- */
 function buildEvBonuses(map) {
   $('evBonuses').innerHTML = activeEmployees().map(e =>
-    '<div class="field-row" style="margin-bottom:6px"><label style="align-self:center;font-size:.75rem">' + esc(e.name) + '</label>' +
-    '<input type="number" min="0" data-eid="' + e.id + '" value="' + Number(map[e.id] || 0) + '" style="padding:7px;border:1px solid var(--line);border-radius:6px;background:var(--cream)"></div>'
+    '<label class="ev-bonus-row"><span class="ev-bonus-name">' + esc(e.name) +
+    '<small>' + esc(e.role) + '</small></span>' +
+    '<input type="number" min="0" step="1" inputmode="numeric" data-eid="' + e.id +
+    '" value="' + Number(map[e.id] || 0) + '" aria-label="Bonus for ' + esc(e.name) + '"></label>'
   ).join('') || '<div class="mini-note">No staff on roster.</div>';
 }
 
 function buildEvStaff(staff) {
   const ids = (staff || []).map(String);
   $('evStaff').innerHTML = activeEmployees().map(e =>
-    '<label class="checkline"><input type="checkbox" data-staff="' + e.id + '"' + (ids.includes(String(e.id)) ? ' checked' : '') + '><span>' + esc(e.name) + ' — ' + esc(e.role) + '</span></label>'
+    '<label class="ev-staff-opt"><input type="checkbox" data-staff="' + e.id + '"' +
+    (ids.includes(String(e.id)) ? ' checked' : '') + '>' +
+    '<span><b>' + esc(e.name) + '</b><small>' + esc(e.role) + '</small></span></label>'
   ).join('') || '<div class="mini-note">No staff on roster.</div>';
+}
+
+function setEvStaffChecks(on) {
+  const root = $('evStaff');
+  if (!root) return;
+  root.querySelectorAll('input[data-staff]').forEach(inp => { inp.checked = !!on; });
 }
 
 function fillRelEmployees(selected) {
@@ -13303,9 +13376,13 @@ $('addEvent').onclick = () => {
   $('evAppliedNote').textContent = '';
   $('deleteEvent').style.display = 'none';
   $('eventModal').classList.add('open');
+  const sc = $('eventModal').querySelector('.dialog-scroll');
+  if (sc) sc.scrollTop = 0;
 };
 $('cancelEvent').onclick = () => $('eventModal').classList.remove('open');
 $('deleteEvent').onclick = () => { if (eventId) delEvent(eventId); $('eventModal').classList.remove('open'); };
+if ($('evStaffAll')) $('evStaffAll').onclick = () => setEvStaffChecks(true);
+if ($('evStaffNone')) $('evStaffNone').onclick = () => setEvStaffChecks(false);
 
 $('saveEvent').onclick = () => {
   const name = $('evName').value.trim();
