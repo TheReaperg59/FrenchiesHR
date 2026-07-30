@@ -2314,6 +2314,19 @@ body.compact-todos .attn-detail{display:none}
 .spotlight-row{background:linear-gradient(90deg,var(--warnwash),transparent 40%)!important}
 .gap-pill{font-size:.62rem;padding:2px 6px;border-radius:6px;background:var(--dangerwash);color:var(--danger);font-weight:700}
 
+
+body.session-staff #markStubPaid,
+body.session-staff #markStubUnpaid,
+body.session-staff #stubEditHours,
+body.session-staff #markAllPaid{display:none!important}
+.roadmap-panel{margin:12px 0;padding:14px;border:1px solid var(--line);border-radius:12px;background:oklch(99% .004 84)}
+.roadmap-panel h3{margin:0 0 8px;font:700 .72rem 'DM Sans',sans-serif;letter-spacing:.08em;text-transform:uppercase;color:var(--muted)}
+.iv-row,.co-row,.clk-row{display:flex;flex-wrap:wrap;gap:8px;align-items:center;justify-content:space-between;padding:10px 12px;border:1px solid var(--line);border-radius:9px;background:var(--paper);margin-bottom:6px}
+.shift-cards{display:none}
+@media (max-width:720px){
+  #shiftBoard{display:none}
+  .shift-cards{display:flex;flex-direction:column;gap:8px}
+}
 </style>
 </head>
 <body>
@@ -2330,6 +2343,7 @@ body.compact-todos .attn-detail{display:none}
         <label for="loginPass">Password</label>
         <input id="loginPass" name="password" type="password" placeholder="House or personal password" autocomplete="current-password" required>
       </div>
+      <label class="checkline" style="margin:4px 0 10px"><input type="checkbox" id="loginStay" checked><span>Stay logged in on this device</span></label>
       <div class="login-err" id="loginErr" role="status"></div>
       <div class="actions">
         <button type="submit" class="btn primary" id="loginSubmit">Sign in</button>
@@ -2431,12 +2445,17 @@ body.compact-todos .attn-detail{display:none}
           <div class="top-account-head-name" id="sessionFullName">Not signed in</div>
           <div class="top-account-head-meta payday"><span data-payday-label="1">Payday: Sunday, 9:00 AM</span></div>
         </div>
+        <button type="button" class="top-account-item" id="myFileBtn" role="menuitem">My file</button>
+        <button type="button" class="top-account-item" id="handbookBtn" role="menuitem">Handbook</button>
+        <button type="button" class="top-account-item" id="hoursDisputeBtn" role="menuitem">Hours dispute</button>
+        <button type="button" class="top-account-item" id="callOffBtn" role="menuitem">Call-off / time-off</button>
         <button type="button" class="top-account-item" id="syncNowBtn" role="menuitem">Sync desk</button>
+        <button type="button" class="top-account-item" id="pullSharedBtn" role="menuitem" data-mgmt-only>Pull shared desk</button>
         <button type="button" class="top-account-item" id="openSettingsBtn" role="menuitem" data-mgmt-only>Settings</button>
         <button type="button" class="top-account-item" id="helpShortcuts" role="menuitem" aria-haspopup="dialog" aria-controls="shortcutSheet">Keyboard shortcuts</button>
         <button type="button" class="top-account-item danger" id="logoutBtn" role="menuitem">Sign out</button>
         <div class="top-account-foot">
-          <span class="build-chip" title="Desk build">v17</span>
+          <span class="build-chip" title="Desk build">v25</span>
           <label class="top-jump-label" for="quickJump">Jump to</label>
           <select class="top-jump" id="quickJump" title="Jump to any tab">
             <option value="overview">Overview</option>
@@ -2481,6 +2500,8 @@ body.compact-todos .attn-detail{display:none}
           <button class="btn primary" type="button" id="copySundayRun">Copy Sunday run</button>
         </div>
         <div class="ov-cta-row">
+          <button class="btn soft" type="button" id="tipSettlementBtn">Tip settlement</button>
+          <button class="btn soft" type="button" id="clockLogBtn">Clock / radio</button>
           <button class="btn soft" type="button" id="previewSundayRun">Preview</button>
           <button class="btn" type="button" id="closePeriod">Close &amp; roll</button>
         </div>
@@ -2653,6 +2674,7 @@ body.compact-todos .attn-detail{display:none}
   <div class="header">
     <div><div class="eyebrow">Recruitment</div><h1 class="title" id="title-hiring">Hiring</h1><div class="subtitle">Application → interview → offer → hire → contract → packet → account login.</div></div>
     <div class="actions hire-forms">
+      <button class="btn soft" id="interviewBoardBtn">Interview board</button>
       <button class="btn soft" id="importReplyBtn">Import reply</button>
       <button class="btn primary" id="addApp">New application</button>
     </div>
@@ -2982,7 +3004,8 @@ body.compact-todos .attn-detail{display:none}
   </div>
   <div class="compact-banner">Week of <b id="shiftWeekLabel">—</b> · radio 10-1 in / 10-2 out · Shift Lead posts coverage before open</div>
   <div class="tip-warn" id="coverageGapWarn" role="status" style="display:none">Coverage gaps this week.</div>
-  <div class="card"><div class="card-head"><b>Week board</b><span class="pill gray" id="shiftWeekPill">Week</span></div><div class="table-scroll"><table><thead><tr><th>Employee</th><th>Mon</th><th>Tue</th><th>Wed</th><th>Thu</th><th>Fri</th><th>Sat</th><th>Sun</th><th class="r">On</th></tr></thead><tbody id="shiftBoard"></tbody></table></div></div>
+  <div class="card"><div class="card-head"><b>Week board</b><span class="pill gray" id="shiftWeekPill">Week</span></div><div class="table-scroll"><table><thead><tr><th>Employee</th><th>Mon</th><th>Tue</th><th>Wed</th><th>Thu</th><th>Fri</th><th>Sat</th><th>Sun</th><th class="r">On</th></tr></thead><tbody id="shiftBoard"></tbody></table></div>
+  <div class="shift-cards" id="shiftCards"></div></div>
   <details class="fold" open>
     <summary>Availability &amp; coverage <span class="pill gray" id="availCount">0</span></summary>
     <div class="fold-body"><div class="avail-grid" id="availBoard"></div></div>
@@ -3306,6 +3329,17 @@ body.compact-todos .attn-detail{display:none}
       <summary>Discipline <span class="pill gray" id="empStrikePill">0</span></summary>
       <div class="fold-body"><div id="empStrikes" class="mini-note"></div></div>
     </details>
+    <details class="fold">
+      <summary>Uniforms &amp; assets <span class="pill gray" id="empAssetPill">0</span></summary>
+      <div class="fold-body">
+        <div id="empAssets"></div>
+        <div class="field-row" style="margin-top:8px" id="empAssetAddRow">
+          <div class="field"><label>Item</label><input id="assetItem" placeholder="e.g. Black apron"></div>
+          <div class="field"><label>Issued</label><input id="assetDate" type="date"></div>
+        </div>
+        <button class="btn tiny soft" type="button" id="addAssetBtn">Add asset</button>
+      </div>
+    </details>
     <details class="fold" open>
       <summary>Documents <span class="pill gray" id="empDocPill">0</span></summary>
       <div class="fold-body">
@@ -3316,6 +3350,7 @@ body.compact-todos .attn-detail{display:none}
             <span class="hint" id="empDocHint">Next: send contract, then packet, then account login.</span>
           </div>
           <div class="doc-next-actions">
+            <button class="btn tiny soft" id="promoteEmpBtn" type="button">Promote</button>
             <button class="btn tiny soft" id="sendEmpContract">Send contract</button>
             <button class="btn tiny soft" id="sendEmpPacket">Send packet</button>
             <button class="btn tiny soft" id="sendEmpLogin">Send account login</button>
@@ -3416,6 +3451,101 @@ body.compact-todos .attn-detail{display:none}
     <button class="btn" id="cancelApp">Cancel</button>
     <button class="btn primary" id="saveApp">Save application</button>
   </div>
+</div></div>
+
+
+<!-- Hours dispute modal -->
+<div class="modal" id="disputeModal" role="dialog" aria-modal="true" hidden><div class="dialog" role="document" tabindex="-1">
+  <h2>Hours dispute</h2>
+  <div class="dialog-scroll">
+    <p class="ui-hint">Tell HR what looks wrong on your hours. They will see it on the to-do desk.</p>
+    <div class="field"><label>Period</label><select id="disputePeriod"></select></div>
+    <div class="field"><label>What is wrong?</label><textarea id="disputeNote" rows="4" placeholder="e.g. I worked Thursday bar but hours show 0"></textarea></div>
+  </div>
+  <div class="dialog-foot"><button class="btn" id="cancelDispute">Cancel</button><button class="btn primary" id="saveDispute">Submit dispute</button></div>
+</div></div>
+
+<!-- Call-off / time-off modal -->
+<div class="modal" id="timeOffModal" role="dialog" aria-modal="true" hidden><div class="dialog" role="document" tabindex="-1">
+  <h2>Call-off / time-off</h2>
+  <div class="dialog-scroll">
+    <div class="field-row">
+      <div class="field"><label>Type</label><select id="toType"><option value="calloff">Call-off</option><option value="timeoff">Time-off</option></select></div>
+      <div class="field"><label>Start date</label><input id="toStart" type="date"></div>
+    </div>
+    <div class="field"><label>End date (optional)</label><input id="toEnd" type="date"></div>
+    <div class="field"><label>Reason</label><textarea id="toReason" rows="3" placeholder="Why you need the day"></textarea></div>
+    <div id="timeOffInbox" class="roadmap-panel" style="display:none"><h3>Pending requests</h3><div id="timeOffList"></div></div>
+  </div>
+  <div class="dialog-foot"><button class="btn" id="cancelTimeOff">Cancel</button><button class="btn primary" id="saveTimeOff">Submit</button></div>
+</div></div>
+
+<!-- Clock / radio log modal -->
+<div class="modal" id="clockModal" role="dialog" aria-modal="true" hidden><div class="dialog wide" role="document" tabindex="-1">
+  <h2>Clock / radio log</h2>
+  <div class="dialog-scroll">
+    <div class="field-row">
+      <div class="field"><label>Employee</label><select id="clkEmp"></select></div>
+      <div class="field"><label>Date</label><input id="clkDate" type="date"></div>
+    </div>
+    <div class="field-row">
+      <div class="field"><label>Mark</label><select id="clkMark"><option value="10-1">10-1 (in)</option><option value="10-2">10-2 (out)</option><option value="note">Note</option></select></div>
+      <div class="field"><label>Note</label><input id="clkNote" placeholder="Optional"></div>
+    </div>
+    <div class="dialog-foot" style="border:0;padding-top:0;margin:0 0 12px"><button class="btn primary" id="addClockEntry" type="button">Add entry</button>
+      <button class="btn soft" id="applyClockHours" type="button">Apply pairs to open period</button></div>
+    <div id="clockList"></div>
+  </div>
+  <div class="dialog-foot"><button class="btn" id="closeClock">Close</button></div>
+</div></div>
+
+<!-- Interview board modal -->
+<div class="modal" id="interviewBoardModal" role="dialog" aria-modal="true" hidden><div class="dialog wide" role="document" tabindex="-1">
+  <h2>Interview board</h2>
+  <div class="dialog-scroll">
+    <div class="toolbar filter-rail" style="margin-bottom:10px">
+      <select id="ivFilter"><option value="week">This week</option><option value="today">Today</option><option value="all">All upcoming</option></select>
+    </div>
+    <div id="interviewBoardList"></div>
+  </div>
+  <div class="dialog-foot"><button class="btn" id="closeInterviewBoard">Close</button></div>
+</div></div>
+
+<!-- Tip settlement modal -->
+<div class="modal" id="tipSettleModal" role="dialog" aria-modal="true" hidden><div class="dialog wide" role="document" tabindex="-1">
+  <h2>Sunday tip settlement</h2>
+  <div class="dialog-scroll">
+    <div id="tipSettleBody"></div>
+  </div>
+  <div class="dialog-foot">
+    <button class="btn soft" id="copyTipSettle">Copy Discord</button>
+    <button class="btn soft" id="printTipSettle">Print</button>
+    <button class="btn" id="closeTipSettle">Close</button>
+  </div>
+</div></div>
+
+<!-- Promote modal -->
+<div class="modal" id="promoteModal" role="dialog" aria-modal="true" hidden><div class="dialog" role="document" tabindex="-1">
+  <h2>Promote / role change</h2>
+  <div class="dialog-scroll">
+    <div class="field"><label>Employee</label><select id="promoEmp"></select></div>
+    <div class="field"><label>New role</label><select id="promoRole"></select></div>
+    <div class="field"><label>New rate</label><input id="promoRate" type="number" min="0" step="1"></div>
+    <div class="field"><label>Effective</label><input id="promoDate" type="date"></div>
+    <div class="field"><label>Note</label><textarea id="promoNote" rows="2"></textarea></div>
+  </div>
+  <div class="dialog-foot"><button class="btn" id="cancelPromote">Cancel</button><button class="btn primary" id="savePromote">Save promotion</button></div>
+</div></div>
+
+<!-- Shared desk pull modal -->
+<div class="modal" id="sharedPullModal" role="dialog" aria-modal="true" hidden><div class="dialog" role="document" tabindex="-1">
+  <h2>Pull shared desk</h2>
+  <div class="dialog-scroll">
+    <p class="ui-hint">Paste a shared desk JSON pack or a raw URL. A snapshot is taken first. Highest rev wins.</p>
+    <div class="field"><label>Raw URL (optional)</label><input id="sharedUrl" placeholder="https://…/desk.json"></div>
+    <div class="field"><label>Or paste JSON</label><textarea id="sharedPaste" rows="8" placeholder="{ … }"></textarea></div>
+  </div>
+  <div class="dialog-foot"><button class="btn" id="cancelSharedPull">Cancel</button><button class="btn primary" id="confirmSharedPull">Pull &amp; apply</button></div>
 </div></div>
 
 <!-- Event modal -->
@@ -3715,7 +3845,7 @@ body.compact-todos .attn-detail{display:none}
 <!-- Changelog -->
 <div class="modal" id="changelogModal" role="dialog" aria-modal="true" aria-labelledby="changelogTitle" hidden>
   <div class="dialog xl" role="document" tabindex="-1">
-    <h2 id="changelogTitle">Desk build v11 — realtime sync + improvements</h2>
+    <h2 id="changelogTitle">Desk build changelog</h2>
     <div class="upgrade-grid" id="upgradeGrid"></div>
     <div class="dialog-foot"><button type="button" class="btn primary" id="closeChangelog">Got it</button></div>
   </div>
@@ -3740,6 +3870,7 @@ body.compact-todos .attn-detail{display:none}
     </div>
     <div class="field"><label>Tip-eligible roles (comma-separated)</label><input id="setTipRoles" placeholder="Waiter, Hostess, Cook"></div>
     <div class="field"><label>High-hours warning threshold</label><input id="setOtHours" type="number" min="1" step="0.5" value="40"></div>
+    <div class="field"><label>Stay-logged-in days</label><select id="setSessionDays"><option value="1">1</option><option value="7">7</option><option value="14" selected>14</option><option value="30">30</option></select></div>
     <label class="checkline"><input type="checkbox" id="setQuietMode"><span>Quiet mode (less motion / hover)</span></label>
     <label class="checkline"><input type="checkbox" id="setRequireNotes"><span>Warn if closing period without notes</span></label>
     <label class="checkline"><input type="checkbox" id="setCompactTodos"><span>Compact to-do rows by default</span></label>
@@ -3802,7 +3933,7 @@ const LOG_TYPES = {
 };
 const TIP_ROLES_DEFAULT = ['Waiter', 'Hostess', 'Cook'];
 const TIP_ROLES = TIP_ROLES_DEFAULT; /* legacy alias — use tipRoles() */
-const DESK_BUILD = 'v17';
+const DESK_BUILD = 'v25';
 const HOUSE_LOGIN_PASSWORD = 'frenchies636';
 const SESSION_KEY = 'frenchies_desk_session';
 const SESSION_DURABLE_KEY = 'frenchies_desk_session_durable';
@@ -4130,6 +4261,9 @@ function normalizeEmployee(e, fallbackDate) {
   if (!e.hireCycleStartedAt) e.hireCycleStartedAt = e.hire || fallbackDate;
   if (!('paperCycleClosedAt' in e)) e.paperCycleClosedAt = e.paperCycleClosedAt || '';
   e.paperArchive = Array.isArray(e.paperArchive) ? e.paperArchive : [];
+  e.assets = Array.isArray(e.assets) ? e.assets : [];
+  if (!('loginSessionEpoch' in e)) e.loginSessionEpoch = 1;
+  if (!('handbookAckAt' in e)) e.handbookAckAt = e.handbookAckAt || '';
   if (MGMT_ROLES.indexOf(e.role) >= 0 && e.status === 'active' && !e.loginAccess) {
     e.loginAccess = true;
     e.loginGrantedAt = e.loginGrantedAt || (e.hire || today());
@@ -4297,6 +4431,12 @@ function migrate(raw) {
   })).filter(t => t.text) : [];
   out.todoDismissed = (raw.todoDismissed && typeof raw.todoDismissed === 'object') ? { ...raw.todoDismissed } : {};
   out.todoSnoozed = (raw.todoSnoozed && typeof raw.todoSnoozed === 'object') ? { ...raw.todoSnoozed } : {};
+  out.disputes = Array.isArray(raw.disputes) ? raw.disputes : [];
+  out.timeOff = Array.isArray(raw.timeOff) ? raw.timeOff : [];
+  out.clockLog = Array.isArray(raw.clockLog) ? raw.clockLog : [];
+  out.nextDisputeId = Number(raw.nextDisputeId || 1);
+  out.nextTimeOffId = Number(raw.nextTimeOffId || 1);
+  out.nextClockId = Number(raw.nextClockId || 1);
   out.settings = (raw.settings && typeof raw.settings === 'object') ? Object.assign({}, raw.settings) : {};
   if (!out.meta || typeof out.meta !== 'object') out.meta = {};
   out.meta.rev = Number((raw.meta && raw.meta.rev) || out.meta.rev || 0);
@@ -4425,6 +4565,14 @@ function ensureMeta() {
   if (!s.todoSnoozed || typeof s.todoSnoozed !== 'object') s.todoSnoozed = {};
   if (!Array.isArray(s.expenses)) s.expenses = [];
   if (!s.nextExpenseId) s.nextExpenseId = 1;
+  if (!Array.isArray(s.disputes)) s.disputes = [];
+  if (!Array.isArray(s.timeOff)) s.timeOff = [];
+  if (!Array.isArray(s.clockLog)) s.clockLog = [];
+  if (!s.nextDisputeId) s.nextDisputeId = 1;
+  if (!s.nextTimeOffId) s.nextTimeOffId = 1;
+  if (!s.nextClockId) s.nextClockId = 1;
+  if (!s.settings || typeof s.settings !== 'object') s.settings = {};
+  if (!('sessionDays' in s.settings)) s.settings.sessionDays = 14;
   if (!s.settings || typeof s.settings !== 'object') s.settings = {};
   const set = s.settings;
   if (!set.paydayLabel) set.paydayLabel = 'Sunday, 9:00 AM';
@@ -5500,6 +5648,7 @@ function resetEmpLoginPassword(e, reason) {
   if (!e) return false;
   e.loginPassword = '';
   e.loginPasswordSetAt = '';
+  bumpLoginSessionEpoch(e);
   pushEmpLog(e, {
     type: 'status',
     summary: 'Desk password reset',
@@ -5526,7 +5675,8 @@ function setLoginGateMode(mode) {
     setTimeout(() => { try { $('loginUser').focus(); } catch (err) {} }, 40);
   }
 }
-function enterDeskSession(e) {
+function enterDeskSession(e, opts) {
+  opts = opts || {};
   ensureEmpLoginUsername(e);
   sessionUser = {
     empId: e.id,
@@ -5536,6 +5686,12 @@ function enterDeskSession(e) {
   };
   pendingPasswordEmpId = null;
   persistSession(sessionUser);
+  if (opts.stay !== false) {
+    const stayEl = $('loginStay');
+    const stay = stayEl ? !!stayEl.checked : true;
+    if (stay || opts.forceDurable) persistDurableSession(sessionUser);
+    else clearDurableSession();
+  }
   applySessionChrome();
   const start = canAccessView('overview') ? 'overview' : (viewsForSession() || ['overview'])[0];
   activateView(start, { focusView: true });
@@ -5559,7 +5715,7 @@ function completePasswordSetup(pass1, pass2) {
     detail: 'First-time password setup complete'
   });
   save();
-  enterDeskSession(e);
+  enterDeskSession(e, { forceDurable: true });
   return { ok: true, emp: e };
 }
 function viewsForSession() {
@@ -5759,6 +5915,7 @@ function logoutDesk() {
   sessionUser = null;
   pendingPasswordEmpId = null;
   persistSession(null);
+  clearDurableSession();
   applySessionChrome();
   if ($('loginUser')) $('loginUser').value = '';
   if ($('loginPass')) $('loginPass').value = '';
@@ -5893,7 +6050,38 @@ function buildTodos() {
     }
   }
 
-  /* New-hire paperwork — contract/packet for any non-terminated staff missing them; onboarding/probation for probation only */
+  
+  (s.disputes || []).filter(d => d.status === 'open').forEach(d => {
+    if (isStaffSession() && sessionUser && String(d.empId) !== String(sessionUser.empId)) return;
+    push({
+      id: 'dispute-open-' + d.id,
+      title: 'Hours dispute — ' + (d.name || 'staff'),
+      detail: (d.periodLabel || '') + ' · ' + (d.note || ''),
+      tone: 'warn',
+      priority: 3,
+      due: d.created || today(),
+      action: (canMutateDesk() || isLeadSession()) ? { label: 'Resolve', run: () => resolveDispute(d.id, true) } : null
+    });
+  });
+  (s.timeOff || []).filter(t => t.status === 'pending').forEach(t => {
+    if (isStaffSession() && sessionUser && String(t.empId) !== String(sessionUser.empId)) return;
+    if (isStaffSession()) {
+      push({ id: 'timeoff-mine-' + t.id, title: 'Your ' + t.type + ' pending', detail: t.start + ' — ' + (t.reason || ''), tone: 'warn', priority: 2, due: t.created || today() });
+      return;
+    }
+    if (!canEditHours()) return;
+    push({
+      id: 'timeoff-pending-' + t.id,
+      title: 'Time-off request — ' + (t.name || 'staff'),
+      detail: t.start + (t.end && t.end !== t.start ? ' → ' + t.end : '') + ' · ' + (t.reason || ''),
+      tone: 'warn',
+      priority: 2,
+      due: t.created || today(),
+      action: { label: 'Review', run: () => openTimeOffModal() }
+    });
+  });
+
+/* New-hire paperwork — contract/packet for any non-terminated staff missing them; onboarding/probation for probation only */
   (s.employees || []).filter(e => e.status !== 'terminated').forEach(e => {
     const a = appForEmployee(e);
     const onProbation = e.status === 'probation';
@@ -6208,7 +6396,20 @@ function buildTodos() {
     if (!!a.pinned !== !!b.pinned) return a.pinned ? -1 : 1;
     return (b.priority || 0) - (a.priority || 0) || String(a.title || '').localeCompare(String(b.title || ''));
   });
-  return items;
+  
+  if (isStaffSession() && sessionUser) {
+    items = items.filter(it => {
+      const id = String(it.id || '');
+      if (id.indexOf('dispute-open-') === 0) return true;
+      if (id.indexOf('timeoff-mine-') === 0) return true;
+      if (/sunday|payday|handbook/i.test(it.title || '')) return true;
+      if (it.manualId) return true;
+      if (/unpaid|tip pool|backup|license|close period|hire|contract|packet|login sheet/i.test(it.title || '')) return false;
+      return false;
+    });
+  }
+
+return items;
 }
 
 const TODO_GROUPS = [
@@ -6811,9 +7012,22 @@ function saveSettings() {
 function openChangelog() {
   const grid = $('upgradeGrid');
   if (grid) {
-    const v11 = V11_IMPROVEMENTS.map((t, i) => '<div class="upgrade-item"><b>v11.' + (i + 1) + ' ' + esc(t) + '</b>Realtime desk</div>').join('');
-    const v9 = UPGRADE_LIST.map((t, i) => '<div class="upgrade-item"><b>' + (i + 1) + '. ' + esc(t) + '</b>Earlier upgrade</div>').join('');
-    grid.innerHTML = v11 + v9;
+    const recent = [
+      ['v25', 'Sunday tip settlement sheet — Discord + print'],
+      ['v24', 'Interview schedule board with Discord reminders'],
+      ['v23', 'Call-off / time-off requests with board marks'],
+      ['v22', 'Stay logged in on this device (durable session)'],
+      ['v21', 'Changelog aligned · mobile shift cards · import confirm'],
+      ['v20', 'Shared desk pack publish/pull · password redaction'],
+      ['v19', 'Clock/radio log · promotions · uniforms/assets · Host station'],
+      ['v18', 'My file · hours disputes · handbook hub · staff-safe todos'],
+      ['v17', 'Staff/lead permission lockdown on mutate paths'],
+      ['v16', 'Log event modal scroll + layout polish'],
+      ['v15', 'No duplicate hire paperwork · hire cycles'],
+      ['v14', 'Login reply import filed to the right employee']
+    ].map(([v, t]) => '<div class="upgrade-item"><b>' + esc(v) + '</b>' + esc(t) + '</div>').join('');
+    const v11 = V11_IMPROVEMENTS.map((t, i) => '<div class="upgrade-item"><b>v11.' + (i + 1) + '</b>' + esc(t) + '</div>').join('');
+    grid.innerHTML = recent + v11;
   }
   $('changelogModal').classList.add('open');
   $('changelogModal').removeAttribute('hidden');
@@ -8213,6 +8427,13 @@ function renderShifts() {
     }
   }
   renderAvailabilityBoard();
+  if ($('shiftCards')) {
+    $('shiftCards').innerHTML = list.length ? list.map(e => {
+      const row = week[e.id] || ['Off','Off','Off','Off','Off','Off','Off'];
+      return '<div class="roadmap-panel"><b>' + esc(e.name) + '</b><div class="history">' + esc(e.role) + '</div>' +
+        DAY_NAMES.map((d,i) => '<div class="history">' + esc(d) + ': ' + esc(row[i] || 'Off') + '</div>').join('') + '</div>';
+    }).join('') : '';
+  }
 }
 
 function availabilityFromFormData(fd) {
@@ -11848,6 +12069,7 @@ function renderEmployeeFile(e) {
       $('openHirePapersBtn').style.display = 'none';
     }
   }
+  try { renderEmpAssets(e); } catch (err) {}
   restoreEmpFolds(e.id);
 }
 
@@ -13936,11 +14158,13 @@ $('exportActivity').onclick = () => {
 $('importJson').onclick = () => {
   const f = $('importFile').files[0];
   if (!f) return toast('Choose a JSON file first');
+  if (!confirm('Replace the entire office file with this backup? A local snapshot will be kept first.')) return;
   const reader = new FileReader();
   reader.onload = () => {
     try {
       const data = migrate(JSON.parse(reader.result));
       if (!data || !data.employees) throw new Error('bad file');
+      pushSnapshot('pre-import');
       s = data;
       ensureMeta();
       notesDirty = false;
@@ -13986,6 +14210,11 @@ ensureMeta();
 save({ skipRevBump: true, silentBroadcast: true, skipSnapshot: true, skipRevCheck: true });
 initRealtimeSync();
 sessionUser = loadSession();
+if (!sessionUser) {
+  const dur = loadDurableSession();
+  if (dur) sessionUser = dur;
+}
+
 applySessionChrome();
 if ($('loginSignInPanel')) {
   $('loginSignInPanel').onsubmit = (ev) => {
@@ -14015,6 +14244,52 @@ if ($('setupCancel')) {
   };
 }
 if ($('logoutBtn')) $('logoutBtn').onclick = () => logoutDesk();
+
+if ($('myFileBtn')) $('myFileBtn').onclick = () => { openMyFile(); const m=$('accountMenu'); if(m) m.removeAttribute('open'); };
+if ($('handbookBtn')) $('handbookBtn').onclick = () => { openHandbookHub(); const m=$('accountMenu'); if(m) m.removeAttribute('open'); };
+if ($('hoursDisputeBtn')) $('hoursDisputeBtn').onclick = () => { openDisputeModal(); const m=$('accountMenu'); if(m) m.removeAttribute('open'); };
+if ($('callOffBtn')) $('callOffBtn').onclick = () => { openTimeOffModal(); const m=$('accountMenu'); if(m) m.removeAttribute('open'); };
+if ($('pullSharedBtn')) $('pullSharedBtn').onclick = () => { pullSharedDesk(); const m=$('accountMenu'); if(m) m.removeAttribute('open'); };
+if ($('cancelDispute')) $('cancelDispute').onclick = () => $('disputeModal').classList.remove('open');
+if ($('saveDispute')) $('saveDispute').onclick = () => submitDispute();
+if ($('cancelTimeOff')) $('cancelTimeOff').onclick = () => $('timeOffModal').classList.remove('open');
+if ($('saveTimeOff')) $('saveTimeOff').onclick = () => submitTimeOff();
+if ($('clockLogBtn')) $('clockLogBtn').onclick = () => openClockModal();
+if ($('closeClock')) $('closeClock').onclick = () => $('clockModal').classList.remove('open');
+if ($('addClockEntry')) $('addClockEntry').onclick = () => addClockEntry();
+if ($('applyClockHours')) $('applyClockHours').onclick = () => applyClockHoursToPeriod();
+if ($('interviewBoardBtn')) $('interviewBoardBtn').onclick = () => openInterviewBoard();
+if ($('closeInterviewBoard')) $('closeInterviewBoard').onclick = () => $('interviewBoardModal').classList.remove('open');
+if ($('ivFilter')) $('ivFilter').onchange = () => openInterviewBoard();
+if ($('tipSettlementBtn')) $('tipSettlementBtn').onclick = () => openTipSettlement();
+if ($('closeTipSettle')) $('closeTipSettle').onclick = () => $('tipSettleModal').classList.remove('open');
+if ($('copyTipSettle')) $('copyTipSettle').onclick = () => copyText(tipSettlementDiscord(), 'Tip settlement copied');
+if ($('printTipSettle')) $('printTipSettle').onclick = () => {
+  const data = tipSettlementLines();
+  printOfficeHtml('Tip settlement — ' + label(data.p), $('tipSettleBody').innerHTML);
+};
+if ($('promoteEmpBtn')) $('promoteEmpBtn').onclick = () => openPromoteModal(editId);
+if ($('cancelPromote')) $('cancelPromote').onclick = () => $('promoteModal').classList.remove('open');
+if ($('savePromote')) $('savePromote').onclick = () => savePromotion();
+if ($('promoEmp')) $('promoEmp').onchange = () => {
+  const e = empById(Number($('promoEmp').value));
+  if (!e) return;
+  roleOptions($('promoRole'), e.role);
+  $('promoRate').value = e.rate;
+};
+if ($('addAssetBtn')) $('addAssetBtn').onclick = () => addEmpAsset();
+if ($('publishSharedBtn')) $('publishSharedBtn').onclick = () => publishSharedPack();
+if ($('cancelSharedPull')) $('cancelSharedPull').onclick = () => $('sharedPullModal').classList.remove('open');
+if ($('confirmSharedPull')) $('confirmSharedPull').onclick = () => confirmSharedPull();
+if ($('setSessionDays')) {
+  $('setSessionDays').value = String(sessionDaysSetting());
+  $('setSessionDays').onchange = () => {
+    ensureMeta();
+    s.settings.sessionDays = Number($('setSessionDays').value) || 14;
+    save(); toast('Stay-logged-in length saved');
+  };
+}
+
 (function bootNav() {
   if (!sessionUser || pendingPasswordEmpId) {
     setTimeout(() => {
@@ -14038,6 +14313,478 @@ if ($('ovTipMode')) $('ovTipMode').value = (s.settings && s.settings.tipMode) ||
 document.querySelectorAll('#view-hiring details.fold').forEach(fold => {
   fold.addEventListener('toggle', () => { fold.dataset.userToggle = '1'; });
 });
+
+
+/* =====================================================
+   ROADMAP v18–v25 FEATURES
+===================================================== */
+function openMyFile() {
+  if (!sessionUser) return toast('Sign in first');
+  editEmployee(sessionUser.empId);
+}
+function openHandbookHub() {
+  goView('compliance');
+  setTimeout(() => {
+    const folds = document.querySelectorAll('#view-compliance details.fold');
+    folds.forEach(f => {
+      const sum = f.querySelector('summary');
+      if (sum && /handbook/i.test(sum.textContent || '')) f.open = true;
+    });
+    const ack = sessionEmp();
+    if (ack && !ack.handbookAckAt && confirm('Mark payday handbook rules as read?')) {
+      ack.handbookAckAt = today();
+      pushEmpLog(ack, { type: 'note', summary: 'Handbook payday rules acknowledged', detail: 'Self-service' });
+      save(); toast('Handbook acknowledged');
+    }
+  }, 80);
+}
+
+function openDisputeModal() {
+  if (!sessionUser) return toast('Sign in first');
+  const sel = $('disputePeriod');
+  if (sel) {
+    sel.innerHTML = s.periods.map((p, i) => '<option value="' + i + '"' + (i === selectedPeriodIndex() ? ' selected' : '') + '>' + esc(label(p)) + '</option>').join('');
+  }
+  if ($('disputeNote')) $('disputeNote').value = '';
+  $('disputeModal').classList.add('open');
+}
+function submitDispute() {
+  ensureMeta();
+  const e = sessionEmp();
+  if (!e) return toast('Sign in first');
+  const note = ($('disputeNote') && $('disputeNote').value || '').trim();
+  if (!note) return toast('Describe what is wrong');
+  const pi = Number(($('disputePeriod') && $('disputePeriod').value) || 0);
+  const p = s.periods[pi] || workingPeriod();
+  s.disputes.unshift({
+    id: s.nextDisputeId++,
+    empId: e.id,
+    name: e.name,
+    periodId: p ? p.id : null,
+    periodLabel: p ? shortLabel(p) : '',
+    note,
+    status: 'open',
+    created: today()
+  });
+  pushEmpLog(e, { type: 'note', summary: 'Hours dispute filed', detail: note });
+  log('Hours dispute from ' + e.name + ' — ' + (p ? shortLabel(p) : 'period'));
+  save();
+  $('disputeModal').classList.remove('open');
+  toast('Dispute sent to HR');
+}
+window.resolveDispute = function (id, ok) {
+  if (!canMutateDesk() && !isLeadSession()) return toast('Leads/HR only');
+  ensureMeta();
+  const d = s.disputes.find(x => String(x.id) === String(id));
+  if (!d) return;
+  d.status = ok ? 'resolved' : 'denied';
+  d.resolvedAt = today();
+  const e = empById(d.empId);
+  if (e) pushEmpLog(e, { type: 'note', summary: 'Hours dispute ' + d.status, detail: d.note });
+  save(); render(); toast('Dispute ' + d.status);
+};
+
+function openTimeOffModal() {
+  if (!sessionUser) return toast('Sign in first');
+  if ($('toStart')) $('toStart').value = today();
+  if ($('toEnd')) $('toEnd').value = '';
+  if ($('toReason')) $('toReason').value = '';
+  if ($('toType')) $('toType').value = 'calloff';
+  const inbox = $('timeOffInbox');
+  const list = $('timeOffList');
+  if (inbox && list) {
+    const showMgmt = canEditHours();
+    inbox.style.display = showMgmt ? '' : 'none';
+    if (showMgmt) {
+      const pending = (s.timeOff || []).filter(t => t.status === 'pending');
+      list.innerHTML = pending.length ? pending.map(t => {
+        const e = empById(t.empId);
+        return '<div class="co-row"><div><b>' + esc((e && e.name) || t.name) + '</b> · ' + esc(t.type) +
+          '<div class="history">' + esc(t.start) + (t.end && t.end !== t.start ? ' → ' + esc(t.end) : '') +
+          ' — ' + esc(t.reason || '') + '</div></div>' +
+          '<div><button class="btn tiny primary" onclick="resolveTimeOff(' + t.id + ',true)">Approve</button> ' +
+          '<button class="btn tiny" onclick="resolveTimeOff(' + t.id + ',false)">Deny</button></div></div>';
+      }).join('') : '<div class="mini-note">No pending requests.</div>';
+    }
+  }
+  $('timeOffModal').classList.add('open');
+}
+function submitTimeOff() {
+  ensureMeta();
+  const e = sessionEmp();
+  if (!e) return toast('Sign in first');
+  const start = ($('toStart') && $('toStart').value) || today();
+  const end = ($('toEnd') && $('toEnd').value) || start;
+  const reason = ($('toReason') && $('toReason').value || '').trim();
+  const type = ($('toType') && $('toType').value) || 'calloff';
+  if (!reason) return toast('Add a reason');
+  s.timeOff.unshift({
+    id: s.nextTimeOffId++, empId: e.id, name: e.name, type, start, end, reason,
+    status: 'pending', created: today()
+  });
+  pushEmpLog(e, { type: 'note', summary: (type === 'calloff' ? 'Call-off' : 'Time-off') + ' requested', detail: start + (end !== start ? ' → ' + end : '') + ' — ' + reason });
+  log((type === 'calloff' ? 'Call-off' : 'Time-off') + ' request from ' + e.name);
+  save();
+  $('timeOffModal').classList.remove('open');
+  toast('Request submitted');
+}
+window.resolveTimeOff = function (id, ok) {
+  if (!canEditHours()) return toast('Leads and management only');
+  ensureMeta();
+  const t = s.timeOff.find(x => String(x.id) === String(id));
+  if (!t) return;
+  t.status = ok ? 'approved' : 'denied';
+  t.resolvedAt = today();
+  const e = empById(t.empId);
+  if (e) {
+    pushEmpLog(e, { type: 'note', summary: (t.type === 'calloff' ? 'Call-off' : 'Time-off') + ' ' + t.status, detail: t.start + ' — ' + (t.reason || '') });
+  }
+  /* Mark board Off for approved dates in current week when possible */
+  if (ok && e) {
+    ensureMeta();
+    if (!s.shifts[shiftWeek]) s.shifts[shiftWeek] = {};
+    if (!s.shifts[shiftWeek][e.id]) s.shifts[shiftWeek][e.id] = ['Off','Off','Off','Off','Off','Off','Off'];
+    const start = new Date(shiftWeek + 'T00:00:00');
+    for (let i = 0; i < 7; i++) {
+      const d = new Date(start); d.setDate(start.getDate() + i);
+      const iso = d.getFullYear() + '-' + String(d.getMonth()+1).padStart(2,'0') + '-' + String(d.getDate()).padStart(2,'0');
+      if (iso >= t.start && iso <= (t.end || t.start)) s.shifts[shiftWeek][e.id][i] = 'Off';
+    }
+  }
+  save(); render(); openTimeOffModal(); toast(ok ? 'Approved' : 'Denied');
+};
+
+function openClockModal() {
+  if (!canEditHours()) return toast('Leads and management only');
+  ensureMeta();
+  if ($('clkEmp')) {
+    $('clkEmp').innerHTML = activeEmployees().map(e => '<option value="' + e.id + '">' + esc(e.name) + '</option>').join('');
+  }
+  if ($('clkDate')) $('clkDate').value = today();
+  if ($('clkNote')) $('clkNote').value = '';
+  renderClockList();
+  $('clockModal').classList.add('open');
+}
+function renderClockList() {
+  ensureMeta();
+  const root = $('clockList');
+  if (!root) return;
+  const rows = (s.clockLog || []).slice(0, 40);
+  root.innerHTML = rows.length ? rows.map(c => {
+    const e = empById(c.empId);
+    return '<div class="clk-row"><div><b>' + esc((e && e.name) || c.name || '—') + '</b> · ' + esc(c.mark) +
+      '<div class="history">' + esc(c.date) + (c.note ? ' — ' + esc(c.note) : '') + '</div></div></div>';
+  }).join('') : '<div class="mini-note">No clock entries yet.</div>';
+}
+function addClockEntry() {
+  ensureMeta();
+  if (!canEditHours()) return;
+  const empId = Number($('clkEmp') && $('clkEmp').value);
+  const e = empById(empId);
+  if (!e) return toast('Pick staff');
+  s.clockLog.unshift({
+    id: s.nextClockId++, empId, name: e.name,
+    date: ($('clkDate') && $('clkDate').value) || today(),
+    mark: ($('clkMark') && $('clkMark').value) || '10-1',
+    note: ($('clkNote') && $('clkNote').value) || '',
+    at: new Date().toISOString()
+  });
+  save(); renderClockList(); toast('Logged ' + e.name);
+}
+function applyClockHoursToPeriod() {
+  ensureMeta();
+  if (!canEditHours()) return;
+  const p = workingPeriod();
+  if (!p || p.status !== 'open') return toast('No open period');
+  /* Pair 10-1 / 10-2 same day → +hours estimate 1h minimum placeholder count of pairs */
+  const byEmp = {};
+  (s.clockLog || []).forEach(c => {
+    if (!byEmp[c.empId]) byEmp[c.empId] = [];
+    byEmp[c.empId].push(c);
+  });
+  let n = 0;
+  Object.keys(byEmp).forEach(id => {
+    const list = byEmp[id].slice().reverse();
+    let openIn = null;
+    let hours = 0;
+    list.forEach(c => {
+      if (c.mark === '10-1') openIn = c;
+      if (c.mark === '10-2' && openIn && openIn.date === c.date) {
+        hours += 1; /* RP-friendly: each pair = 1 hour unless note says more */
+        openIn = null;
+      }
+    });
+    if (hours > 0) {
+      const e = empById(id);
+      if (!p.entries[id]) p.entries[id] = emptyEntry(e);
+      p.entries[id].hours = Number(p.entries[id].hours || 0) + hours;
+      n++;
+    }
+  });
+  save(); render(); toast(n ? ('Applied clock pairs for ' + n + ' staff') : 'No 10-1/10-2 pairs to apply');
+}
+
+function openPromoteModal(empId) {
+  if (!requireMgmt('Promote')) return;
+  const sel = $('promoEmp');
+  if (sel) {
+    sel.innerHTML = activeEmployees().map(e => '<option value="' + e.id + '"' + (String(e.id) === String(empId || '') ? ' selected' : '') + '>' + esc(e.name) + '</option>').join('');
+  }
+  const e = empById(($('promoEmp') && $('promoEmp').value) || empId);
+  roleOptions($('promoRole'), e ? e.role : 'Waiter');
+  if ($('promoRate')) $('promoRate').value = e ? e.rate : 3000;
+  if ($('promoDate')) $('promoDate').value = today();
+  if ($('promoNote')) $('promoNote').value = '';
+  $('promoteModal').classList.add('open');
+}
+function savePromotion() {
+  if (!requireMgmt('Promote')) return;
+  const e = empById(Number($('promoEmp').value));
+  if (!e) return;
+  const role = $('promoRole').value;
+  const rate = Number($('promoRate').value) || e.rate;
+  const when = ($('promoDate') && $('promoDate').value) || today();
+  const note = ($('promoNote') && $('promoNote').value) || '';
+  const fromRole = e.role, fromRate = e.rate;
+  e.role = role;
+  e.rate = rate;
+  pushEmpLog(e, { type: 'role', summary: roleMoveLabel(fromRole, role) + ': ' + fromRole + ' → ' + role, from: fromRole, to: role, detail: note || ('Effective ' + when) });
+  if (Number(fromRate) !== Number(rate)) {
+    pushEmpLog(e, { type: 'rate', summary: 'Rate: ' + money(fromRate) + ' → ' + money(rate), from: fromRate, to: rate, amount: rate - fromRate, detail: note || 'Promotion' });
+  }
+  log(e.name + ' promoted ' + fromRole + ' → ' + role);
+  save();
+  $('promoteModal').classList.remove('open');
+  toast(e.name + ' → ' + role);
+  copyText("Frenchie's HR — " + e.name + ' is now ' + role + ' effective ' + when + (note ? ' — ' + note : ''), 'Promotion Discord blurb copied');
+}
+
+function renderEmpAssets(e) {
+  const root = $('empAssets');
+  if (!root || !e) return;
+  e.assets = e.assets || [];
+  if ($('empAssetPill')) $('empAssetPill').textContent = String(e.assets.length);
+  root.innerHTML = e.assets.length ? e.assets.map((a, i) =>
+    '<div class="co-row"><div><b>' + esc(a.item) + '</b><div class="history">Issued ' + esc(a.date || '—') + (a.returned ? ' · returned ' + esc(a.returned) : '') + '</div></div>' +
+    (canMutateDesk() ? '<button class="btn tiny" onclick="returnAsset(' + e.id + ',' + i + ')">' + (a.returned ? 'Clear return' : 'Mark returned') + '</button>' : '') + '</div>'
+  ).join('') : '<div class="mini-note">No uniforms or assets issued.</div>';
+  if ($('empAssetAddRow')) $('empAssetAddRow').style.display = canMutateDesk() ? '' : 'none';
+  if ($('addAssetBtn')) $('addAssetBtn').style.display = canMutateDesk() ? '' : 'none';
+  if ($('assetDate') && !$('assetDate').value) $('assetDate').value = today();
+}
+window.returnAsset = function (empId, idx) {
+  if (!requireMgmt('Assets')) return;
+  const e = empById(empId);
+  if (!e || !e.assets || !e.assets[idx]) return;
+  if (e.assets[idx].returned) e.assets[idx].returned = '';
+  else e.assets[idx].returned = today();
+  save(); renderEmpAssets(e); toast('Asset updated');
+};
+function addEmpAsset() {
+  if (!requireMgmt('Assets')) return;
+  const e = empById(editId);
+  if (!e) return toast('Open a file first');
+  const item = ($('assetItem') && $('assetItem').value || '').trim();
+  if (!item) return toast('Item name required');
+  e.assets = e.assets || [];
+  e.assets.unshift({ item, date: ($('assetDate') && $('assetDate').value) || today(), returned: '' });
+  if ($('assetItem')) $('assetItem').value = '';
+  pushEmpLog(e, { type: 'note', summary: 'Asset issued: ' + item, detail: 'Uniform / equipment' });
+  save(); renderEmpAssets(e); toast('Asset added');
+}
+
+function interviewBoardRows(filter) {
+  const t = today();
+  const weekEnd = addDays(t, 7);
+  return (s.applications || []).filter(a => {
+    if (!a.interviewDate || a.stage === 'hired' || a.stage === 'rejected') return false;
+    if (filter === 'today') return a.interviewDate === t;
+    if (filter === 'week') return a.interviewDate >= t && a.interviewDate <= weekEnd;
+    return a.interviewDate >= t;
+  }).sort((a, b) => String(a.interviewDate).localeCompare(String(b.interviewDate)) || String(a.interviewTime || '').localeCompare(String(b.interviewTime || '')));
+}
+function openInterviewBoard() {
+  if (!canAccessView('hiring')) return toast('Hiring is management only');
+  const filter = ($('ivFilter') && $('ivFilter').value) || 'week';
+  const list = interviewBoardRows(filter);
+  const root = $('interviewBoardList');
+  if (root) {
+    root.innerHTML = list.length ? list.map(a =>
+      '<div class="iv-row"><div><b>' + esc(a.name) + '</b> · ' + esc(a.offerRole || 'New Hire') +
+      '<div class="history">' + esc(fmtLong(a.interviewDate) || a.interviewDate) +
+      (a.interviewTime ? ' · ' + esc(formatInterviewTime(a.interviewTime)) : '') +
+      (a.interviewSlot ? ' · ' + esc(a.interviewSlot) : '') + '</div></div>' +
+      '<div>' +
+      '<button class="btn tiny" onclick="goView(\'hiring\');setTimeout(function(){editApp(' + a.id + ')},40)">Open</button> ' +
+      '<button class="btn tiny soft" onclick="copyInterviewBlurb(' + a.id + ')">Discord</button>' +
+      '</div></div>'
+    ).join('') : '<div class="mini-note">No interviews in this window.</div>';
+  }
+  $('interviewBoardModal').classList.add('open');
+}
+window.copyInterviewBlurb = function (id) {
+  const a = findApp(id);
+  if (!a) return;
+  const blurb = "Frenchie's HR — Interview reminder for " + a.name +
+    (a.interviewDate ? ' on ' + fmtLong(a.interviewDate) : '') +
+    (a.interviewTime ? ' at ' + formatInterviewTime(a.interviewTime) : '') +
+    (a.interviewSlot ? ' (' + a.interviewSlot + ')' : '') +
+    '. Reply on Discord if you need to reschedule.';
+  copyText(blurb, 'Interview reminder copied');
+};
+
+function tipSettlementLines(p) {
+  p = p || workingPeriod();
+  if (!p) return { lines: [], excluded: [], pool: 0, mode: 'equal' };
+  ensureMeta();
+  const mode = (s.settings && s.settings.tipMode) || 'equal';
+  const pool = Number(p.tipPool || 0);
+  const tipRoles = tipRoles();
+  const lines = [];
+  const excluded = [];
+  payableEmployees().forEach(e => {
+    const x = entry(p, e.id);
+    const hrs = Number(x.hours || 0);
+    const tipRole = tipRoles.indexOf(e.role) >= 0;
+    if (!tipRole) { excluded.push(e.name + ' (role)'); return; }
+    if (hrs <= 0) { excluded.push(e.name + ' (no hours)'); return; }
+    lines.push({ e, x, hrs, tips: Number(x.tips || 0), wage: hrs * entryRate(e, x), bonus: Number(x.bonus || 0), gross: lineGross(e, x), paid: !!x.paidOut });
+  });
+  return { lines, excluded, pool, mode, p };
+}
+function openTipSettlement() {
+  if (!canEditHours()) return toast('Leads and management only');
+  const data = tipSettlementLines();
+  const root = $('tipSettleBody');
+  if (!root) return;
+  root.innerHTML =
+    '<p class="ui-hint">Period <b>' + esc(label(data.p)) + '</b> · Pool <b>' + money(data.pool) + '</b> · Split <b>' + esc(data.mode) + '</b></p>' +
+    '<div class="table-scroll"><table><thead><tr><th>Staff</th><th class="r">Hours</th><th class="r">Tips</th><th class="r">Wage</th><th class="r">Bonus</th><th class="r">Gross</th><th>Paid</th></tr></thead><tbody>' +
+    (data.lines.map(r => '<tr><td>' + esc(r.e.name) + '<div class="history">' + esc(r.e.role) + '</div></td>' +
+      '<td class="r mono">' + dec(r.hrs) + '</td><td class="r mono">' + money(r.tips) + '</td><td class="r mono">' + money(r.wage) + '</td>' +
+      '<td class="r mono">' + money(r.bonus) + '</td><td class="r mono">' + money(r.gross) + '</td>' +
+      '<td>' + (r.paid ? '<span class="pill green">paid</span>' : '<span class="pill warn">owed</span>') + '</td></tr>').join('') ||
+      '<tr><td colspan="7" class="empty">No tip-eligible lines.</td></tr>') +
+    '</tbody></table></div>' +
+    (data.excluded.length ? '<p class="ui-hint" style="margin-top:10px">Excluded: ' + esc(data.excluded.join(', ')) + '</p>' : '');
+  $('tipSettleModal').classList.add('open');
+}
+function tipSettlementDiscord() {
+  const data = tipSettlementLines();
+  const lines = ["Frenchie's Sunday tip settlement — " + label(data.p), 'Pool: ' + money(data.pool) + ' · ' + data.mode];
+  data.lines.forEach(r => lines.push(r.e.name + ' — tips ' + money(r.tips) + ' · gross ' + money(r.gross) + (r.paid ? ' · PAID' : ' · owed')));
+  if (data.excluded.length) lines.push('Excluded: ' + data.excluded.join(', '));
+  return lines.join('\n');
+}
+
+function redactPasswordsInState(raw) {
+  const clone = JSON.parse(JSON.stringify(raw));
+  (clone.employees || []).forEach(e => { if (e && 'loginPassword' in e) e.loginPassword = ''; });
+  return clone;
+}
+function publishSharedPack() {
+  if (!requireMgmt('Publish shared desk')) return;
+  ensureMeta();
+  pushSnapshot('pre-publish');
+  const pack = redactPasswordsInState(s);
+  pack.meta = Object.assign({}, pack.meta || {}, { sharedAt: new Date().toISOString(), build: DESK_BUILD });
+  const text = JSON.stringify(pack, null, 2);
+  downloadFile(text, 'frenchies-shared-desk-r' + (s.meta.rev || 0) + '.json', 'application/json');
+  copyText(text, 'Shared pack downloaded · JSON copied (passwords redacted)');
+}
+async function pullSharedDesk() {
+  if (!requireMgmt('Pull shared desk')) return;
+  $('sharedPullModal').classList.add('open');
+}
+async function confirmSharedPull() {
+  if (!requireMgmt('Pull shared desk')) return;
+  let text = ($('sharedPaste') && $('sharedPaste').value || '').trim();
+  const url = ($('sharedUrl') && $('sharedUrl').value || '').trim();
+  try {
+    if (!text && url) {
+      const res = await fetch(url);
+      if (!res.ok) throw new Error('Could not fetch URL');
+      text = await res.text();
+    }
+    if (!text) return toast('Paste JSON or a URL first');
+    const parsed = JSON.parse(text);
+    const migrated = migrate(parsed);
+    const remoteRev = Number((migrated.meta && migrated.meta.rev) || 0);
+    const localRev = Number((s.meta && s.meta.rev) || 0);
+    if (remoteRev < localRev && !confirm('Shared pack rev ' + remoteRev + ' is older than local rev ' + localRev + '. Take theirs anyway?')) return;
+    if (!confirm('Replace this desk with the shared pack (rev ' + remoteRev + ')? A snapshot will be kept.')) return;
+    pushSnapshot('pre-pull');
+    s = migrated;
+    ensureMeta();
+    save({ quiet: false });
+    $('sharedPullModal').classList.remove('open');
+    render();
+    toast('Shared desk applied · rev ' + (s.meta.rev || 0));
+    /* re-validate session */
+    if (sessionUser) {
+      const e = empById(sessionUser.empId);
+      if (!e || !empHasLoginAccess(e)) logoutDesk();
+    }
+  } catch (err) {
+    toast('Pull failed — ' + (err && err.message ? err.message : 'bad JSON'));
+  }
+}
+
+/* Durable stay-logged-in */
+function sessionDaysSetting() {
+  ensureMeta();
+  return Math.max(1, Number((s.settings && s.settings.sessionDays) || 14));
+}
+function clearDurableSession() {
+  try { localStorage.removeItem(SESSION_DURABLE_KEY); } catch (err) {}
+}
+function persistDurableSession(user) {
+  try {
+    if (!user) { clearDurableSession(); return; }
+    const e = empById(user.empId);
+    const days = sessionDaysSetting();
+    const exp = Date.now() + days * 86400000;
+    localStorage.setItem(SESSION_DURABLE_KEY, JSON.stringify({
+      empId: user.empId,
+      username: user.username,
+      band: roleAccessBand(user.role),
+      expiresAt: exp,
+      epoch: e ? (e.loginSessionEpoch || 1) : 1
+    }));
+  } catch (err) {}
+}
+function loadDurableSession() {
+  try {
+    const raw = localStorage.getItem(SESSION_DURABLE_KEY);
+    if (!raw) return null;
+    const data = JSON.parse(raw);
+    if (!data || !data.empId || !data.expiresAt || Date.now() > Number(data.expiresAt)) {
+      clearDurableSession();
+      return null;
+    }
+    const e = empById(data.empId);
+    if (!e || !empHasLoginAccess(e) || e.status === 'terminated' || e.status === 'suspended') {
+      clearDurableSession();
+      return null;
+    }
+    if (!empHasOwnPassword(e)) { clearDurableSession(); return null; }
+    if (Number(data.epoch || 1) !== Number(e.loginSessionEpoch || 1)) {
+      clearDurableSession();
+      return null;
+    }
+    return {
+      empId: e.id,
+      name: e.name,
+      role: e.role,
+      username: e.loginUsername || loginUsernameFromName(e.name)
+    };
+  } catch (err) { return null; }
+}
+function bumpLoginSessionEpoch(e) {
+  if (!e) return;
+  e.loginSessionEpoch = Number(e.loginSessionEpoch || 1) + 1;
+}
+
 
 /* Debug / test hooks (same-origin desk) */
 window.__desk = {
