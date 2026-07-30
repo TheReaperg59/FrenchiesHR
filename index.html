@@ -2388,7 +2388,7 @@ body.compact-todos .attn-detail{display:none}
         <button type="button" class="top-account-item" id="helpShortcuts" role="menuitem" aria-haspopup="dialog" aria-controls="shortcutSheet">Keyboard shortcuts</button>
         <button type="button" class="top-account-item danger" id="logoutBtn" role="menuitem">Sign out</button>
         <div class="top-account-foot">
-          <span class="build-chip" title="Desk build">v14</span>
+          <span class="build-chip" title="Desk build">v15</span>
           <label class="top-jump-label" for="quickJump">Jump to</label>
           <select class="top-jump" id="quickJump" title="Jump to any tab">
             <option value="overview">Overview</option>
@@ -3732,7 +3732,7 @@ const LOG_TYPES = {
 };
 const TIP_ROLES_DEFAULT = ['Waiter', 'Hostess', 'Cook'];
 const TIP_ROLES = TIP_ROLES_DEFAULT; /* legacy alias — use tipRoles() */
-const DESK_BUILD = 'v14';
+const DESK_BUILD = 'v15';
 const HOUSE_LOGIN_PASSWORD = 'frenchies636';
 const SESSION_KEY = 'frenchies_desk_session';
 const MGMT_ROLES = ['Owner', 'District Manager', 'Store Manager', 'HR Director', 'Operations Manager'];
@@ -4055,6 +4055,10 @@ function normalizeEmployee(e, fallbackDate) {
   e.loginGrantedAt = e.loginGrantedAt || '';
   e.loginPassword = String(e.loginPassword || '');
   e.loginPasswordSetAt = e.loginPasswordSetAt || '';
+  if (!e.hireCycle || e.hireCycle < 1) e.hireCycle = 1;
+  if (!e.hireCycleStartedAt) e.hireCycleStartedAt = e.hire || fallbackDate;
+  if (!('paperCycleClosedAt' in e)) e.paperCycleClosedAt = e.paperCycleClosedAt || '';
+  e.paperArchive = Array.isArray(e.paperArchive) ? e.paperArchive : [];
   if (MGMT_ROLES.indexOf(e.role) >= 0 && e.status === 'active' && !e.loginAccess) {
     e.loginAccess = true;
     e.loginGrantedAt = e.loginGrantedAt || (e.hire || today());
@@ -5173,6 +5177,205 @@ function empLoginPaperStatus(e) {
   if (d.status === 'sent') return 'sent';
   return d.status || 'draft';
 }
+
+/* ----- hire paperwork cycle — no duplicate sends while active or on file ----- */
+const EMP_HIRE_PAPER = ['offer', 'contract', 'packet', 'login'];
+const PAPER_AWAITING_STATUS = ['sent', 'returned'];
+const PAPER_FILED_STATUS = ['signed', 'confirmed', 'accepted', 'acknowledged'];
+
+function normalizeEmpPaperCycle(e) {
+  if (!e) return e;
+  if (!e.hireCycle || e.hireCycle < 1) e.hireCycle = 1;
+  if (!e.hireCycleStartedAt) e.hireCycleStartedAt = e.hire || today();
+  if (!('paperCycleClosedAt' in e)) e.paperCycleClosedAt = e.paperCycleClosedAt || '';
+  e.paperArchive = Array.isArray(e.paperArchive) ? e.paperArchive : [];
+  return e;
+}
+
+function empPaperStatusLabel(st) {
+  if (!st || st === 'none' || st === 'draft') return 'not started';
+  if (PAPER_AWAITING_STATUS.indexOf(st) >= 0) return 'awaiting reply';
+  if (PAPER_FILED_STATUS.indexOf(st) >= 0) return 'on file';
+  if (st === 'declined') return 'declined';
+  return st;
+}
+
+function empPaperRecord(e, kind) {
+  if (!e || !kind) return { state: 'none', source: null, doc: null, rec: null, cycle: 1 };
+  normalizeEmpPaperCycle(e);
+  const cycleNow = e.hireCycle || 1;
+  const doc = findEmpDoc(e, kind);
+  if (doc) {
+    const cycle = doc.hireCycle || cycleNow;
+    if (cycle !== cycleNow) return { state: 'none', source: null, doc: null, rec: null, cycle: cycleNow, stale: true };
+    return { state: doc.status || 'draft', source: 'doc', doc, rec: null, cycle };
+  }
+  const a = appForEmployee(e);
+  if (a && a.paperwork && a.paperwork[kind]) {
+    const rec = a.paperwork[kind];
+    const cycle = rec.hireCycle || cycleNow;
+    if (cycle !== cycleNow) return { state: 'none', source: null, doc: null, rec: null, cycle: cycleNow, stale: true };
+    let st = rec.sendStatus || 'draft';
+    if (rec.reply && rec.reply.decision) {
+      if (rec.reply.decision === 'confirm') st = 'confirmed';
+      else if (rec.reply.decision === 'accept') st = 'accepted';
+      else if (rec.reply.decision === 'decline') st = 'declined';
+      else if (rec.reply.decision === 'reschedule') st = 'returned';
+      else if (rec.reply.decision === 'submitted' || rec.reply.decision === 'acknowledged' || rec.reply.decision === 'reapply') st = 'signed';
+      else st = 'returned';
+    }
+    return { state: st, source: 'app', doc: null, rec, cycle };
+  }
+  return { state: 'none', source: null, doc: null, rec: null, cycle: cycleNow };
+}
+
+function empPaperIsLocked(e, kind) {
+  const st = empPaperRecord(e, kind).state;
+  if (st === 'none' || st === 'draft') return false;
+  return PAPER_AWAITING_STATUS.indexOf(st) >= 0 || PAPER_FILED_STATUS.indexOf(st) >= 0 || st === 'declined';
+}
+
+function empCanSendPaper(e, kind) {
+  const def = PAPER_KINDS[kind];
+  if (!e) return { ok: false, msg: 'Save the file first' };
+  if (e.status === 'terminated') {
+    return { ok: false, msg: e.name + ' is terminated — use Rehire on the roster to start a fresh paper cycle' };
+  }
+  if (!def) return { ok: false, msg: 'Unknown document' };
+  const pr = empPaperRecord(e, kind);
+  const st = pr.state;
+  const title = def.title || kind;
+  if (st === 'none' || st === 'draft') {
+    if (kind === 'packet' && !empHasSignedContract(e)) {
+      return { ok: false, msg: 'Signed contract required before the new-hire packet', need: 'contract' };
+    }
+    if (kind === 'login') {
+      if (!empHasSignedContract(e)) return { ok: false, msg: 'Signed contract required before account login info', need: 'contract' };
+      if (!empHasAcknowledgedPacket(e)) return { ok: false, msg: 'Packet acknowledgement required before account login info', need: 'packet' };
+    }
+    return { ok: true, state: st };
+  }
+  if (PAPER_AWAITING_STATUS.indexOf(st) >= 0) {
+    return {
+      ok: false,
+      locked: true,
+      awaiting: true,
+      state: st,
+      msg: title + ' already sent — awaiting their reply. Import Frenchies-Reply-….html instead of sending again.'
+    };
+  }
+  if (PAPER_FILED_STATUS.indexOf(st) >= 0) {
+    const cycleNote = (e.hireCycle || 1) > 1 ? ' (hire cycle ' + e.hireCycle + ')' : '';
+    return {
+      ok: false,
+      locked: true,
+      filed: true,
+      state: st,
+      msg: title + ' already on file' + cycleNote + '. Only termination + rehire starts a new set.'
+    };
+  }
+  if (st === 'declined') {
+    return { ok: false, locked: true, state: st, msg: title + ' was declined — reset paperwork on the hiring file or rehire before sending again' };
+  }
+  return { ok: true, state: st };
+}
+
+function appPaperRecord(a, kind) {
+  ensurePaperwork(a);
+  const rec = a.paperwork[kind];
+  if (!rec) return { state: 'none', rec: null };
+  let st = rec.sendStatus || 'draft';
+  if (rec.reply && rec.reply.decision) {
+    if (rec.reply.decision === 'confirm') st = 'confirmed';
+    else if (rec.reply.decision === 'accept') st = 'accepted';
+    else if (rec.reply.decision === 'decline') st = 'declined';
+    else if (rec.reply.decision === 'reschedule') st = 'returned';
+    else if (rec.reply.decision === 'submitted' || rec.reply.decision === 'acknowledged' || rec.reply.decision === 'reapply') st = 'signed';
+    else st = 'returned';
+  }
+  return { state: st, rec };
+}
+
+function appCanSendPaper(a, kind) {
+  const def = PAPER_KINDS[kind];
+  if (!a || !def) return { ok: false, msg: 'Nothing to send' };
+  if (!def.sendable) return { ok: false, msg: 'That sheet stays in the office' };
+  const emp = empForApp(a);
+  if (emp && EMP_HIRE_PAPER.indexOf(kind) >= 0) return empCanSendPaper(emp, kind);
+  const pr = appPaperRecord(a, kind);
+  const st = pr.state;
+  const title = def.title || kind;
+  if (st === 'none' || st === 'draft') return { ok: true, state: st };
+  if (PAPER_AWAITING_STATUS.indexOf(st) >= 0) {
+    return { ok: false, locked: true, awaiting: true, state: st, msg: title + ' already sent to ' + a.name + ' — import their reply instead of sending again' };
+  }
+  if (PAPER_FILED_STATUS.indexOf(st) >= 0) {
+    return { ok: false, locked: true, filed: true, state: st, msg: title + ' already returned for ' + a.name + ' — reset paperwork if you truly need a blank resend' };
+  }
+  if (st === 'declined') {
+    return { ok: false, locked: true, state: st, msg: title + ' was declined for ' + a.name + ' — reset before sending again' };
+  }
+  return { ok: true, state: st };
+}
+
+function archiveEmpHirePapers(e, reason) {
+  if (!e) return;
+  normalizeEmpPaperCycle(e);
+  const archived = [];
+  EMP_HIRE_PAPER.forEach(kind => {
+    const doc = findEmpDoc(e, kind);
+    if (doc) {
+      archived.push(Object.assign({}, doc, { kind, archivedAt: today(), hireCycle: e.hireCycle, reason: reason || 'Cycle closed' }));
+      e.documents = (e.documents || []).filter(d => d.kind !== kind);
+    }
+  });
+  if (archived.length) {
+    e.paperArchive.unshift({
+      cycle: e.hireCycle,
+      closedAt: today(),
+      reason: reason || 'Cycle closed',
+      docs: archived
+    });
+  }
+  const a = appForEmployee(e);
+  if (a) {
+    ensurePaperwork(a);
+    EMP_HIRE_PAPER.forEach(kind => { if (a.paperwork[kind]) delete a.paperwork[kind]; });
+  }
+  e.contractSignedAt = '';
+  if (MGMT_ROLES.indexOf(e.role) < 0 || e.status !== 'active') {
+    e.loginAccess = false;
+    e.loginGrantedAt = '';
+    e.loginPassword = '';
+    e.loginPasswordSetAt = '';
+  }
+}
+
+function startNewHirePaperCycle(e, reason) {
+  if (!e) return;
+  normalizeEmpPaperCycle(e);
+  archiveEmpHirePapers(e, reason || 'Rehire — previous paperwork archived');
+  e.hireCycle = (e.hireCycle || 1) + 1;
+  e.hireCycleStartedAt = today();
+  e.paperCycleClosedAt = '';
+  pushEmpLog(e, {
+    type: 'status',
+    summary: 'New hire paper cycle #' + e.hireCycle,
+    detail: reason || 'Contract, packet, and login can be sent fresh for this rehire'
+  });
+}
+
+function closeEmpPaperCycle(e, reason) {
+  if (!e) return;
+  normalizeEmpPaperCycle(e);
+  e.paperCycleClosedAt = today();
+  pushEmpLog(e, {
+    type: 'status',
+    summary: 'Hire paperwork cycle closed',
+    detail: reason || 'Employment ended — rehire starts cycle #' + ((e.hireCycle || 1) + 1)
+  });
+}
+
 function empHasLoginAccess(e) {
   if (!e || e.status === 'terminated' || e.status === 'suspended') return false;
   if (e.loginAccess) return true;
@@ -6603,6 +6806,12 @@ function confirmTermination() {
   const notes = ($('termNotes') && $('termNotes').value || '').trim();
   const before = e.status;
   e.status = 'terminated';
+  e.paperCycleClosedAt = today();
+  closeEmpPaperCycle(e, notes || 'Terminated');
+  if (MGMT_ROLES.indexOf(e.role) < 0) {
+    e.loginAccess = false;
+    e.loginGrantedAt = '';
+  }
   pushEmpLog(e, { type: 'status', summary: 'Terminated', from: before, to: 'terminated', detail: notes || 'Termination checklist' });
   log('Terminated ' + e.name + (notes ? ' — ' + notes : ''));
   pushUndo({
@@ -6624,7 +6833,8 @@ window.rehireEmployee = function (id) {
   e.hire = today();
   e.probationEnd = addDays(today(), 7);
   e.onboarding = emptyOnboarding();
-  pushEmpLog(e, { type: 'hire', summary: 'Rehired as New Hire', from: before.status, to: 'probation', detail: 'Rehire from terminated' });
+  startNewHirePaperCycle(e, 'Rehired from terminated — fresh contract, packet, and login path');
+  pushEmpLog(e, { type: 'hire', summary: 'Rehired as New Hire', from: before.status, to: 'probation', detail: 'Rehire from terminated · paper cycle #' + e.hireCycle });
   s.periods.filter(p => p.status === 'open').forEach(p => {
     if (!p.entries[e.id]) p.entries[e.id] = { hours: 0, bonus: 0, tips: 0, rate: e.rate, paidOut: false };
   });
@@ -7299,18 +7509,25 @@ function renderPaperList(id) {
     const def = PAPER_KINDS[k];
     const rec = a.paperwork[k];
     const st = rec ? (rec.sendStatus || 'draft') : 'none';
+    const sendGate = def.sendable ? appCanSendPaper(a, k) : null;
     const bits = [def.note];
     if (rec && rec.packetId) bits.push('packet ' + rec.packetId);
     if (rec && rec.sentAt) bits.push('sent ' + rec.sentAt);
     if (rec && rec.returnedAt) bits.push('returned ' + rec.returnedAt);
     if (rec && rec.reply && rec.reply.signature) bits.push('signed "' + rec.reply.signature + '"');
+    const sendBtn = !def.sendable
+      ? '<span class="pill gray">HR only</span>'
+      : (sendGate && sendGate.ok
+        ? '<button class="btn tiny soft" onclick="downloadSendPacket(' + a.id + ',\'' + k + '\')">Send to applicant</button>'
+        : '<span class="pill ' + (sendGate && sendGate.awaiting ? 'warn' : (sendGate && sendGate.filed ? 'green' : 'gray')) + '" title="' + esc((sendGate && sendGate.msg) || '') + '">' +
+          esc(empPaperStatusLabel((sendGate && sendGate.state) || st)) + '</span>');
     return '<div class="paper-row">' +
       '<div><div class="paper-name">' + esc(def.title) + '<span class="pill ' + statusClass(st) + '">' + esc(st === 'none' ? 'not made' : st) + '</span></div>' +
       '<div class="paper-sub">' + esc(bits.join(' · ')) + '</div></div>' +
       '<div class="paper-actions">' +
       '<button class="btn tiny" onclick="openPaperDoc(' + a.id + ',\'' + k + '\')">Letter</button>' +
       '<button class="btn tiny" onclick="printPaperDoc(' + a.id + ',\'' + k + '\')">Print PDF</button>' +
-      (def.sendable ? '<button class="btn tiny soft" onclick="downloadSendPacket(' + a.id + ',\'' + k + '\')">Send to applicant</button>' : '<span class="pill gray">HR only</span>') +
+      sendBtn +
       (rec && rec.packetId ? '<button class="btn tiny" onclick="copyPacketId(' + JSON.stringify(String(rec.packetId)) + ')">Copy ID</button>' : '') +
       (rec && rec.reply ? '<button class="btn tiny" onclick="viewAppReply(' + a.id + ',\'' + k + '\')">Read reply</button>' : '') +
       (rec ? '<button class="btn tiny danger" onclick="resetPaperDoc(' + a.id + ',\'' + k + '\')">Reset</button>' : '') +
@@ -9017,6 +9234,7 @@ function empDocStatusPill(st) {
 function syncPaperToEmpDoc(e, a, kind, opts) {
   opts = opts || {};
   if (!e || !kind || !PAPER_KINDS[kind]) return null;
+  normalizeEmpPaperCycle(e);
   if (a) ensurePaperwork(a);
   const rec = (a && a.paperwork && a.paperwork[kind]) || null;
   const reply = opts.reply != null ? opts.reply : (rec && rec.reply) || null;
@@ -9051,8 +9269,9 @@ function syncPaperToEmpDoc(e, a, kind, opts) {
   }
 
   const date = (reply && reply.signedAt) || (rec && rec.returnedAt) || (rec && rec.sentAt) || today();
+  const hireCycle = e.hireCycle || 1;
   if (!doc) {
-    doc = { id: s.nextDocId++, kind, title, date, html, text: '', status };
+    doc = { id: s.nextDocId++, kind, title, date, html, text: '', status, hireCycle };
     e.documents.unshift(doc);
   } else {
     if (html && (newRank >= existingRank || opts.force || !doc.html)) doc.html = html;
@@ -9061,6 +9280,7 @@ function syncPaperToEmpDoc(e, a, kind, opts) {
       doc.title = title;
     }
     doc.date = date || doc.date;
+    doc.hireCycle = hireCycle;
   }
   if ((reply && reply.houseSign) || opts.houseSign) doc.houseSign = (reply && reply.houseSign) || opts.houseSign;
   const packetId = (reply && reply.packetId) || (rec && rec.packetId) || opts.packetId || null;
@@ -10251,11 +10471,25 @@ function applyReply(reply) {
 
   ensurePaperwork(a);
   const status = replyStatus(kind, reply.decision);
+
+  const empEarly = empHint || empForApp(a) || null;
+  if (empEarly && EMP_HIRE_PAPER.indexOf(kind) >= 0) {
+    const pr = empPaperRecord(empEarly, kind);
+    if (PAPER_FILED_STATUS.indexOf(pr.state) >= 0) {
+      return { ok: false, msg: PAPER_KINDS[kind].title + ' already on file for ' + empEarly.name + ' — no duplicate import for this hire' };
+    }
+  }
+  const prior = a.paperwork && a.paperwork[kind];
+  if (prior && prior.reply && PAPER_FILED_STATUS.indexOf(replyStatus(kind, prior.reply.decision)) >= 0 && PAPER_FILED_STATUS.indexOf(status) >= 0) {
+    return { ok: false, msg: PAPER_KINDS[kind].title + ' reply already imported for ' + a.name };
+  }
+
   const rec = setPaper(a, kind, a.paperwork[kind] && a.paperwork[kind].html ? '' : buildPaperHtml(a, kind), {
     reply,
     returnedAt: reply.signedAt || today(),
     sendStatus: status,
-    packetId: reply.packetId || (a.paperwork[kind] || {}).packetId || null
+    packetId: reply.packetId || (a.paperwork[kind] || {}).packetId || null,
+    hireCycle: empEarly ? (empEarly.hireCycle || 1) : 1
   });
 
   const f = reply.fields || {};
@@ -11096,7 +11330,8 @@ window.downloadSendPacket = function (id, kind) {
   const a = findApp(id);
   const def = PAPER_KINDS[kind];
   if (!a || !def) return;
-  if (!def.sendable) return toast('That sheet stays in the office');
+  const gate = appCanSendPaper(a, kind);
+  if (!gate.ok) return toast(gate.msg);
   if (kind === 'invite') {
     openInterviewSchedule(a, (chosen) => downloadChosenPacket(chosen, 'invite'));
     return;
@@ -11114,6 +11349,8 @@ function finishDownloadSendPacket(a, kind, opts) {
   ensurePaperwork(a);
   const linked = empForApp(a);
   if (linked) syncEmpCtxOntoApp(a, linked);
+  const gate = linked ? empCanSendPaper(linked, kind) : appCanSendPaper(a, kind);
+  if (!gate.ok) return toast(gate.msg);
   if (!s.nextPacketId) s.nextPacketId = 1;
   const existing = a.paperwork[kind];
   const packetId = (existing && existing.packetId) || ('FR-' + String(s.nextPacketId++).padStart(4, '0'));
@@ -11121,7 +11358,7 @@ function finishDownloadSendPacket(a, kind, opts) {
   if (opts.houseSign) a._houseSign = opts.houseSign;
   const html = buildSendPacket(a, kind, packetId, opts);
   openPacketWindow(html, filename);
-  const paperExtra = { sendStatus: 'sent', sentAt: today(), packetId };
+  const paperExtra = { sendStatus: 'sent', sentAt: today(), packetId, hireCycle: linked ? (linked.hireCycle || 1) : 1 };
   if (opts.houseSign) paperExtra.houseSign = opts.houseSign;
   setPaper(a, kind, (existing && existing.html) ? '' : buildPaperHtml(a, kind), paperExtra);
   const emp = empForApp(a);
@@ -11347,17 +11584,24 @@ function renderEmployeeFile(e) {
   kinds.forEach(k => {
     const d = findEmpDoc(e, k);
     const label = (PAPER_KINDS[k] && PAPER_KINDS[k].title) || k;
+    const pr = empPaperRecord(e, k);
     if (d) {
       const st = d.status || 'on file';
       const pillTone = empDocStatusPill(st);
+      const lockNote = empPaperIsLocked(e, k) ? ' · ' + empPaperStatusLabel(st) : '';
       docsHtml += '<div class="doc-row"><div><b>' + esc(d.title || label) + '</b>' +
-        '<div class="paper-sub">' + esc(d.date || '—') + (st ? ' · ' + esc(st) : '') + '</div></div>' +
+        '<div class="paper-sub">' + esc(d.date || '—') + (st ? ' · ' + esc(st) : '') + esc(lockNote) +
+        (d.packetId ? ' · ' + esc(d.packetId) : '') + '</div></div>' +
         '<div class="paper-actions">' +
         '<span class="pill ' + pillTone + '">' + esc(st) + '</span>' +
         (d.html ? '<button class="btn tiny" onclick="viewDoc(' + e.id + ',' + d.id + ')">Open</button>' : '') +
         (d.html ? '<button class="btn tiny soft" onclick="printEmpDoc(' + e.id + ',' + d.id + ')">Print</button>' : '') +
-        '<button class="btn tiny danger" onclick="deleteDoc(' + e.id + ',' + d.id + ')">Delete</button>' +
+        (empPaperIsLocked(e, k) ? '' : '<button class="btn tiny danger" onclick="deleteDoc(' + e.id + ',' + d.id + ')">Delete</button>') +
         '</div></div>';
+    } else if (pr.state !== 'none' && pr.state !== 'draft') {
+      docsHtml += '<div class="doc-row"><div><b>' + esc(label) + '</b><div class="paper-sub">' +
+        esc(empPaperStatusLabel(pr.state)) + ' on hiring file</div></div>' +
+        '<div class="paper-actions"><span class="pill warn">' + esc(pr.state) + '</span></div></div>';
     } else {
       const next = k === 'offer' ? 'Copied from the hiring file when available'
         : (k === 'contract' ? 'Not on file yet — send a contract to start'
@@ -11374,6 +11618,15 @@ function renderEmployeeFile(e) {
       (d.html ? '<button class="btn tiny" onclick="viewDoc(' + e.id + ',' + d.id + ')">Open</button>' : '') +
       '<button class="btn tiny danger" onclick="deleteDoc(' + e.id + ',' + d.id + ')">Delete</button></div></div>';
   });
+  if ((e.paperArchive || []).length) {
+    const arch = e.paperArchive[0];
+    docsHtml += '<div class="ui-hint">Previous hire paperwork archived · cycle ' + esc(String(arch.cycle || '')) +
+      (arch.closedAt ? ' closed ' + esc(arch.closedAt) : '') + ' · ' +
+      ((arch.docs && arch.docs.length) || 0) + ' document' + (((arch.docs && arch.docs.length) || 0) === 1 ? '' : 's') +
+      '. Rehire opened cycle ' + esc(String(e.hireCycle || 1)) + '.</div>';
+  } else if ((e.hireCycle || 1) > 1) {
+    docsHtml += '<div class="ui-hint">Hire paper cycle <b>#' + esc(String(e.hireCycle)) + '</b> · started ' + esc(e.hireCycleStartedAt || e.hire || '—') + '</div>';
+  }
   $('empDocs').innerHTML = docsHtml || '<div class="ui-hint">No documents yet.</div>';
   if ($('empDocPill')) {
     const onFile = kinds.filter(k => findEmpDoc(e, k)).length;
@@ -11392,29 +11645,30 @@ function renderEmployeeFile(e) {
   if ($('genContract')) { $('genContract').hidden = true; $('genContract').disabled = !hasContract; }
   if ($('genPacket')) { $('genPacket').hidden = true; $('genPacket').disabled = !hasPacket; }
   if ($('genLogin')) { $('genLogin').hidden = true; $('genLogin').disabled = !hasLogin; }
-  /* Re-send only when that paper is already on the file */
+  /* Send actions — one active copy per hire cycle; no duplicate sends while sent or on file */
+  const contractGate = empCanSendPaper(e, 'contract');
+  const packetGate = empCanSendPaper(e, 'packet');
+  const loginGate = empCanSendPaper(e, 'login');
   if ($('sendEmpContract')) {
-    $('sendEmpContract').textContent = hasContract ? 'Re-send contract' : 'Send contract';
-    $('sendEmpContract').className = (!hasContract || !signedContract) ? 'btn tiny primary' : 'btn tiny';
-    $('sendEmpContract').title = hasContract
-      ? 'Send another copy of the contract'
-      : 'Create and send the employment contract';
+    $('sendEmpContract').textContent = contractGate.ok ? 'Send contract'
+      : (contractGate.awaiting ? 'Contract sent' : (contractGate.filed ? 'Contract on file' : 'Send contract'));
+    $('sendEmpContract').className = contractGate.ok ? 'btn tiny primary' : 'btn tiny soft';
+    $('sendEmpContract').disabled = !contractGate.ok;
+    $('sendEmpContract').title = contractGate.ok ? 'Create and send the employment contract' : contractGate.msg;
   }
   if ($('sendEmpPacket')) {
-    $('sendEmpPacket').textContent = hasPacket ? 'Re-send packet' : 'Send packet';
-    $('sendEmpPacket').className = (signedContract && !hasPacket) ? 'btn tiny primary' : 'btn tiny soft';
-    $('sendEmpPacket').disabled = false;
-    $('sendEmpPacket').title = hasPacket
-      ? 'Send another copy of the new-hire packet'
-      : 'Send the new-hire packet';
+    $('sendEmpPacket').textContent = packetGate.ok ? 'Send packet'
+      : (packetGate.awaiting ? 'Packet sent' : (packetGate.filed ? 'Packet on file' : 'Send packet'));
+    $('sendEmpPacket').className = packetGate.ok && signedContract ? 'btn tiny primary' : 'btn tiny soft';
+    $('sendEmpPacket').disabled = !packetGate.ok;
+    $('sendEmpPacket').title = packetGate.ok ? 'Send the new-hire packet' : packetGate.msg;
   }
   if ($('sendEmpLogin')) {
-    $('sendEmpLogin').textContent = hasLogin ? 'Re-send account login' : 'Send account login';
-    $('sendEmpLogin').className = (packetAcked && !loginOk) ? 'btn tiny primary' : 'btn tiny soft';
-    $('sendEmpLogin').disabled = false;
-    $('sendEmpLogin').title = hasLogin
-      ? 'Send another account login sheet'
-      : 'Send account login information';
+    $('sendEmpLogin').textContent = loginGate.ok ? 'Send account login'
+      : (loginGate.awaiting ? 'Login sent' : (loginGate.filed ? 'Login on file' : 'Send account login'));
+    $('sendEmpLogin').className = loginGate.ok && packetAcked ? 'btn tiny primary' : 'btn tiny soft';
+    $('sendEmpLogin').disabled = !loginGate.ok;
+    $('sendEmpLogin').title = loginGate.ok ? 'Send account login information' : loginGate.msg;
   }
   if ($('resetEmpPasswordBtn')) {
     const hasPw = empHasOwnPassword(e);
@@ -11424,11 +11678,11 @@ function renderEmployeeFile(e) {
   }
   if ($('empDocHint')) {
     if (!hasContract) $('empDocHint').textContent = 'Send the employment contract first (you sign, then they reply).';
-    else if (!signedContract) $('empDocHint').textContent = 'Contract is on file — import their signed reply when it comes back.';
+    else if (!signedContract) $('empDocHint').textContent = 'Contract sent — import their signed reply. Do not send a duplicate.';
     else if (!hasPacket) $('empDocHint').textContent = 'Contract signed — send the new-hire packet next.';
-    else if (!packetAcked) $('empDocHint').textContent = 'Packet sent — await acknowledgement, then send account login.';
+    else if (!packetAcked) $('empDocHint').textContent = 'Packet sent — import their acknowledgement. Do not send a duplicate.';
     else if (!hasLogin) $('empDocHint').textContent = 'Packet acknowledged — send Account login information next.';
-    else if (!loginOk) $('empDocHint').textContent = 'Login sheet sent — import their Frenchies-Reply-….html (not the blank send form) to grant access.';
+    else if (!loginOk) $('empDocHint').textContent = 'Login sent — import Frenchies-Reply-….html. Do not send a duplicate.';
     else $('empDocHint').textContent = 'Desk access granted · ' + (e.loginUsername || loginUsernameFromName(e.name)) +
       (empHasOwnPassword(e) ? ' · personal password set' : ' · first sign-in with house password, then create their own');
   }
@@ -11661,6 +11915,12 @@ function completeProbation(pass) {
     if (!confirmDanger('End probation and terminate ' + e.name + '?', notes || 'They will be marked terminated.')) return;
     const fromStatus = e.status;
     e.status = 'terminated';
+    e.paperCycleClosedAt = today();
+    closeEmpPaperCycle(e, notes || 'Probation ended — terminated');
+    if (MGMT_ROLES.indexOf(e.role) < 0) {
+      e.loginAccess = false;
+      e.loginGrantedAt = '';
+    }
     e.probationReview = { date: today(), passed: false, notes, toRole: '' };
     pushEmpLog(e, {
       type: 'probation',
@@ -12555,6 +12815,8 @@ $('genPacket').onclick = () => docAction('packet');
 $('sendEmpContract').onclick = () => {
   const e = empById(editId);
   if (!e) return toast('Save the file first');
+  const gate = empCanSendPaper(e, 'contract');
+  if (!gate.ok) return toast(gate.msg);
   const a = syncEmpCtxOntoApp(ensureAppForEmployee(e), e);
   syncPaperToEmpDoc(e, a, 'contract', { status: 'draft', force: false });
   save();
@@ -12563,16 +12825,19 @@ $('sendEmpContract').onclick = () => {
 $('sendEmpPacket').onclick = () => {
   const e = empById(editId);
   if (!e) return toast('Save the file first');
-  if (!empHasSignedContract(e)) {
-    toast('Signed contract required before the new-hire packet');
+  let gate = empCanSendPaper(e, 'packet');
+  if (!gate.ok && gate.need === 'contract') {
     if (!confirm('Override paper path and file & send the packet for ' + e.name + ' without a signed contract?')) return;
+    gate = { ok: true };
+  } else if (!gate.ok) {
+    return toast(gate.msg);
   }
   const a = syncEmpCtxOntoApp(ensureAppForEmployee(e), e);
   const html = letterPacket(empCtx(e));
   ensurePaperwork(a);
   if (!s.nextPacketId) s.nextPacketId = 1;
   const packetId = (a.paperwork.packet && a.paperwork.packet.packetId) || ('FR-' + String(s.nextPacketId++).padStart(4, '0'));
-  setPaper(a, 'packet', html, { sendStatus: 'sent', sentAt: today(), packetId });
+  setPaper(a, 'packet', html, { sendStatus: 'sent', sentAt: today(), packetId, hireCycle: e.hireCycle || 1 });
   syncPaperToEmpDoc(e, a, 'packet', { html, status: 'sent', force: true, packetId });
   const keep = buildSendPacket(a, 'packet', packetId, { employeeId: e.id });
   openPacketWindow(keep, 'Frenchies-New-Hire-Packet-' + safeName(e.name) + '.html');
@@ -12598,13 +12863,15 @@ if ($('resetEmpPasswordBtn')) $('resetEmpPasswordBtn').onclick = () => {
 if ($('sendEmpLogin')) $('sendEmpLogin').onclick = () => {
   const e = empById(editId);
   if (!e) return toast('Save the file first');
-  if (!empHasSignedContract(e)) {
-    toast('Signed contract required before account login info');
+  let gate = empCanSendPaper(e, 'login');
+  if (!gate.ok && gate.need === 'contract') {
     if (!confirm('Override and send login info for ' + e.name + ' without a signed contract?')) return;
-  }
-  if (!empHasAcknowledgedPacket(e)) {
-    toast('Packet acknowledgement preferred before login info');
+    gate = { ok: true };
+  } else if (!gate.ok && gate.need === 'packet') {
     if (!confirm('Send Account login information for ' + e.name + ' before the packet is acknowledged?')) return;
+    gate = { ok: true };
+  } else if (!gate.ok) {
+    return toast(gate.msg);
   }
   ensureEmpLoginUsername(e);
   const a = syncEmpCtxOntoApp(ensureAppForEmployee(e), e);
@@ -12612,7 +12879,7 @@ if ($('sendEmpLogin')) $('sendEmpLogin').onclick = () => {
   ensurePaperwork(a);
   if (!s.nextPacketId) s.nextPacketId = 1;
   const packetId = (a.paperwork.login && a.paperwork.login.packetId) || ('FR-' + String(s.nextPacketId++).padStart(4, '0'));
-  setPaper(a, 'login', html, { sendStatus: 'sent', sentAt: today(), packetId });
+  setPaper(a, 'login', html, { sendStatus: 'sent', sentAt: today(), packetId, hireCycle: e.hireCycle || 1 });
   syncPaperToEmpDoc(e, a, 'login', { html, status: 'sent', force: true, packetId });
   const keep = buildSendPacket(a, 'login', packetId, { employeeId: e.id });
   openPacketWindow(keep, 'Frenchies-Account-Login-' + safeName(e.name) + '.html');
