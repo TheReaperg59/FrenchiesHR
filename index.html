@@ -1382,6 +1382,68 @@ body{
   .todo-add-pri{width:100%}
 }
 
+/* ===== Desk v9 — 50 major upgrades ===== */
+body.quiet-mode .metric:hover,body.quiet-mode .card:hover,body.quiet-mode .btn:hover{transform:none;box-shadow:none}
+.metric-btn{appearance:none;border:1px solid var(--line);background:var(--paper);text-align:left;cursor:pointer;font:inherit;color:inherit;padding:14px 16px;border-radius:12px;transition:border-color .15s,box-shadow .15s}
+.metric-btn:hover,.metric-btn:focus-visible{border-color:var(--gold);box-shadow:0 0 0 2px var(--goldwash);outline:none}
+.metric-btn label{display:block;font-size:.68rem;letter-spacing:.04em;text-transform:uppercase;color:var(--muted);margin-bottom:4px}
+.metric-btn strong{display:block;font:600 1.35rem 'JetBrains Mono',monospace;color:var(--navy)}
+.metric-btn span{display:block;font-size:.72rem;color:var(--muted);margin-top:4px}
+.ot-badge{display:inline-block;margin-top:4px;font-size:.62rem;font-weight:600;color:var(--warn);background:var(--warnwash);padding:2px 6px;border-radius:4px}
+.dupe-row td{background:var(--warnwash)!important}
+.cov-gap{color:var(--danger);font-weight:600}
+body.compact-todos .attn{padding:8px 10px}
+body.compact-todos .attn-detail{display:none}
+body.print-dense .card{box-shadow:none;border-color:#ccc}
+@media print{body.print-dense .desk-hero,body.print-dense .build-banner,body.print-dense .nba-card,body.print-dense .compare-strip,body.print-dense .health-strip,body.print-dense .todo-card{display:none!important}}
+
+body.compact-todos .todo-card-v2 .attn{padding:8px 10px;margin-bottom:5px}
+body.compact-todos .attn-detail{display:none}
+.build-banner b{letter-spacing:.01em}
+.upgrade-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(220px,1fr));gap:8px;padding:12px 0}
+.upgrade-item{border:1px solid var(--line);border-radius:10px;padding:10px 12px;background:oklch(98.5% .005 84);font-size:.72rem}
+.upgrade-item b{display:block;color:var(--navy);margin-bottom:3px;font-size:.76rem}
+.compare-strip,.nba-card,.health-strip{
+  display:flex;flex-wrap:wrap;gap:10px 14px;align-items:center;
+  padding:12px 14px;border-radius:14px;border:1px solid var(--line);
+  background:linear-gradient(180deg,var(--paper),oklch(97.5% .01 84));font-size:.76rem;
+}
+.compare-strip strong,.nba-card strong,.health-strip strong{font-family:'JetBrains Mono',monospace;color:var(--navy)}
+.nba-card{background:linear-gradient(135deg,var(--goldwash),oklch(98% .01 84));border-color:oklch(88% .05 82)}
+.cmd-palette,.settings-drawer{
+  position:fixed;inset:0;z-index:50;display:none;align-items:flex-start;justify-content:center;
+  padding:12vh 16px 24px;background:oklch(18% .025 155 / .55);backdrop-filter:blur(4px);
+}
+.cmd-palette.open,.settings-drawer.open{display:flex}
+.cmd-panel,.settings-panel{
+  width:min(560px,96vw);background:var(--paper);border:1px solid var(--line);border-radius:16px;
+  box-shadow:0 24px 60px oklch(18% .03 155 / .3);max-height:80vh;overflow:auto;padding:16px 18px;
+}
+.settings-panel{width:min(640px,96vw)}
+.cmd-panel input{
+  width:100%;padding:12px 14px;border:1px solid var(--line);border-radius:11px;font-size:.9rem;margin-bottom:10px;
+}
+.cmd-list{list-style:none;margin:0;padding:0;display:flex;flex-direction:column;gap:4px}
+.cmd-list button{
+  width:100%;text-align:left;border:1px solid transparent;background:oklch(97.5% .008 84);
+  border-radius:10px;padding:10px 12px;font-size:.78rem;cursor:pointer;
+}
+.cmd-list button:hover,.cmd-list button.active{border-color:var(--line);background:var(--sage)}
+.cmd-list small{display:block;color:var(--muted);margin-top:2px}
+.storage-meter{height:8px;border-radius:999px;background:oklch(93% .01 84);overflow:hidden;margin-top:8px}
+.storage-meter i{display:block;height:100%;background:linear-gradient(90deg,var(--green),var(--gold),var(--danger));width:0%}
+.paper-meter{height:6px;border-radius:999px;background:oklch(93% .01 84);overflow:hidden;max-width:140px}
+.paper-meter i{display:block;height:100%;background:var(--gold);width:0%}
+
+.ot-flag{color:var(--warn);font-weight:700;font-size:.65rem}
+.pin-btn{border:0;background:transparent;cursor:pointer;color:var(--muted);font-size:.9rem;padding:0 4px}
+.pin-btn.on{color:var(--gold)}
+.rating-stars{display:inline-flex;gap:2px}
+.rating-stars button{border:0;background:transparent;cursor:pointer;color:oklch(80% .02 84);font-size:.85rem;padding:0}
+.rating-stars button.on{color:var(--gold)}
+.spotlight-row{background:linear-gradient(90deg,var(--warnwash),transparent 40%)!important}
+.gap-pill{font-size:.62rem;padding:2px 6px;border-radius:6px;background:var(--dangerwash);color:var(--danger);font-weight:700}
+
 </style>
 </head>
 <body>
@@ -1457,7 +1519,9 @@ body{
       <option value="backup">Backup</option>
     </select>
     <button type="button" class="help-btn" id="helpShortcuts" title="Keyboard shortcuts" aria-haspopup="dialog" aria-controls="shortcutSheet">?</button>
-    <span class="build-chip" title="Desk build marker">v8</span>
+    <span class="build-chip" title="Desk build marker">v9</span>
+    <button type="button" class="btn tiny soft" id="openSettingsBtn" title="Desk settings">Settings</button>
+    <button type="button" class="btn tiny" id="openCmdBtn" title="Command palette (Ctrl+K)">⌘K</button>
     <span class="kbd-hint" title="Press ? for shortcuts">g then key</span>
     <div class="payday"><span id="saveBadge" title="Autosave status">Saved</span><span class="payday-sep" aria-hidden="true">·</span><span>Payday: Sunday, 9:00 AM</span></div>
   </div>
@@ -1467,9 +1531,21 @@ body{
 <!-- OVERVIEW -->
 <section class="view active" id="view-overview" role="region" aria-labelledby="title-overview" tabindex="-1">
   <div class="build-banner" id="buildBanner" role="status">
-    <b>Desk build v8</b>
-    <span>Todo desk rebuilt · Sunday pay run · Probation review · Availability board</span>
+    <b>Desk build v9</b>
+    <span>50 major upgrades · settings · command palette · weighted tips · bulk hours · undo</span>
+    <button type="button" class="btn tiny soft" id="openChangelogBtn" style="margin-left:auto">What&apos;s new</button>
     <span class="pill green" id="buildStamp">LIVE</span>
+  </div>
+  <div class="nba-card" id="nbaCard">
+    <div><b>Next best action</b><div id="nbaText" class="mini-note" style="margin:4px 0 0">Scanning the desk…</div></div>
+    <button type="button" class="btn tiny primary" id="nbaGoBtn">Do it</button>
+  </div>
+  <div class="compare-strip" id="compareStrip" aria-label="Period comparison">
+    <span>vs last period:</span>
+    <span>Gross <strong id="cmpGross">—</strong></span>
+    <span>Hours <strong id="cmpHours">—</strong></span>
+    <span>Tips <strong id="cmpTips">—</strong></span>
+    <span>Health <strong id="periodHealthScore">—</strong></span>
   </div>
   <div class="desk-hero">
     <div class="desk-hero-main">
@@ -1504,8 +1580,15 @@ body{
       <input id="tipPool" type="number" min="0" step="1" aria-label="Tip pool amount">
     </label>
     <button class="btn" id="newPeriod">New period</button>
+    <button class="btn soft" id="bulkHoursBtn" type="button">Bulk hours</button>
     <button class="btn" id="markAllPaid">Mark all paid</button>
     <button class="btn primary" id="closePeriod">Close &amp; roll next</button>
+  </div>
+  <div class="health-strip" id="healthStrip">
+    <span>Period health</span>
+    <strong id="healthScoreLabel">—</strong>
+    <span id="healthHints" class="mini-note" style="margin:0">—</span>
+    <button type="button" class="btn tiny soft" id="undoBtn" title="Undo last desk action">Undo</button>
   </div>
   <div class="tip-warn" id="tipWarn" role="status">Tip pool is set, but no Waiter / Hostess / Cook with hours is eligible to share it.</div>
   <div class="metrics">
@@ -1518,6 +1601,9 @@ body{
     <button class="btn tiny soft" type="button" id="ovGotoReports">Year reports</button>
     <button class="btn tiny soft" type="button" id="ovGotoExpenses">Expense rebates</button>
     <button class="btn tiny soft" type="button" id="ovGotoUnpaidStubs">Unpaid stubs</button>
+    <button class="btn tiny soft" type="button" id="exportTodosBtn">Export to-dos</button>
+    <button class="btn tiny" type="button" id="todoCompactBtn">Compact to-dos</button>
+    <button class="btn tiny" type="button" id="batchClearTodosBtn">Clear visible</button>
   </div>
   <div class="grid desk-split">
     <div class="stack-col">
@@ -1578,6 +1664,8 @@ body{
             <option value="2">Soon</option>
             <option value="3">Urgent</option>
           </select>
+          <label class="checkline" style="margin:0;white-space:nowrap" title="Pin to top of Your list"><input type="checkbox" id="todoAddPin"><span>Pin</span></label>
+          <label class="checkline" style="margin:0;white-space:nowrap" title="Reappear next week when marked Done"><input type="checkbox" id="todoAddRecur"><span>Weekly</span></label>
           <button class="btn tiny primary" id="todoAddBtn">Add</button>
         </div>
       </div>
@@ -1615,11 +1703,11 @@ body{
     Applicants must be in good standing with the city and clear of recent felony convictions.
     Terrorism charges or the murder of a government employee are a hard bar.
   </div>
-  <div class="metrics">
-    <div class="metric"><label>In pipeline</label><strong id="mPipe">0</strong><span>Not yet hired</span></div>
-    <div class="metric"><label>Eligibility hold</label><strong id="mElig">0</strong><span>Awaiting clearance</span></div>
-    <div class="metric"><label>At interview</label><strong id="mInt">0</strong><span>In interview stage</span></div>
-    <div class="metric"><label>Offers out</label><strong id="mOffer">0</strong><span>Pending accept</span></div>
+  <div class="metrics" id="hireMetrics">
+    <button type="button" class="metric metric-btn" data-hire-metric="pipeline" title="Show pipeline"><label>In pipeline</label><strong id="mPipe">0</strong><span>Not yet hired</span></button>
+    <button type="button" class="metric metric-btn" data-hire-metric="elig" title="Show eligibility holds"><label>Eligibility hold</label><strong id="mElig">0</strong><span>Awaiting clearance</span></button>
+    <button type="button" class="metric metric-btn" data-hire-metric="interview" title="Show interviews"><label>At interview</label><strong id="mInt">0</strong><span>In interview stage</span></button>
+    <button type="button" class="metric metric-btn" data-hire-metric="offer" title="Show offers"><label>Offers out</label><strong id="mOffer">0</strong><span>Pending accept</span></button>
   </div>
   <div class="hire-path" id="hirePathStrip" aria-label="Hiring paper path">
     <span data-step="application">Application</span>
@@ -1630,16 +1718,25 @@ body{
     <i></i><span data-step="contract">Contract</span>
     <i></i><span data-step="packet">Packet</span>
   </div>
+  <div class="grid-2" style="margin-bottom:12px">
+    <div class="card"><div class="card-head"><b>Interview agenda</b><span class="pill gray" id="agendaCount">0</span></div>
+      <div class="card-body" id="interviewAgenda"><div class="mini-note">No interviews scheduled.</div></div>
+    </div>
+    <div class="card"><div class="card-head"><b>Ready to hire</b><span class="pill gold" id="readyHireCount">0</span></div>
+      <div class="card-body" id="readyHireSpotlight"><div class="mini-note">Nobody waiting on Hire yet.</div></div>
+    </div>
+  </div>
   <div class="toolbar filter-rail">
     <input class="search" id="hireSearch" placeholder="Search applicant" aria-label="Search applicants">
     <button type="button" class="btn tiny soft" id="hireFilterPipe" data-hire-filter="pipeline">Pipeline</button>
     <button type="button" class="btn tiny" id="hireFilterClosed" data-hire-filter="closed">Closed files</button>
     <button type="button" class="btn tiny" id="hireFilterAll" data-hire-filter="all">All applications</button>
+    <button type="button" class="btn tiny" id="hireFilterAwait" data-hire-filter="awaiting">Awaiting reply</button>
     <span class="pill gray" id="hireFilterLabel">Showing pipeline</span>
   </div>
   <div class="split-desk">
     <div class="card"><div class="card-head"><b>Applications</b><span class="pill gray" id="appCount"></span></div>
-      <div class="table-scroll"><table><thead><tr><th>Applicant</th><th>Stage</th><th>Applied</th><th>Standing</th><th>Record</th><th>Paperwork</th><th class="r">Move</th><th class="r">Action</th></tr></thead><tbody id="apps"></tbody></table></div>
+      <div class="table-scroll"><table><thead><tr><th>Applicant</th><th>Stage</th><th>Applied</th><th>Age</th><th>Papers</th><th>Rate</th><th>Standing</th><th>Record</th><th>Paperwork</th><th class="r">Move</th><th class="r">Action</th></tr></thead><tbody id="apps"></tbody></table></div>
     </div>
     <div class="card"><div class="card-head"><b>Filed replies</b><span class="pill gray" id="filedCount"></span></div>
       <div class="panel-note">Completed forms land here after Import reply.</div>
@@ -1668,8 +1765,9 @@ body{
     <div class="actions"><button class="btn soft" id="pdfEmployees">Export roster PDF</button><button class="btn primary" id="addEmployee2">Add employee</button></div>
   </div>
   <div class="toolbar filter-rail">
-    <input class="search" id="search" placeholder="Search name or role" aria-label="Search employees">
+    <input class="search" id="search" placeholder="Search name, role, or phone" aria-label="Search employees">
     <select id="statusFilter"><option value="">All statuses</option><option value="active">Active</option><option value="probation">Probation</option><option value="suspended">Suspended</option><option value="terminated">Terminated</option></select>
+    <button type="button" class="btn tiny soft" id="massOnboardBtn" title="Tick one onboarding item for everyone on probation">Mass onboarding tick</button>
     <span class="pill gray" id="shown"></span>
   </div>
   <div class="split-desk">
@@ -1764,6 +1862,10 @@ body{
       <table><thead><tr><th>Paid by</th><th class="r">Entries</th><th class="r">Total</th><th class="r">Reimbursable</th></tr></thead><tbody id="expByPaid"></tbody></table>
     </div>
   </div>
+  <div class="card" style="margin-top:12px"><div class="card-head"><b>Rebate aging</b><span class="pill warn" id="rebateAgeCount">0</span></div>
+    <div class="panel-note">Open reimbursables sorted by age — oldest first for chase-up.</div>
+    <div class="table-scroll"><table><thead><tr><th>Age</th><th>Date</th><th>Vendor</th><th class="r">Amount</th><th>Status</th><th class="r"></th></tr></thead><tbody id="rebateAgingBody"></tbody></table></div>
+  </div>
 </section>
 
 <!-- PAY STUBS -->
@@ -1846,10 +1948,11 @@ body{
 <section class="view" id="view-shifts" role="region" aria-labelledby="title-shifts" tabindex="-1">
   <div class="header">
     <div><div class="eyebrow">People</div><h1 class="title" id="title-shifts">Shifts</h1><div class="subtitle">Weekly station board — bar, kitchen, and floor.</div></div>
-    <div class="actions"><button class="btn" id="shiftPrev">&larr; Prev week</button><button class="btn" id="shiftThis">This week</button><button class="btn" id="shiftNext">Next week &rarr;</button><button class="btn soft" id="pdfShifts" title="Print Discord week sheet">Print week sheet</button></div>
+    <div class="actions"><button class="btn" id="shiftPrev">&larr; Prev week</button><button class="btn" id="shiftThis">This week</button><button class="btn" id="shiftNext">Next week &rarr;</button><button class="btn soft" id="copyLastWeekShifts" type="button">Copy last week</button><button class="btn soft" id="pdfShifts" title="Print Discord week sheet">Print week sheet</button></div>
   </div>
   <div class="feature-banner"><b>New:</b> Availability board pulls days and shift windows from hired applications — edit them on the employee file.<span class="pill green">Coverage</span></div>
   <div class="callout plain">Week of <b id="shiftWeekLabel">—</b> &mdash; clock in on radio with 10-1 and clock out with 10-2. Shift Lead posts coverage before open.</div>
+  <div class="tip-warn" id="coverageGapWarn" role="status" style="display:none">Coverage gaps this week.</div>
   <div class="card"><div class="card-head"><b>Week board</b><span class="pill gray" id="shiftWeekPill">Week</span></div><div class="table-scroll"><table><thead><tr><th>Employee</th><th>Mon</th><th>Tue</th><th>Wed</th><th>Thu</th><th>Fri</th><th>Sat</th><th>Sun</th><th class="r">On</th></tr></thead><tbody id="shiftBoard"></tbody></table></div></div>
   <div class="card"><div class="card-head"><b>Availability &amp; coverage</b><span class="pill gray" id="availCount">0</span></div>
     <div class="panel-note">From applications and employee files — use this when building the week board.</div>
@@ -1932,7 +2035,8 @@ body{
           a terrorism charge or the murder of a government employee.</p>
         </div>
       </div>
-      <div class="card"><div class="card-head"><b>Activity log</b></div><div class="log" id="fullActivity"></div></div>
+      <div class="card"><div class="card-head"><b>Activity log</b></div><div class="toolbar filter-rail" style="margin-bottom:8px"><input class="search" id="activitySearch" placeholder="Filter activity…" aria-label="Filter activity"></div>
+  <div class="log" id="fullActivity"></div></div>
     </div>
   </div>
 </section>
@@ -2019,6 +2123,16 @@ body{
     <div class="metric"><label>Activity log</label><strong id="backupActivityCount">0</strong><span id="backupActivityCap">Entries kept</span></div>
     <div class="metric"><label>Pay log</label><strong id="backupPayCount">0</strong><span>Sunday payment rows</span></div>
   </div>
+  <div class="card"><div class="card-head"><b>Storage health</b><span class="pill gray" id="storageHealthPill">OK</span></div>
+    <div class="card-body">
+      <div class="mini-note" id="storageHealthText">Checking localStorage…</div>
+      <div class="storage-meter" aria-hidden="true"><i id="storageMeterBar"></i></div>
+      <div class="actions" style="margin-top:12px">
+        <button type="button" class="btn tiny soft" id="validateImportBtn">Validate current file</button>
+        <button type="button" class="btn tiny" id="exportLicensesBtn">Export license calendar</button>
+      </div>
+    </div>
+  </div>
   <div class="callout plain">Autosave keeps the roster, hours, applications, expenses, relations, shifts, licenses, pay log, and activity history. Export a JSON file after big days — that copy is yours even if the browser is cleared.</div>
   <div class="grid-2 backup-actions">
     <div class="card"><div class="card-head"><b>Export</b></div><div class="card-body">
@@ -2095,10 +2209,16 @@ body{
   </div>
 
   <div class="file-panel" data-emp-panel="avail">
-    <h3>Availability</h3>
+    <h3>Availability &amp; floor profile</h3>
     <div class="mini-note">Copied from the application when hired — edit anytime for the coverage board.</div>
     <div class="field"><label>Days available (comma or checklist text)</label><input id="availDays" placeholder="Monday, Wednesday, Friday"></div>
     <div class="field"><label>Shift window</label><input id="availWindow" placeholder="e.g. Evenings / after 6 PM"></div>
+    <div class="field"><label>Station preference</label><select id="stationPref"><option value="">—</option><option>Bar</option><option>Kitchen</option><option>Floor</option><option>Any</option></select></div>
+    <div class="field-row">
+      <div class="field"><label>Uniform size</label><input id="uniformSize" placeholder="e.g. M / L"></div>
+      <div class="field"><label>Emergency contact</label><input id="emergencyName" placeholder="Name"></div>
+    </div>
+    <div class="field"><label>Emergency phone</label><input id="emergencyPhone" placeholder="Phone"></div>
     <div class="field"><label>Coverage notes</label><textarea id="availNotes" placeholder="Timezone, peak hours, station preference…"></textarea></div>
   </div>
 
@@ -2174,6 +2294,10 @@ body{
   <div class="field-row">
     <div class="field"><label>Time slot label (optional)</label><input id="appInterviewSlot" placeholder="e.g. Evening service"></div>
     <div class="field"><label>Offer role</label><select id="appRole"></select></div>
+  </div>
+  <div class="field-row">
+    <div class="field"><label>Applicant rating (1–5)</label><input id="appRating" type="number" min="1" max="5" step="1" placeholder="Optional"></div>
+    <div class="field"><label>Decline reason</label><input id="appDeclineReason" placeholder="Required when rejecting"></div>
   </div>
   <div class="field"><label>Notes</label><textarea id="appNotes" placeholder="Interview notes, references, availability..."></textarea></div>
   <div id="appPaperWrap" style="display:none">
@@ -2408,6 +2532,7 @@ body{
       <li><span>Jump to tab</span><kbd>g</kbd> then number / letter</li>
       <li><span>Filter sidebar tabs</span><kbd>/</kbd></li>
       <li><span>Quick jump menu</span><kbd>j</kbd></li>
+      <li><span>Command palette</span><kbd>Ctrl</kbd>+<kbd>K</kbd></li>
       <li><span>Close dialog / menu</span><kbd>Esc</kbd></li>
       <li><span>Save in open dialog</span><kbd>Enter</kbd></li>
       <li><span>This help</span><kbd>?</kbd></li>
@@ -2427,6 +2552,75 @@ body{
     <div class="dialog-foot">
       <button type="button" class="btn" id="closeSundayRun">Close</button>
       <button type="button" class="btn primary" id="copySundayRunModal">Copy to clipboard</button>
+    </div>
+  </div>
+</div>
+
+
+<!-- Bulk hours -->
+<div class="modal" id="bulkHoursModal" role="dialog" aria-modal="true" aria-labelledby="bulkHoursTitle" hidden>
+  <div class="dialog xl" role="document" tabindex="-1">
+    <h2 id="bulkHoursTitle">Bulk hours</h2>
+    <div class="mini-note">Set hours for the current open period. Paid stubs are locked.</div>
+    <div class="table-scroll" style="max-height:55vh"><table><thead><tr><th>Employee</th><th>Role</th><th class="r">Hours</th><th class="r">Bonus</th><th>Paid</th></tr></thead><tbody id="bulkHoursBody"></tbody></table></div>
+    <div class="dialog-foot">
+      <button type="button" class="btn" id="cancelBulkHours">Cancel</button>
+      <button type="button" class="btn primary" id="saveBulkHours">Save hours</button>
+    </div>
+  </div>
+</div>
+
+<!-- Termination checklist -->
+<div class="modal" id="termModal" role="dialog" aria-modal="true" aria-labelledby="termTitle" hidden>
+  <div class="dialog" role="document" tabindex="-1">
+    <h2 id="termTitle">Termination checklist</h2>
+    <div class="mini-note" id="termName">—</div>
+    <label class="checkline"><input type="checkbox" id="termKeys"><span>Keys / fob collected</span></label>
+    <label class="checkline"><input type="checkbox" id="termUniform"><span>Uniform returned</span></label>
+    <label class="checkline"><input type="checkbox" id="termPay"><span>Final pay noted</span></label>
+    <label class="checkline"><input type="checkbox" id="termAccess"><span>Discord / radio access removed</span></label>
+    <div class="field"><label>Notes</label><textarea id="termNotes"></textarea></div>
+    <div class="dialog-foot">
+      <button type="button" class="btn" id="cancelTerm">Cancel</button>
+      <button type="button" class="btn danger" id="confirmTerm">Terminate</button>
+    </div>
+  </div>
+</div>
+
+<!-- Changelog -->
+<div class="modal" id="changelogModal" role="dialog" aria-modal="true" aria-labelledby="changelogTitle" hidden>
+  <div class="dialog xl" role="document" tabindex="-1">
+    <h2 id="changelogTitle">Desk build v9 — 50 major upgrades</h2>
+    <div class="upgrade-grid" id="upgradeGrid"></div>
+    <div class="dialog-foot"><button type="button" class="btn primary" id="closeChangelog">Got it</button></div>
+  </div>
+</div>
+
+<!-- Command palette -->
+<div class="cmd-palette" id="cmdPalette" hidden>
+  <div class="cmd-panel" role="dialog" aria-modal="true" aria-label="Command palette">
+    <input id="cmdInput" type="search" placeholder="Jump to tab, action, or person…" autocomplete="off">
+    <ul class="cmd-list" id="cmdList"></ul>
+    <div class="mini-note">Tip: Ctrl/Cmd+K anytime. Esc closes.</div>
+  </div>
+</div>
+
+<!-- Settings -->
+<div class="settings-drawer" id="settingsDrawer" hidden>
+  <div class="settings-panel" role="dialog" aria-modal="true" aria-labelledby="settingsTitle">
+    <h2 id="settingsTitle" style="font:600 1.2rem 'Playfair Display',serif;margin:0 0 12px">Desk settings</h2>
+    <div class="field"><label>Payday label</label><input id="setPaydayLabel" placeholder="Sunday, 9:00 AM"></div>
+    <div class="field"><label>Tip split mode</label>
+      <select id="setTipMode"><option value="equal">Equal share</option><option value="hours">Weighted by hours</option></select>
+    </div>
+    <div class="field"><label>Tip-eligible roles (comma-separated)</label><input id="setTipRoles" placeholder="Waiter, Hostess, Cook"></div>
+    <div class="field"><label>High-hours warning threshold</label><input id="setOtHours" type="number" min="1" step="0.5" value="40"></div>
+    <label class="checkline"><input type="checkbox" id="setQuietMode"><span>Quiet mode (less motion / hover)</span></label>
+    <label class="checkline"><input type="checkbox" id="setRequireNotes"><span>Warn if closing period without notes</span></label>
+    <label class="checkline"><input type="checkbox" id="setCompactTodos"><span>Compact to-do rows by default</span></label>
+    <div class="dialog-foot" style="border:0;padding-top:8px">
+      <button type="button" class="btn" id="closeSettings">Close</button>
+      <button type="button" class="btn primary" id="saveSettings">Save settings</button>
     </div>
   </div>
 </div>
@@ -2481,7 +2675,20 @@ const LOG_TYPES = {
   discipline: { label: 'Discipline', tone: 'danger' },
   note: { label: 'Note', tone: 'gray' }
 };
-const TIP_ROLES = ['Waiter', 'Hostess', 'Cook'];
+const TIP_ROLES_DEFAULT = ['Waiter', 'Hostess', 'Cook'];
+const TIP_ROLES = TIP_ROLES_DEFAULT; /* legacy alias — use tipRoles() */
+const DESK_BUILD = 'v9';
+const UPGRADE_LIST = [
+  'Weighted tip split','Editable tip roles','Period vs last week','High-hours warnings','Bulk hours grid','Pay method on mark-paid','Auto closeout check','Per-stub Discord blurb','Period health score','Close notes warning',
+  'Applicant rating','Decline reason required','Paperwork % column','Pipeline aging badge','Interview agenda card','Ready-to-hire spotlight','Duplicate hard warn','Hire checklist','Awaiting-reply filter','Clickable stage metrics',
+  'Pin personal todos','Snooze system todos','Recurring weekly todos','Next-best-action card','Export todo queue','Batch clear visible','Compact todo mode','Smarter Open labels',
+  'Emergency contact','Station preference','Uniform size','Quick roster status','Rehire terminated','Termination checklist','Phone search','Mass onboarding tick','Hire-anniversary reminders','Shift coverage gaps',
+  'Copy last week shifts','Expense duplicate detector','Rebate aging list','License calendar export','Command palette Ctrl+K','Undo last action','Settings drawer','Storage health meter','Import validation','Activity search','Quiet/print density','Build v9 changelog'
+];
+let undoStack = [];
+let termTargetId = null;
+let cmdIndex = 0;
+
 const PAY_STATUSES = ['active', 'probation'];
 const STAGES = { application: 'Application', eligibility: 'Eligibility', interview: 'Interview', offer: 'Offer', hired: 'Hired', rejected: 'Rejected' };
 const STAGE_ORDER = ['application', 'eligibility', 'interview', 'offer', 'hired'];
@@ -2668,6 +2875,8 @@ function normalizeApplication(a) {
   a.interviewSlot = a.interviewSlot || '';
   if (!a.paperwork || typeof a.paperwork !== 'object') a.paperwork = {};
   if (!a.formData || typeof a.formData !== 'object') a.formData = {};
+  if (!('rating' in a)) a.rating = Number(a.rating || 0) || 0;
+  if (!('declineReason' in a)) a.declineReason = a.declineReason || '';
   Object.keys(a.paperwork).forEach(k => {
     const r = a.paperwork[k];
     if (!r || typeof r !== 'object') { delete a.paperwork[k]; return; }
@@ -2705,6 +2914,10 @@ function normalizeEmployee(e, fallbackDate) {
   }
   e.availability.window = String(e.availability.window || '');
   e.availability.notes = String(e.availability.notes || '');
+  e.stationPref = e.stationPref || '';
+  e.uniformSize = e.uniformSize || '';
+  e.emergencyName = e.emergencyName || '';
+  e.emergencyPhone = e.emergencyPhone || '';
   if (e.probationReview && typeof e.probationReview === 'object') {
     e.probationReview = {
       date: e.probationReview.date || '',
@@ -2836,9 +3049,13 @@ function migrate(raw) {
     due: t.due || '',
     done: !!t.done,
     created: t.created || today(),
-    priority: Math.min(3, Math.max(1, Number(t.priority) || 1))
+    priority: Math.min(3, Math.max(1, Number(t.priority) || 1)),
+    pinned: !!t.pinned,
+    recurring: t.recurring === 'weekly' ? 'weekly' : (t.recurring ? 'weekly' : '')
   })).filter(t => t.text) : [];
   out.todoDismissed = (raw.todoDismissed && typeof raw.todoDismissed === 'object') ? { ...raw.todoDismissed } : {};
+  out.todoSnoozed = (raw.todoSnoozed && typeof raw.todoSnoozed === 'object') ? { ...raw.todoSnoozed } : {};
+  out.settings = (raw.settings && typeof raw.settings === 'object') ? Object.assign({}, raw.settings) : {};
 
   if (!out.employees.length) return base;
   if (!out.periods.length) out.periods = base.periods;
@@ -2949,8 +3166,60 @@ function ensureMeta() {
   if (!('saveCount' in s.meta)) s.meta.saveCount = 0;
   if (!Array.isArray(s.todos)) s.todos = [];
   if (!s.todoDismissed || typeof s.todoDismissed !== 'object') s.todoDismissed = {};
+  if (!s.todoSnoozed || typeof s.todoSnoozed !== 'object') s.todoSnoozed = {};
   if (!Array.isArray(s.expenses)) s.expenses = [];
   if (!s.nextExpenseId) s.nextExpenseId = 1;
+  if (!s.settings || typeof s.settings !== 'object') s.settings = {};
+  const set = s.settings;
+  if (!set.paydayLabel) set.paydayLabel = 'Sunday, 9:00 AM';
+  if (!set.tipMode || !['equal','hours'].includes(set.tipMode)) set.tipMode = 'equal';
+  if (!Array.isArray(set.tipRoles) || !set.tipRoles.length) set.tipRoles = TIP_ROLES_DEFAULT.slice();
+  if (!set.otHours) set.otHours = 40;
+  if (!('quietMode' in set)) set.quietMode = false;
+  if (!('requireNotesOnClose' in set)) set.requireNotesOnClose = true;
+  if (!('compactTodos' in set)) set.compactTodos = false;
+  if (!Array.isArray(s.undoLog)) s.undoLog = [];
+}
+
+function tipRoles() {
+  ensureMeta();
+  return (s.settings.tipRoles && s.settings.tipRoles.length) ? s.settings.tipRoles : TIP_ROLES_DEFAULT;
+}
+
+function applyUiSettings() {
+  ensureMeta();
+  document.body.classList.toggle('quiet-mode', !!s.settings.quietMode);
+  document.body.classList.toggle('print-dense', !!s.settings.quietMode);
+  document.body.classList.toggle('compact-todos', !!s.settings.compactTodos || !!window.__todoCompact);
+  const payday = document.querySelector('.payday');
+  if (payday) {
+    let label = payday.querySelector('[data-payday-label]');
+    if (!label) {
+      const spans = payday.querySelectorAll('span');
+      label = spans[spans.length - 1];
+      if (label && label.id !== 'saveBadge') label.setAttribute('data-payday-label', '1');
+    }
+    if (label && label.id !== 'saveBadge') label.textContent = 'Payday: ' + (s.settings.paydayLabel || 'Sunday, 9:00 AM');
+  }
+}
+
+function pushUndo(entry) {
+  undoStack.push(entry);
+  if (undoStack.length > 20) undoStack.shift();
+  if ($('undoBtn')) $('undoBtn').disabled = !undoStack.length;
+}
+
+function runUndo() {
+  const u = undoStack.pop();
+  if (!u) return toast('Nothing to undo');
+  try {
+    if (typeof u.restore === 'function') u.restore();
+    save(); render();
+    toast('Undid: ' + (u.label || 'last action'));
+  } catch (err) {
+    toast('Could not undo');
+  }
+  if ($('undoBtn')) $('undoBtn').disabled = !undoStack.length;
 }
 
 function updateSaveBadge() {
@@ -3308,11 +3577,12 @@ function tipEligibleIds(p) {
   return Object.keys(p.entries || {}).filter(id => {
     const e = empById(id);
     const x = p.entries[id];
-    return e && PAY_STATUSES.includes(e.status) && TIP_ROLES.includes(e.role) && Number(x.hours || 0) > 0;
+    return e && PAY_STATUSES.includes(e.status) && tipRoles().includes(e.role) && Number(x.hours || 0) > 0;
   });
 }
 function distributeTips(p) {
   if (!p || p.status === 'closed') return { ok: true, eligible: 0, locked: 0 };
+  ensureMeta();
   const pool = Number(p.tipPool || 0);
   const lockedTips = {};
   Object.keys(p.entries || {}).forEach(id => {
@@ -3327,9 +3597,23 @@ function distributeTips(p) {
     Object.keys(lockedTips).forEach(id => { p.entries[id].tips = lockedTips[id]; });
     return { ok: pool <= lockedSum, eligible: 0, locked: Object.keys(lockedTips).length, remaining };
   }
-  const share = Math.floor(remaining / eligibleIds.length);
-  let remainder = remaining - share * eligibleIds.length;
-  eligibleIds.forEach((id, i) => { p.entries[id].tips = share + (i < remainder ? 1 : 0); });
+  if (s.settings.tipMode === 'hours') {
+    const hours = eligibleIds.map(id => Math.max(0, Number(p.entries[id].hours || 0)));
+    const totalH = hours.reduce((a, b) => a + b, 0) || eligibleIds.length;
+    let assigned = 0;
+    eligibleIds.forEach((id, i) => {
+      if (i === eligibleIds.length - 1) p.entries[id].tips = Math.max(0, remaining - assigned);
+      else {
+        const share = Math.floor(remaining * (hours[i] / totalH));
+        p.entries[id].tips = share;
+        assigned += share;
+      }
+    });
+  } else {
+    const share = Math.floor(remaining / eligibleIds.length);
+    let remainder = remaining - share * eligibleIds.length;
+    eligibleIds.forEach((id, i) => { p.entries[id].tips = share + (i < remainder ? 1 : 0); });
+  }
   Object.keys(lockedTips).forEach(id => { p.entries[id].tips = lockedTips[id]; });
   return { ok: true, eligible: eligibleIds.length, locked: Object.keys(lockedTips).length, remaining };
 }
@@ -3340,6 +3624,7 @@ function updateTipWarn(p) {
   const eligible = tipEligibleIds(p);
   const show = p.status === 'open' && pool > 0 && !eligible.length;
   el.classList.toggle('show', show);
+  if (show) el.textContent = 'Tip pool is set, but no ' + tipRoles().join(' / ') + ' with hours is eligible to share it' + (s.settings.tipMode === 'hours' ? ' (weighted mode).' : '.');
 }
 
 /* ---------------- pay log ---------------- */
@@ -3380,8 +3665,8 @@ function setPaidStatus(p, empId, paid, opts) {
   if (!!x.paidOut === !!paid) return false;
   x.paidOut = !!paid;
   if (paid) {
-    recordPayment(p, e, g);
-    if (!opts.silent) log('Paid ' + e.name + ' — ' + money(g));
+    recordPayment(p, e, g, opts.method || 'House payroll');
+    if (!opts.silent) log('Paid ' + e.name + ' — ' + money(g) + (opts.method ? ' via ' + opts.method : ''));
   } else {
     voidPayment(p, e, g);
     if (!opts.silent) log('Marked unpaid: ' + e.name);
@@ -3392,7 +3677,11 @@ function setPaidStatus(p, empId, paid, opts) {
 /* ---------------- to-do desk ---------------- */
 function isTodoDismissed(id) {
   ensureMeta();
-  return !!s.todoDismissed[id];
+  if (s.todoDismissed[id]) return true;
+  const sn = s.todoSnoozed && s.todoSnoozed[id];
+  if (sn && String(sn) > today()) return true;
+  if (sn && String(sn) <= today()) delete s.todoSnoozed[id];
+  return false;
 }
 
 function empHasSignedContract(e) {
@@ -3710,6 +3999,44 @@ function buildTodos() {
     }
   }
 
+  /* Hire anniversaries (same month-day within 7 days) */
+  (s.employees || []).filter(e => e.status !== 'terminated' && e.hire).forEach(e => {
+    const parts = String(e.hire).split('-');
+    if (parts.length < 3) return;
+    const thisYear = t.slice(0, 4) + '-' + parts[1] + '-' + parts[2];
+    let next = thisYear;
+    if (next < t) next = String(Number(t.slice(0, 4)) + 1) + '-' + parts[1] + '-' + parts[2];
+    const d = daysBetween(t, next);
+    if (d >= 0 && d <= 7) {
+      push({
+        id: 'anniv-' + e.id + '-' + next,
+        group: 'desk',
+        tone: d === 0 ? 'warn' : 'gray',
+        priority: d === 0 ? 2 : 1,
+        tag: 'Anniversary',
+        title: e.name,
+        detail: d === 0 ? 'Hire anniversary today.' : ('Hire anniversary in ' + d + ' day' + (d === 1 ? '' : 's') + ' (' + next + ').'),
+        due: next,
+        go: { type: 'emp', id: e.id }
+      });
+    }
+  });
+
+  /* Coverage gaps this week */
+  const gaps = coverageGaps();
+  if (gaps.length) {
+    push({
+      id: 'coverage-' + shiftWeek,
+      group: 'desk',
+      tone: 'warn',
+      priority: 2,
+      tag: 'Shifts',
+      title: 'Coverage gaps this week',
+      detail: gaps.join(', ') + ' have nobody on the board.',
+      go: { type: 'view', view: 'shifts' }
+    });
+  }
+
   /* Your list */
   (s.todos || []).filter(td => !td.done).forEach(td => {
     const overdue = td.due && daysBetween(t, td.due) < 0;
@@ -3720,15 +4047,17 @@ function buildTodos() {
       id: 'manual-' + td.id,
       group: 'yours',
       tone,
-      priority: overdue ? 3 : Math.max(pri, dueSoon ? 2 : 1),
-      tag: 'Yours',
+      priority: (td.pinned ? 4 : 0) + (overdue ? 3 : Math.max(pri, dueSoon ? 2 : 1)),
+      tag: td.pinned ? 'Pinned' : (td.recurring === 'weekly' ? 'Weekly' : 'Yours'),
       title: td.text,
-      detail: td.due
+      detail: (td.due
         ? (overdue ? 'Overdue since ' + td.due + '.' : 'Due ' + td.due + '.')
-        : (td.created ? 'Added ' + td.created + '.' : 'Personal reminder.'),
+        : (td.created ? 'Added ' + td.created + '.' : 'Personal reminder.')) +
+        (td.recurring === 'weekly' ? ' Recurs weekly.' : ''),
       due: td.due || '',
       go: null,
-      manualId: td.id
+      manualId: td.id,
+      pinned: !!td.pinned
     });
   });
 
@@ -3736,6 +4065,7 @@ function buildTodos() {
     const ga = TODO_GROUP_ORDER[a.group] || 9;
     const gb = TODO_GROUP_ORDER[b.group] || 9;
     if (ga !== gb) return ga - gb;
+    if (!!a.pinned !== !!b.pinned) return a.pinned ? -1 : 1;
     return (b.priority || 0) - (a.priority || 0) || String(a.title || '').localeCompare(String(b.title || ''));
   });
   return items;
@@ -3853,7 +4183,15 @@ window.dismissTodo = function (idx) {
   ensureMeta();
   if (item.manualId != null) {
     const td = s.todos.find(x => x.id === item.manualId);
-    if (td) td.done = true;
+    if (td) {
+      if (td.recurring === 'weekly') {
+        td.due = addDays(td.due || today(), 7);
+        td.done = false;
+        save(); render(); toast('Weekly to-do rolled +7 days');
+        return;
+      }
+      td.done = true;
+    }
   } else {
     s.todoDismissed[item.id] = today();
   }
@@ -3862,7 +4200,8 @@ window.dismissTodo = function (idx) {
   toast('To-do cleared');
 };
 
-function addManualTodo(text, due, priority) {
+function addManualTodo(text, due, priority, opts) {
+  opts = opts || {};
   const t = String(text || '').trim();
   if (!t) return toast('Write a to-do first');
   ensureMeta();
@@ -3873,7 +4212,9 @@ function addManualTodo(text, due, priority) {
     due: due || '',
     done: false,
     created: today(),
-    priority: pri
+    priority: pri,
+    pinned: !!opts.pinned,
+    recurring: opts.recurring === 'weekly' ? 'weekly' : ''
   });
   save();
   render();
@@ -3984,12 +4325,26 @@ function renderAttention() {
           '</span></div>' : '') +
         '</div>' +
         '<span class="attn-actions">' +
-          (i.go ? '<button class="btn tiny primary" onclick="goTodoAction(' + idx + ')">Open</button>' : '') +
+          (i.go ? '<button class="btn tiny primary" onclick="goTodoAction(' + idx + ')">' + esc(todoOpenLabel(i)) + '</button>' : '') +
+          (i.manualId != null ? '<button class="btn tiny soft" onclick="pinManualTodo(' + i.manualId + ')">' + (i.pinned ? 'Unpin' : 'Pin') + '</button>' : '') +
+          (!i.manualId ? '<button class="btn tiny soft" onclick="snoozeTodo(' + idx + ',1)" title="Snooze 1 day">1d</button>' +
+            '<button class="btn tiny soft" onclick="snoozeTodo(' + idx + ',3)" title="Snooze 3 days">3d</button>' +
+            '<button class="btn tiny soft" onclick="snoozeTodo(' + idx + ',7)" title="Snooze 7 days">7d</button>' : '') +
           '<button class="btn tiny soft" onclick="dismissTodo(' + idx + ')">Done</button>' +
         '</span>' +
       '</div>'
     );
   };
+  function todoOpenLabel(i) {
+    const tag = String(i.tag || '').toLowerCase();
+    const g = String(i.group || '');
+    if (tag === 'payday' || tag === 'friday' || tag === 'saturday') return 'Open payroll';
+    if (tag === 'contract' || tag === 'packet' || tag === 'onboarding' || tag === 'probation') return 'Open file';
+    if (g === 'pipeline' || tag === 'interview' || tag === 'offer') return 'Open hiring';
+    if (tag === 'shifts' || tag === 'anniversary') return 'Open';
+    if (g === 'desk' && tag === 'backup') return 'Open backup';
+    return 'Open';
+  }
 
   if (useGroups) {
     TODO_GROUPS.forEach(g => {
@@ -4016,6 +4371,551 @@ function renderAttention() {
 }
 
 /* legacy name kept for older call sites */
+
+
+/* =====================================================
+   V9 FEATURE HELPERS (50 upgrades)
+===================================================== */
+function paperCompletionPct(a) {
+  ensurePaperwork(a);
+  const keys = PAPER_ORDER.filter(k => PAPER_KINDS[k] && PAPER_KINDS[k].sendable && !(a.stage !== 'hired' && (k === 'contract' || k === 'packet')));
+  if (!keys.length) return 0;
+  let done = 0;
+  keys.forEach(k => {
+    const rec = a.paperwork[k];
+    if (!rec) return;
+    if (rec.reply || ['accepted','signed','confirmed','acknowledged','declined'].includes(rec.sendStatus)) done++;
+    else if (rec.sendStatus === 'sent' || rec.sendStatus === 'returned') done += 0.5;
+  });
+  return Math.round((done / keys.length) * 100);
+}
+
+function periodHealth(p) {
+  if (!p) return { score: 0, hints: [] };
+  let score = 100;
+  const hints = [];
+  const unpaid = unpaidCount(p);
+  if (unpaid) { score -= Math.min(40, unpaid * 8); hints.push(unpaid + ' unpaid'); }
+  const checksLeft = CHECK_KEYS.filter(k => !(p.checks && p.checks[k])).length;
+  if (checksLeft) { score -= checksLeft * 6; hints.push(checksLeft + ' checks open'); }
+  if (!String(p.notes || '').trim()) { score -= 8; hints.push('no notes'); }
+  const pool = Number(p.tipPool || 0);
+  if (pool > 0 && !tipEligibleIds(p).length) { score -= 12; hints.push('tips undistributed'); }
+  const ot = payableEmployees().filter(e => Number(entry(p, e.id).hours || 0) >= Number((s.settings && s.settings.otHours) || 40)).length;
+  if (ot) { score -= Math.min(15, ot * 5); hints.push(ot + ' high-hours'); }
+  score = Math.max(0, Math.min(100, score));
+  return { score, hints };
+}
+
+function priorPeriod(p) {
+  if (!p) return null;
+  const idx = s.periods.indexOf(p);
+  if (idx < 0) return s.periods[1] || null;
+  return s.periods[idx + 1] || null;
+}
+
+function renderCompareAndHealth(p) {
+  const prev = priorPeriod(p);
+  const fmtDelta = (cur, oldv, moneyish) => {
+    if (oldv == null) return '—';
+    const d = cur - oldv;
+    const sign = d > 0 ? '+' : '';
+    return sign + (moneyish ? money(d) : dec(d));
+  };
+  if ($('cmpGross')) $('cmpGross').textContent = prev ? fmtDelta(grossOf(p), grossOf(prev), true) : '—';
+  if ($('cmpHours')) $('cmpHours').textContent = prev ? fmtDelta(hoursOf(p), hoursOf(prev), false) : '—';
+  if ($('cmpTips')) $('cmpTips').textContent = prev ? fmtDelta(tipsOf(p), tipsOf(prev), true) : '—';
+  const h = periodHealth(p);
+  if ($('periodHealthScore')) $('periodHealthScore').textContent = h.score + '/100';
+  if ($('healthScoreLabel')) {
+    $('healthScoreLabel').textContent = h.score + '/100';
+    $('healthScoreLabel').style.color = h.score >= 80 ? 'var(--green)' : (h.score >= 55 ? 'var(--warn)' : 'var(--danger)');
+  }
+  if ($('healthHints')) $('healthHints').textContent = h.hints.length ? h.hints.join(' · ') : 'Looking solid';
+}
+
+function nextBestAction() {
+  const all = buildTodos();
+  if (!all.length) return { title: 'Desk is clear', detail: 'Nothing urgent. Add a personal to-do or export a backup.', go: { type: 'view', view: 'backup' } };
+  const sorted = all.slice().sort((a, b) => (b.priority || 0) - (a.priority || 0) || (a.due ? -1 : 1));
+  const top = sorted[0];
+  return { title: (top.tag ? top.tag + ': ' : '') + (top.title || 'Next task'), detail: top.detail || '', go: top.go, item: top };
+}
+
+function renderNba() {
+  const nba = nextBestAction();
+  window.__nba = nba;
+  if ($('nbaText')) $('nbaText').innerHTML = '<b style="color:var(--navy)">' + esc(nba.title) + '</b><br>' + esc(nba.detail || '');
+}
+
+function storageHealth() {
+  try {
+    const json = JSON.stringify(s);
+    const bytes = json.length * 2;
+    const limit = 5 * 1024 * 1024;
+    const pct = Math.min(100, Math.round((bytes / limit) * 1000) / 10);
+    return { bytes, pct, ok: pct < 70 };
+  } catch (err) {
+    return { bytes: 0, pct: 100, ok: false };
+  }
+}
+
+function validateDeskData() {
+  const issues = [];
+  const ids = new Set();
+  (s.employees || []).forEach(e => {
+    if (ids.has(e.id)) issues.push('Duplicate employee id ' + e.id);
+    ids.add(e.id);
+    if (!e.name) issues.push('Employee missing name (#' + e.id + ')');
+  });
+  (s.periods || []).forEach(p => {
+    Object.keys(p.entries || {}).forEach(id => {
+      if (!empById(id)) issues.push('Orphan hours entry ' + id + ' in ' + shortLabel(p));
+    });
+  });
+  (s.applications || []).forEach(a => {
+    if (a.stage === 'rejected' && !String(a.declineReason || '').trim()) issues.push('Rejected app without decline reason: ' + (a.name || a.id));
+  });
+  const maxEmp = (s.employees || []).reduce((m, e) => Math.max(m, Number(e.id) || 0), 0);
+  if (Number(s.nextId) <= maxEmp) issues.push('nextId behind max employee id');
+  return issues;
+}
+
+function exportTodosText() {
+  const all = buildTodos();
+  const lines = ["Frenchie's to-do desk — " + today(), ''];
+  all.forEach(i => {
+    lines.push('[' + (i.tag || i.group) + '] ' + (i.title || '') + (i.detail ? ' — ' + i.detail : '') + (i.due ? ' (due ' + i.due + ')' : ''));
+  });
+  if (!all.length) lines.push('(clear)');
+  return lines.join('\n');
+}
+
+function copyTextSafe(text, okMsg) {
+  if (navigator.clipboard && navigator.clipboard.writeText) {
+    navigator.clipboard.writeText(text).then(() => toast(okMsg || 'Copied')).catch(() => { window.prompt('Copy:', text); toast(okMsg || 'Copied'); });
+  } else { window.prompt('Copy:', text); toast(okMsg || 'Copied'); }
+}
+
+function openBulkHours() {
+  const p = current();
+  if (!p || p.status === 'closed') return toast('Open period only');
+  const body = $('bulkHoursBody');
+  if (!body) return;
+  body.innerHTML = payableEmployees().map(e => {
+    const x = entry(p, e.id);
+    return '<tr><td class="name">' + esc(e.name) + '</td><td>' + esc(e.role) + '</td>' +
+      '<td class="r"><input data-bh-hours="' + e.id + '" type="number" min="0" step="0.01" value="' + Number(x.hours || 0) + '" ' + (x.paidOut ? 'disabled' : '') + ' style="width:90px;text-align:right"></td>' +
+      '<td class="r"><input data-bh-bonus="' + e.id + '" type="number" min="0" step="1" value="' + Number(x.bonus || 0) + '" ' + (x.paidOut ? 'disabled' : '') + ' style="width:90px;text-align:right"></td>' +
+      '<td>' + (x.paidOut ? '<span class="pill green">Paid</span>' : '—') + '</td></tr>';
+  }).join('') || emptyState('No payable staff');
+  $('bulkHoursModal').classList.add('open');
+  $('bulkHoursModal').removeAttribute('hidden');
+}
+
+function saveBulkHours() {
+  const p = current();
+  if (!p || p.status === 'closed') return;
+  const before = JSON.parse(JSON.stringify(p.entries));
+  document.querySelectorAll('[data-bh-hours]').forEach(inp => {
+    const id = inp.getAttribute('data-bh-hours');
+    if (!p.entries[id]) p.entries[id] = { hours: 0, bonus: 0, tips: 0, rate: (empById(id) || {}).rate || 0, paidOut: false };
+    if (p.entries[id].paidOut) return;
+    p.entries[id].hours = Math.max(0, Number(inp.value) || 0);
+  });
+  document.querySelectorAll('[data-bh-bonus]').forEach(inp => {
+    const id = inp.getAttribute('data-bh-bonus');
+    if (!p.entries[id] || p.entries[id].paidOut) return;
+    p.entries[id].bonus = Math.max(0, Number(inp.value) || 0);
+  });
+  pushUndo({
+    label: 'bulk hours',
+    restore: () => { p.entries = before; }
+  });
+  distributeTips(p);
+  log('Bulk hours saved for ' + shortLabel(p));
+  save(); render();
+  $('bulkHoursModal').classList.remove('open');
+  toast('Bulk hours saved');
+}
+
+function copyLastWeekShifts() {
+  const prev = addDays(shiftWeek, -7);
+  if (!s.shifts[prev]) return toast('No board for the previous week');
+  const snap = JSON.parse(JSON.stringify(s.shifts[prev]));
+  const before = s.shifts[shiftWeek] ? JSON.parse(JSON.stringify(s.shifts[shiftWeek])) : null;
+  s.shifts[shiftWeek] = snap;
+  pushUndo({ label: 'copy shifts', restore: () => { if (before) s.shifts[shiftWeek] = before; else delete s.shifts[shiftWeek]; } });
+  save(); renderShifts(); toast('Copied last week onto this board');
+}
+
+function detectExpenseDupes(list) {
+  const seen = {};
+  const dupes = new Set();
+  (list || []).forEach(x => {
+    const key = [x.date, x.amount, (x.vendor || '').toLowerCase(), x.category].join('|');
+    if (seen[key]) dupes.add(x.id), dupes.add(seen[key]);
+    else seen[key] = x.id;
+  });
+  return dupes;
+}
+
+function rebateAgingRows() {
+  const t = today();
+  return (s.expenses || []).filter(x => x.reimbursable && x.rebateStatus !== 'reimbursed').map(x => {
+    const age = x.date ? daysBetween(x.date, t) : 0;
+    return { x, age };
+  }).sort((a, b) => b.age - a.age);
+}
+
+function coverageGaps() {
+  if (!s.shifts[shiftWeek]) return [];
+  const week = s.shifts[shiftWeek];
+  const gaps = [];
+  DAY_NAMES.forEach((day, i) => {
+    let on = 0;
+    activeEmployees().forEach(e => {
+      const row = week[e.id] || [];
+      if (row[i] && row[i] !== 'Off') on++;
+    });
+    if (on === 0) gaps.push(day);
+  });
+  return gaps;
+}
+
+function cmdCommands() {
+  const cmds = [];
+  document.querySelectorAll('.nav button[data-view]').forEach(b => {
+    cmds.push({ label: 'Open ' + (b.dataset.label || b.textContent), hint: 'Tab', run: () => activateView(b.dataset.view, { focusView: true }) });
+  });
+  cmds.push({ label: 'Copy Sunday pay run', hint: 'Payroll', run: () => copySundayRun() });
+  cmds.push({ label: 'Bulk hours', hint: 'Payroll', run: () => openBulkHours() });
+  cmds.push({ label: 'Open settings', hint: 'Desk', run: () => openSettings() });
+  cmds.push({ label: 'Export to-dos', hint: 'Todos', run: () => copyTextSafe(exportTodosText(), 'To-dos copied') });
+  cmds.push({ label: 'New application', hint: 'Hiring', run: () => { goView('hiring'); setTimeout(() => $('addApp') && $('addApp').click(), 40); } });
+  cmds.push({ label: 'Add employee', hint: 'People', run: () => openAddEmployee() });
+  cmds.push({ label: 'Undo last action', hint: 'Desk', run: () => runUndo() });
+  activeEmployees().forEach(e => {
+    cmds.push({ label: e.name, hint: e.role + ' · file', run: () => { goView('employees'); setTimeout(() => editEmployee(e.id), 50); } });
+  });
+  return cmds;
+}
+
+function openCmdPalette() {
+  const el = $('cmdPalette');
+  if (!el) return;
+  el.classList.add('open');
+  el.removeAttribute('hidden');
+  cmdIndex = 0;
+  renderCmdList('');
+  setTimeout(() => $('cmdInput') && $('cmdInput').focus(), 20);
+}
+function closeCmdPalette() {
+  const el = $('cmdPalette');
+  if (!el) return;
+  el.classList.remove('open');
+  el.setAttribute('hidden', '');
+}
+function renderCmdList(q) {
+  const list = $('cmdList');
+  if (!list) return;
+  const query = String(q || '').toLowerCase().trim();
+  const cmds = cmdCommands().filter(c => !query || (c.label + ' ' + c.hint).toLowerCase().includes(query)).slice(0, 12);
+  window.__cmdCmds = cmds;
+  if (cmdIndex >= cmds.length) cmdIndex = 0;
+  list.innerHTML = cmds.map((c, i) => '<li><button type="button" class="' + (i === cmdIndex ? 'active' : '') + '" data-cmd="' + i + '"><b>' + esc(c.label) + '</b><small>' + esc(c.hint) + '</small></button></li>').join('') || '<li class="mini-note">No matches</li>';
+  list.querySelectorAll('[data-cmd]').forEach(btn => {
+    btn.onclick = () => { const c = window.__cmdCmds[Number(btn.getAttribute('data-cmd'))]; closeCmdPalette(); if (c) c.run(); };
+  });
+}
+
+function openSettings() {
+  ensureMeta();
+  const d = $('settingsDrawer');
+  if (!d) return;
+  $('setPaydayLabel').value = s.settings.paydayLabel || '';
+  $('setTipMode').value = s.settings.tipMode || 'equal';
+  $('setTipRoles').value = tipRoles().join(', ');
+  $('setOtHours').value = s.settings.otHours || 40;
+  $('setQuietMode').checked = !!s.settings.quietMode;
+  $('setRequireNotes').checked = !!s.settings.requireNotesOnClose;
+  $('setCompactTodos').checked = !!s.settings.compactTodos;
+  d.classList.add('open'); d.removeAttribute('hidden');
+}
+function closeSettings() {
+  const d = $('settingsDrawer');
+  if (!d) return;
+  d.classList.remove('open'); d.setAttribute('hidden', '');
+}
+function saveSettings() {
+  ensureMeta();
+  s.settings.paydayLabel = ($('setPaydayLabel').value || 'Sunday, 9:00 AM').trim();
+  s.settings.tipMode = $('setTipMode').value === 'hours' ? 'hours' : 'equal';
+  s.settings.tipRoles = String($('setTipRoles').value || '').split(',').map(x => x.trim()).filter(Boolean);
+  if (!s.settings.tipRoles.length) s.settings.tipRoles = TIP_ROLES_DEFAULT.slice();
+  s.settings.otHours = Math.max(1, Number($('setOtHours').value) || 40);
+  s.settings.quietMode = !!$('setQuietMode').checked;
+  s.settings.requireNotesOnClose = !!$('setRequireNotes').checked;
+  s.settings.compactTodos = !!$('setCompactTodos').checked;
+  save(); applyUiSettings(); closeSettings(); render(); toast('Settings saved');
+}
+
+function openChangelog() {
+  const grid = $('upgradeGrid');
+  if (grid) grid.innerHTML = UPGRADE_LIST.map((t, i) => '<div class="upgrade-item"><b>' + (i + 1) + '. ' + esc(t) + '</b>Shipped in build v9</div>').join('');
+  $('changelogModal').classList.add('open');
+  $('changelogModal').removeAttribute('hidden');
+}
+
+function renderInterviewAgenda() {
+  const el = $('interviewAgenda');
+  if (!el) return;
+  const rows = s.applications.filter(a => a.stage === 'interview' && (a.interviewDate || a.interviewTime || a.interviewSlot))
+    .slice()
+    .sort((a, b) => String(a.interviewDate || '').localeCompare(String(b.interviewDate || '')) || String(a.interviewTime || '').localeCompare(String(b.interviewTime || '')));
+  if ($('agendaCount')) $('agendaCount').textContent = String(rows.length);
+  el.innerHTML = rows.length ? rows.map(a =>
+    '<div class="log-row" style="align-items:flex-start"><i class="dot"></i><span><b>' + esc(a.name) + '</b> · ' + esc(a.offerRole || 'New Hire') +
+    '<div class="history">' + esc(a.interviewDate || 'TBD') + (a.interviewTime ? ' · ' + esc(formatInterviewTime(a.interviewTime)) : '') +
+    (a.interviewSlot ? ' · ' + esc(a.interviewSlot) : '') + '</div></span>' +
+    '<button class="btn tiny" type="button" onclick="editApp(' + a.id + ')">Open</button></div>'
+  ).join('') : '<div class="mini-note">No interviews scheduled. Set date/time on an Interview-stage file.</div>';
+}
+
+function renderReadyHire() {
+  const el = $('readyHireSpotlight');
+  if (!el) return;
+  const rows = s.applications.filter(a => a.stage === 'offer' && offerAccepted(a) && !a.employeeId);
+  if ($('readyHireCount')) $('readyHireCount').textContent = String(rows.length);
+  el.innerHTML = rows.length ? rows.map(a =>
+    '<div class="log-row"><i class="dot"></i><span><b>' + esc(a.name) + '</b> accepted · ' + esc(a.offerRole || 'New Hire') +
+    ' · papers ' + paperCompletionPct(a) + '%</span>' +
+    '<button class="btn tiny primary" type="button" onclick="hireChecklist(' + a.id + ')">Hire ✓</button></div>'
+  ).join('') : '<div class="mini-note">Nobody with an accepted offer waiting on Hire.</div>';
+}
+
+window.rateApplicant = function (id, value) {
+  const a = findApp(id) || s.applications.find(x => x.id === id);
+  if (!a) return;
+  a.rating = Math.max(0, Math.min(5, Number(value) || 0));
+  save(); renderHiring();
+  toast(a.rating ? (a.name + ' rated ' + a.rating + '/5') : 'Cleared rating');
+};
+
+window.hireChecklist = function (id) {
+  const a = findApp(id) || s.applications.find(x => x.id === id);
+  if (!a) return;
+  ensurePaperwork(a);
+  const pct = paperCompletionPct(a);
+  const missing = [];
+  if (!offerAccepted(a)) missing.push('Offer not accepted yet');
+  if (!eligible(a)) missing.push('Eligibility not fully cleared');
+  if (pct < 50) missing.push('Paperwork only ' + pct + '%');
+  const body = [
+    'Hire checklist — ' + a.name,
+    'Role: ' + (a.offerRole || 'New Hire'),
+    'Paperwork: ' + pct + '%',
+    a.rating ? ('Rating: ' + a.rating + '/5') : 'Rating: none',
+    a.interviewDate ? ('Interview: ' + a.interviewDate) : 'Interview: —',
+    missing.length ? ('Flags: ' + missing.join('; ')) : 'Ready to convert to Active/Probation employee.',
+    '',
+    'Proceed to hire onto roster?'
+  ].join('\n');
+  if (!confirm(body)) return;
+  hireApplicant(a);
+};
+
+window.copyStubDiscord = function (empId) {
+  const p = current();
+  const e = empById(empId);
+  if (!e || !p) return;
+  const x = entry(p, empId);
+  const g = lineGross(e, x);
+  const text = [
+    "Frenchie's pay — " + e.name,
+    'Period: ' + shortLabel(p),
+    'Hours: ' + dec(x.hours) + ' @ ' + money(entryRate(e, x)) + '/hr',
+    'Bonus: ' + money(x.bonus || 0),
+    'Tips: ' + money(x.tips || 0),
+    'Gross: ' + money(g),
+    'Status: ' + (x.paidOut ? 'PAID' : 'UNPAID'),
+    'Payday: Sunday 9:00 AM from the house'
+  ].join('\n');
+  copyTextSafe(text, 'Discord pay blurb copied');
+};
+
+function findDupApplicants(name, phone, excludeId) {
+  const n = String(name || '').trim().toLowerCase();
+  const ph = String(phone || '').trim().toLowerCase();
+  return s.applications.filter(a => {
+    if (excludeId != null && String(a.id) === String(excludeId)) return false;
+    if (n && String(a.name || '').trim().toLowerCase() === n) return true;
+    const aph = String((a.formData && a.formData.phone) || a.phone || '').trim().toLowerCase();
+    if (ph && aph && aph === ph) return true;
+    return false;
+  });
+}
+
+function openTermChecklist(id) {
+  const e = empById(id);
+  if (!e) return;
+  termTargetId = id;
+  if ($('termName')) $('termName').textContent = e.name + ' · ' + e.role;
+  ['termKeys','termUniform','termPay','termAccess'].forEach(k => { if ($(k)) $(k).checked = false; });
+  if ($('termNotes')) $('termNotes').value = '';
+  $('termModal').classList.add('open');
+  $('termModal').removeAttribute('hidden');
+}
+
+function confirmTermination() {
+  const e = empById(termTargetId);
+  if (!e) return;
+  const checks = ['termKeys','termUniform','termPay','termAccess'].filter(k => $(k) && $(k).checked).length;
+  if (checks < 4 && !confirm('Only ' + checks + '/4 checklist items ticked. Terminate anyway?')) return;
+  const notes = ($('termNotes') && $('termNotes').value || '').trim();
+  const before = e.status;
+  e.status = 'terminated';
+  pushEmpLog(e, { type: 'status', summary: 'Terminated', from: before, to: 'terminated', detail: notes || 'Termination checklist' });
+  log('Terminated ' + e.name + (notes ? ' — ' + notes : ''));
+  pushUndo({
+    label: 'terminate ' + e.name,
+    restore: () => { e.status = before; }
+  });
+  $('termModal').classList.remove('open');
+  save(); render(); toast(e.name + ' terminated');
+}
+
+window.rehireEmployee = function (id) {
+  const e = empById(id);
+  if (!e || e.status !== 'terminated') return toast('Only terminated staff can be rehired');
+  if (!confirm('Rehire ' + e.name + ' onto probation as New Hire?')) return;
+  const before = { status: e.status, role: e.role, rate: e.rate, probationEnd: e.probationEnd };
+  e.status = 'probation';
+  e.role = 'New Hire';
+  e.rate = Number(s.roles['New Hire'] || 3000);
+  e.hire = today();
+  e.probationEnd = addDays(today(), 7);
+  e.onboarding = emptyOnboarding();
+  pushEmpLog(e, { type: 'hire', summary: 'Rehired as New Hire', from: before.status, to: 'probation', detail: 'Rehire from terminated' });
+  s.periods.filter(p => p.status === 'open').forEach(p => {
+    if (!p.entries[e.id]) p.entries[e.id] = { hours: 0, bonus: 0, tips: 0, rate: e.rate, paidOut: false };
+  });
+  pushUndo({ label: 'rehire ' + e.name, restore: () => Object.assign(e, before) });
+  log('Rehired ' + e.name);
+  save(); render(); toast(e.name + ' rehired on probation');
+  editEmployee(e.id);
+};
+
+window.quickEmpStatus = function (id, status) {
+  const e = empById(id);
+  if (!e) return;
+  if (status === 'terminated') return openTermChecklist(id);
+  const before = e.status;
+  if (before === status) return;
+  e.status = status;
+  if (status === 'probation' && !e.probationEnd) e.probationEnd = addDays(e.hire || today(), 7);
+  pushEmpLog(e, { type: 'status', summary: 'Status: ' + before + ' → ' + status, from: before, to: status, detail: 'Quick roster change' });
+  pushUndo({ label: 'status ' + e.name, restore: () => { e.status = before; } });
+  log(e.name + ' status → ' + status);
+  save(); render(); toast(e.name + ' → ' + status);
+};
+
+window.massOnboardTick = function () {
+  const key = prompt('Onboarding key to tick for all probation staff:\nuniform | station | menu | shadow | lead', 'uniform');
+  if (key == null) return;
+  const k = String(key).trim().toLowerCase();
+  if (!ONBOARD_LABELS[k]) return toast('Unknown key — use uniform, station, menu, shadow, or lead');
+  const list = s.employees.filter(e => e.status === 'probation' && !(e.onboarding && e.onboarding[k]));
+  if (!list.length) return toast('Nothing left to tick for ' + ONBOARD_LABELS[k]);
+  if (!confirm('Mark "' + ONBOARD_LABELS[k] + '" complete for ' + list.length + ' probation staff?')) return;
+  const snap = list.map(e => ({ id: e.id, val: !!(e.onboarding && e.onboarding[k]) }));
+  list.forEach(e => {
+    e.onboarding = Object.assign(emptyOnboarding(), e.onboarding || {});
+    e.onboarding[k] = true;
+    pushEmpLog(e, { type: 'onboarding', summary: ONBOARD_LABELS[k] + ' — marked complete', detail: 'Mass tick' });
+  });
+  pushUndo({
+    label: 'mass onboard',
+    restore: () => snap.forEach(x => { const e = empById(x.id); if (e && e.onboarding) e.onboarding[k] = x.val; })
+  });
+  log('Mass onboarding: ' + ONBOARD_LABELS[k] + ' × ' + list.length);
+  save(); render(); toast('Ticked ' + list.length + ' files');
+};
+
+window.pinManualTodo = function (manualId) {
+  const td = (s.todos || []).find(x => x.id === manualId);
+  if (!td) return;
+  td.pinned = !td.pinned;
+  save(); render(); toast(td.pinned ? 'Pinned' : 'Unpinned');
+};
+
+window.snoozeTodo = function (idx, days) {
+  const items = window.__todoItems || buildTodos();
+  const item = items[idx];
+  if (!item) return;
+  if (item.manualId != null) return toast('Personal to-dos: edit due date instead');
+  ensureMeta();
+  const d = Math.max(1, Number(days) || 1);
+  s.todoSnoozed[item.id] = addDays(today(), d);
+  save(); render(); toast('Snoozed ' + d + ' day' + (d === 1 ? '' : 's'));
+};
+
+function exportLicenseCalendar() {
+  const lines = ['BEGIN:VCALENDAR', 'VERSION:2.0', 'PRODID:-//Frenchies HR//Licenses//EN'];
+  (s.licenses || []).forEach(l => {
+    if (!l.expires) return;
+    const d = String(l.expires).replace(/-/g, '');
+    const uid = 'lic-' + l.id + '@frenchies';
+    lines.push('BEGIN:VEVENT');
+    lines.push('UID:' + uid);
+    lines.push('DTSTART;VALUE=DATE:' + d);
+    lines.push('SUMMARY:' + String(l.name || 'License').replace(/[,;]/g, ' ') + ' expires');
+    lines.push('DESCRIPTION:' + String(l.notes || '').replace(/\n/g, ' '));
+    lines.push('END:VEVENT');
+  });
+  lines.push('END:VCALENDAR');
+  const blob = new Blob([lines.join('\r\n')], { type: 'text/calendar' });
+  const a = document.createElement('a');
+  a.href = URL.createObjectURL(blob);
+  a.download = 'frenchies-licenses.ics';
+  a.click();
+  setTimeout(() => URL.revokeObjectURL(a.href), 1000);
+  toast('License calendar exported');
+}
+
+function filterActivityLog(q) {
+  const query = String(q || '').toLowerCase().trim();
+  const rows = (s.activity || []).filter(x => !query || String(x.text || '').toLowerCase().includes(query) || String(x.date || '').includes(query));
+  const html = rows.map(x =>
+    '<div class="log-row"><i class="dot"></i><span>' + esc(x.text) + '</span>' +
+    activityOpenLink(x.text) +
+    '<span class="date">' + esc(x.date) + '</span></div>'
+  ).join('') || '<div class="empty">No matching activity.</div>';
+  if ($('fullActivity')) $('fullActivity').innerHTML = html;
+}
+
+function batchClearVisibleTodos() {
+  const all = buildTodos();
+  const items = filteredTodos(all);
+  if (!items.length) return toast('Nothing visible to clear');
+  if (!confirm('Clear ' + items.length + ' visible to-do' + (items.length === 1 ? '' : 's') + '? System items hide until Restore; personal ones mark Done.')) return;
+  ensureMeta();
+  items.forEach(item => {
+    if (item.manualId != null) {
+      const td = s.todos.find(x => x.id === item.manualId);
+      if (td) {
+        if (td.recurring === 'weekly') {
+          td.due = addDays(td.due || today(), 7);
+          td.done = false;
+        } else td.done = true;
+      }
+    } else {
+      s.todoDismissed[item.id] = today();
+    }
+  });
+  save(); render(); toast('Cleared ' + items.length);
+}
+
 
 /* =====================================================
    RENDER
@@ -4044,6 +4944,10 @@ function render() {
       activeEmployees().length + ' on roster · ' + (p.status === 'open' ? 'period open' : 'period closed');
   }
   if ($('heroPeriodPill')) $('heroPeriodPill').textContent = shortLabel(p);
+  renderCompareAndHealth(p);
+  renderNba();
+  applyUiSettings();
+  updateSaveBadge();
 
   $('state').textContent = String(p.status).toUpperCase();
   $('state').className = 'pill ' + (p.status === 'closed' ? 'gray' : 'green');
@@ -4077,11 +4981,14 @@ function render() {
   renderBackupStats();
   updateSaveBadge();
 
-  $('fullActivity').innerHTML = s.activity.map(x =>
-    '<div class="log-row"><i class="dot"></i><span>' + esc(x.text) + '</span>' +
-    activityOpenLink(x.text) +
-    '<span class="date">' + esc(x.date) + '</span></div>'
-  ).join('') || '<div class="empty">Nothing logged yet.</div>';
+  if ($('activitySearch') && $('activitySearch').value.trim()) filterActivityLog($('activitySearch').value);
+  else {
+    $('fullActivity').innerHTML = s.activity.map(x =>
+      '<div class="log-row"><i class="dot"></i><span>' + esc(x.text) + '</span>' +
+      activityOpenLink(x.text) +
+      '<span class="date">' + esc(x.date) + '</span></div>'
+    ).join('') || '<div class="empty">Nothing logged yet.</div>';
+  }
 }
 
 function renderBackupStats() {
@@ -4097,6 +5004,13 @@ function renderBackupStats() {
   if ($('backupActivityCount')) $('backupActivityCount').textContent = (s.activity || []).length;
   if ($('backupActivityCap')) $('backupActivityCap').textContent = 'Entries kept (no cap)';
   if ($('backupPayCount')) $('backupPayCount').textContent = (s.payLog || []).length;
+  const sh = storageHealth();
+  if ($('storageHealthText')) $('storageHealthText').textContent = 'About ' + Math.round(sh.bytes / 1024) + ' KB in localStorage (~' + sh.pct + '% of a 5 MB soft ceiling).';
+  if ($('storageMeterBar')) $('storageMeterBar').style.width = sh.pct + '%';
+  if ($('storageHealthPill')) {
+    $('storageHealthPill').textContent = sh.ok ? 'OK' : 'HIGH';
+    $('storageHealthPill').className = 'pill ' + (sh.ok ? 'green' : 'warn');
+  }
 }
 
 function renderUnpaidDesk(p) {
@@ -4121,12 +5035,16 @@ function renderUnpaidDesk(p) {
 }
 
 function renderPayroll(p) {
+  ensureMeta();
+  const otLimit = Number((s.settings && s.settings.otHours) || 40);
   const list = payableEmployees();
   const rows = list.map(e => {
     const x = entry(p, e.id);
     const g = lineGross(e, x);
-    return '<tr>' +
-      '<td class="name">' + esc(e.name) + '</td>' +
+    const hrs = Number(x.hours || 0);
+    const ot = hrs >= otLimit;
+    return '<tr' + (ot ? ' class="spotlight-row"' : '') + '>' +
+      '<td class="name">' + esc(e.name) + (ot ? '<div class="ot-badge">High hours · ' + dec(hrs) + ' (warn ≥' + otLimit + ')</div>' : '') + '</td>' +
       '<td>' + esc(e.role) + '</td>' +
       '<td class="r mono">' + dec(x.hours) + '</td>' +
       '<td class="r mono">' + money(x.bonus) + '</td>' +
@@ -4135,7 +5053,8 @@ function renderPayroll(p) {
       '<td class="r">' + (g ? '<button class="btn tiny" onclick="togglePaid(' + e.id + ')">' + (x.paidOut ? 'Paid' : 'Unpaid') + '</button>' : '<span class="pill gray">—</span>') + '</td>' +
       '<td class="r">' +
         (p.status === 'open' ? '<button class="btn tiny" onclick="openHours(' + e.id + ')">Edit</button> ' : '<span class="pill gray">Locked</span> ') +
-        (g ? '<button class="btn tiny" onclick="openPayStubs(' + selectedPeriodIndex() + ',' + e.id + ')">Stub</button>' : '') +
+        (g ? '<button class="btn tiny" onclick="openPayStubs(' + selectedPeriodIndex() + ',' + e.id + ')">Stub</button> ' : '') +
+        (g ? '<button class="btn tiny soft" onclick="copyStubDiscord(' + e.id + ')" title="Discord pay blurb">Discord</button>' : '') +
       '</td>' +
       '</tr>';
   }).join('');
@@ -4230,11 +5149,28 @@ function renderHiring() {
     const closed = ['hired', 'rejected'].includes(a.stage);
     if (hireFilter === 'pipeline' && closed) return false;
     if (hireFilter === 'closed' && !closed) return false;
-    if (hq && !String(a.name || '').toLowerCase().includes(hq)) return false;
+    if (hireFilter === 'awaiting') {
+      if (closed) return false;
+      ensurePaperwork(a);
+      const waiting = Object.values(a.paperwork || {}).some(r => r && r.sendStatus === 'sent' && !r.reply);
+      if (!(waiting || a.stage === 'offer')) return false;
+    }
+    if (hireFilter === 'interview' && a.stage !== 'interview') return false;
+    if (hireFilter === 'offer' && a.stage !== 'offer') return false;
+    if (hireFilter === 'elig' && (closed || eligible(a))) return false;
+    if (hq && !(String(a.name || '').toLowerCase().includes(hq) || String(a.offerRole || '').toLowerCase().includes(hq))) return false;
     return true;
   });
   $('appCount').textContent = list.length + ' shown · ' + s.applications.length + ' total';
-  const filterLabel = hireFilter === 'pipeline' ? 'Showing pipeline' : (hireFilter === 'closed' ? 'Showing closed files' : 'Showing all applications');
+  const filterLabel = ({
+    pipeline: 'Showing pipeline',
+    closed: 'Showing closed files',
+    awaiting: 'Showing awaiting reply',
+    interview: 'Showing interviews',
+    offer: 'Showing offers',
+    elig: 'Showing eligibility holds',
+    all: 'Showing all applications'
+  })[hireFilter] || 'Showing applications';
   if ($('hireFilterLabel')) $('hireFilterLabel').textContent = filterLabel;
   document.querySelectorAll('[data-hire-filter]').forEach(btn => {
     const on = btn.getAttribute('data-hire-filter') === hireFilter;
@@ -4246,9 +5182,14 @@ function renderHiring() {
     ensurePaperwork(a);
     const idx = STAGE_ORDER.indexOf(a.stage);
     const canAdvance = idx > -1 && idx < STAGE_ORDER.length - 1;
+    const pct = paperCompletionPct(a);
+    const aged = a.applied ? daysBetween(a.applied, today()) : 0;
+    const stars = Number(a.rating || 0);
+    const ready = a.stage === 'offer' && offerAccepted(a) && !a.employeeId;
     const moveBtns = ['hired', 'rejected'].includes(a.stage)
       ? '<span class="pill gray">closed</span>'
       : (canAdvance ? '<button class="btn tiny" onclick="advanceApp(' + a.id + ')">&rarr; ' + esc(STAGES[STAGE_ORDER[idx + 1]]) + '</button> ' : '') +
+        (a.stage === 'offer' ? '<button class="btn tiny primary" onclick="hireChecklist(' + a.id + ')">Hire ✓</button> ' : '') +
         '<button class="btn tiny danger" onclick="rejectApp(' + a.id + ')">Reject</button>';
     const ps = paperSummary(a);
     const nextAct = nextHireAction(a);
@@ -4256,11 +5197,18 @@ function renderHiring() {
       '<span class="pill ' + statusClass(ps.status) + '">' + esc(ps.status === 'none' ? 'none' : ps.status) + '</span>' +
       '<button class="btn tiny" onclick="openAppPaper(' + a.id + ')">Paperwork</button></div>' +
       '<div class="history">' + esc(nextAct) +
-      (ps.docs ? ' · ' + ps.docs + ' on file · ' + ps.sent + ' sent · ' + ps.replies + ' returned' : '') + '</div>';
-    return '<tr>' +
-      '<td class="name">' + esc(a.name) + '</td>' +
+      (ps.docs ? ' · ' + ps.docs + ' on file · ' + ps.sent + ' sent · ' + ps.replies + ' returned' : '') + '</div>' +
+      '<div class="paper-meter" style="margin-top:6px"><i style="width:' + pct + '%"></i></div>';
+    const rateCell = '<select class="input" style="width:auto;min-height:28px;padding:2px 6px" onchange="rateApplicant(' + a.id + ',this.value)" aria-label="Rate ' + esc(a.name) + '">' +
+      [0,1,2,3,4,5].map(n => '<option value="' + n + '"' + (stars === n ? ' selected' : '') + '>' + (n ? ('★'.repeat(n)) : '—') + '</option>').join('') +
+      '</select>';
+    return '<tr' + (ready ? ' class="spotlight-row"' : '') + '>' +
+      '<td class="name">' + esc(a.name) + (ready ? ' <span class="pill gold">Ready</span>' : '') + '</td>' +
       '<td>' + stagePill(a.stage) + '</td>' +
       '<td>' + esc(a.applied || '—') + '</td>' +
+      '<td><span class="pill ' + (aged >= 7 ? 'warn' : 'gray') + '">' + aged + 'd</span></td>' +
+      '<td class="mono">' + pct + '%</td>' +
+      '<td>' + rateCell + '</td>' +
       '<td>' + (a.adminClear ? '<span class="pill green">Clear</span>' : '<span class="pill warn">Pending</span>') + '</td>' +
       '<td>' + (a.felonyClear ? '<span class="pill green">Clear</span>' : '<span class="pill warn">Pending</span>') + '</td>' +
       '<td>' + paperCell + '</td>' +
@@ -4269,9 +5217,12 @@ function renderHiring() {
       '</tr>';
   }).join('') : emptyState(
     hireFilter === 'closed' ? 'No closed files yet.' : (hireFilter === 'pipeline' ? 'No open applications.' : 'No applications on the desk.'),
-    hireFilter === 'pipeline' ? 'Click New application to start a hire.' : ''
+    hireFilter === 'pipeline' ? 'Click New application to start a hire.' : '',
+    11
   );
 
+  renderInterviewAgenda();
+  renderReadyHire();
   renderFiledReplies();
   if ($('paperModal').classList.contains('open') && paperAppId != null && findApp(paperAppId)) renderPaperList(paperAppId);
 }
@@ -4539,7 +5490,10 @@ function renderAppPaperBadges(a) {
 function renderEmployees() {
   const q = ($('search').value || '').toLowerCase();
   const st = $('statusFilter').value;
-  const list = s.employees.filter(e => (e.name + ' ' + e.role).toLowerCase().includes(q) && (st ? e.status === st : true));
+  const list = s.employees.filter(e => {
+    const hay = (e.name + ' ' + e.role + ' ' + (e.phone || '') + ' ' + (e.emergencyPhone || '')).toLowerCase();
+    return hay.includes(q) && (st ? e.status === st : true);
+  });
   $('shown').textContent = list.length + ' shown';
   $('employees').innerHTML = list.length ? list.map(e => {
     const hist = (e.history || []).slice(-2).map(h => {
@@ -4549,8 +5503,14 @@ function renderEmployees() {
     }).join(' · ');
     const prob = e.status === 'probation' && e.probationEnd ? '<div class="history">Probation ends ' + esc(e.probationEnd) + '</div>' : '';
     const docs = (e.documents || []).length;
+    const quick = e.status === 'terminated'
+      ? '<button class="btn tiny soft" onclick="rehireEmployee(' + e.id + ')">Rehire</button> '
+      : '<select class="input" style="width:auto;min-height:28px;padding:2px 6px" onchange="quickEmpStatus(' + e.id + ',this.value)" aria-label="Status for ' + esc(e.name) + '">' +
+        ['active','probation','suspended','terminated'].map(stt => '<option value="' + stt + '"' + (e.status === stt ? ' selected' : '') + '>' + stt + '</option>').join('') +
+        '</select> ';
     return '<tr>' +
       '<td class="name">' + esc(e.name) + (e.phone ? ' <span class="pill gray">' + esc(e.phone) + '</span>' : '') +
+      (e.stationPref ? '<div class="history">Station: ' + esc(e.stationPref) + (e.uniformSize ? ' · Uniform ' + esc(e.uniformSize) : '') + '</div>' : '') +
       (hist ? '<div class="history">' + esc(hist) + '</div>' : '') + prob +
       (docs ? '<div class="history">' + docs + ' document' + (docs === 1 ? '' : 's') + ' on file</div>' : '') + '</td>' +
       '<td>' + esc(e.role) + '</td>' +
@@ -4558,7 +5518,7 @@ function renderEmployees() {
       '<td class="r mono">' + money(e.rate) + '</td>' +
       '<td class="r">' + esc(e.hire) + '</td>' +
       '<td class="r">' + (e.strikes ? '<span class="pill ' + (e.strikes >= 3 ? 'danger' : 'warn') + '">' + e.strikes + '</span>' : '<span class="pill green">0</span>') + '</td>' +
-      '<td class="r"><button class="btn tiny" onclick="editEmployee(' + e.id + ')">Open file</button></td>' +
+      '<td class="r">' + quick + '<button class="btn tiny" onclick="editEmployee(' + e.id + ')">Open file</button></td>' +
       '</tr>';
   }).join('') : '<tr><td colspan="7" class="empty">No staff match that search.</td></tr>';
 
@@ -4730,9 +5690,10 @@ function renderExpenses() {
   if ($('expStatusFilter') && $('expStatusFilter').value) bits.push(REBATE_STATUS[$('expStatusFilter').value] || $('expStatusFilter').value);
   if ($('expFilterLabel')) $('expFilterLabel').textContent = bits.length ? bits.join(' · ') : 'Showing all';
 
+  const dupes = detectExpenseDupes(list);
   $('expenses').innerHTML = list.length ? list.map(x =>
-    '<tr>' +
-    '<td>' + esc(x.date) + '</td>' +
+    '<tr' + (dupes.has(x.id) ? ' class="dupe-row"' : '') + '>' +
+    '<td>' + esc(x.date) + (dupes.has(x.id) ? '<div class="ot-badge">Possible duplicate</div>' : '') + '</td>' +
     '<td><span class="pill gray">' + esc(expenseCatLabel(x.category)) + '</span></td>' +
     '<td class="name">' + esc(x.vendor || '—') +
     (x.description ? '<div class="history">' + esc(x.description) + '</div>' : '') +
@@ -4747,6 +5708,17 @@ function renderExpenses() {
     '<button class="btn tiny danger" onclick="delExpense(' + x.id + ')">Delete</button></td>' +
     '</tr>'
   ).join('') : emptyState('No expenses match.', 'Log food, drink, Weazel ads, permits, and more.');
+  const aging = rebateAgingRows();
+  if ($('rebateAgeCount')) $('rebateAgeCount').textContent = String(aging.length);
+  if ($('rebateAgingBody')) {
+    $('rebateAgingBody').innerHTML = aging.length ? aging.map(({ x, age }) =>
+      '<tr><td><span class="pill ' + (age >= 14 ? 'danger' : (age >= 7 ? 'warn' : 'gray')) + '">' + age + 'd</span></td>' +
+      '<td>' + esc(x.date) + '</td><td class="name">' + esc(x.vendor || '—') + '</td>' +
+      '<td class="r mono">' + money(x.amount) + '</td>' +
+      '<td><span class="pill ' + rebateStatusPill(x.rebateStatus) + '">' + esc(REBATE_STATUS[x.rebateStatus] || 'Pending') + '</span></td>' +
+      '<td class="r"><button class="btn tiny" onclick="editExpense(' + x.id + ')">Open</button></td></tr>'
+    ).join('') : emptyState('No open reimbursables.', '', 6);
+  }
 
   const catRows = Object.keys(EXPENSE_CATS).filter(k => byCat[k]).concat(Object.keys(byCat).filter(k => !EXPENSE_CATS[k]));
   $('expByCat').innerHTML = catRows.length
@@ -4992,6 +5964,18 @@ function renderShifts() {
     const on = row.filter(x => x !== 'Off').length;
     return '<tr><td class="name">' + esc(e.name) + '<div class="history">' + esc(e.role) + '</div></td>' + cells + '<td class="r mono">' + on + '</td></tr>';
   }).join('') : '<tr><td colspan="9" class="empty">No staff on roster.</td></tr>';
+  const gaps = coverageGaps();
+  const warn = $('coverageGapWarn');
+  if (warn) {
+    if (gaps.length) {
+      warn.style.display = '';
+      warn.classList.add('show');
+      warn.innerHTML = '<span class="cov-gap">Coverage gaps:</span> ' + gaps.join(', ') + ' — nobody assigned on those days.';
+    } else {
+      warn.style.display = 'none';
+      warn.classList.remove('show');
+    }
+  }
   renderAvailabilityBoard();
 }
 
@@ -5553,11 +6537,18 @@ window.jumpStubPeriod = function (i) {
 window.markPaidNow = function (id) {
   const p = current();
   if (p.status === 'closed' && !confirm('This period is closed. Mark paid anyway?')) return;
-  if (setPaidStatus(p, id, true)) {
+  const method = promptPayMethod();
+  if (method == null) return;
+  if (setPaidStatus(p, id, true, { method })) {
     if (p.checks && unpaidCount(p) === 0) p.checks.markPaid = true;
     save(); render(); toast('Marked paid');
   }
 };
+function promptPayMethod() {
+  const m = prompt('Pay method (House payroll / Cash / Bank / Discord):', 'House payroll');
+  if (m == null) return null;
+  return String(m).trim() || 'House payroll';
+}
 
 /* ---------------- clipboard helpers ---------------- */
 function fallbackCopy(text) {
@@ -7522,15 +8513,26 @@ function createNextPeriod() {
 function closePeriodAndRoll(p, opts) {
   opts = opts || {};
   if (!p || p.status === 'closed') { toast('Already closed'); return false; }
+  ensureMeta();
   const unpaid = unpaidCount(p);
   if (!opts.skipUnpaidConfirm && unpaid > 0 && !confirm(unpaid + ' unpaid stub(s) remain. Close anyway?')) return false;
+  if (s.settings.requireNotesOnClose && !String(p.notes || '').trim()) {
+    if (!confirm('No period notes yet. Close anyway? (Turn off this warning in Settings.)')) return false;
+  }
   if (!opts.skipCloseConfirm && !confirm('Close and preserve ' + label(p) + '? A new period will open.')) return false;
   Object.keys(p.entries).forEach(id => {
     const e = empById(id);
     if (e && !p.entries[id].rate) p.entries[id].rate = e.rate;
   });
+  if (!p.checks) p.checks = {};
+  if (unpaid === 0) {
+    p.checks.verifyHours = true;
+    p.checks.confirmRates = true;
+    p.checks.markPaid = true;
+    p.checks.approvePayment = true;
+  }
   p.status = 'closed';
-  if (p.checks) p.checks.closeRecord = true;
+  p.checks.closeRecord = true;
   log('Closed ' + label(p) + ' — ' + money(grossOf(p)));
   createNextPeriod();
   save();
@@ -7596,7 +8598,13 @@ window.togglePaid = function (id) {
   const x = entry(p, id);
   const next = !x.paidOut;
   if (p.status === 'closed' && !confirm('This period is closed. Change paid status for ' + e.name + ' anyway?')) return;
-  if (setPaidStatus(p, id, next)) {
+  let opts = {};
+  if (next) {
+    const method = promptPayMethod();
+    if (method == null) return;
+    opts.method = method;
+  }
+  if (setPaidStatus(p, id, next, opts)) {
     if (p.checks && unpaidCount(p) === 0) p.checks.markPaid = true;
     save(); render();
   }
@@ -7642,6 +8650,10 @@ window.editEmployee = function (id) {
   if ($('availDays')) $('availDays').value = ((e.availability && e.availability.days) || []).join(', ');
   if ($('availWindow')) $('availWindow').value = (e.availability && e.availability.window) || '';
   if ($('availNotes')) $('availNotes').value = (e.availability && e.availability.notes) || '';
+  if ($('stationPref')) $('stationPref').value = e.stationPref || '';
+  if ($('uniformSize')) $('uniformSize').value = e.uniformSize || '';
+  if ($('emergencyName')) $('emergencyName').value = e.emergencyName || '';
+  if ($('emergencyPhone')) $('emergencyPhone').value = e.emergencyPhone || '';
   $('deleteEmployee').style.display = 'inline-block';
   if ($('empTabFile')) $('empTabFile').style.display = 'inline-flex';
   renderEmployeeFile(e);
@@ -7698,6 +8710,8 @@ window.editApp = function (id) {
   if ($('appInterviewSlot')) $('appInterviewSlot').value = a.interviewSlot || '';
   roleOptions($('appRole'), a.offerRole || 'New Hire');
   $('appNotes').value = a.notes || '';
+  if ($('appRating')) $('appRating').value = a.rating || '';
+  if ($('appDeclineReason')) $('appDeclineReason').value = a.declineReason || '';
   $('deleteApp').style.display = 'inline-block';
   renderAppPaperBadges(a);
   syncHireButton();
@@ -7747,11 +8761,16 @@ window.advanceApp = function (id) {
 window.rejectApp = function (id) {
   const a = s.applications.find(x => x.id === id);
   if (!a) return;
-  if (!confirmDanger('Reject ' + a.name + '?', 'A decline letter will be drafted on their hiring file.')) return;
+  const reason = prompt('Decline reason (required):', a.declineReason || '');
+  if (reason == null) return;
+  if (!String(reason).trim()) return toast('Decline reason required');
+  if (!confirmDanger('Reject ' + a.name + '?', String(reason).trim())) return;
+  a.declineReason = String(reason).trim();
   a.stage = 'rejected';
+  a.rating = Number(a.rating || 0);
   ensurePaperwork(a);
   if (!a.paperwork.decline) setPaper(a, 'decline', letterDecline(a));
-  log('Application rejected: ' + a.name);
+  log('Application rejected: ' + a.name + ' — ' + a.declineReason);
   save(); render(); toast('Application rejected · decline letter drafted');
   if (confirm('Download the decline letter to send on Discord?')) downloadSendPacket(a.id, 'decline');
 };
@@ -8412,7 +9431,9 @@ function hireApplicant(a) {
   }
   const role = a.offerRole || 'New Hire';
   const hire = today();
-  const avail = availabilityFromFormData(a.formData || {});
+  const fd = a.formData || {};
+  const avail = availabilityFromFormData(fd);
+  const stationPref = String(fd.preferStation || fd.preferStationOther || (Array.isArray(fd.stations) ? fd.stations[0] : '') || '').trim();
   const e = normalizeEmployee({
     id: s.nextId++,
     name: a.name,
@@ -8420,7 +9441,7 @@ function hireApplicant(a) {
     rate: Number(s.roles[role] || 3000),
     hire,
     status: 'probation',
-    phone: (a.formData && a.formData.phone) || a.phone || '',
+    phone: fd.phone || a.phone || '',
     supervisorId: (s.employees.find(x => x.role === 'Operations Manager') || {}).id || null,
     probationEnd: addDays(hire, 7),
     onboarding: emptyOnboarding(),
@@ -8428,6 +9449,9 @@ function hireApplicant(a) {
     documents: [],
     applicationId: a.id,
     availability: avail,
+    stationPref: stationPref || '',
+    emergencyName: String(fd.emergencyName || '').trim(),
+    emergencyPhone: String(fd.emergencyPhone || '').trim(),
     history: [{ date: hire, type: 'hire', summary: 'Hired as ' + role, from: null, to: role, detail: 'Hired from application' }]
   }, hire);
   s.employees.push(e);
@@ -8646,11 +9670,36 @@ document.addEventListener('keydown', ev => {
   const typing = isTypingTarget(ev.target);
   const sheetOpen = $('shortcutSheet') && $('shortcutSheet').classList.contains('open');
   const modalOpen = document.querySelector('.modal.open');
+  const cmdOpen = $('cmdPalette') && $('cmdPalette').classList.contains('open');
+  const settingsOpen = $('settingsDrawer') && $('settingsDrawer').classList.contains('open');
+
+  if ((ev.metaKey || ev.ctrlKey) && String(ev.key || '').toLowerCase() === 'k') {
+    ev.preventDefault();
+    if (cmdOpen) closeCmdPalette();
+    else openCmdPalette();
+    return;
+  }
 
   if (ev.key === 'Escape') {
+    if (cmdOpen) { closeCmdPalette(); return; }
+    if (settingsOpen) { closeSettings(); return; }
     if (sheetOpen) { closeShortcutSheet(); return; }
     if (modalOpen) { setOverlayOpen(modalOpen, false); return; }
     if ($('side').classList.contains('open')) { closeSidebar(); return; }
+    return;
+  }
+
+  if (cmdOpen) {
+    const cmds = window.__cmdCmds || [];
+    if (ev.key === 'ArrowDown') { ev.preventDefault(); cmdIndex = Math.min(cmds.length - 1, cmdIndex + 1); renderCmdList($('cmdInput') && $('cmdInput').value); return; }
+    if (ev.key === 'ArrowUp') { ev.preventDefault(); cmdIndex = Math.max(0, cmdIndex - 1); renderCmdList($('cmdInput') && $('cmdInput').value); return; }
+    if (ev.key === 'Enter') {
+      ev.preventDefault();
+      const c = cmds[cmdIndex];
+      closeCmdPalette();
+      if (c) c.run();
+      return;
+    }
     return;
   }
 
@@ -8665,7 +9714,7 @@ document.addEventListener('keydown', ev => {
     return;
   }
 
-  if (sheetOpen || modalOpen) return;
+  if (sheetOpen || modalOpen || settingsOpen) return;
   if (ev.metaKey || ev.ctrlKey || ev.altKey) return;
 
   if (!typing && (ev.key === '?' || (ev.shiftKey && ev.key === '/'))) {
@@ -8726,11 +9775,17 @@ $('todoAddBtn').onclick = () => {
   addManualTodo(
     $('todoAddText').value,
     ($('todoAddDue') && $('todoAddDue').value) || '',
-    ($('todoAddPri') && $('todoAddPri').value) || 1
+    ($('todoAddPri') && $('todoAddPri').value) || 1,
+    {
+      pinned: !!( $('todoAddPin') && $('todoAddPin').checked ),
+      recurring: ($('todoAddRecur') && $('todoAddRecur').checked) ? 'weekly' : ''
+    }
   );
   $('todoAddText').value = '';
   if ($('todoAddDue')) $('todoAddDue').value = '';
   if ($('todoAddPri')) $('todoAddPri').value = '1';
+  if ($('todoAddPin')) $('todoAddPin').checked = false;
+  if ($('todoAddRecur')) $('todoAddRecur').checked = false;
   $('todoAddText').focus();
 };
 $('todoAddText').onkeydown = ev => {
@@ -8821,7 +9876,9 @@ $('markAllPaid').onclick = () => {
   if (!pending.length) return toast('Nothing outstanding');
   if (p.status === 'closed' && !confirm('This period is closed. Mark all unpaid stubs paid anyway?')) return;
   if (!confirm('Mark ' + pending.length + ' stub(s) as paid for the Sunday run?')) return;
-  pending.forEach(e => setPaidStatus(p, e.id, true, { silent: true }));
+  const method = promptPayMethod();
+  if (method == null) return;
+  pending.forEach(e => setPaidStatus(p, e.id, true, { silent: true, method }));
   if (p.checks) p.checks.markPaid = true;
   log('Sunday pay run for ' + shortLabel(p) + ' — ' + pending.length + ' stub(s), ' + money(pending.reduce((a, e) => a + lineGross(e, entry(p, e.id)), 0)));
   save(); render(); toast(pending.length + ' stub(s) marked paid');
@@ -8864,6 +9921,57 @@ bindClick('closeSundayRun', () => { if ($('sundayRunModal')) $('sundayRunModal')
 bindClick('closePeriodTop', () => closePeriodAndRoll(current()));
 bindClick('probPassBtn', () => completeProbation(true));
 bindClick('probFailBtn', () => completeProbation(false));
+
+/* ---------- v9 wiring ---------- */
+bindClick('bulkHoursBtn', openBulkHours);
+bindClick('saveBulkHours', saveBulkHours);
+bindClick('cancelBulkHours', () => { if ($('bulkHoursModal')) $('bulkHoursModal').classList.remove('open'); });
+bindClick('copyLastWeekShifts', copyLastWeekShifts);
+bindClick('openSettingsBtn', openSettings);
+bindClick('closeSettings', closeSettings);
+bindClick('saveSettings', saveSettings);
+bindClick('openCmdBtn', openCmdPalette);
+bindClick('openChangelogBtn', openChangelog);
+bindClick('closeChangelog', () => { if ($('changelogModal')) $('changelogModal').classList.remove('open'); });
+bindClick('undoBtn', runUndo);
+bindClick('nbaGoBtn', () => {
+  const nba = window.__nba || nextBestAction();
+  if (nba && nba.go) goTodo({ go: nba.go, id: (nba.item && nba.item.id) || '', tag: '' });
+  else if (nba && nba.item) goTodo(nba.item);
+});
+bindClick('exportTodosBtn', () => copyTextSafe(exportTodosText(), 'To-dos copied'));
+bindClick('batchClearTodosBtn', batchClearVisibleTodos);
+bindClick('todoCompactBtn', () => {
+  window.__todoCompact = !window.__todoCompact;
+  applyUiSettings();
+  toast(window.__todoCompact ? 'Compact to-dos on' : 'Compact to-dos off');
+});
+bindClick('massOnboardBtn', massOnboardTick);
+bindClick('exportLicensesBtn', exportLicenseCalendar);
+bindClick('validateImportBtn', () => {
+  const issues = validateDeskData();
+  if (!issues.length) return toast('Validation clean — no issues found');
+  alert('Validation report (' + issues.length + '):\n\n' + issues.slice(0, 20).join('\n') + (issues.length > 20 ? '\n…' : ''));
+});
+bindClick('confirmTerm', confirmTermination);
+bindClick('cancelTerm', () => { if ($('termModal')) $('termModal').classList.remove('open'); termTargetId = null; });
+if ($('activitySearch')) $('activitySearch').oninput = () => filterActivityLog($('activitySearch').value);
+if ($('cmdInput')) $('cmdInput').oninput = () => { cmdIndex = 0; renderCmdList($('cmdInput').value); };
+document.querySelectorAll('[data-hire-metric]').forEach(btn => {
+  btn.onclick = () => {
+    const m = btn.getAttribute('data-hire-metric');
+    if (m === 'pipeline') hireFilter = 'pipeline';
+    else if (m === 'elig') hireFilter = 'elig';
+    else if (m === 'interview') hireFilter = 'interview';
+    else if (m === 'offer') hireFilter = 'offer';
+    goView('hiring');
+    renderHiring();
+  };
+});
+document.querySelectorAll('.modal').forEach(m => {
+  try { if (typeof _modalObserver !== 'undefined') _modalObserver.observe(m, { attributes: true }); } catch (err) {}
+});
+
 document.querySelectorAll('#empFileTabs .file-tab').forEach(btn => {
   btn.onclick = () => setEmpFileTab(btn.getAttribute('data-emp-tab') || 'onboard');
 });
@@ -8898,6 +10006,10 @@ function openAddEmployee() {
   if ($('availDays')) $('availDays').value = '';
   if ($('availWindow')) $('availWindow').value = '';
   if ($('availNotes')) $('availNotes').value = '';
+  if ($('stationPref')) $('stationPref').value = '';
+  if ($('uniformSize')) $('uniformSize').value = '';
+  if ($('emergencyName')) $('emergencyName').value = '';
+  if ($('emergencyPhone')) $('emergencyPhone').value = '';
   $('deleteEmployee').style.display = 'none';
   if ($('empTabFile')) $('empTabFile').style.display = 'none';
   if ($('probationBox')) $('probationBox').style.display = 'none';
@@ -9022,7 +10134,11 @@ $('save').onclick = () => {
       window: String(($('availWindow') && $('availWindow').value) || '').trim(),
       notes: String(($('availNotes') && $('availNotes').value) || '').trim()
     };
-    Object.assign(e, { name: n, role: r, rate, hire: h, status: st, phone, supervisorId, probationEnd, onboarding, availability });
+    const stationPref = ($('stationPref') && $('stationPref').value) || '';
+    const uniformSize = ($('uniformSize') && $('uniformSize').value || '').trim();
+    const emergencyName = ($('emergencyName') && $('emergencyName').value || '').trim();
+    const emergencyPhone = ($('emergencyPhone') && $('emergencyPhone').value || '').trim();
+    Object.assign(e, { name: n, role: r, rate, hire: h, status: st, phone, supervisorId, probationEnd, onboarding, availability, stationPref, uniformSize, emergencyName, emergencyPhone });
     log('Updated file: ' + n + (logged.length ? ' (' + logged.join(', ') + ')' : ''));
   } else {
     if (nameOnRoster(n) && !confirm(n + ' is already on the roster. Add a second file?')) return;
@@ -9034,6 +10150,10 @@ $('save').onclick = () => {
     const e = normalizeEmployee({
       id: s.nextId++, name: n, role: r, rate, hire: h, status: st,
       phone, supervisorId, probationEnd, onboarding, availability, strikes: 0, documents: [],
+      stationPref: ($('stationPref') && $('stationPref').value) || '',
+      uniformSize: ($('uniformSize') && $('uniformSize').value || '').trim(),
+      emergencyName: ($('emergencyName') && $('emergencyName').value || '').trim(),
+      emergencyPhone: ($('emergencyPhone') && $('emergencyPhone').value || '').trim(),
       history: [{ date: h, type: 'hire', summary: 'Hired as ' + r, from: null, to: r, detail: note || 'Hired' }]
     }, h);
     s.employees.push(e);
@@ -9178,7 +10298,12 @@ if ($('markStubPaid')) $('markStubPaid').onclick = () => {
   const e = empById($('stubEmployee').value);
   if (!p || !e) return;
   if (p.status === 'closed' && !confirm('This period is closed. Mark paid anyway?')) return;
-  if (setPaidStatus(p, e.id, true)) { save(); render(); toast('Marked paid'); }
+  const method = promptPayMethod();
+  if (method == null) return;
+  if (setPaidStatus(p, e.id, true, { method })) {
+    if (p.checks && unpaidCount(p) === 0) p.checks.markPaid = true;
+    save(); render(); toast('Marked paid');
+  }
   else toast('Nothing to mark paid');
 };
 if ($('markStubUnpaid')) $('markStubUnpaid').onclick = () => {
@@ -9394,8 +10519,15 @@ $('saveApp').onclick = () => {
     interviewTime: $('appInterviewTime') ? $('appInterviewTime').value : '',
     interviewSlot: $('appInterviewSlot') ? $('appInterviewSlot').value.trim() : '',
     offerRole: $('appRole').value,
-    notes: $('appNotes').value
+    notes: $('appNotes').value,
+    rating: $('appRating') ? Math.max(0, Math.min(5, Number($('appRating').value) || 0)) : 0,
+    declineReason: $('appDeclineReason') ? $('appDeclineReason').value.trim() : ''
   };
+  const dups = findDupApplicants(name, '', appId);
+  if (dups.length && !confirm('Possible duplicate on desk: ' + dups.map(d => d.name + ' (' + (STAGES[d.stage] || d.stage) + ')').join(', ') + '. Save anyway?')) return;
+  if (data.stage === 'rejected' && !data.declineReason) {
+    return toast('Decline reason required when rejecting');
+  }
   if (data.stage === 'hired') {
     toast('Use Hire onto roster — stage cannot be set to Hired by save alone');
     return;
@@ -9442,7 +10574,8 @@ $('hireFromApp').onclick = () => {
     interviewTime: $('appInterviewTime') ? $('appInterviewTime').value : '',
     interviewSlot: $('appInterviewSlot') ? $('appInterviewSlot').value.trim() : '',
     offerRole: $('appRole').value,
-    notes: $('appNotes').value
+    notes: $('appNotes').value,
+    rating: $('appRating') ? Math.max(0, Math.min(5, Number($('appRating').value) || 0)) : 0
   };
   let a;
   if (appId) { a = s.applications.find(x => x.id === appId); Object.assign(a, data); normalizeApplication(a); }
@@ -9452,10 +10585,8 @@ $('hireFromApp').onclick = () => {
     return;
   }
   ensurePaperwork(a);
-  if (!offerAccepted(a)) {
-    if (!confirm('Offer is not marked accepted for ' + a.name + '. Hire anyway?')) return;
-  }
-  hireApplicant(a);
+  save();
+  hireChecklist(a.id);
 };
 
 /* ---------- events ---------- */
@@ -9895,8 +11026,14 @@ $('importJson').onclick = () => {
       const data = migrate(JSON.parse(reader.result));
       if (!data || !data.employees) throw new Error('bad file');
       s = data;
+      ensureMeta();
       notesDirty = false;
-      save(); render(); toast('Backup restored');
+      const issues = validateDeskData();
+      save(); render();
+      toast('Backup restored');
+      if (issues.length) {
+        setTimeout(() => alert('Import validation (' + issues.length + ' note' + (issues.length === 1 ? '' : 's') + '):\n\n' + issues.slice(0, 15).join('\n') + (issues.length > 15 ? '\n…' : '')), 200);
+      }
     } catch (err) { toast('That file could not be read'); }
   };
   reader.readAsText(f);
