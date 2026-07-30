@@ -562,6 +562,14 @@ tbody tr:hover:not(.total){background:var(--goldwash)}
   .metric:hover{transform:none}
 }
 
+
+.hire-path{display:flex;flex-wrap:wrap;align-items:center;gap:6px 8px;padding:12px 14px;margin-bottom:16px;background:linear-gradient(135deg,var(--paper),oklch(97.5% .01 84));border:1px solid var(--line);border-radius:var(--r);font-size:.7rem;font-weight:700;color:var(--muted);letter-spacing:.02em}
+.hire-path span{padding:5px 10px;border-radius:999px;border:1px solid transparent;background:oklch(96% .008 84)}
+.hire-path span.on{background:var(--sage);color:var(--navy);border-color:oklch(86% .04 155)}
+.hire-path span.now{background:var(--navy);color:var(--gold);border-color:var(--navy)}
+.hire-path span.done{background:var(--goldwash);color:oklch(42% .08 82);border-color:oklch(88% .05 82)}
+.hire-path i{width:14px;height:1px;background:var(--line);flex:none}
+@media(max-width:700px){.hire-path i{display:none}}
 </style>
 </head>
 <body>
@@ -676,7 +684,7 @@ tbody tr:hover:not(.total){background:var(--goldwash)}
 <!-- HIRING -->
 <section class="view" id="view-hiring">
   <div class="header">
-    <div><div class="eyebrow">Recruitment</div><h1 class="title">Hiring</h1><div class="subtitle">Application → eligibility → interview → offer → hire.</div></div>
+    <div><div class="eyebrow">Recruitment</div><h1 class="title">Hiring</h1><div class="subtitle">Application → eligibility → interview → offer → hire → contract → packet.</div></div>
     <div class="actions hire-forms">
       <button class="btn soft" id="importReplyBtn">Import reply</button>
       <button class="btn primary" id="addApp">New application</button>
@@ -703,8 +711,17 @@ tbody tr:hover:not(.total){background:var(--goldwash)}
   <div class="metrics">
     <div class="metric"><label>In pipeline</label><strong id="mPipe">0</strong><span>Not yet hired</span></div>
     <div class="metric"><label>Eligibility hold</label><strong id="mElig">0</strong><span>Awaiting clearance</span></div>
-    <div class="metric"><label>Interview ready</label><strong id="mInt">0</strong><span>Cleared</span></div>
+    <div class="metric"><label>At interview</label><strong id="mInt">0</strong><span>In interview stage</span></div>
     <div class="metric"><label>Offers out</label><strong id="mOffer">0</strong><span>Pending accept</span></div>
+  </div>
+  <div class="hire-path" id="hirePathStrip" aria-label="Hiring paper path">
+    <span data-step="application">Application</span>
+    <i></i><span data-step="eligibility">Eligibility</span>
+    <i></i><span data-step="interview">Interview</span>
+    <i></i><span data-step="offer">Offer</span>
+    <i></i><span data-step="hired">Hire</span>
+    <i></i><span data-step="contract">Contract</span>
+    <i></i><span data-step="packet">Packet</span>
   </div>
   <div class="toolbar" style="margin-bottom:12px">
     <input class="search" id="hireSearch" placeholder="Search applicant">
@@ -1125,6 +1142,9 @@ tbody tr:hover:not(.total){background:var(--goldwash)}
     <label class="checkline"><input type="checkbox" id="obMenu"><span>Menu learned</span></label>
     <label class="checkline"><input type="checkbox" id="obShadow"><span>Shadow shift completed</span></label>
   </div>
+  <div class="field-row">
+    <label class="checkline"><input type="checkbox" id="obLead"><span>Met Shift Lead</span></label>
+  </div>
 
   <div id="fileExtras" style="display:none">
     <h3>Earnings</h3>
@@ -1182,10 +1202,10 @@ tbody tr:hover:not(.total){background:var(--goldwash)}
       <option value="eligibility">Eligibility check</option>
       <option value="interview">Interview</option>
       <option value="offer">Offer</option>
-      <option value="hired">Hired</option>
       <option value="rejected">Rejected</option>
     </select></div>
   </div>
+  <div class="mini-note" id="appHiredNote" style="display:none;margin:-4px 0 10px">This file is already <b>Hired</b> — open the employee file for contract &amp; packet.</div>
   <h3>Eligibility</h3>
   <label class="checkline"><input type="checkbox" id="appAdmin"><span>City standing clear</span></label>
   <label class="checkline"><input type="checkbox" id="appFelony"><span>No recent felony convictions</span></label>
@@ -1457,7 +1477,8 @@ const ONBOARD_LABELS = {
   uniform: 'Uniform issued',
   station: 'Station trained',
   menu: 'Menu learned',
-  shadow: 'Shadow shift completed'
+  shadow: 'Shadow shift completed',
+  lead: 'Met Shift Lead'
 };
 const LOG_TYPES = {
   hire: { label: 'Hire', tone: 'green' },
@@ -1521,7 +1542,7 @@ const PAPER_KINDS = {
 };
 const PAPER_ORDER = ['application', 'screening', 'invite', 'interviewIc', 'interviewOoc', 'offer', 'contract', 'packet', 'decline'];
 const PAPER_RANK = { none: 0, draft: 1, sent: 2, returned: 3, signed: 4, confirmed: 4, accepted: 5, declined: 5 };
-const DEFAULT_DECISION = { application: 'submitted', interviewIc: 'submitted', decline: 'acknowledged' };
+const DEFAULT_DECISION = { application: 'submitted', interviewIc: 'submitted', packet: 'confirm', decline: 'acknowledged' };
 
 /* Required answers before Download reply — radioOrOther = radio OR write-in; multiMin = at least N checks */
 const PACKET_RULES = {
@@ -1600,7 +1621,7 @@ const today = () => new Date().toISOString().slice(0, 10);
 const addDays = (iso, n) => { const d = new Date(iso + 'T00:00:00'); d.setDate(d.getDate() + n); return d.toISOString().slice(0, 10); };
 const daysBetween = (a, b) => Math.round((new Date(b + 'T00:00:00') - new Date(a + 'T00:00:00')) / 86400000);
 
-function emptyOnboarding() { return { uniform: false, station: false, menu: false, shadow: false }; }
+function emptyOnboarding() { return { uniform: false, station: false, menu: false, shadow: false, lead: false }; }
 
 function seedState() {
   return {
@@ -2198,12 +2219,13 @@ function nextHireAction(a) {
   if (a.stage === 'rejected') return 'Closed';
   if (a.stage === 'hired') {
     const e = a.employeeId ? empById(a.employeeId) : null;
-    if (!e) return 'Open employee file';
+    if (!e) return 'Hire onto roster (no employee linked)';
     if (!empHasSignedContract(e)) {
       const st = appContractStatus(a);
       return st === 'sent' ? 'Awaiting contract reply' : 'Send contract';
     }
     if (!empHasPacket(e)) return 'File & send packet';
+    if (!empHasAcknowledgedPacket(e)) return 'Awaiting packet reply';
     return 'On roster';
   }
   ensurePaperwork(a);
@@ -2213,9 +2235,12 @@ function nextHireAction(a) {
   if (STAGE_ORDER.indexOf(a.stage) < 2) return 'Move to interview';
   const inv = a.paperwork.invite;
   if (!inv || !inv.reply) return 'Send invitation';
+  if (!(a.paperwork.interviewIc && a.paperwork.interviewIc.reply)) return 'Send interview questions';
+  if (!paperHasSubstance(a.paperwork.interviewOoc)) return 'Add interviewer notes';
+  if (STAGE_ORDER.indexOf(a.stage) < 3) return 'Move to offer';
   const offer = a.paperwork.offer;
-  if (!offer || !offer.reply) return a.stage === 'offer' ? 'Awaiting offer reply' : 'Send offer';
-  if (offer.sendStatus === 'accepted' || (offer.reply && offer.reply.decision === 'accept')) return 'Ready to hire';
+  if (!offer || !offer.reply) return a.stage === 'offer' && offer && offer.sendStatus === 'sent' ? 'Awaiting offer reply' : 'Send offer';
+  if (offerAccepted(a)) return 'Ready to hire';
   if (offer.sendStatus === 'declined') return 'Offer declined';
   return 'Review paperwork';
 }
@@ -2311,6 +2336,31 @@ function empHasSignedContract(e) {
 function empHasPacket(e) {
   return (e.documents || []).some(d => d.kind === 'packet');
 }
+function empPacketStatus(e) {
+  const d = (e.documents || []).find(x => x.kind === 'packet');
+  if (!d) return 'none';
+  if (d.status === 'acknowledged' || d.status === 'confirmed' || d.status === 'signed' || d.status === 'accepted') return 'acked';
+  if (d.status === 'sent') return 'sent';
+  return d.status || 'draft';
+}
+function empHasAcknowledgedPacket(e) {
+  return empPacketStatus(e) === 'acked';
+}
+function offerAccepted(a) {
+  if (!a) return false;
+  ensurePaperwork(a);
+  const offer = a.paperwork.offer;
+  return !!(offer && (offer.sendStatus === 'accepted' || (offer.reply && offer.reply.decision === 'accept')));
+}
+function paperHasSubstance(rec) {
+  if (!rec) return false;
+  if (rec.reply) return true;
+  if (rec.sendStatus && rec.sendStatus !== 'draft' && rec.sendStatus !== 'none') return true;
+  const html = String(rec.html || '');
+  if (html.length < 80) return false;
+  /* opened blank letterhead alone is not enough */
+  return /<textarea|<input|checked|data-field|letter-plain/i.test(html) && html.replace(/<[^>]+>/g, '').trim().length > 40;
+}
 
 function appContractStatus(a) {
   ensurePaperwork(a);
@@ -2405,10 +2455,20 @@ function buildTodos() {
         detail: 'Contract signed — file & send the new-hire packet next.',
         go: { type: 'emp', id: e.id }
       });
+    } else if (!empHasAcknowledgedPacket(e)) {
+      push({
+        id: 'hire-packet-wait-' + e.id,
+        group: 'hires',
+        tone: 'warn',
+        tag: 'Packet',
+        title: e.name,
+        detail: 'New-hire packet sent — waiting on their acknowledgement reply.',
+        go: { type: 'emp', id: e.id }
+      });
     }
 
     const onb = e.onboarding || {};
-    const missing = ['uniform', 'station', 'menu', 'shadow'].filter(k => !onb[k]);
+    const missing = ['uniform', 'station', 'menu', 'shadow', 'lead'].filter(k => !onb[k]);
     if (missing.length) {
       push({
         id: 'hire-onboard-' + e.id,
@@ -2441,7 +2501,7 @@ function buildTodos() {
   });
 
   /* Pipeline */
-  (s.applications || []).filter(a => !['hired', 'rejected'].includes(a.stage)).forEach(a => {
+  (s.applications || []).filter(a => a.stage !== 'rejected').forEach(a => {
     ensurePaperwork(a);
     Object.keys(a.paperwork || {}).forEach(k => {
       const rec = a.paperwork[k];
@@ -2449,6 +2509,9 @@ function buildTodos() {
       if (rec.sendStatus !== 'sent') return;
       const def = PAPER_KINDS[k];
       if (!def || !def.sendable) return;
+      /* Post-hire contract/packet await lives under New hires; skip duplicate for hired */
+      if (a.stage === 'hired' && (k === 'contract' || k === 'packet')) return;
+      if (a.stage === 'hired') return;
       push({
         id: 'await-reply-' + a.id + '-' + k,
         group: 'pipeline',
@@ -2459,6 +2522,7 @@ function buildTodos() {
         go: { type: 'app', id: a.id }
       });
     });
+    if (a.stage === 'hired') return;
     const d = a.applied ? daysBetween(a.applied, t) : 0;
     if (d >= 7) {
       push({
@@ -2936,7 +3000,31 @@ function renderHiring() {
   $('mPipe').textContent = open.length;
   $('mElig').textContent = s.applications.filter(a => !['hired', 'rejected'].includes(a.stage) && !eligible(a)).length;
   $('mInt').textContent = s.applications.filter(a => a.stage === 'interview').length;
+  /* cleared subset available via eligibility pills in the table */
   $('mOffer').textContent = s.applications.filter(a => a.stage === 'offer').length;
+  if ($('hirePathStrip')) {
+    const openApps = s.applications.filter(a => !['hired', 'rejected'].includes(a.stage));
+    const probation = s.employees.filter(e => e.status === 'probation');
+    const order = ['application', 'eligibility', 'interview', 'offer', 'hired', 'contract', 'packet'];
+    let current = 'application';
+    if (openApps.some(a => a.stage === 'offer')) current = 'offer';
+    else if (openApps.some(a => a.stage === 'interview')) current = 'interview';
+    else if (openApps.some(a => a.stage === 'eligibility')) current = 'eligibility';
+    else if (openApps.some(a => a.stage === 'application')) current = 'application';
+    else if (probation.some(e => !empHasSignedContract(e))) current = 'contract';
+    else if (probation.some(e => empHasSignedContract(e) && !empHasPacket(e))) current = 'packet';
+    else if (probation.some(e => empHasPacket(e) && !empHasAcknowledgedPacket(e))) current = 'packet';
+    else if (probation.length || s.applications.some(a => a.stage === 'hired')) current = 'hired';
+    const cur = order.indexOf(current);
+    $('hirePathStrip').querySelectorAll('[data-step]').forEach(el => {
+      const st = el.getAttribute('data-step');
+      const idx = order.indexOf(st);
+      el.classList.remove('on', 'now', 'done');
+      if (st === current) el.classList.add('now');
+      else if (idx >= 0 && idx < cur) el.classList.add('done');
+      else el.classList.add('on');
+    });
+  }
 
   const hq = ($('hireSearch') && $('hireSearch').value || '').trim().toLowerCase();
   const list = s.applications.filter(a => {
@@ -3189,8 +3277,10 @@ function renderPaperList(id) {
   ensurePaperwork(a);
   paperAppId = a.id;
   $('paperTitle').textContent = 'Paperwork — ' + a.name;
+  const next = nextHireAction(a);
   $('paperNote').innerHTML = 'Stage <b>' + esc(STAGES[a.stage] || a.stage) + '</b> &middot; applied ' + esc(a.applied || '—') +
-    ' &middot; offer role <b>' + esc(a.offerRole || 'New Hire') + '</b>';
+    ' &middot; offer role <b>' + esc(a.offerRole || 'New Hire') + '</b>' +
+    '<div class="history" style="margin-top:6px">Next: <b>' + esc(next) + '</b></div>';
   $('paperList').innerHTML = paperKindsFor(a).map(k => {
     const def = PAPER_KINDS[k];
     const rec = a.paperwork[k];
@@ -4255,7 +4345,7 @@ function mapPacketOnboarding(emp, fields) {
   const hit = s => labels.some(x => String(x).toLowerCase().indexOf(s) >= 0);
   let changed = false;
   emp.onboarding = Object.assign(emptyOnboarding(), emp.onboarding || {});
-  [['uniform', 'uniform'], ['station', 'station'], ['menu', 'menu'], ['shadow', 'shadow']].forEach(([key, needle]) => {
+  [['uniform', 'uniform'], ['station', 'station'], ['menu', 'menu'], ['shadow', 'shadow'], ['lead', 'shift lead']].forEach(([key, needle]) => {
     if (hit(needle) && !emp.onboarding[key]) { emp.onboarding[key] = true; changed = true; }
   });
   return changed;
@@ -4791,16 +4881,23 @@ function syncAllHirePapersToEmp(e, a) {
     if (!rec.html && !rec.reply) return;
     syncPaperToEmpDoc(e, a, k);
   });
-  if (!findEmpDoc(e, 'offer')) {
-    syncPaperToEmpDoc(e, a, 'offer', {
-      html: letterOffer(empCtx(e)),
-      status: (a.paperwork.offer && a.paperwork.offer.sendStatus) || 'draft'
-    });
-  }
+  /* Stamp hire dates onto offer archive — keep accepted/reply status */
+  const offerRec = a.paperwork.offer;
+  const offerStatus = (offerRec && offerRec.sendStatus) || 'draft';
+  const offerHtml = (offerRec && offerRec.reply && offerRec.reply.replyHtml)
+    ? offerRec.reply.replyHtml
+    : letterOffer(empCtx(e));
+  syncPaperToEmpDoc(e, a, 'offer', {
+    html: offerHtml,
+    status: offerStatus,
+    reply: offerRec && offerRec.reply,
+    force: true
+  });
 }
 
 function generateHirePaperwork(e) {
-  addDocument(e, 'offer');
+  const a = syncEmpCtxOntoApp(ensureAppForEmployee(e), e);
+  syncPaperToEmpDoc(e, a, 'offer', { html: letterOffer(empCtx(e)), status: 'draft', force: true });
   log('Generated offer letter for ' + e.name + ' — send contract next, then new-hire packet');
   save();
 }
@@ -4951,7 +5048,7 @@ const SEND_PICK_STAGES = {
   invite: ['interview'],
   interviewIc: ['interview', 'offer'],
   interviewOoc: ['interview', 'offer'],
-  offer: ['interview', 'offer'],
+  offer: ['offer'],
   contract: ['hired'],
   packet: ['hired'],
   decline: ['application', 'eligibility', 'interview', 'offer', 'rejected']
@@ -6025,7 +6122,9 @@ function applyReply(reply) {
       extra = 'contract declined / returned';
     }
   } else if (kind === 'packet') {
-    extra = 'new-hire packet acknowledged';
+    extra = status === 'acknowledged' || status === 'confirmed' || status === 'accepted'
+      ? 'new-hire packet acknowledged'
+      : 'new-hire packet returned';
   } else if (kind === 'decline') {
     extra = reply.decision === 'reapply' ? 'may apply again later' : 'decline acknowledged';
   }
@@ -6065,6 +6164,7 @@ function applyReply(reply) {
     }, 80);
   } else if (kind === 'contract' && status === 'accepted' && emp) {
     setTimeout(() => {
+      if (empHasPacket(emp) && empHasAcknowledgedPacket(emp)) return;
       if (empHasPacket(emp)) return;
       if (confirm(a.name + ' signed the contract. File & send the new-hire packet now?')) {
         editId = emp.id;
@@ -6073,6 +6173,16 @@ function applyReply(reply) {
           editEmployee(emp.id);
           setTimeout(() => { if ($('sendEmpPacket')) $('sendEmpPacket').click(); }, 60);
         }, 80);
+      }
+    }, 80);
+  } else if (kind === 'contract' && status === 'declined' && emp) {
+    setTimeout(() => {
+      if (confirm(a.name + ' declined the contract. Mark them terminated on the roster?')) {
+        emp.status = 'terminated';
+        pushEmpLog(emp, { type: 'status', summary: 'Status: probation → terminated', from: 'probation', to: 'terminated', detail: 'Contract declined' });
+        log(emp.name + ' terminated after contract decline');
+        save(); render();
+        toast(emp.name + ' marked terminated');
       }
     }, 80);
   }
@@ -6282,6 +6392,7 @@ window.editEmployee = function (id) {
   $('obStation').checked = !!e.onboarding.station;
   $('obMenu').checked = !!e.onboarding.menu;
   $('obShadow').checked = !!e.onboarding.shadow;
+  if ($('obLead')) $('obLead').checked = !!e.onboarding.lead;
   $('deleteEmployee').style.display = 'inline-block';
   $('fileExtras').style.display = 'block';
   renderEmployeeFile(e);
@@ -6325,7 +6436,8 @@ window.editApp = function (id) {
   $('appTitle').textContent = 'Application — ' + a.name;
   $('appName').value = a.name;
   $('appDate').value = a.applied || '';
-  $('appStage').value = a.stage;
+  $('appStage').value = a.stage === 'hired' ? 'offer' : a.stage;
+  if ($('appHiredNote')) $('appHiredNote').style.display = (a.stage === 'hired' || a.employeeId) ? 'block' : 'none';
   $('appAdmin').checked = !!a.adminClear;
   $('appFelony').checked = !!a.felonyClear;
   if ($('appNoTerror')) $('appNoTerror').checked = a.noTerror !== false;
@@ -6354,8 +6466,11 @@ window.advanceApp = function (id) {
   if (next === 'interview' && !(a.paperwork.application && a.paperwork.application.reply)) {
     if (!confirm('No returned application on file for ' + a.name + '. Move to interview anyway?')) return;
   }
-  if (next === 'interview' && !(a.paperwork.screening && (a.paperwork.screening.html || a.paperwork.screening.sendStatus))) {
-    if (!confirm('No screening sheet on file for ' + a.name + '. Move to interview anyway?')) return;
+  if (next === 'eligibility' && !(a.paperwork.application && a.paperwork.application.reply)) {
+    if (!confirm('No returned application on file for ' + a.name + '. Move to eligibility anyway?')) return;
+  }
+  if (next === 'interview' && !(a.paperwork.screening && paperHasSubstance(a.paperwork.screening))) {
+    if (!confirm('No filled screening sheet on file for ' + a.name + '. Move to interview anyway?')) return;
   }
   if (next === 'offer' && !(a.paperwork.invite && a.paperwork.invite.reply)) {
     if (!confirm('Interview invitation has not been returned yet. Move ' + a.name + ' to offer anyway?')) return;
@@ -6363,13 +6478,11 @@ window.advanceApp = function (id) {
   if (next === 'offer' && !(a.paperwork.interviewIc && a.paperwork.interviewIc.reply)) {
     if (!confirm('Interview questions have not been returned for ' + a.name + '. Move to offer anyway?')) return;
   }
-  if (next === 'offer' && !(a.paperwork.interviewOoc && a.paperwork.interviewOoc.html)) {
+  if (next === 'offer' && !paperHasSubstance(a.paperwork.interviewOoc)) {
     if (!confirm('No interviewer notes on file for ' + a.name + '. Move to offer anyway?')) return;
   }
   if (next === 'hired') {
-    const offer = a.paperwork.offer;
-    const accepted = offer && (offer.sendStatus === 'accepted' || (offer.reply && offer.reply.decision === 'accept'));
-    if (!accepted) {
+    if (!offerAccepted(a)) {
       if (!confirm('Offer is not marked accepted for ' + a.name + '. Hire anyway?')) return;
     }
     hireApplicant(a);
@@ -6396,6 +6509,13 @@ window.deleteApplication = function (id) {
   const a = s.applications.find(x => x.id === id);
   if (!a) return;
   if (!confirmDanger('Delete the application for ' + a.name + '?', 'This removes it from the desk entirely.')) return;
+  if (a.employeeId) {
+    const e = empById(a.employeeId);
+    if (e && String(e.applicationId) === String(a.id)) e.applicationId = null;
+  }
+  (s.employees || []).forEach(e => {
+    if (String(e.applicationId) === String(a.id)) e.applicationId = null;
+  });
   s.applications = s.applications.filter(x => x.id !== id);
   log('Deleted application: ' + a.name);
   save(); render(); toast('Application deleted');
@@ -6525,6 +6645,12 @@ window.resetPaperDoc = function (id, kind) {
   if (!a || !a.paperwork || !a.paperwork[kind]) return;
   if (!confirmDanger('Reset ' + PAPER_KINDS[kind].title + ' back to the standard wording?', 'Edits, send status, and any imported reply are lost.')) return;
   delete a.paperwork[kind];
+  const emp = (a.employeeId && empById(a.employeeId)) ||
+    (s.employees || []).find(x => String(x.applicationId) === String(a.id));
+  if (emp && emp.documents) {
+    emp.documents = emp.documents.filter(d => d.kind !== kind);
+    if (kind === 'contract') emp.contractSignedAt = '';
+  }
   log('Reset ' + PAPER_KINDS[kind].title.toLowerCase() + ' for ' + a.name);
   save(); render();
   toast('Back to the standard wording');
@@ -6550,6 +6676,9 @@ function finishDownloadSendPacket(a, kind, opts) {
   opts = opts || {};
   const def = PAPER_KINDS[kind];
   ensurePaperwork(a);
+  const linked = (a.employeeId && empById(a.employeeId)) ||
+    (s.employees || []).find(x => String(x.applicationId) === String(a.id));
+  if (linked) syncEmpCtxOntoApp(a, linked);
   if (!s.nextPacketId) s.nextPacketId = 1;
   const existing = a.paperwork[kind];
   const packetId = (existing && existing.packetId) || ('FR-' + String(s.nextPacketId++).padStart(4, '0'));
@@ -6937,7 +7066,20 @@ function hireApplicant(a) {
 
 function syncHireButton() {
   const stage = $('appStage').value;
-  $('hireFromApp').style.display = ['interview', 'offer'].includes(stage) ? 'inline-block' : 'none';
+  const a = appId != null ? findApp(appId) : null;
+  const hired = a && (a.stage === 'hired' || a.employeeId);
+  if ($('appHiredNote')) $('appHiredNote').style.display = hired ? 'block' : 'none';
+  if (hired) {
+    $('hireFromApp').style.display = 'none';
+    if ($('appStage')) {
+      /* keep stage select usable but Hired is not an option — show Offer/Rejected */
+      if (!['application', 'eligibility', 'interview', 'offer', 'rejected'].includes($('appStage').value)) {
+        $('appStage').value = 'offer';
+      }
+    }
+    return;
+  }
+  $('hireFromApp').style.display = stage === 'offer' ? 'inline-block' : 'none';
 }
 
 /* =====================================================
@@ -7118,7 +7260,7 @@ function openAddEmployee() {
   $('hire').value = today();
   $('probationEnd').value = addDays(today(), 7);
   fillSupervisors(null);
-  ['obUniform', 'obStation', 'obMenu', 'obShadow'].forEach(k => { $(k).checked = false; });
+  ['obUniform', 'obStation', 'obMenu', 'obShadow', 'obLead'].forEach(k => { if ($(k)) $(k).checked = false; });
   $('deleteEmployee').style.display = 'none';
   $('fileExtras').style.display = 'none';
   $('employeeModal').classList.add('open');
@@ -7143,7 +7285,7 @@ $('save').onclick = () => {
   const h = $('hire').value || today();
   const st = $('empStatus').value;
   const phone = $('phone').value.trim();
-  const onboarding = { uniform: $('obUniform').checked, station: $('obStation').checked, menu: $('obMenu').checked, shadow: $('obShadow').checked };
+  const onboarding = { uniform: $('obUniform').checked, station: $('obStation').checked, menu: $('obMenu').checked, shadow: $('obShadow').checked, lead: $('obLead') ? $('obLead').checked : false };
   const supervisorId = $('supervisor').value ? Number($('supervisor').value) : null;
   const probationEnd = $('probationEnd').value || (st === 'probation' ? addDays(h, 7) : '');
   const note = $('promoReason').value.trim();
@@ -7260,6 +7402,19 @@ $('deleteEmployee').onclick = () => {
   const e = empById(editId);
   if (!e) return;
   if (!confirmDanger('Remove ' + e.name + ' from the roster entirely?', 'Consider setting status to terminated instead so the file is kept.')) return;
+  if (e.applicationId) {
+    const a = findApp(e.applicationId);
+    if (a && String(a.employeeId) === String(e.id)) {
+      a.employeeId = null;
+      if (a.stage === 'hired') a.stage = 'offer';
+    }
+  }
+  (s.applications || []).forEach(a => {
+    if (String(a.employeeId) === String(e.id)) {
+      a.employeeId = null;
+      if (a.stage === 'hired') a.stage = 'offer';
+    }
+  });
   s.employees = s.employees.filter(x => x.id !== e.id);
   log('Removed ' + e.name + ' from the roster');
   save();
@@ -7591,19 +7746,26 @@ $('saveApp').onclick = () => {
     offerRole: $('appRole').value,
     notes: $('appNotes').value
   };
+  if (data.stage === 'hired') {
+    toast('Use Hire onto roster — stage cannot be set to Hired by save alone');
+    return;
+  }
   if (data.stage === 'interview' && !eligible(data)) {
     if (!confirm('Eligibility is not fully cleared. Move to interview anyway?')) return;
   }
   if ((!data.noTerror || !data.noGovMurder) && data.stage !== 'rejected') {
     if (!confirm('A hard bar is unchecked (terrorism / gov-employee murder). Save anyway?')) return;
   }
+  let a;
   if (appId) {
-    const a = s.applications.find(x => x.id === appId);
+    a = s.applications.find(x => x.id === appId);
+    const wasHired = a.stage === 'hired' || !!a.employeeId;
     Object.assign(a, data);
+    if (wasHired && data.stage !== 'rejected') a.stage = 'hired';
     normalizeApplication(a);
     log('Updated application: ' + name);
   } else {
-    const a = normalizeApplication({ id: s.nextAppId++, ...data });
+    a = normalizeApplication({ id: s.nextAppId++, ...data });
     s.applications.unshift(a);
     log('New application received: ' + name);
   }
@@ -7621,7 +7783,7 @@ $('hireFromApp').onclick = () => {
   const data = {
     name,
     applied: $('appDate').value || today(),
-    stage: $('appStage').value,
+    stage: $('appStage').value === 'hired' ? 'offer' : $('appStage').value,
     adminClear: $('appAdmin').checked,
     felonyClear: $('appFelony').checked,
     noTerror: $('appNoTerror') ? $('appNoTerror').checked : true,
@@ -7635,6 +7797,14 @@ $('hireFromApp').onclick = () => {
   let a;
   if (appId) { a = s.applications.find(x => x.id === appId); Object.assign(a, data); normalizeApplication(a); }
   else { a = normalizeApplication({ id: s.nextAppId++, ...data }); s.applications.unshift(a); }
+  if (a.employeeId && empById(a.employeeId)) {
+    toast(a.name + ' is already on the roster — open their employee file');
+    return;
+  }
+  ensurePaperwork(a);
+  if (!offerAccepted(a)) {
+    if (!confirm('Offer is not marked accepted for ' + a.name + '. Hire anyway?')) return;
+  }
   hireApplicant(a);
 };
 
