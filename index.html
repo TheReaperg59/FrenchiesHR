@@ -300,6 +300,81 @@ tbody tr:hover{background:oklch(98% .005 84)}
 .paper-row:last-child{border-bottom:0}
 .paper-name{font-size:.8rem;font-weight:600;display:flex;gap:8px;align-items:center;flex-wrap:wrap}
 .paper-sub{font-size:.68rem;color:var(--muted);margin-top:3px;line-height:1.5;white-space:normal;max-width:420px}
+
+/* Hiring desk layout */
+#view-hiring .hire-stage{margin:0 0 16px}
+#view-hiring .hire-hero{
+  display:flex;justify-content:space-between;align-items:flex-end;gap:16px;flex-wrap:wrap;
+  padding:18px 20px;border:1px solid var(--line);border-radius:16px;
+  background:linear-gradient(135deg,oklch(99% .006 84),oklch(96.5% .02 155));
+  margin-bottom:14px;
+}
+#view-hiring .hire-brand{font:700 .62rem 'DM Sans',sans-serif;letter-spacing:.14em;text-transform:uppercase;color:var(--muted);margin-bottom:4px}
+#view-hiring .hire-hero .title{margin:0;font:700 1.55rem/1.15 'Playfair Display',Georgia,serif;color:var(--navy)}
+#view-hiring .hire-hero .subtitle{margin:6px 0 0;max-width:42ch;color:var(--muted);font-size:.84rem}
+#view-hiring .hire-spotlight{
+  display:grid;grid-template-columns:1fr 1fr;gap:12px;margin-bottom:14px;
+}
+#view-hiring .hire-spot{
+  border:1px solid var(--line);border-radius:14px;padding:14px 16px;
+  background:var(--paper);min-height:88px;
+}
+#view-hiring .hire-spot h3{
+  margin:0 0 8px;font:700 .68rem 'DM Sans',sans-serif;letter-spacing:.08em;text-transform:uppercase;color:var(--muted);
+  display:flex;align-items:center;gap:8px;
+}
+#view-hiring .hire-desk{display:flex;flex-direction:column;gap:16px}
+#view-hiring .hire-apps-card .table-scroll{max-height:none}
+#view-hiring .apps-table td.name{font-weight:600;color:var(--navy)}
+#view-hiring .apps-table .app-next{font-size:.72rem;color:var(--muted);line-height:1.4;max-width:180px}
+#view-hiring .apps-table .app-clear{display:flex;flex-direction:column;gap:4px;align-items:flex-start}
+#view-hiring .apps-table .app-actions{display:flex;flex-wrap:wrap;gap:6px;justify-content:flex-end}
+#view-hiring .apps-table .paper-meter{height:4px;background:oklch(93% .01 84);border-radius:99px;overflow:hidden;margin-top:5px;max-width:72px}
+#view-hiring .apps-table .paper-meter i{display:block;height:100%;background:linear-gradient(90deg,var(--navy),var(--gold));border-radius:99px}
+#view-hiring .filed-list{display:flex;flex-direction:column;gap:8px;padding:12px 16px 16px}
+#view-hiring .filed-row{
+  display:grid;grid-template-columns:minmax(0,1.2fr) minmax(0,.9fr) minmax(0,.8fr) auto;
+  gap:10px 14px;align-items:center;padding:12px 14px;
+  border:1px solid var(--line);border-radius:12px;background:oklch(99.2% .004 84);
+}
+#view-hiring .filed-row .filed-who{font-weight:600;color:var(--navy)}
+#view-hiring .filed-row .filed-meta{font-size:.72rem;color:var(--muted);margin-top:2px}
+#view-hiring .filed-actions{display:flex;gap:6px;flex-wrap:wrap;justify-content:flex-end}
+@media(max-width:900px){
+  #view-hiring .hire-spotlight{grid-template-columns:1fr}
+  #view-hiring .filed-row{grid-template-columns:1fr;gap:8px}
+  #view-hiring .filed-actions{justify-content:flex-start}
+}
+
+/* Paperwork modal */
+#paperModal .dialog.xl{max-width:860px}
+#paperModal .paper-modal-head{margin-bottom:14px}
+#paperModal .paper-modal-meta{
+  display:flex;flex-wrap:wrap;gap:8px 14px;margin:8px 0 0;font-size:.78rem;color:var(--muted);
+}
+#paperModal .paper-modal-meta b{color:var(--navy);font-weight:600}
+#paperModal .paper-next-chip{
+  display:inline-flex;align-items:center;gap:8px;margin-top:10px;padding:8px 12px;
+  border-radius:10px;background:var(--sage);border:1px solid oklch(86% .04 155);
+  font-size:.78rem;color:var(--navy);font-weight:600;
+}
+#paperModal .paper-list{display:flex;flex-direction:column;gap:10px;margin-top:4px;max-height:48vh;overflow:auto;padding-right:2px}
+#paperModal .paper-card{
+  display:flex;justify-content:space-between;gap:14px;align-items:flex-start;flex-wrap:wrap;
+  padding:14px 16px;border:1px solid var(--line);border-radius:12px;background:var(--paper);
+}
+#paperModal .paper-card.is-needed{border-style:dashed;background:oklch(99% .006 84)}
+#paperModal .paper-card.is-ready{border-color:oklch(78% .08 155);box-shadow:inset 3px 0 var(--green)}
+#paperModal .paper-card .paper-name{font-size:.9rem}
+#paperModal .paper-card .paper-sub{max-width:none}
+#paperModal .paper-import{
+  margin-top:16px;padding:14px 16px;border:1px dashed oklch(82% .03 155);border-radius:12px;
+  background:linear-gradient(180deg,oklch(98% .01 155),var(--paper));
+}
+#paperModal .paper-import h3{
+  margin:0 0 8px;font:700 .68rem 'DM Sans',sans-serif;letter-spacing:.1em;text-transform:uppercase;color:var(--muted);
+}
+#paperModal .paper-import .paper-actions{margin-top:8px}
 .status-draft{background:oklch(94% .01 155);color:var(--muted)}
 .status-none{background:oklch(94% .01 155);color:var(--muted)}
 .status-sent{background:oklch(94% .03 230);color:oklch(42% .1 230)}
@@ -1761,12 +1836,10 @@ body{
 #saveBadge.rel{font-variant-numeric:tabular-nums}
 .tip-mode-chip{font-size:.68rem;color:var(--muted)}
 .nba-card.is-clear{/* opacity set in Overview polish */}
-.apps-table th:nth-child(6),
-.apps-table td:nth-child(6){display:none} /* Rate — open file to rate */
 @media(max-width:1100px){
   .kbd-hint,.help-btn{display:none}
-  .apps-table th:nth-child(3),
-  .apps-table td:nth-child(3){display:none} /* Applied date */
+  #view-hiring .apps-table th:nth-child(5),
+  #view-hiring .apps-table td:nth-child(5){display:none} /* Clearance on narrow */
 }
 @media(max-width:720px){
   #openCmdBtn,.ov-tip-tools .tip-mode-chip{display:none}
@@ -2263,16 +2336,7 @@ body.session-lead .mgmt-only{display:none!important}
 body.desk-clean .desk-hero{display:none}
 body.desk-clean .feature-banner{display:none}
 body.desk-clean .build-banner{display:none}
-.apps-table th:nth-child(7),
-.apps-table th:nth-child(8),
-.apps-table td:nth-child(7),
-.apps-table td:nth-child(8){display:none}
-@media(min-width:1100px){
-  .apps-table th:nth-child(7),
-  .apps-table th:nth-child(8),
-  .apps-table td:nth-child(7),
-  .apps-table td:nth-child(8){display:table-cell}
-}
+/* Apps table columns simplified in v32 — clearance lives in its own cell */
 
 /* ===== Desk v9 — 50 major upgrades ===== */
 body.quiet-mode .metric:hover,body.quiet-mode .card:hover,body.quiet-mode .btn:hover{transform:none;box-shadow:none}
@@ -2478,7 +2542,7 @@ body.session-staff #pullSharedBtn{display:none!important}
         <button type="button" class="top-account-item danger" id="logoutBtn" role="menuitem">Sign out</button>
         <button type="button" class="top-account-item" id="logoutAllBtn" role="menuitem">Sign out all remembered</button>
         <div class="top-account-foot">
-          <span class="build-chip" title="Desk build">v31</span>
+          <span class="build-chip" title="Desk build">v32</span>
           <label class="top-jump-label" for="quickJump">Jump to</label>
           <select class="top-jump" id="quickJump" title="Jump to any tab">
             <option value="overview">Overview</option>
@@ -2704,58 +2768,64 @@ body.session-staff #pullSharedBtn{display:none!important}
 
 <!-- HIRING -->
 <section class="view" id="view-hiring" role="region" aria-labelledby="title-hiring" tabindex="-1">
-  <div class="header">
-    <div><div class="eyebrow">Recruitment</div><h1 class="title" id="title-hiring">Hiring</h1><div class="subtitle">Application → interview → offer → hire → contract → packet → account login.</div></div>
-    <div class="actions hire-forms">
-      <button class="btn soft" id="interviewBoardBtn">Interview board</button>
-      <button class="btn soft" id="importReplyBtn">Import reply</button>
-      <button class="btn primary" id="addApp">New application</button>
+  <div class="hire-stage">
+    <div class="hire-hero">
+      <div>
+        <div class="hire-brand">Frenchie&apos;s Restaurant</div>
+        <h1 class="title" id="title-hiring">Hiring</h1>
+        <p class="subtitle">Application → interview → offer → hire → contract → packet → account login.</p>
+      </div>
+      <div class="actions hire-forms">
+        <button class="btn soft" id="interviewBoardBtn">Interview board</button>
+        <button class="btn soft" id="importReplyBtn">Import reply</button>
+        <button class="btn primary" id="addApp">New application</button>
+      </div>
     </div>
-  </div>
-  <div class="action-bar">
-    <span class="bar-label">Forms</span>
-    <button class="btn tiny" id="formApp" title="Download Application">Application</button>
-    <button class="btn tiny" id="formInvite" title="Download Interview invitation">Invitation</button>
-    <button class="btn tiny" id="formQuestions" title="Download Interviewer questions">Questions</button>
-    <button class="btn tiny" id="formOffer" title="Download Offer letter">Offer</button>
-    <button class="btn tiny" id="formDecline" title="Download Decline letter">Decline</button>
-    <span class="bar-sep"></span>
-    <button class="btn tiny soft" id="formNotes" title="Open Interviewer notes">Notes</button>
-    <span class="bar-sep"></span>
-    <input type="file" class="file-mini" id="importReplyFile" accept=".html,.htm,.json,.txt,text/html,application/json" title="Import reply file">
-  </div>
-  <details class="fold quiet">
-    <summary>Hiring standards &amp; paper path</summary>
-    <div class="fold-body">
-      <p class="ui-hint">Every applicant fills the Application, interviews with HR, and starts on seven-day probation. City standing + no recent felony required. Terrorism or gov-employee murder is a hard bar.</p>
-      <p class="ui-hint"><b>Before hire:</b> Application → Invitation → Questions → Offer → Hire. <b>After hire:</b> Send contract (you sign first) → Import reply → New-hire packet → Account login information (access granted when filed).</p>
+    <div class="action-bar">
+      <span class="bar-label">Blank forms</span>
+      <button class="btn tiny" id="formApp" title="Download Application">Application</button>
+      <button class="btn tiny" id="formInvite" title="Download Interview invitation">Invitation</button>
+      <button class="btn tiny" id="formQuestions" title="Download Interviewer questions">Questions</button>
+      <button class="btn tiny" id="formOffer" title="Download Offer letter">Offer</button>
+      <button class="btn tiny" id="formDecline" title="Download Decline letter">Decline</button>
+      <span class="bar-sep"></span>
+      <button class="btn tiny soft" id="formNotes" title="Open Interviewer notes">Notes</button>
+      <span class="bar-sep"></span>
+      <input type="file" class="file-mini" id="importReplyFile" accept=".html,.htm,.json,.txt,text/html,application/json" title="Import reply file">
     </div>
-  </details>
-  <div class="metrics" id="hireMetrics">
-    <button type="button" class="metric metric-btn" data-hire-metric="pipeline" title="Show pipeline"><label>In pipeline</label><strong id="mPipe">0</strong><span>Not yet hired</span></button>
-    <button type="button" class="metric metric-btn" data-hire-metric="elig" title="Show eligibility holds"><label>Eligibility hold</label><strong id="mElig">0</strong><span>Awaiting clearance</span></button>
-    <button type="button" class="metric metric-btn" data-hire-metric="interview" title="Show interviews"><label>At interview</label><strong id="mInt">0</strong><span>In interview stage</span></button>
-    <button type="button" class="metric metric-btn" data-hire-metric="offer" title="Show offers"><label>Offers out</label><strong id="mOffer">0</strong><span>Pending accept</span></button>
-  </div>
-  <div class="hire-path" id="hirePathStrip" aria-label="Hiring paper path">
-    <span data-step="application">Application</span>
-    <i></i><span data-step="eligibility">Eligibility</span>
-    <i></i><span data-step="interview">Interview</span>
-    <i></i><span data-step="offer">Offer</span>
-    <i></i><span data-step="hired">Hire</span>
-    <i></i><span data-step="contract">Contract</span>
-    <i></i><span data-step="packet">Packet</span>
-    <i></i><span data-step="login">Account login</span>
-  </div>
-  <div class="grid-2" style="margin-bottom:12px">
-    <details class="fold" open>
-      <summary>Interview agenda <span class="pill gray" id="agendaCount">0</span></summary>
-      <div class="fold-body" id="interviewAgenda"><div class="ui-hint">No interviews scheduled.</div></div>
+    <details class="fold quiet">
+      <summary>Hiring standards &amp; paper path</summary>
+      <div class="fold-body">
+        <p class="ui-hint">Every applicant fills the Application, interviews with HR, and starts on seven-day probation. City standing + no recent felony required. Terrorism or gov-employee murder is a hard bar.</p>
+        <p class="ui-hint"><b>Before hire:</b> Application → Invitation → Questions → Offer → Hire. <b>After hire:</b> Send contract (you sign first) → Import reply → New-hire packet → Account login information (access granted when filed).</p>
+      </div>
     </details>
-    <details class="fold" open>
-      <summary>Ready to hire <span class="pill gold" id="readyHireCount">0</span></summary>
-      <div class="fold-body" id="readyHireSpotlight"><div class="ui-hint">Nobody waiting on Hire.</div></div>
-    </details>
+    <div class="metrics" id="hireMetrics">
+      <button type="button" class="metric metric-btn" data-hire-metric="pipeline" title="Show pipeline"><label>In pipeline</label><strong id="mPipe">0</strong><span>Not yet hired</span></button>
+      <button type="button" class="metric metric-btn" data-hire-metric="elig" title="Show eligibility holds"><label>Eligibility hold</label><strong id="mElig">0</strong><span>Awaiting clearance</span></button>
+      <button type="button" class="metric metric-btn" data-hire-metric="interview" title="Show interviews"><label>At interview</label><strong id="mInt">0</strong><span>In interview stage</span></button>
+      <button type="button" class="metric metric-btn" data-hire-metric="offer" title="Show offers"><label>Offers out</label><strong id="mOffer">0</strong><span>Pending accept</span></button>
+    </div>
+    <div class="hire-path" id="hirePathStrip" aria-label="Hiring paper path">
+      <span data-step="application">Application</span>
+      <i></i><span data-step="eligibility">Eligibility</span>
+      <i></i><span data-step="interview">Interview</span>
+      <i></i><span data-step="offer">Offer</span>
+      <i></i><span data-step="hired">Hire</span>
+      <i></i><span data-step="contract">Contract</span>
+      <i></i><span data-step="packet">Packet</span>
+      <i></i><span data-step="login">Account login</span>
+    </div>
+    <div class="hire-spotlight">
+      <div class="hire-spot">
+        <h3>Interview agenda <span class="pill gray" id="agendaCount">0</span></h3>
+        <div id="interviewAgenda"><div class="ui-hint">No interviews scheduled.</div></div>
+      </div>
+      <div class="hire-spot">
+        <h3>Ready to hire <span class="pill gold" id="readyHireCount">0</span></h3>
+        <div id="readyHireSpotlight"><div class="ui-hint">Nobody waiting on Hire.</div></div>
+      </div>
+    </div>
   </div>
   <div class="toolbar filter-rail">
     <input class="search" id="hireSearch" placeholder="Search applicant" aria-label="Search applicants">
@@ -2765,13 +2835,15 @@ body.session-staff #pullSharedBtn{display:none!important}
     <button type="button" class="btn tiny" id="hireFilterAwait" data-hire-filter="awaiting">Awaiting reply</button>
     <span class="pill gray" id="hireFilterLabel">Showing pipeline</span>
   </div>
-  <div class="split-desk">
-    <div class="card"><div class="card-head"><b>Applications</b><span class="pill gray" id="appCount"></span></div>
-      <div class="table-scroll"><table class="apps-table"><thead><tr><th>Applicant</th><th>Stage</th><th>Applied</th><th>Age</th><th>Papers</th><th>Rate</th><th>Standing</th><th>Record</th><th>Paperwork</th><th class="r">Move</th><th class="r">Action</th></tr></thead><tbody id="apps"></tbody></table></div>
+  <div class="hire-desk">
+    <div class="card hire-apps-card"><div class="card-head"><b>Applications</b><span class="pill gray" id="appCount"></span></div>
+      <div class="table-scroll"><table class="apps-table"><thead><tr>
+        <th>Applicant</th><th>Stage</th><th>Age</th><th>Papers</th><th>Clearance</th><th>Next</th><th class="r">Actions</th>
+      </tr></thead><tbody id="apps"></tbody></table></div>
     </div>
     <div class="card"><div class="card-head"><b>Filed replies</b><span class="pill gray" id="filedCount"></span></div>
-      <div class="panel-note">Imported Discord replies.</div>
-      <div class="table-scroll"><table><thead><tr><th>Returned</th><th>Applicant</th><th>Document</th><th>Decision</th><th>Signed by</th><th class="r">Action</th></tr></thead><tbody id="filedReplies"></tbody></table></div>
+      <div class="panel-note">Imported applicant replies — newest first.</div>
+      <div class="filed-list" id="filedReplies"></div>
     </div>
   </div>
   <details class="fold quiet">
@@ -3791,15 +3863,19 @@ body.session-staff #pullSharedBtn{display:none!important}
 
 <!-- Paperwork pack modal -->
 <div class="modal" id="paperModal" role="dialog" aria-modal="true" aria-labelledby="paperTitle" hidden><div class="dialog xl" role="document" tabindex="-1">
-  <h2 id="paperTitle">Paperwork</h2>
-  <div class="mini-note" id="paperNote"></div>
-  <div id="paperList" style="margin-top:10px"></div>
-  <h3>Applicant reply</h3>
-  <div class="paper-actions">
-    <input type="file" class="file-mini" id="paperReplyFile" accept=".html,.htm,.json,.txt,text/html,application/json">
-    <button class="btn tiny soft" id="paperReplyBtn">Import reply file</button>
+  <div class="paper-modal-head">
+    <h2 id="paperTitle">Paperwork</h2>
+    <div id="paperNote"></div>
   </div>
-  <div class="mini-note">The applicant presses <b>Download reply</b> inside the packet and sends the completed .html back. Importing it files the answer under Filed replies.</div>
+  <div class="paper-list" id="paperList"></div>
+  <div class="paper-import">
+    <h3>Applicant reply</h3>
+    <div class="mini-note" style="padding:0;margin:0">The applicant presses <b>Download reply</b> inside the packet and sends the completed .html back. Importing files it under Filed replies.</div>
+    <div class="paper-actions">
+      <input type="file" class="file-mini" id="paperReplyFile" accept=".html,.htm,.json,.txt,text/html,application/json">
+      <button class="btn tiny soft" id="paperReplyBtn">Import reply file</button>
+    </div>
+  </div>
   <div class="dialog-foot">
     <button class="btn" id="paperOpenApp" style="margin-right:auto">Open application</button>
     <button class="btn primary" id="paperClose">Close</button>
@@ -4055,7 +4131,7 @@ const LOG_TYPES = {
 };
 const TIP_ROLES_DEFAULT = ['Waiter', 'Hostess', 'Cook'];
 const TIP_ROLES = TIP_ROLES_DEFAULT; /* legacy alias — use tipRoles() */
-const DESK_BUILD = 'v31';
+const DESK_BUILD = 'v32';
 const HOUSE_LOGIN_PASSWORD = 'frenchies636';
 const SESSION_KEY = 'frenchies_desk_session';
 const SESSION_DURABLE_KEY = 'frenchies_desk_session_durable';
@@ -7229,6 +7305,7 @@ function openChangelog() {
   const grid = $('upgradeGrid');
   if (grid) {
     const recent = [
+      ['v32', 'Discord embeds (pro channel posts) · Hiring desk + paperwork modal layout polish'],
       ['v31', 'Discord Post-to-channel webhooks · signed hire papers Open/Print on employee file'],
       ['v30', 'Shared desk auto-pull on focus · backup vs shared pack warnings · Sync vs Pull labels'],
       ['v29', 'Interview Done→offer / No-show→reject · call-off coverage Discord paste'],
@@ -7342,9 +7419,25 @@ window.copyStubDiscord = function (empId) {
   copyTextSafe(text, 'Discord pay blurb copied');
 };
 window.postStubDiscord = function (empId) {
-  const text = stubDiscordText(empId);
-  if (!text) return;
-  return postDiscord('payroll', text, { label: 'Stub · ' + ((empById(empId) && empById(empId).name) || empId) });
+  const p = current();
+  const e = empById(empId);
+  if (!e || !p) return;
+  const x = entry(p, empId);
+  const g = lineGross(e, x);
+  const card = discordCard('payroll', {
+    title: 'Pay stub · ' + e.name,
+    description: (x.paidOut ? 'Marked **PAID**.' : 'Still **owed** for this period.'),
+    fields: [
+      discordField('Period', shortLabel(p), true),
+      discordField('Hours', dec(x.hours) + ' @ ' + money(entryRate(e, x)) + '/hr', true),
+      discordField('Tips', money(x.tips || 0), true),
+      discordField('Bonus', money(x.bonus || 0), true),
+      discordField('Gross', money(g), true),
+      discordField('Status', x.paidOut ? 'PAID' : 'UNPAID', true),
+      discordField('Payday', 'Sunday 9:00 AM from the house', false)
+    ]
+  });
+  return postDiscord('payroll', card, { label: 'Stub · ' + e.name });
 };
 
 function findDupApplicants(name, phone, excludeId) {
@@ -7398,13 +7491,15 @@ function confirmTermination() {
   });
   $('termModal').classList.remove('open');
   save(); render(); toast(e.name + ' terminated');
-  postDiscordHrLog(
-    "Frenchie's HR log — Termination\n" +
-    e.name + ' · ' + e.role + '\n' +
-    (notes ? 'Notes: ' + notes + '\n' : '') +
-    'Checklist: ' + checks + '/4 · By ' + (sessionUser ? sessionUser.name : 'desk'),
-    'Termination · ' + e.name
-  );
+  postDiscordHrLog(discordCard('hrLog', {
+    title: 'Termination',
+    description: '**' + e.name + '** · ' + e.role,
+    fields: [
+      discordField('Checklist', checks + '/4', true),
+      discordField('By', (sessionUser && sessionUser.name) || 'desk', true),
+      discordField('Notes', notes || '—', false)
+    ]
+  }), 'Termination · ' + e.name);
 }
 
 window.rehireEmployee = function (id) {
@@ -7865,41 +7960,36 @@ function renderHiring() {
     const canAdvance = idx > -1 && idx < STAGE_ORDER.length - 1;
     const pct = paperCompletionPct(a);
     const aged = a.applied ? daysBetween(a.applied, today()) : 0;
-    const stars = Number(a.rating || 0);
     const ready = a.stage === 'offer' && offerAccepted(a) && !a.employeeId;
-    const moveBtns = ['hired', 'rejected'].includes(a.stage)
-      ? '<span class="pill gray">closed</span>'
-      : (a.stage === 'offer' ? '<button class="btn tiny primary" onclick="hireChecklist(' + a.id + ')">Hire ✓</button> ' : '') +
-        (canAdvance ? '<button class="btn tiny soft" onclick="advanceApp(' + a.id + ')">' + esc(STAGES[STAGE_ORDER[idx + 1]]) + '</button> ' : '') +
-        '<button class="btn tiny" onclick="rejectApp(' + a.id + ')" title="Reject">✕</button>';
-    const ps = paperSummary(a);
     const nextAct = nextHireAction(a);
-    const paperCell = '<div class="paper-actions">' +
-      '<span class="pill ' + statusClass(ps.status) + '">' + esc(ps.status === 'none' ? 'none' : ps.status) + '</span>' +
-      '<button class="btn tiny" onclick="openAppPaper(' + a.id + ')">Paperwork</button></div>' +
-      '<div class="history">' + esc(nextAct) +
-      (ps.docs ? ' · ' + ps.docs + ' on file · ' + ps.sent + ' sent · ' + ps.replies + ' returned' : '') + '</div>' +
-      '<div class="paper-meter" style="margin-top:6px"><i style="width:' + pct + '%"></i></div>';
-    const rateCell = '<select class="input" style="width:auto;min-height:28px;padding:2px 6px" onchange="rateApplicant(' + a.id + ',this.value)" aria-label="Rate ' + esc(a.name) + '">' +
-      [0,1,2,3,4,5].map(n => '<option value="' + n + '"' + (stars === n ? ' selected' : '') + '>' + (n ? ('★'.repeat(n)) : '—') + '</option>').join('') +
-      '</select>';
+    const moveBtns = ['hired', 'rejected'].includes(a.stage)
+      ? ''
+      : (a.stage === 'offer' ? '<button class="btn tiny primary" onclick="hireChecklist(' + a.id + ')">Hire</button>' : '') +
+        (canAdvance ? '<button class="btn tiny soft" onclick="advanceApp(' + a.id + ')">' + esc(STAGES[STAGE_ORDER[idx + 1]]) + '</button>' : '') +
+        '<button class="btn tiny" onclick="rejectApp(' + a.id + ')" title="Reject">Reject</button>';
+    const actions = '<div class="app-actions">' +
+      '<button class="btn tiny" onclick="openAppPaper(' + a.id + ')">Paperwork</button>' +
+      '<button class="btn tiny" onclick="editApp(' + a.id + ')">Open</button>' +
+      moveBtns +
+      '<button class="btn tiny danger" onclick="deleteApplication(' + a.id + ')">Delete</button>' +
+      '</div>';
     return '<tr' + (ready ? ' class="spotlight-row"' : '') + '>' +
-      '<td class="name">' + esc(a.name) + (ready ? ' <span class="pill gold">Ready</span>' : '') + '</td>' +
+      '<td class="name">' + esc(a.name) + (ready ? ' <span class="pill gold">Ready</span>' : '') +
+      '<div class="history">' + esc(a.applied || '—') + (a.offerRole ? ' · ' + esc(a.offerRole) : '') + '</div></td>' +
       '<td>' + stagePill(a.stage) + '</td>' +
-      '<td>' + esc(a.applied || '—') + '</td>' +
       '<td><span class="pill ' + (aged >= 7 ? 'warn' : 'gray') + '">' + aged + 'd</span></td>' +
-      '<td class="mono">' + pct + '%</td>' +
-      '<td>' + rateCell + '</td>' +
-      '<td>' + (a.adminClear ? '<span class="pill green">Clear</span>' : '<span class="pill warn">Pending</span>') + '</td>' +
-      '<td>' + (a.felonyClear ? '<span class="pill green">Clear</span>' : '<span class="pill warn">Pending</span>') + '</td>' +
-      '<td>' + paperCell + '</td>' +
-      '<td class="r">' + moveBtns + '</td>' +
-      '<td class="r"><button class="btn tiny" onclick="editApp(' + a.id + ')">Open</button> <button class="btn tiny danger" onclick="deleteApplication(' + a.id + ')">Delete</button></td>' +
+      '<td><span class="mono">' + pct + '%</span><div class="paper-meter"><i style="width:' + pct + '%"></i></div></td>' +
+      '<td><div class="app-clear">' +
+        '<span class="pill ' + (a.adminClear ? 'green' : 'warn') + '" title="City standing">' + (a.adminClear ? 'Standing' : 'Standing?') + '</span>' +
+        '<span class="pill ' + (a.felonyClear ? 'green' : 'warn') + '" title="Record">' + (a.felonyClear ? 'Record' : 'Record?') + '</span>' +
+      '</div></td>' +
+      '<td><div class="app-next">' + esc(nextAct) + '</div></td>' +
+      '<td class="r">' + actions + '</td>' +
       '</tr>';
   }).join('') : emptyState(
     hireFilter === 'closed' ? 'No closed files yet.' : (hireFilter === 'pipeline' ? 'No open applications.' : 'No applications on the desk.'),
     hireFilter === 'pipeline' ? 'Click New application to start a hire.' : '',
-    11
+    7
   );
 
   renderInterviewAgenda();
@@ -8080,16 +8170,17 @@ function renderFiledReplies() {
   const rows = collectFiledReplies();
   if ($('filedCount')) $('filedCount').textContent = rows.length + ' filed';
   el.innerHTML = rows.length ? rows.map((r, i) =>
-    '<tr>' +
-      '<td>' + esc(r.returnedAt || '—') + '</td>' +
-      '<td class="name">' + esc(r.name) + '</td>' +
-      '<td>' + esc(r.title) + '</td>' +
-      '<td><span class="pill ' + statusClass(r.status) + '">' + esc(decisionLabel(r.decision || r.status)) + '</span></td>' +
-      '<td>' + esc(r.signature || '—') + '</td>' +
-      '<td class="r"><button class="btn tiny" onclick="viewFiledReply(' + i + ')">Read</button> ' +
-      '<button class="btn tiny" onclick="openAppPaper(' + r.appId + ')">Paperwork</button></td>' +
-      '</tr>'
-  ).join('') : emptyState('No replies filed yet.', 'Import a completed .html reply from an applicant.');
+    '<div class="filed-row">' +
+      '<div><div class="filed-who">' + esc(r.name) + '</div>' +
+      '<div class="filed-meta">' + esc(r.title) + (r.returnedAt ? ' · ' + esc(r.returnedAt) : '') + '</div></div>' +
+      '<div><span class="pill ' + statusClass(r.status) + '">' + esc(decisionLabel(r.decision || r.status)) + '</span></div>' +
+      '<div class="filed-meta">Signed by ' + esc(r.signature || '—') + '</div>' +
+      '<div class="filed-actions">' +
+        '<button class="btn tiny" onclick="viewFiledReply(' + i + ')">Read</button>' +
+        '<button class="btn tiny soft" onclick="openAppPaper(' + r.appId + ')">Paperwork</button>' +
+      '</div>' +
+    '</div>'
+  ).join('') : '<div class="ui-hint" style="padding:8px 0">No replies filed yet. Import a completed .html reply from an applicant.</div>';
   window.__filedRows = rows;
 }
 
@@ -8111,9 +8202,13 @@ function renderPaperList(id) {
   paperAppId = a.id;
   $('paperTitle').textContent = 'Paperwork — ' + a.name;
   const next = nextHireAction(a);
-  $('paperNote').innerHTML = 'Stage <b>' + esc(STAGES[a.stage] || a.stage) + '</b> &middot; applied ' + esc(a.applied || '—') +
-    ' &middot; offer role <b>' + esc(a.offerRole || 'New Hire') + '</b>' +
-    '<div class="history" style="margin-top:6px">Next: <b>' + esc(next) + '</b></div>';
+  $('paperNote').innerHTML =
+    '<div class="paper-modal-meta">' +
+      '<span>Stage <b>' + esc(STAGES[a.stage] || a.stage) + '</b></span>' +
+      '<span>Applied <b>' + esc(a.applied || '—') + '</b></span>' +
+      '<span>Offer role <b>' + esc(a.offerRole || 'New Hire') + '</b></span>' +
+    '</div>' +
+    '<div class="paper-next-chip">Next · ' + esc(next) + '</div>';
   $('paperList').innerHTML = paperKindsFor(a).map(k => {
     const def = PAPER_KINDS[k];
     const rec = a.paperwork[k];
@@ -8124,24 +8219,28 @@ function renderPaperList(id) {
     if (rec && rec.sentAt) bits.push('sent ' + rec.sentAt);
     if (rec && rec.returnedAt) bits.push('returned ' + rec.returnedAt);
     if (rec && rec.reply && rec.reply.signature) bits.push('signed "' + rec.reply.signature + '"');
+    const canSend = !!(def.sendable && sendGate && sendGate.ok);
+    const filed = !!(sendGate && sendGate.filed) || PAPER_FILED_STATUS.indexOf(st) >= 0;
     const sendBtn = !def.sendable
       ? '<span class="pill gray">HR only</span>'
-      : (sendGate && sendGate.ok
-        ? '<button class="btn tiny soft" onclick="downloadSendPacket(' + a.id + ',\'' + k + '\')">Send to applicant</button>'
-        : '<span class="pill ' + (sendGate && sendGate.awaiting ? 'warn' : (sendGate && sendGate.filed ? 'green' : 'gray')) + '" title="' + esc((sendGate && sendGate.msg) || '') + '">' +
+      : (canSend
+        ? '<button class="btn tiny primary" onclick="downloadSendPacket(' + a.id + ',\'' + k + '\')">Send to applicant</button>'
+        : '<span class="pill ' + (sendGate && sendGate.awaiting ? 'warn' : (filed ? 'green' : 'gray')) + '" title="' + esc((sendGate && sendGate.msg) || '') + '">' +
           esc(empPaperStatusLabel((sendGate && sendGate.state) || st)) + '</span>');
-    return '<div class="paper-row">' +
-      '<div><div class="paper-name">' + esc(def.title) + '<span class="pill ' + statusClass(st) + '">' + esc(st === 'none' ? 'not made' : st) + '</span></div>' +
+    const cardClass = 'paper-card' + (st === 'none' ? ' is-needed' : '') + (canSend ? ' is-ready' : '');
+    return '<div class="' + cardClass + '">' +
+      '<div><div class="paper-name">' + esc(def.title) +
+        '<span class="pill ' + statusClass(st) + '">' + esc(st === 'none' ? 'not made' : st) + '</span></div>' +
       '<div class="paper-sub">' + esc(bits.join(' · ')) + '</div></div>' +
       '<div class="paper-actions">' +
       '<button class="btn tiny" onclick="openPaperDoc(' + a.id + ',\'' + k + '\')">Letter</button>' +
-      '<button class="btn tiny" onclick="printPaperDoc(' + a.id + ',\'' + k + '\')">Print PDF</button>' +
+      '<button class="btn tiny soft" onclick="printPaperDoc(' + a.id + ',\'' + k + '\')">Print</button>' +
       sendBtn +
       (rec && rec.packetId ? '<button class="btn tiny" onclick="copyPacketId(' + JSON.stringify(String(rec.packetId)) + ')">Copy ID</button>' : '') +
       (rec && rec.reply ? '<button class="btn tiny" onclick="viewAppReply(' + a.id + ',\'' + k + '\')">Read reply</button>' : '') +
       (rec ? '<button class="btn tiny danger" onclick="resetPaperDoc(' + a.id + ',\'' + k + '\')">Reset</button>' : '') +
       '</div></div>';
-  }).join('') || '<div class="empty">Nothing to prepare at this stage.</div>';
+  }).join('') || '<div class="ui-hint">Nothing to prepare at this stage.</div>';
 }
 
 window.viewAppReply = function (appId, kind) {
@@ -9326,6 +9425,17 @@ function copyText(text, msg) {
 }
 
 const DISCORD_CHANNEL_KEYS = ['payroll', 'hiring', 'coverage', 'hrLog', 'announcements'];
+/* Discord embed brand — navy / gold / warn / sage integer colors */
+const DISCORD_EMBED_COLORS = {
+  payroll: 0x1a3329,
+  hiring: 0xb18a3e,
+  coverage: 0xc45c26,
+  hrLog: 0x2f5d50,
+  announcements: 0x1a3329
+};
+const DISCORD_FOOTER = "Frenchie's HR · 8 Elgin Ave";
+const DISCORD_USERNAME = "Frenchie's HR desk";
+
 function discordWebhookUrl(channelKey) {
   ensureMeta();
   const dw = (s.settings && s.settings.discordWebhooks) || {};
@@ -9352,14 +9462,69 @@ function splitDiscordContent(text) {
   if (rest) parts.push(rest);
   return parts;
 }
-async function postDiscord(channelKey, content, opts) {
+function discordField(name, value, inline) {
+  return {
+    name: String(name || '—').slice(0, 256),
+    value: String(value == null || value === '' ? '—' : value).slice(0, 1024),
+    inline: !!inline
+  };
+}
+function discordEmbed(channelKey, spec) {
+  spec = spec || {};
+  const emb = {
+    title: String(spec.title || 'Frenchie\'s HR').slice(0, 256),
+    color: spec.color != null ? spec.color : (DISCORD_EMBED_COLORS[channelKey] || DISCORD_EMBED_COLORS.payroll),
+    timestamp: new Date().toISOString(),
+    footer: { text: String(spec.footer || DISCORD_FOOTER).slice(0, 2048) }
+  };
+  if (spec.description) emb.description = String(spec.description).slice(0, 4096);
+  if (spec.fields && spec.fields.length) {
+    emb.fields = spec.fields.filter(f => f && f.name).slice(0, 25);
+  }
+  return emb;
+}
+function embedToPlainText(embed) {
+  if (!embed) return '';
+  const lines = [];
+  if (embed.title) lines.push(embed.title);
+  if (embed.description) lines.push(embed.description);
+  (embed.fields || []).forEach(f => {
+    lines.push((f.inline ? '' : '') + f.name + ': ' + f.value);
+  });
+  if (embed.footer && embed.footer.text) lines.push('', '— ' + embed.footer.text);
+  return lines.join('\n').trim();
+}
+/** Build { embeds, plain } for a professional channel post. */
+function discordCard(channelKey, spec) {
+  const embed = discordEmbed(channelKey, spec);
+  return {
+    embeds: [embed],
+    plain: embedToPlainText(embed),
+    content: spec.content || ''
+  };
+}
+function normalizeDiscordPayload(payload, opts) {
+  opts = opts || {};
+  if (payload && typeof payload === 'object' && !Array.isArray(payload) && (payload.embeds || payload.plain != null || payload.content != null)) {
+    const embeds = payload.embeds || opts.embeds || null;
+    const plain = String(payload.plain || (embeds && embeds[0] ? embedToPlainText(embeds[0]) : '') || payload.content || '').trim();
+    return { content: String(payload.content || '').trim(), embeds, plain };
+  }
+  const text = String(payload == null ? '' : payload).trim();
+  if (opts.embeds && opts.embeds.length) {
+    return { content: text, embeds: opts.embeds, plain: text || embedToPlainText(opts.embeds[0]) };
+  }
+  return { content: text, embeds: null, plain: text };
+}
+async function postDiscord(channelKey, payload, opts) {
   opts = opts || {};
   if (!canPostDiscord()) {
     toast('Leads and management only');
     return { ok: false, msg: 'denied' };
   }
-  const text = String(content || '').trim();
-  if (!text) {
+  const norm = normalizeDiscordPayload(payload, opts);
+  const text = norm.plain || norm.content;
+  if (!text && !(norm.embeds && norm.embeds.length)) {
     toast('Nothing to post');
     return { ok: false, msg: 'empty' };
   }
@@ -9369,11 +9534,15 @@ async function postDiscord(channelKey, content, opts) {
     return { ok: false, msg: 'missing-webhook' };
   }
   const url = discordWebhookUrl(channelKey);
-  const chunks = splitDiscordContent(text);
   try {
-    for (let i = 0; i < chunks.length; i++) {
-      const body = { content: chunks[i], allowed_mentions: { parse: [] } };
-      body.username = opts.username || "Frenchie's HR desk";
+    if (norm.embeds && norm.embeds.length) {
+      /* One message with embed(s); optional short content above the card */
+      const body = {
+        allowed_mentions: { parse: [] },
+        username: opts.username || DISCORD_USERNAME,
+        embeds: norm.embeds
+      };
+      if (norm.content) body.content = String(norm.content).slice(0, 2000);
       const res = await fetch(url, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
@@ -9382,6 +9551,24 @@ async function postDiscord(channelKey, content, opts) {
       if (!res.ok) {
         const detail = await res.text().catch(() => '');
         throw new Error('Discord ' + res.status + (detail ? ': ' + detail.slice(0, 120) : ''));
+      }
+    } else {
+      const chunks = splitDiscordContent(text);
+      for (let i = 0; i < chunks.length; i++) {
+        const body = {
+          content: chunks[i],
+          allowed_mentions: { parse: [] },
+          username: opts.username || DISCORD_USERNAME
+        };
+        const res = await fetch(url, {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify(body)
+        });
+        if (!res.ok) {
+          const detail = await res.text().catch(() => '');
+          throw new Error('Discord ' + res.status + (detail ? ': ' + detail.slice(0, 120) : ''));
+        }
       }
     }
     log('Discord → ' + channelKey + (opts.label ? ' · ' + opts.label : ''));
@@ -9395,39 +9582,71 @@ async function postDiscord(channelKey, content, opts) {
     return { ok: false, msg };
   }
 }
-function postDiscordHrLog(text, label) {
-  return postDiscord('hrLog', text, { label: label || 'HR log', fallbackCopy: false, quiet: false });
+function postDiscordHrLog(payload, label) {
+  /* Accept plain string or discordCard payload */
+  if (typeof payload === 'string') {
+    const lines = String(payload).split('\n');
+    const title = (lines[0] || 'HR desk log').replace(/^Frenchie's HR log —\s*/i, '') || 'HR desk log';
+    const body = lines.slice(1).join('\n').trim();
+    payload = discordCard('hrLog', {
+      title: 'HR desk log · ' + title,
+      description: body || lines[0]
+    });
+  }
+  return postDiscord('hrLog', payload, { label: label || 'HR log', fallbackCopy: false, quiet: false });
+}
+function discordHireKindMeta(kind) {
+  const map = {
+    contract: {
+      title: 'Employment contract',
+      body: 'House already signed. Open the .html, review terms, sign, hit **Download reply**, and send that file back to HR.'
+    },
+    invite: {
+      title: 'Interview invitation',
+      body: 'Open the .html, confirm or propose a time, sign, hit **Download reply**, and send that completed file back to HR.'
+    },
+    decline: {
+      title: 'Decline letter',
+      body: 'Open the .html, acknowledge, sign, hit **Download reply**, and send that completed file back to HR.'
+    },
+    packet: {
+      title: 'New-hire packet',
+      body: 'Open the .html, complete every starred field and declarations, sign, hit **Download reply**, and send that acknowledgement back to HR.'
+    },
+    login: {
+      title: 'Account login information',
+      body: 'Open the .html, review your username and house password, tick the acknowledgements, sign, hit **Download reply**, and send that file back to HR. Access starts when we file it.'
+    },
+    offer: {
+      title: 'Offer letter',
+      body: 'Open the .html, accept or decline, sign, hit **Download reply**, and send that file back to HR.'
+    },
+    application: {
+      title: 'Application form',
+      body: 'Open the .html, complete every starred field, sign, hit **Download reply**, and send that file back to HR.'
+    }
+  };
+  return map[kind] || {
+    title: (PAPER_KINDS[kind] && PAPER_KINDS[kind].title) || kind,
+    body: 'Open the .html, complete, sign, hit **Download reply**, and send that file back to HR.'
+  };
+}
+function discordHirePaperCard(name, kind, packetId) {
+  const meta = discordHireKindMeta(kind);
+  const fields = [
+    discordField('Applicant', name || '—', true),
+    discordField('Document', meta.title, true)
+  ];
+  if (packetId) fields.push(discordField('Packet ID', '`' + packetId + '`', true));
+  fields.push(discordField('Next step', 'Download reply → send .html back to HR', false));
+  return discordCard('hiring', {
+    title: meta.title + ' · ' + (name || 'Applicant'),
+    description: meta.body,
+    fields
+  });
 }
 function discordPostBlurb(name, kind, packetId) {
-  const who = name || 'you';
-  const idPart = packetId ? ' (' + packetId + ')' : '';
-  if (kind === 'contract') {
-    return "Frenchie's HR — Employment contract for " + who + idPart +
-      '. House already signed. Open the .html, review terms, sign, hit Download reply, and send that file back to HR.';
-  }
-  if (kind === 'invite') {
-    return "Frenchie's HR — Interview invitation for " + who + idPart +
-      '. Open the .html, confirm or propose a time, sign, hit Download reply, and send that completed file back to HR.';
-  }
-  if (kind === 'decline') {
-    return "Frenchie's HR — Decline letter for " + who + idPart +
-      '. Open the .html, acknowledge, sign, hit Download reply, and send that completed file back to HR.';
-  }
-  if (kind === 'packet') {
-    return "Frenchie's HR — New-hire packet for " + who + idPart +
-      '. Open the .html, complete every starred field and declarations, sign, hit Download reply, and send that acknowledgement back to HR.';
-  }
-  if (kind === 'login') {
-    return "Frenchie's HR — Account login information for " + who + idPart +
-      '. Open the .html, review your username and house password, tick the acknowledgements, sign, hit Download reply, and send that file back to HR. Access starts when we file it.';
-  }
-  if (kind === 'offer') {
-    return "Frenchie's HR — Offer letter for " + who + idPart +
-      '. Open the .html, accept or decline, sign, hit Download reply, and send that completed file back to HR.';
-  }
-  const title = (PAPER_KINDS[kind] && PAPER_KINDS[kind].title) || kind;
-  return "Frenchie's HR — " + title + ' for ' + who + idPart +
-    '. Open the .html, fill every starred field, sign, hit Download reply, and send that completed file back to HR.';
+  return discordHirePaperCard(name, kind, packetId).plain;
 }
 function offerHireFollowUp(a) {
   if (!a || a.stage === 'hired' || a.stage === 'rejected') return;
@@ -12138,8 +12357,7 @@ function finishDownloadSendPacket(a, kind, opts) {
   }
   log('Packet ' + packetId + ' prepared — ' + def.title + ' for ' + a.name + (opts.houseSign ? ' (house signed)' : ''));
   save(); render();
-  const blurb = discordPostBlurb(a.name, kind, packetId);
-  postDiscord('hiring', blurb, {
+  postDiscord('hiring', discordHirePaperCard(a.name, kind, packetId), {
     label: (def.title || kind) + ' · ' + a.name,
     fallbackCopy: true
   });
@@ -12766,10 +12984,35 @@ function copySundayRun() {
   if ($('sundayRunPreview')) $('sundayRunPreview').textContent = text;
   copyText(text, 'Sunday pay run copied');
 }
+function sundayRunDiscordCard(p) {
+  p = p || current();
+  if (!p) return discordCard('payroll', { title: 'Sunday pay run', description: 'No period selected.' });
+  const unpaid = unpaidPayable(p);
+  let description;
+  if (!unpaid.length) {
+    description = 'All payable stubs marked **paid**. Nothing left in the unpaid queue.';
+  } else {
+    description = '**Unpaid queue (' + unpaid.length + ')**\n' + unpaid.map(e => {
+      const x = entry(p, e.id);
+      return '• **' + e.name + '** — ' + e.role + ' — ' + dec(x.hours) + 'h — ' + money(lineGross(e, x));
+    }).join('\n');
+  }
+  return discordCard('payroll', {
+    title: 'Sunday pay run',
+    description,
+    fields: [
+      discordField('Period', label(p), true),
+      discordField('Status', String(p.status || '—').toUpperCase(), true),
+      discordField('Tip pool', money(p.tipPool || 0), true),
+      discordField('Still owed', money(owedGrossOf(p)), true),
+      discordField('Payday', 'Sunday 9:00 AM from the house', false)
+    ]
+  });
+}
 function postSundayRunDiscord() {
   const text = buildSundayRunText(current());
   if ($('sundayRunPreview')) $('sundayRunPreview').textContent = text;
-  return postDiscord('payroll', text, { label: 'Sunday run' });
+  return postDiscord('payroll', sundayRunDiscordCard(current()), { label: 'Sunday run' });
 }
 
 function setEmpFileTab(name) {
@@ -13812,7 +14055,7 @@ $('sendEmpPacket').onclick = () => {
   log('New-hire packet filed and downloaded for ' + e.name);
   save();
   renderEmployeeFile(e);
-  postDiscord('hiring', discordPostBlurb(e.name, 'packet', packetId), { label: 'Packet · ' + e.name });
+  postDiscord('hiring', discordHirePaperCard(e.name, 'packet', packetId), { label: 'Packet · ' + e.name });
   announce('New-hire packet filed for ' + e.name);
 };
 
@@ -13855,7 +14098,7 @@ if ($('sendEmpLogin')) $('sendEmpLogin').onclick = () => {
   log('Account login information filed and downloaded for ' + e.name + ' · ' + e.loginUsername);
   save();
   renderEmployeeFile(e);
-  postDiscord('hiring', discordPostBlurb(e.name, 'login', packetId), { label: 'Login · ' + e.name });
+  postDiscord('hiring', discordHirePaperCard(e.name, 'login', packetId), { label: 'Login · ' + e.name });
   announce('Account login sheet filed for ' + e.name);
 };
 
@@ -14844,7 +15087,7 @@ if ($('ivFilter')) $('ivFilter').onchange = () => openInterviewBoard();
 if ($('tipSettlementBtn')) $('tipSettlementBtn').onclick = () => openTipSettlement();
 if ($('closeTipSettle')) $('closeTipSettle').onclick = () => $('tipSettleModal').classList.remove('open');
 if ($('copyTipSettle')) $('copyTipSettle').onclick = () => copyText(tipSettlementDiscord(), 'Tip settlement copied');
-if ($('postTipSettle')) $('postTipSettle').onclick = () => postDiscord('payroll', tipSettlementDiscord(), { label: 'Tip settlement' });
+if ($('postTipSettle')) $('postTipSettle').onclick = () => postDiscord('payroll', tipSettlementDiscordCard(), { label: 'Tip settlement' });
 if ($('printTipSettle')) $('printTipSettle').onclick = () => printTipSettlement();
 if ($('recomputeTipSettle')) $('recomputeTipSettle').onclick = () => recomputeTipSettlement();
 if ($('promoteEmpBtn')) $('promoteEmpBtn').onclick = () => openPromoteModal(editId);
@@ -15212,14 +15455,17 @@ window.resolveDispute = function (id, ok, opts) {
     renderDisputePanels();
     render();
     toast('Dispute resolved · hours saved');
-    postDiscordHrLog(
-      "Frenchie's HR log — Dispute resolved\n" +
-      ((e && e.name) || d.name || 'Staff') + ' · ' + (d.periodLabel || '') + '\n' +
-      'Hours ' + dec(res.beforeH) + ' → ' + dec(res.x.hours) +
-      (note ? '\nNote: ' + note : '') +
-      '\nBy ' + (sessionUser ? sessionUser.name : 'desk'),
-      'Dispute resolved'
-    );
+    postDiscordHrLog(discordCard('hrLog', {
+      title: 'Dispute resolved',
+      description: 'Hours updated on the open period.',
+      fields: [
+        discordField('Staff', (e && e.name) || d.name || 'Staff', true),
+        discordField('Period', d.periodLabel || '—', true),
+        discordField('Hours', dec(res.beforeH) + ' → ' + dec(res.x.hours), true),
+        discordField('By', (sessionUser && sessionUser.name) || 'desk', true),
+        discordField('Note', note || '—', false)
+      ]
+    }), 'Dispute resolved');
     return;
   }
   d.status = 'denied';
@@ -15233,13 +15479,16 @@ window.resolveDispute = function (id, ok, opts) {
   renderDisputePanels();
   render();
   toast('Dispute denied');
-  postDiscordHrLog(
-    "Frenchie's HR log — Dispute denied\n" +
-    ((e && e.name) || d.name || 'Staff') + ' · ' + (d.periodLabel || '') + '\n' +
-    'Reason: ' + note +
-    '\nBy ' + (sessionUser ? sessionUser.name : 'desk'),
-    'Dispute denied'
-  );
+  postDiscordHrLog(discordCard('hrLog', {
+    title: 'Dispute denied',
+    description: 'Hours dispute closed without a change.',
+    fields: [
+      discordField('Staff', (e && e.name) || d.name || 'Staff', true),
+      discordField('Period', d.periodLabel || '—', true),
+      discordField('By', (sessionUser && sessionUser.name) || 'desk', true),
+      discordField('Reason', note, false)
+    ]
+  }), 'Dispute denied');
 };
 
 function approveDisputeFromPanel() {
@@ -15353,9 +15602,9 @@ window.resolveTimeOff = function (id, ok) {
     const chip = t.type === 'calloff' ? 'Off' : 'Off';
     markTimeOffOnBoard(e.id, t.start, t.end || t.start, chip);
     if (t.type === 'calloff') {
-      const blurb = coverageDiscordBlurb(e, t);
-      if (blurb) {
-        postDiscord('coverage', blurb, { label: 'Coverage · ' + e.name }).then(r => {
+      const card = coverageDiscordCard(e, t);
+      if (card) {
+        postDiscord('coverage', card, { label: 'Coverage · ' + e.name }).then(r => {
           if (r && r.ok) toast('Approved · board Off · NEED COVERAGE posted');
         });
       } else toast('Approved · board marked Off');
@@ -15370,12 +15619,12 @@ window.resolveTimeOff = function (id, ok) {
   render();
 };
 
-function coverageDiscordBlurb(e, t) {
-  if (!e || !t) return '';
+function coverageDiscordDays(e, t) {
   const days = [];
+  if (!e || !t) return days;
   const start = new Date(t.start + 'T00:00:00');
   const end = new Date((t.end || t.start) + 'T00:00:00');
-  if (isNaN(start) || isNaN(end)) return '';
+  if (isNaN(start) || isNaN(end)) return days;
   for (let d = new Date(start); d <= end; d.setDate(d.getDate() + 1)) {
     const iso = d.getFullYear() + '-' + String(d.getMonth() + 1).padStart(2, '0') + '-' + String(d.getDate()).padStart(2, '0');
     const week = mondayOf(iso);
@@ -15384,11 +15633,24 @@ function coverageDiscordBlurb(e, t) {
     const long = d.toLocaleDateString('en-US', { weekday: 'short', month: 'short', day: 'numeric' });
     days.push(long + (station && station !== 'Off' ? ' (was ' + station + ')' : ''));
   }
-  return "Frenchie's floor — NEED COVERAGE\n" +
-    e.name + ' (' + e.role + ') call-off approved.\n' +
-    'Days open: ' + days.join(', ') + '\n' +
-    (t.reason ? 'Note: ' + t.reason + '\n' : '') +
-    'Reply if you can cover.';
+  return days;
+}
+function coverageDiscordCard(e, t) {
+  if (!e || !t) return null;
+  const days = coverageDiscordDays(e, t);
+  if (!days.length) return null;
+  return discordCard('coverage', {
+    title: 'NEED COVERAGE',
+    description: '**' + e.name + '** (' + e.role + ') call-off approved.\nReply in this channel if you can cover.',
+    fields: [
+      discordField('Days open', days.join('\n'), false),
+      discordField('Reason', t.reason || '—', false)
+    ]
+  });
+}
+function coverageDiscordBlurb(e, t) {
+  const card = coverageDiscordCard(e, t);
+  return card ? card.plain : '';
 }
 
 function parseClockHoursFromNote(note) {
@@ -15654,8 +15916,17 @@ function savePromotion() {
   save();
   $('promoteModal').classList.remove('open');
   toast(e.name + ' → ' + role);
-  const promoBlurb = "Frenchie's HR — " + e.name + ' is now ' + role + ' effective ' + when + (note ? ' — ' + note : '');
-  postDiscord('hrLog', promoBlurb, { label: 'Promotion · ' + e.name, fallbackCopy: true });
+  postDiscord('hrLog', discordCard('hrLog', {
+    title: 'Promotion',
+    description: '**' + e.name + '** is now **' + role + '**.',
+    fields: [
+      discordField('From', fromRole, true),
+      discordField('To', role, true),
+      discordField('Rate', money(fromRate) + ' → ' + money(rate), true),
+      discordField('Effective', when, true),
+      discordField('Note', note || '—', false)
+    ]
+  }), { label: 'Promotion · ' + e.name, fallbackCopy: true });
   render();
 }
 
@@ -15785,13 +16056,24 @@ function openInterviewBoard() {
   $('interviewBoardModal').removeAttribute('hidden');
 }
 
+function interviewReminderCard(a) {
+  if (!a) return null;
+  return discordCard('hiring', {
+    title: 'Interview reminder',
+    description: 'Reply in this channel if you need to reschedule.',
+    fields: [
+      discordField('Applicant', a.name, true),
+      discordField('Role', a.offerRole || 'New Hire', true),
+      discordField('Date', a.interviewDate ? (fmtLong(a.interviewDate) || a.interviewDate) : '—', true),
+      discordField('Time', a.interviewTime ? formatInterviewTime(a.interviewTime) : '—', true),
+      discordField('Slot', a.interviewSlot || '—', true),
+      discordField('Confirm', a.interviewConfirm || 'pending', true)
+    ]
+  });
+}
 function interviewReminderText(a) {
-  if (!a) return '';
-  return "Frenchie's HR — Interview reminder for " + a.name +
-    (a.interviewDate ? ' on ' + fmtLong(a.interviewDate) : '') +
-    (a.interviewTime ? ' at ' + formatInterviewTime(a.interviewTime) : '') +
-    (a.interviewSlot ? ' (' + a.interviewSlot + ')' : '') +
-    '. Reply on Discord if you need to reschedule.';
+  const card = interviewReminderCard(a);
+  return card ? card.plain : '';
 }
 window.copyInterviewBlurb = function (id) {
   const a = findApp(id);
@@ -15801,22 +16083,29 @@ window.copyInterviewBlurb = function (id) {
 window.postInterviewBlurb = function (id) {
   const a = findApp(id);
   if (!a) return;
-  return postDiscord('hiring', interviewReminderText(a), { label: 'Interview · ' + a.name });
+  const card = interviewReminderCard(a);
+  if (!card) return;
+  return postDiscord('hiring', card, { label: 'Interview · ' + a.name });
 };
 function postInterviewBoardDiscord() {
   const filter = ($('ivFilter') && $('ivFilter').value) || 'week';
   const list = interviewBoardRows(filter);
   if (!list.length) return toast('No interviews to post');
-  const lines = ["Frenchie's HR — Interview board (" + filter + ")", ''];
-  list.forEach(a => {
-    lines.push('• ' + a.name + (a.offerRole ? ' · ' + a.offerRole : '') +
-      (a.interviewDate ? ' · ' + (fmtLong(a.interviewDate) || a.interviewDate) : '') +
-      (a.interviewTime ? ' · ' + formatInterviewTime(a.interviewTime) : '') +
-      (a.interviewConfirm ? ' · ' + a.interviewConfirm : '') +
-      (a.interviewOutcome ? ' · ' + a.interviewOutcome : ''));
-  });
-  lines.push('', 'Reply on Discord if you need to reschedule.');
-  return postDiscord('hiring', lines.join('\n'), { label: 'Interview board' });
+  const body = list.map(a =>
+    '• **' + a.name + '**' + (a.offerRole ? ' · ' + a.offerRole : '') +
+    (a.interviewDate ? ' · ' + (fmtLong(a.interviewDate) || a.interviewDate) : '') +
+    (a.interviewTime ? ' · ' + formatInterviewTime(a.interviewTime) : '') +
+    (a.interviewConfirm ? ' · ' + a.interviewConfirm : '') +
+    (a.interviewOutcome ? ' · ' + a.interviewOutcome : '')
+  ).join('\n');
+  return postDiscord('hiring', discordCard('hiring', {
+    title: 'Interview board',
+    description: body + '\n\nReply in this channel if you need to reschedule.',
+    fields: [
+      discordField('Window', filter, true),
+      discordField('Count', String(list.length), true)
+    ]
+  }), { label: 'Interview board' });
 }
 
 window.setInterviewConfirm = function (id, status) {
@@ -15846,10 +16135,15 @@ window.setInterviewOutcome = function (id, outcome) {
     }
     save();
     openInterviewBoard();
-    const blurb = "Frenchie's HR — Interview complete for " + a.name +
-      (a.offerRole ? ' (' + a.offerRole + ')' : '') +
-      '. Moving toward offer — watch Discord for next steps.';
-    postDiscord('hiring', blurb, { label: 'Interview done · ' + a.name });
+    postDiscord('hiring', discordCard('hiring', {
+      title: 'Interview complete',
+      description: 'Moving toward offer — watch this channel for next steps.',
+      fields: [
+        discordField('Applicant', a.name, true),
+        discordField('Role', a.offerRole || 'New Hire', true),
+        discordField('Outcome', 'Done', true)
+      ]
+    }), { label: 'Interview done · ' + a.name });
     render();
     return;
   }
@@ -15941,11 +16235,26 @@ function recomputeTipSettlement() {
 }
 
 function tipSettlementDiscord() {
+  return tipSettlementDiscordCard().plain;
+}
+function tipSettlementDiscordCard() {
   const data = tipSettlementLines();
-  const lines = ["Frenchie's Sunday tip settlement — " + label(data.p), 'Pool: ' + money(data.pool) + ' · ' + data.mode];
-  data.lines.forEach(r => lines.push(r.e.name + ' — tips ' + money(r.tips) + ' · gross ' + money(r.gross) + (r.paid ? ' · PAID' : ' · owed')));
-  if (data.excluded.length) lines.push('Excluded: ' + data.excluded.join(', '));
-  return lines.join('\n');
+  const body = data.lines.length
+    ? data.lines.map(r =>
+      '• **' + r.e.name + '** — tips ' + money(r.tips) + ' · gross ' + money(r.gross) + (r.paid ? ' · PAID' : ' · owed')
+    ).join('\n')
+    : '_No tip-eligible lines._';
+  const fields = [
+    discordField('Period', label(data.p), true),
+    discordField('Pool', money(data.pool), true),
+    discordField('Split', data.mode, true)
+  ];
+  if (data.excluded.length) fields.push(discordField('Excluded', data.excluded.join(', '), false));
+  return discordCard('payroll', {
+    title: 'Sunday tip settlement',
+    description: body,
+    fields
+  });
 }
 
 function printTipSettlement() {
