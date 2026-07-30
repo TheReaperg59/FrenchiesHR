@@ -495,6 +495,7 @@ tbody tr:hover{background:oklch(98% .005 84)}
     <button class="btn tiny" id="formInvite" title="Download Interview invitation">Invitation</button>
     <button class="btn tiny" id="formQuestions" title="Download Interviewer questions">Questions</button>
     <button class="btn tiny" id="formOffer" title="Download Offer letter">Offer</button>
+    <button class="btn tiny" id="formDecline" title="Download Decline letter">Decline</button>
     <span class="bar-sep"></span>
     <button class="btn tiny soft" id="formNotes" title="Open Interviewer notes">Notes</button>
     <span class="bar-sep"></span>
@@ -536,7 +537,7 @@ tbody tr:hover{background:oklch(98% .005 84)}
       <p class="paper-order"><b>Before hire:</b> Application → Invitation → Questions → Offer (accept) → Hire.</p>
       <p class="paper-order"><b>After hire:</b> employee file → Send contract (you sign first) → Import signed reply → File &amp; send new-hire packet.</p>
       <p class="paper-order muted">Screening and Interviewer notes stay in the office. Contract and packet unlock only after hire.</p>
-      <p class="paper-order muted">Letter preview fills name, role, rate, start, manager, phone, Discord, and probation dates before you Send — import the reply to file it on the employee.</p>
+      <p class="paper-order muted">Letter preview fills name, role, rate, start, manager, phone, and probation dates before you Send — import the reply to file it on the employee.</p>
     </div>
   </div>
 </section>
@@ -995,6 +996,8 @@ tbody tr:hover{background:oklch(98% .005 84)}
   <h3>Eligibility</h3>
   <label class="checkline"><input type="checkbox" id="appAdmin"><span>City standing clear</span></label>
   <label class="checkline"><input type="checkbox" id="appFelony"><span>No recent felony convictions</span></label>
+  <label class="checkline"><input type="checkbox" id="appNoTerror" checked><span>No terrorism charge (hard bar)</span></label>
+  <label class="checkline"><input type="checkbox" id="appNoGovMurder" checked><span>No murder of a government employee (hard bar)</span></label>
   <div class="field-row" style="margin-top:12px">
     <div class="field"><label>Interview date</label><input id="appInterview" type="date"></div>
     <div class="field"><label>Interview time</label><input id="appInterviewTime" type="time"></div>
@@ -1016,7 +1019,7 @@ tbody tr:hover{background:oklch(98% .005 84)}
   </div>
   <div class="dialog-foot">
     <button class="btn danger" id="deleteApp" style="margin-right:auto;display:none">Delete</button>
-    <button class="btn soft" id="hireFromApp" style="display:none">Hire &amp; generate paperwork</button>
+    <button class="btn soft" id="hireFromApp" style="display:none">Hire onto roster</button>
     <button class="btn" id="cancelApp">Cancel</button>
     <button class="btn primary" id="saveApp">Save application</button>
   </div>
@@ -1152,7 +1155,9 @@ tbody tr:hover{background:oklch(98% .005 84)}
   <div id="replyBody" class="card-body policy" style="margin-top:12px;max-height:58vh;overflow:auto;background:oklch(96% .01 84);border:1px solid var(--line);border-radius:10px;padding:12px"></div>
   <div class="dialog-foot">
     <button class="btn soft" id="replyOpenPaper" style="margin-right:auto">Open paperwork</button>
+    <button class="btn" id="replyCopyPacket" title="Copy packet ID">Copy packet ID</button>
     <button class="btn" id="replyCopy">Copy text</button>
+    <button class="btn soft" id="replyPrint">Print</button>
     <button class="btn primary" id="replyClose">Close</button>
   </div>
 </div></div>
@@ -1971,7 +1976,7 @@ function stagePill(st) {
   const c = st === 'hired' ? 'green' : st === 'rejected' ? 'danger' : st === 'offer' ? 'blue' : 'gray';
   return '<span class="pill ' + c + '">' + esc(STAGES[st] || st) + '</span>';
 }
-function eligible(a) { return a.adminClear && a.felonyClear; }
+function eligible(a) { return !!(a.adminClear && a.felonyClear && a.noTerror !== false && a.noGovMurder !== false); }
 function findApp(id) { return s.applications.find(x => String(x.id) === String(id)); }
 function ensurePaperwork(a) { if (a && (!a.paperwork || typeof a.paperwork !== 'object')) a.paperwork = {}; return a; }
 function statusClass(st) {
@@ -2001,7 +2006,10 @@ function nextHireAction(a) {
   if (a.stage === 'hired') {
     const e = a.employeeId ? empById(a.employeeId) : null;
     if (!e) return 'Open employee file';
-    if (!empHasSignedContract(e)) return 'Send contract';
+    if (!empHasSignedContract(e)) {
+      const st = appContractStatus(a);
+      return st === 'sent' ? 'Awaiting contract reply' : 'Send contract';
+    }
     if (!empHasPacket(e)) return 'File & send packet';
     return 'On roster';
   }
@@ -2807,6 +2815,10 @@ window.viewFiledReply = function (idx) {
   if (!row) return toast('That reply is gone');
   openReplyViewer(row);
 };
+window.copyPacketId = function (id) {
+  if (!id) return toast('No packet ID');
+  copyText(String(id), 'Packet ID copied');
+};
 
 function renderPaperList(id) {
   const a = findApp(id);
@@ -2832,6 +2844,7 @@ function renderPaperList(id) {
       '<button class="btn tiny" onclick="openPaperDoc(' + a.id + ',\'' + k + '\')">Letter</button>' +
       '<button class="btn tiny" onclick="printPaperDoc(' + a.id + ',\'' + k + '\')">Print PDF</button>' +
       (def.sendable ? '<button class="btn tiny soft" onclick="downloadSendPacket(' + a.id + ',\'' + k + '\')">Send to applicant</button>' : '<span class="pill gray">HR only</span>') +
+      (rec && rec.packetId ? '<button class="btn tiny" onclick="copyPacketId(' + JSON.stringify(String(rec.packetId)) + ')">Copy ID</button>' : '') +
       (rec && rec.reply ? '<button class="btn tiny" onclick="viewAppReply(' + a.id + ',\'' + k + '\')">Read reply</button>' : '') +
       (rec ? '<button class="btn tiny danger" onclick="resetPaperDoc(' + a.id + ',\'' + k + '\')">Reset</button>' : '') +
       '</div></div>';
@@ -2906,8 +2919,10 @@ function renderEmployees() {
   if ($('empDocsIndex')) {
     $('empDocsIndex').innerHTML = docRows.length ? docRows.map(r =>
       '<tr><td>' + esc(r.doc.date || '—') + '</td><td class="name">' + esc(r.name) + '</td><td>' + esc(r.doc.title || r.doc.kind) + '</td>' +
-      '<td class="r"><button class="btn tiny" onclick="viewDoc(' + r.empId + ',' + r.doc.id + ')">Open</button></td></tr>'
-    ).join('') : '<tr><td colspan="4" class="empty">No staff documents yet. Open an employee file and generate hire paperwork.</td></tr>';
+      '<td class="r"><button class="btn tiny" onclick="viewDoc(' + r.empId + ',' + r.doc.id + ')">Open</button> ' +
+      (r.doc.html ? '<button class="btn tiny" onclick="printEmpDoc(' + r.empId + ',' + r.doc.id + ')">Print</button>' : '') +
+      '</td></tr>'
+    ).join('') : emptyState('No staff documents yet.', 'Open an employee file and send hire paperwork.');
   }
 }
 
@@ -3858,6 +3873,51 @@ function copyText(text, msg) {
     navigator.clipboard.writeText(text).then(() => toast(msg)).catch(() => { fallbackCopy(text); toast(msg); });
   } else { fallbackCopy(text); toast(msg); }
 }
+function discordPostBlurb(name, kind, packetId) {
+  const title = (PAPER_KINDS[kind] && PAPER_KINDS[kind].title) || kind;
+  return "Frenchie's HR — " + title + ' for ' + (name || 'you') +
+    (packetId ? ' (' + packetId + ')' : '') +
+    '. Open the .html, fill every starred field, sign, hit Download reply, and send that completed file back to HR.';
+}
+function offerHireFollowUp(a) {
+  if (!a || a.stage === 'hired' || a.stage === 'rejected') return;
+  setTimeout(() => {
+    if (confirm(a.name + ' accepted the offer. Hire them onto the roster now?')) hireApplicant(a);
+  }, 80);
+}
+function mapPacketOnboarding(emp, fields) {
+  if (!emp || !fields) return false;
+  const raw = fields.onboarding;
+  const labels = Array.isArray(raw) ? raw : [];
+  const hit = s => labels.some(x => String(x).toLowerCase().indexOf(s) >= 0);
+  let changed = false;
+  emp.onboarding = Object.assign(emptyOnboarding(), emp.onboarding || {});
+  [['uniform', 'uniform'], ['station', 'station'], ['menu', 'menu'], ['shadow', 'shadow']].forEach(([key, needle]) => {
+    if (hit(needle) && !emp.onboarding[key]) { emp.onboarding[key] = true; changed = true; }
+  });
+  return changed;
+}
+function ensureAppFromReply(writtenName, kind, reply) {
+  const stageGuess = kind === 'offer' ? 'offer' : (kind === 'interviewIc' || kind === 'invite' ? 'interview' : 'application');
+  const a = normalizeApplication({
+    id: s.nextAppId++,
+    name: writtenName,
+    applied: today(),
+    stage: stageGuess,
+    adminClear: false,
+    felonyClear: false,
+    interviewDate: '',
+    interviewTime: '',
+    interviewSlot: '',
+    offerRole: (reply && reply.fields && reply.fields.roleSought) || 'New Hire',
+    notes: 'Opened from ' + ((PAPER_KINDS[kind] && PAPER_KINDS[kind].title) || kind) + ' reply (TMP / off-desk send).',
+    paperwork: {},
+    formData: {}
+  });
+  s.applications.unshift(a);
+  log('Application opened from ' + kind + ' reply — ' + writtenName);
+  return a;
+}
 
 /* ---------------- documents ---------------- */
 function supervisorName(e) {
@@ -3965,6 +4025,7 @@ function appOfferCtx(a) {
   const rate = (a && a._empRate != null)
     ? Number(a._empRate)
     : Number((s.roles && s.roles[role]) || DEFAULT_ROLES[role] || 3000);
+  const hs = (a && a._houseSign) || (a && a.paperwork && a.paperwork.contract && a.paperwork.contract.houseSign) || null;
   return {
     name: (a && a.name) || '',
     role,
@@ -3976,16 +4037,19 @@ function appOfferCtx(a) {
     phone: (a && a.formData && a.formData.phone) || (a && a.phone) || '',
     hire,
     probationEnd: (a && a._empProbationEnd) || addDays(hire, 7),
-    supervisor: defaultSupervisorName()
+    supervisor: defaultSupervisorName(),
+    houseSign: hs
   };
 }
 function empCtx(e) {
   const hire = e.hire || today();
+  const doc = findEmpDoc(e, 'contract');
   return {
     name: e.name, role: e.role, rate: Number(e.rate || 0), applied: hire,
     interviewDate: '', phone: e.phone || '', hire,
     probationEnd: e.probationEnd || addDays(hire, 7),
-    supervisor: supervisorName(e)
+    supervisor: supervisorName(e),
+    houseSign: (doc && doc.houseSign) || null
   };
 }
 
@@ -4195,7 +4259,7 @@ function letterContract(c) {
     '<h4>7. Acknowledgement</h4>' +
     '<p>The Employee confirms they have read this Contract and the employee handbook, and accept the terms above in full.</p>' +
     signGrid('Employee — ' + (c.name || ''), '', 'Date', '') +
-    signGrid('For the house', 'Kenzie Long, HR Director · 636', 'Date', '');
+    signGrid('For the house', (c.houseSign && c.houseSign.name) || 'Kenzie Long, HR Director · 636', 'Date', (c.houseSign && c.houseSign.date) || '');
   return wrapLetter('Contract of Employment', body, (c.name || 'Employee') + ' · ' + c.role + ' · ' + today());
 }
 
@@ -4275,7 +4339,7 @@ const EMP_DOC_BUILDERS = {
   contract: { title: 'Contract', build: e => letterContract(empCtx(e)) },
   packet: { title: 'New-hire packet', build: e => letterPacket(empCtx(e)) }
 };
-const EMP_ARCHIVE_KINDS = ['application', 'invite', 'interviewIc', 'offer', 'contract', 'packet', 'decline'];
+const EMP_ARCHIVE_KINDS = ['application', 'screening', 'invite', 'interviewIc', 'interviewOoc', 'offer', 'contract', 'packet', 'decline'];
 
 function addDocument(e, kind) {
   const def = EMP_DOC_BUILDERS[kind];
@@ -4473,13 +4537,9 @@ function syncDocModalChrome() {
 function showFillablePreview(a, kind) {
   try {
     ensurePaperwork(a);
-    if (!s.nextPacketId) s.nextPacketId = 1;
     const existing = a.paperwork[kind];
-    const packetId = (existing && existing.packetId) || ('FR-' + String(s.nextPacketId++).padStart(4, '0'));
-    if (!existing || !existing.packetId) {
-      setPaper(a, kind, (existing && existing.html) ? '' : buildPaperHtml(a, kind), { packetId });
-      save();
-    }
+    /* Preview must not burn FR-#### — only real Send allocates nextPacketId */
+    const packetId = (existing && existing.packetId) || ('TMP-PREVIEW-' + kindSlug(kind));
     if (docCtx && docCtx._packetUrl) { try { URL.revokeObjectURL(docCtx._packetUrl); } catch (e) {} }
     const def = PAPER_KINDS[kind] || { title: 'Document' };
     const c = appOfferCtx(a);
@@ -4487,13 +4547,14 @@ function showFillablePreview(a, kind) {
       v: 1, packetId, applicationId: a.id, kind,
       name: a.name, role: c.role, rate: c.rate,
       issued: today(), interviewDate: a.interviewDate || '',
-      defaultDecision: DEFAULT_DECISION[kind] || ''
+      defaultDecision: DEFAULT_DECISION[kind] || '',
+      preview: true
     };
     docCtx = Object.assign({}, docCtx, {
       appId: a.id, kind, packetId, mode: 'fillable', _packetUrl: null,
       title: def.title + ' — ' + a.name, packetMeta: meta
     });
-    $('docTitle').textContent = docCtx.title + ' (fillable)';
+    $('docTitle').textContent = docCtx.title + ' (fillable preview)';
     $('docPreview').innerHTML = buildPacketSheet(a, kind, packetId, true);
     bindPacketForm($('docPreview'), meta);
     syncDocModalChrome();
@@ -4523,8 +4584,10 @@ function templateStub(kind) {
 /* Preferred pipeline stages for each Send button dropdown — contract/packet only post-hire */
 const SEND_PICK_STAGES = {
   application: ['application', 'eligibility', 'interview', 'offer'],
+  screening: ['application', 'eligibility', 'interview', 'offer'],
   invite: ['interview'],
   interviewIc: ['interview', 'offer'],
+  interviewOoc: ['interview', 'offer'],
   offer: ['interview', 'offer'],
   contract: ['hired'],
   packet: ['hired'],
@@ -4535,10 +4598,27 @@ function openTemplateForm(kind) {
   const def = PAPER_KINDS[kind];
   if (!def) return toast('Unknown document');
 
-  /* HR-only sheets stay in the office */
+  /* HR-only sheets stay in the office — bind to open app when possible so Save works */
   if (!def.sendable) {
-    openLetter(def.title, buildPaperHtml(templateStub(kind), kind), { appId: null, kind, mode: 'letter' });
-    toast('HR sheet — stays in the office, not sent to applicants');
+    const preferred = (paperAppId != null && findApp(paperAppId)) || (appId != null && findApp(appId)) || null;
+    if (preferred) {
+      ensurePaperwork(preferred);
+      const html = (preferred.paperwork[kind] && preferred.paperwork[kind].html) || buildPaperHtml(preferred, kind);
+      openLetter(def.title + ' — ' + preferred.name, html, { appId: preferred.id, kind, mode: 'letter' });
+      toast('HR sheet for ' + preferred.name + ' — stays in the office');
+    } else {
+      openSendApplicantPick(kind, null, (chosen) => {
+        if (!chosen || chosen.id == null) {
+          openLetter(def.title, buildPaperHtml(templateStub(kind), kind), { appId: null, kind, mode: 'letter' });
+          toast('HR sheet — pick an applicant first next time so Save can file it');
+          return;
+        }
+        ensurePaperwork(chosen);
+        const html = (chosen.paperwork[kind] && chosen.paperwork[kind].html) || buildPaperHtml(chosen, kind);
+        openLetter(def.title + ' — ' + chosen.name, html, { appId: chosen.id, kind, mode: 'letter' });
+        toast('HR sheet for ' + chosen.name + ' — stays in the office');
+      });
+    }
     return;
   }
 
@@ -4576,11 +4656,30 @@ function downloadChosenPacket(chosen, kind, opts) {
   const stub = chosen || templateStub(kind);
   const name = String(stub.name || '').trim();
   if (!name) return toast('Pick an applicant or type a name first');
-  const packetId = 'TMP-' + kindSlug(kind);
-  const filename = 'Frenchies-' + kindSlug(kind) + '-' + safeName(name) + '.html';
-  if (opts.houseSign) stub._houseSign = opts.houseSign;
-  openPacketWindow(buildSendPacket(stub, kind, packetId, opts), filename);
-  toast((PAPER_KINDS[kind] || {}).title + ' downloaded for ' + name + ' — send on Discord.');
+  /* Prefer a real desk application so TMP replies can be filed later */
+  let a = (s.applications || []).find(x => String(x.name).trim().toLowerCase() === name.toLowerCase() && x.stage !== 'rejected');
+  if (!a) {
+    const stageGuess = kind === 'offer' ? 'offer' : (kind === 'invite' || kind === 'interviewIc' ? 'interview' : (kind === 'decline' ? 'rejected' : 'application'));
+    a = normalizeApplication({
+      id: s.nextAppId++,
+      name,
+      applied: today(),
+      stage: stageGuess,
+      adminClear: false,
+      felonyClear: false,
+      interviewDate: stub.interviewDate || '',
+      interviewTime: stub.interviewTime || '',
+      interviewSlot: stub.interviewSlot || '',
+      offerRole: stub.offerRole || 'New Hire',
+      notes: 'Opened when sending ' + ((PAPER_KINDS[kind] && PAPER_KINDS[kind].title) || kind) + ' off the desk.',
+      paperwork: {},
+      formData: {}
+    });
+    s.applications.unshift(a);
+    log('Application opened for send — ' + name);
+  }
+  if (opts.houseSign) a._houseSign = opts.houseSign;
+  finishDownloadSendPacket(a, kind, opts);
 }
 
 window.openTemplateForm = openTemplateForm;
@@ -5500,26 +5599,10 @@ function applyReply(reply) {
   if (!a && writtenName) {
     a = s.applications.find(x => String(x.name).trim().toLowerCase() === writtenName.toLowerCase());
   }
-  if (!a && kind === 'invite' && writtenName) {
-    a = normalizeApplication({
-      id: s.nextAppId++,
-      name: writtenName,
-      applied: today(),
-      stage: 'interview',
-      adminClear: false,
-      felonyClear: false,
-      interviewDate: '',
-      interviewTime: '',
-      interviewSlot: '',
-      offerRole: 'New Hire',
-      notes: 'Opened from Interview invitation reply (not moved through stages yet).',
-      paperwork: {},
-      formData: {}
-    });
-    s.applications.unshift(a);
-    log('Application opened from invite reply — ' + writtenName);
+  if (!a && writtenName) {
+    a = ensureAppFromReply(writtenName, kind, reply);
   }
-  if (!a) return { ok: false, msg: 'No application on the desk matches that reply — have them write their name on the invitation' };
+  if (!a) return { ok: false, msg: 'No application on the desk matches that reply — have them write their full name on the form' };
 
   if (writtenName && (!a.name || a.name === 'Applicant')) a.name = writtenName;
 
@@ -5570,6 +5653,7 @@ function applyReply(reply) {
       extra = 'offer accepted — ready to hire';
     } else if (status === 'declined') {
       extra = 'offer declined';
+      if (!a.paperwork.decline) setPaper(a, 'decline', letterDecline(a));
     }
   } else if (kind === 'contract') {
     if (status === 'accepted') {
@@ -5592,6 +5676,7 @@ function applyReply(reply) {
     emp.applicationId = a.id;
     syncPaperToEmpDoc(emp, a, kind, { reply, status, force: true });
     if (kind === 'contract' && status === 'accepted') emp.contractSignedAt = reply.signedAt || today();
+    if (kind === 'packet' && mapPacketOnboarding(emp, f)) extra += ' · onboarding ticks copied';
     if (EMP_ARCHIVE_KINDS.indexOf(kind) >= 0) extra += ' · employee file updated';
   }
 
@@ -5600,7 +5685,35 @@ function applyReply(reply) {
   log('Reply filed — ' + PAPER_KINDS[kind].title + ' from ' + a.name + ' (' + status + (reply.packetId ? ', ' + reply.packetId : '') + ')');
   save();
   render();
-  return { ok: true, app: a, kind, status, rec, msg: extra, empUpdated: !!emp };
+  const out = { ok: true, app: a, kind, status, rec, msg: extra, empUpdated: !!emp };
+  if (kind === 'offer' && status === 'accepted') offerHireFollowUp(a);
+  else if (kind === 'offer' && status === 'declined') {
+    setTimeout(() => {
+      if (a.stage === 'rejected' || a.stage === 'hired') return;
+      if (confirm(a.name + ' declined the offer. Mark the application rejected and keep the decline letter?')) {
+        a.stage = 'rejected';
+        ensurePaperwork(a);
+        if (!a.paperwork.decline) setPaper(a, 'decline', letterDecline(a));
+        log('Application rejected after offer decline: ' + a.name);
+        save(); render();
+        toast('Marked rejected · decline letter on file');
+        if (confirm('Download the decline letter to send on Discord?')) downloadSendPacket(a.id, 'decline');
+      }
+    }, 80);
+  } else if (kind === 'contract' && status === 'accepted' && emp) {
+    setTimeout(() => {
+      if (empHasPacket(emp)) return;
+      if (confirm(a.name + ' signed the contract. File & send the new-hire packet now?')) {
+        editId = emp.id;
+        goView('employees');
+        setTimeout(() => {
+          editEmployee(emp.id);
+          setTimeout(() => { if ($('sendEmpPacket')) $('sendEmpPacket').click(); }, 60);
+        }, 80);
+      }
+    }, 80);
+  }
+  return out;
 }
 
 function parseReplyPayload(text, filename) {
@@ -5852,6 +5965,8 @@ window.editApp = function (id) {
   $('appStage').value = a.stage;
   $('appAdmin').checked = !!a.adminClear;
   $('appFelony').checked = !!a.felonyClear;
+  if ($('appNoTerror')) $('appNoTerror').checked = a.noTerror !== false;
+  if ($('appNoGovMurder')) $('appNoGovMurder').checked = a.noGovMurder !== false;
   $('appInterview').value = a.interviewDate || '';
   if ($('appInterviewTime')) $('appInterviewTime').value = toTimeInputValue(a.interviewTime) || '';
   if ($('appInterviewSlot')) $('appInterviewSlot').value = a.interviewSlot || '';
@@ -5876,8 +5991,17 @@ window.advanceApp = function (id) {
   if (next === 'interview' && !(a.paperwork.application && a.paperwork.application.reply)) {
     if (!confirm('No returned application on file for ' + a.name + '. Move to interview anyway?')) return;
   }
+  if (next === 'interview' && !(a.paperwork.screening && (a.paperwork.screening.html || a.paperwork.screening.sendStatus))) {
+    if (!confirm('No screening sheet on file for ' + a.name + '. Move to interview anyway?')) return;
+  }
   if (next === 'offer' && !(a.paperwork.invite && a.paperwork.invite.reply)) {
     if (!confirm('Interview invitation has not been returned yet. Move ' + a.name + ' to offer anyway?')) return;
+  }
+  if (next === 'offer' && !(a.paperwork.interviewIc && a.paperwork.interviewIc.reply)) {
+    if (!confirm('Interview questions have not been returned for ' + a.name + '. Move to offer anyway?')) return;
+  }
+  if (next === 'offer' && !(a.paperwork.interviewOoc && a.paperwork.interviewOoc.html)) {
+    if (!confirm('No interviewer notes on file for ' + a.name + '. Move to offer anyway?')) return;
   }
   if (next === 'hired') {
     const offer = a.paperwork.offer;
@@ -5902,6 +6026,7 @@ window.rejectApp = function (id) {
   if (!a.paperwork.decline) setPaper(a, 'decline', letterDecline(a));
   log('Application rejected: ' + a.name);
   save(); render(); toast('Application rejected · decline letter drafted');
+  if (confirm('Download the decline letter to send on Discord?')) downloadSendPacket(a.id, 'decline');
 };
 
 window.deleteApplication = function (id) {
@@ -6035,7 +6160,7 @@ window.printPaperDoc = function (id, kind) {
 window.resetPaperDoc = function (id, kind) {
   const a = findApp(id);
   if (!a || !a.paperwork || !a.paperwork[kind]) return;
-  if (!confirm('Reset ' + PAPER_KINDS[kind].title + ' back to the standard wording? Edits, send status, and any imported reply are lost.')) return;
+  if (!confirmDanger('Reset ' + PAPER_KINDS[kind].title + ' back to the standard wording?', 'Edits, send status, and any imported reply are lost.')) return;
   delete a.paperwork[kind];
   log('Reset ' + PAPER_KINDS[kind].title.toLowerCase() + ' for ' + a.name);
   save(); render();
@@ -6081,9 +6206,10 @@ function finishDownloadSendPacket(a, kind, opts) {
   }
   log('Packet ' + packetId + ' prepared — ' + def.title + ' for ' + a.name + (opts.houseSign ? ' (house signed)' : ''));
   save(); render();
-  toast(kind === 'contract'
-    ? 'Contract downloaded — on file as sent. They sign, Download reply, and you Import it.'
-    : 'Packet .html downloaded — send that file on Discord. They fill it, Download reply, and you Import their completed .html');
+  const blurb = discordPostBlurb(a.name, kind, packetId);
+  copyText(blurb, kind === 'contract'
+    ? 'Contract downloaded · Discord blurb copied'
+    : 'Packet downloaded · Discord blurb copied');
 }
 
 let hrSignPending = null;
@@ -6172,10 +6298,13 @@ function syncSendPickNameWrap() {
 function openSendApplicantPick(kind, preferred, onConfirm) {
   const def = PAPER_KINDS[kind] || { title: 'Document' };
   sendPickPending = { kind, preferred: preferred || null, onConfirm };
-  if ($('sendPickTitle')) $('sendPickTitle').textContent = 'Send ' + def.title;
+  const hrOnly = !!(def.hrOnly || def.sendable === false);
+  if ($('sendPickTitle')) $('sendPickTitle').textContent = (hrOnly ? 'Open ' : 'Send ') + def.title;
   if ($('sendPickHint')) {
-    $('sendPickHint').textContent = 'Pick who this ' + def.title.toLowerCase() +
-      ' is for so their name prints on the sheet — not a blank "Applicant".';
+    $('sendPickHint').textContent = hrOnly
+      ? 'Pick whose file this ' + def.title.toLowerCase() + ' belongs on so Save can file it.'
+      : 'Pick who this ' + def.title.toLowerCase() +
+        ' is for so their name prints on the sheet — not a blank "Applicant".';
   }
   fillApplicantSelect($('sendPickApplicant'), kind, preferred, 'Not on the desk — type a name below');
   syncSendPickNameWrap();
@@ -6201,7 +6330,7 @@ window.openEmpDoc = function (empId, kind, docId) {
 window.deleteDoc = function (empId, docId) {
   const e = empById(empId);
   if (!e) return;
-  if (!confirm('Delete this document from the file?')) return;
+  if (!confirmDanger('Delete this document from the file?', 'It leaves the employee Documents list.')) return;
   e.documents = (e.documents || []).filter(x => x.id !== docId);
   save(); renderEmployeeFile(e); toast('Document removed');
 };
@@ -6292,6 +6421,7 @@ function renderEmployeeFile(e) {
       '<div class="paper-actions">' +
       (d.status ? '<span class="pill ' + empDocStatusPill(d.status) + '">' + esc(d.status) + '</span> ' : '') +
       (d.html ? '<button class="btn tiny" onclick="viewDoc(' + e.id + ',' + d.id + ')">View</button> ' : '<button class="btn tiny" disabled title="Not on file yet">View</button> ') +
+      (d.html ? '<button class="btn tiny" onclick="printEmpDoc(' + e.id + ',' + d.id + ')">Print</button> ' : '') +
       '<button class="btn tiny danger" onclick="deleteDoc(' + e.id + ',' + d.id + ')">Delete</button></div></div>'
     ).join('');
   } else {
@@ -6353,6 +6483,13 @@ window.openLinkedAppPaper = function (appId) {
   $('employeeModal').classList.remove('open');
   goView('hiring');
   setTimeout(() => { if (typeof openAppPaper === 'function') openAppPaper(appId); }, 60);
+};
+window.printEmpDoc = function (empId, docId) {
+  const e = empById(empId);
+  if (!e) return toast('Employee gone');
+  const d = (e.documents || []).find(x => String(x.id) === String(docId));
+  if (!d || !d.html) return toast('Nothing to print');
+  printLetter(d.html);
 };
 
 window.filterEmpLog = function (type) {
@@ -6739,12 +6876,14 @@ $('save').onclick = () => {
     }, h);
     s.employees.push(e);
     s.periods.filter(p => p.status === 'open').forEach(p => { p.entries[e.id] = { hours: 0, bonus: 0, tips: 0, rate: e.rate, paidOut: false }; });
-    log('Added ' + n + ' as ' + r);
+    const a = syncEmpCtxOntoApp(ensureAppForEmployee(e), e);
+    syncPaperToEmpDoc(e, a, 'offer', { html: letterOffer(empCtx(e)), status: 'draft', force: true });
+    log('Added ' + n + ' as ' + r + ' — offer draft on file');
   }
   save();
   $('employeeModal').classList.remove('open');
   render();
-  toast('Saved');
+  toast(editId ? 'Saved' : 'Saved — offer draft on file · Send contract next');
 };
 
 $('deleteEmployee').onclick = () => {
@@ -6781,6 +6920,9 @@ $('sendEmpContract').onclick = () => {
 $('sendEmpPacket').onclick = () => {
   const e = empById(editId);
   if (!e) return toast('Save the file first');
+  if (!empHasSignedContract(e)) {
+    if (!confirm('No signed contract on file for ' + e.name + '. Paper path says contract first. File & send the packet anyway?')) return;
+  }
   const a = syncEmpCtxOntoApp(ensureAppForEmployee(e), e);
   const html = letterPacket(empCtx(e));
   ensurePaperwork(a);
@@ -6793,7 +6935,7 @@ $('sendEmpPacket').onclick = () => {
   log('New-hire packet filed and downloaded for ' + e.name);
   save();
   renderEmployeeFile(e);
-  toast('New-hire packet on file — send the .html so they can open it anytime.');
+  copyText(discordPostBlurb(e.name, 'packet', packetId), 'New-hire packet on file · Discord blurb copied');
 };
 
 $('cancelHrSign').onclick = () => {
@@ -6923,6 +7065,8 @@ $('addApp').onclick = () => {
   $('appStage').value = 'application';
   $('appAdmin').checked = false;
   $('appFelony').checked = false;
+  if ($('appNoTerror')) $('appNoTerror').checked = true;
+  if ($('appNoGovMurder')) $('appNoGovMurder').checked = true;
   $('appInterview').value = '';
   if ($('appInterviewTime')) $('appInterviewTime').value = '';
   if ($('appInterviewSlot')) $('appInterviewSlot').value = '';
@@ -6950,6 +7094,7 @@ $('formInvite').onclick = () => openTemplateForm('invite');
 $('formQuestions').onclick = () => openTemplateForm('interviewIc');
 $('formNotes').onclick = () => openTemplateForm('interviewOoc');
 $('formOffer').onclick = () => openTemplateForm('offer');
+if ($('formDecline')) $('formDecline').onclick = () => openTemplateForm('decline');
 $('importReplyBtn').onclick = () => {
   const inp = $('importReplyFile');
   if (!inp.files.length) return inp.click();
@@ -6977,6 +7122,17 @@ $('replyCopy').onclick = () => {
   const text = replyViewCtx ? formatReplyText(replyViewCtx) : ($('replyBody').textContent || '');
   if (!text.trim()) return toast('Nothing to copy');
   copyText(text, 'Reply copied');
+};
+if ($('replyCopyPacket')) $('replyCopyPacket').onclick = () => {
+  const id = replyViewCtx && replyViewCtx.packetId;
+  if (!id) return toast('No packet ID on this reply');
+  copyText(String(id), 'Packet ID copied');
+};
+if ($('replyPrint')) $('replyPrint').onclick = () => {
+  const body = $('replyBody');
+  if (!body || !body.innerHTML.trim()) return toast('Nothing to print');
+  const sheet = body.querySelector('.packet-embed, .letter-page') || body;
+  printOfficeHtml('Filed reply — ' + ((replyViewCtx && replyViewCtx.title) || 'Reply'), sheet.outerHTML || body.innerHTML);
 };
 $('replyOpenPaper').onclick = () => {
   if (!replyViewCtx || !replyViewCtx.appId) return toast('No application linked');
@@ -7057,6 +7213,8 @@ $('saveApp').onclick = () => {
     stage: $('appStage').value,
     adminClear: $('appAdmin').checked,
     felonyClear: $('appFelony').checked,
+    noTerror: $('appNoTerror') ? $('appNoTerror').checked : true,
+    noGovMurder: $('appNoGovMurder') ? $('appNoGovMurder').checked : true,
     interviewDate: $('appInterview').value,
     interviewTime: $('appInterviewTime') ? $('appInterviewTime').value : '',
     interviewSlot: $('appInterviewSlot') ? $('appInterviewSlot').value.trim() : '',
@@ -7065,6 +7223,9 @@ $('saveApp').onclick = () => {
   };
   if (data.stage === 'interview' && !eligible(data)) {
     if (!confirm('Eligibility is not fully cleared. Move to interview anyway?')) return;
+  }
+  if ((!data.noTerror || !data.noGovMurder) && data.stage !== 'rejected') {
+    if (!confirm('A hard bar is unchecked (terrorism / gov-employee murder). Save anyway?')) return;
   }
   if (appId) {
     const a = s.applications.find(x => x.id === appId);
@@ -7093,6 +7254,8 @@ $('hireFromApp').onclick = () => {
     stage: $('appStage').value,
     adminClear: $('appAdmin').checked,
     felonyClear: $('appFelony').checked,
+    noTerror: $('appNoTerror') ? $('appNoTerror').checked : true,
+    noGovMurder: $('appNoGovMurder') ? $('appNoGovMurder').checked : true,
     interviewDate: $('appInterview').value,
     interviewTime: $('appInterviewTime') ? $('appInterviewTime').value : '',
     interviewSlot: $('appInterviewSlot') ? $('appInterviewSlot').value.trim() : '',
