@@ -305,28 +305,47 @@ tbody tr:hover{background:oklch(98% .005 84)}
 #view-hiring .hire-stage{margin:0 0 16px}
 #view-hiring .hire-hero{
   display:flex;justify-content:space-between;align-items:flex-end;gap:16px;flex-wrap:wrap;
-  padding:18px 20px;border:1px solid var(--line);border-radius:16px;
-  background:linear-gradient(135deg,oklch(99% .006 84),oklch(96.5% .02 155));
+  padding:20px 22px;border:1px solid var(--line);border-radius:16px;
+  background:
+    radial-gradient(ellipse 80% 120% at 100% 0%, oklch(94% .03 82 / .55), transparent 55%),
+    linear-gradient(135deg,oklch(99% .006 84),oklch(96.5% .02 155));
   margin-bottom:14px;
 }
 #view-hiring .hire-brand{font:700 .62rem 'DM Sans',sans-serif;letter-spacing:.14em;text-transform:uppercase;color:var(--muted);margin-bottom:4px}
 #view-hiring .hire-hero .title{margin:0;font:700 1.55rem/1.15 'Playfair Display',Georgia,serif;color:var(--navy)}
-#view-hiring .hire-hero .subtitle{margin:6px 0 0;max-width:42ch;color:var(--muted);font-size:.84rem}
+#view-hiring .hire-hero .subtitle{margin:8px 0 0;max-width:52ch;color:var(--muted);font-size:.84rem;line-height:1.45}
 #view-hiring .hire-spotlight{
-  display:grid;grid-template-columns:1fr 1fr;gap:12px;margin-bottom:14px;
+  display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:12px;margin-bottom:14px;
 }
 #view-hiring .hire-spot{
   border:1px solid var(--line);border-radius:14px;padding:14px 16px;
-  background:var(--paper);min-height:88px;
+  background:var(--paper);min-height:108px;
+  box-shadow:0 1px 0 oklch(90% .01 84 / .5);
 }
 #view-hiring .hire-spot h3{
-  margin:0 0 8px;font:700 .68rem 'DM Sans',sans-serif;letter-spacing:.08em;text-transform:uppercase;color:var(--muted);
+  margin:0 0 10px;font:700 .68rem 'DM Sans',sans-serif;letter-spacing:.08em;text-transform:uppercase;color:var(--muted);
   display:flex;align-items:center;gap:8px;
 }
+#view-hiring .hire-spot-row{
+  display:flex;align-items:flex-start;justify-content:space-between;gap:10px;
+  padding:8px 0;border-bottom:1px solid oklch(94% .008 84);
+  font-size:.78rem;
+}
+#view-hiring .hire-spot-row:last-child{border-bottom:0}
+#view-hiring .hire-spot-row b{color:var(--navy);font-weight:700}
+#view-hiring .hire-spot-actions{display:flex;gap:6px;flex-wrap:wrap;flex:none}
 #view-hiring .hire-desk{display:flex;flex-direction:column;gap:16px}
 #view-hiring .hire-apps-card .table-scroll{max-height:none}
 #view-hiring .apps-table td.name{font-weight:600;color:var(--navy)}
-#view-hiring .apps-table .app-next{font-size:.72rem;color:var(--muted);line-height:1.4;max-width:180px}
+#view-hiring .apps-table .app-next{
+  font-size:.72rem;line-height:1.35;max-width:220px;font-weight:600;
+  padding:6px 9px;border-radius:8px;border:1px solid transparent;
+}
+#view-hiring .apps-table .app-next.tone-action{background:var(--sage);color:var(--navy);border-color:oklch(86% .04 155)}
+#view-hiring .apps-table .app-next.tone-wait{background:oklch(96% .03 240);color:oklch(42% .08 250);border-color:oklch(88% .04 250)}
+#view-hiring .apps-table .app-next.tone-ready{background:var(--goldwash);color:oklch(38% .08 82);border-color:oklch(88% .05 82)}
+#view-hiring .apps-table .app-next.tone-done{background:oklch(96% .01 155);color:var(--muted)}
+#view-hiring .apps-table tr.await-row td{background:oklch(98% .015 240 / .45)}
 #view-hiring .apps-table .app-clear{display:flex;flex-direction:column;gap:4px;align-items:flex-start}
 #view-hiring .apps-table .app-actions{display:flex;flex-wrap:wrap;gap:6px;justify-content:flex-end}
 #view-hiring .apps-table .paper-meter{height:4px;background:oklch(93% .01 84);border-radius:99px;overflow:hidden;margin-top:5px;max-width:72px}
@@ -340,6 +359,9 @@ tbody tr:hover{background:oklch(98% .005 84)}
 #view-hiring .filed-row .filed-who{font-weight:600;color:var(--navy)}
 #view-hiring .filed-row .filed-meta{font-size:.72rem;color:var(--muted);margin-top:2px}
 #view-hiring .filed-actions{display:flex;gap:6px;flex-wrap:wrap;justify-content:flex-end}
+@media(max-width:1100px){
+  #view-hiring .hire-spotlight{grid-template-columns:1fr 1fr}
+}
 @media(max-width:900px){
   #view-hiring .hire-spotlight{grid-template-columns:1fr}
   #view-hiring .filed-row{grid-template-columns:1fr;gap:8px}
@@ -639,10 +661,16 @@ tbody tr:hover:not(.total){background:var(--goldwash)}
 
 
 .hire-path{display:flex;flex-wrap:wrap;align-items:center;gap:6px 8px;padding:12px 14px;margin-bottom:16px;background:linear-gradient(135deg,var(--paper),oklch(97.5% .01 84));border:1px solid var(--line);border-radius:var(--r);font-size:.7rem;font-weight:700;color:var(--muted);letter-spacing:.02em}
-.hire-path span{padding:5px 10px;border-radius:999px;border:1px solid transparent;background:oklch(96% .008 84)}
-.hire-path span.on{background:var(--sage);color:var(--navy);border-color:oklch(86% .04 155)}
-.hire-path span.now{background:var(--navy);color:var(--gold);border-color:var(--navy)}
-.hire-path span.done{background:var(--goldwash);color:oklch(42% .08 82);border-color:oklch(88% .05 82)}
+.hire-path button[data-step],.hire-path span[data-step]{
+  appearance:none;padding:6px 11px;border-radius:999px;border:1px solid transparent;
+  background:oklch(96% .008 84);color:inherit;font:inherit;letter-spacing:inherit;cursor:pointer;
+  transition:background .15s,color .15s,border-color .15s,transform .12s;
+}
+.hire-path button[data-step]:hover{transform:translateY(-1px);border-color:oklch(82% .03 155)}
+.hire-path button[data-step]:focus-visible{outline:2px solid oklch(72% .12 82 / .55);outline-offset:2px}
+.hire-path button.on, .hire-path span.on{background:var(--sage);color:var(--navy);border-color:oklch(86% .04 155)}
+.hire-path button.now, .hire-path span.now{background:var(--navy);color:var(--gold);border-color:var(--navy)}
+.hire-path button.done, .hire-path span.done{background:var(--goldwash);color:oklch(42% .08 82);border-color:oklch(88% .05 82)}
 .hire-path i{width:14px;height:1px;background:var(--line);flex:none}
 @media(max-width:700px){.hire-path i{display:none}}
 /* ===== Desk UX, formats, accessibility ===== */
@@ -1008,7 +1036,7 @@ td .btn.tiny{white-space:nowrap}
   margin:0;border-radius:14px;padding:14px 16px;
   justify-content:flex-start;
 }
-.hire-path span{padding:6px 12px;font-size:.68rem}
+.hire-path button[data-step],.hire-path span{padding:6px 12px;font-size:.68rem}
 .action-bar{margin:0}
 .action-bar .bar-label{
   padding:4px 8px;border-radius:999px;background:var(--sage);color:var(--navy);
@@ -1268,7 +1296,7 @@ body{
   box-shadow:var(--shadow-sm);
 }
 .hire-path{border-radius:16px;padding:14px 16px;gap:8px}
-.hire-path span{padding:7px 12px;font-size:.7rem;border-radius:999px}
+.hire-path button[data-step],.hire-path span{padding:7px 12px;font-size:.7rem;border-radius:999px}
 
 .desk-hero{
   display:grid;grid-template-columns:minmax(0,1.2fr) minmax(240px,.8fr);
@@ -2771,9 +2799,9 @@ body.session-staff #pullSharedBtn{display:none!important}
   <div class="hire-stage">
     <div class="hire-hero">
       <div>
-        <div class="hire-brand">Frenchie&apos;s Restaurant</div>
-        <h1 class="title" id="title-hiring">Hiring</h1>
-        <p class="subtitle">Application → interview → offer → hire → contract → packet → account login.</p>
+        <div class="hire-brand">Frenchie&apos;s Restaurant · Human Resources</div>
+        <h1 class="title" id="title-hiring">Hiring desk</h1>
+        <p class="subtitle">Formal pipeline from application through interview, offer, hire, contract, orientation packet, and account access.</p>
       </div>
       <div class="actions hire-forms">
         <button class="btn soft" id="interviewBoardBtn">Interview board</button>
@@ -2783,76 +2811,81 @@ body.session-staff #pullSharedBtn{display:none!important}
     </div>
     <div class="action-bar">
       <span class="bar-label">Blank forms</span>
-      <button class="btn tiny" id="formApp" title="Download Application">Application</button>
-      <button class="btn tiny" id="formInvite" title="Download Interview invitation">Invitation</button>
-      <button class="btn tiny" id="formQuestions" title="Download Interviewer questions">Questions</button>
-      <button class="btn tiny" id="formOffer" title="Download Offer letter">Offer</button>
-      <button class="btn tiny" id="formDecline" title="Download Decline letter">Decline</button>
+      <button class="btn tiny" id="formApp" title="Download blank employment application">Application</button>
+      <button class="btn tiny" id="formInvite" title="Download blank interview invitation">Invitation</button>
+      <button class="btn tiny" id="formQuestions" title="Download blank interviewer questions">Questions</button>
+      <button class="btn tiny" id="formOffer" title="Download blank offer letter">Offer</button>
+      <button class="btn tiny" id="formDecline" title="Download blank decline letter">Decline</button>
       <span class="bar-sep"></span>
-      <button class="btn tiny soft" id="formNotes" title="Open Interviewer notes">Notes</button>
+      <button class="btn tiny soft" id="formNotes" title="Open interviewer notes">Notes</button>
       <span class="bar-sep"></span>
-      <input type="file" class="file-mini" id="importReplyFile" accept=".html,.htm,.json,.txt,text/html,application/json" title="Import reply file">
+      <input type="file" class="file-mini" id="importReplyFile" accept=".html,.htm,.json,.txt,text/html,application/json" title="Import signed reply file">
     </div>
     <details class="fold quiet">
       <summary>Hiring standards &amp; paper path</summary>
       <div class="fold-body">
-        <p class="ui-hint">Every applicant fills the Application, interviews with HR, and starts on seven-day probation. City standing + no recent felony required. Terrorism or gov-employee murder is a hard bar.</p>
-        <p class="ui-hint"><b>Before hire:</b> Application → Invitation → Questions → Offer → Hire. <b>After hire:</b> Send contract (you sign first) → Import reply → New-hire packet → Account login information (access granted when filed).</p>
+        <p class="ui-hint">Every candidate completes an employment application, clears eligibility, interviews with Human Resources, and begins on seven-day probation. City standing and a clear recent felony record are required. Terrorism charges or murder of a government employee are a hard bar.</p>
+        <p class="ui-hint"><b>Before hire:</b> Issue application → clear eligibility → issue invitation → issue interviewer questions → record notes → issue offer → hire onto roster.</p>
+        <p class="ui-hint"><b>After hire:</b> Issue contract (house signs first) → file signed reply → issue new-hire packet → issue account login information (desk access granted when the acknowledgement is filed).</p>
       </div>
     </details>
     <div class="metrics" id="hireMetrics">
-      <button type="button" class="metric metric-btn" data-hire-metric="pipeline" title="Show pipeline"><label>In pipeline</label><strong id="mPipe">0</strong><span>Not yet hired</span></button>
+      <button type="button" class="metric metric-btn" data-hire-metric="pipeline" title="Show open pipeline"><label>In pipeline</label><strong id="mPipe">0</strong><span>Open applications</span></button>
       <button type="button" class="metric metric-btn" data-hire-metric="elig" title="Show eligibility holds"><label>Eligibility hold</label><strong id="mElig">0</strong><span>Awaiting clearance</span></button>
-      <button type="button" class="metric metric-btn" data-hire-metric="interview" title="Show interviews"><label>At interview</label><strong id="mInt">0</strong><span>In interview stage</span></button>
-      <button type="button" class="metric metric-btn" data-hire-metric="offer" title="Show offers"><label>Offers out</label><strong id="mOffer">0</strong><span>Pending accept</span></button>
+      <button type="button" class="metric metric-btn" data-hire-metric="interview" title="Show interview stage"><label>At interview</label><strong id="mInt">0</strong><span>Interview stage</span></button>
+      <button type="button" class="metric metric-btn" data-hire-metric="offer" title="Show offer stage"><label>Offers out</label><strong id="mOffer">0</strong><span>Pending decision</span></button>
     </div>
-    <div class="hire-path" id="hirePathStrip" aria-label="Hiring paper path">
-      <span data-step="application">Application</span>
-      <i></i><span data-step="eligibility">Eligibility</span>
-      <i></i><span data-step="interview">Interview</span>
-      <i></i><span data-step="offer">Offer</span>
-      <i></i><span data-step="hired">Hire</span>
-      <i></i><span data-step="contract">Contract</span>
-      <i></i><span data-step="packet">Packet</span>
-      <i></i><span data-step="login">Account login</span>
+    <div class="hire-path" id="hirePathStrip" aria-label="Hiring paper path — click a step to filter">
+      <button type="button" data-step="application" data-hire-filter="application" title="Filter application stage">Application</button>
+      <i></i><button type="button" data-step="eligibility" data-hire-filter="elig" title="Filter eligibility holds">Eligibility</button>
+      <i></i><button type="button" data-step="interview" data-hire-filter="interview" title="Filter interview stage">Interview</button>
+      <i></i><button type="button" data-step="offer" data-hire-filter="offer" title="Filter offer stage">Offer</button>
+      <i></i><button type="button" data-step="hired" data-hire-filter="hired" title="Filter hired files">Hire</button>
+      <i></i><button type="button" data-step="contract" data-hire-filter="hired" title="Post-hire contract">Contract</button>
+      <i></i><button type="button" data-step="packet" data-hire-filter="hired" title="Post-hire packet">Packet</button>
+      <i></i><button type="button" data-step="login" data-hire-filter="hired" title="Post-hire account login">Account login</button>
     </div>
     <div class="hire-spotlight">
       <div class="hire-spot">
         <h3>Interview agenda <span class="pill gray" id="agendaCount">0</span></h3>
-        <div id="interviewAgenda"><div class="ui-hint">No interviews scheduled.</div></div>
+        <div id="interviewAgenda"><div class="ui-hint">No interviews on the agenda.</div></div>
       </div>
       <div class="hire-spot">
         <h3>Ready to hire <span class="pill gold" id="readyHireCount">0</span></h3>
-        <div id="readyHireSpotlight"><div class="ui-hint">Nobody waiting on Hire.</div></div>
+        <div id="readyHireSpotlight"><div class="ui-hint">No candidates ready to hire.</div></div>
+      </div>
+      <div class="hire-spot">
+        <h3>Awaiting reply <span class="pill blue" id="awaitingCount">0</span></h3>
+        <div id="awaitingSpotlight"><div class="ui-hint">No outstanding packets.</div></div>
       </div>
     </div>
   </div>
   <div class="toolbar filter-rail">
-    <input class="search" id="hireSearch" placeholder="Search applicant" aria-label="Search applicants">
+    <input class="search" id="hireSearch" placeholder="Search name, role, or packet ID" aria-label="Search applicants">
     <button type="button" class="btn tiny soft" id="hireFilterPipe" data-hire-filter="pipeline">Pipeline</button>
+    <button type="button" class="btn tiny" id="hireFilterAwait" data-hire-filter="awaiting">Awaiting reply</button>
     <button type="button" class="btn tiny" id="hireFilterClosed" data-hire-filter="closed">Closed files</button>
     <button type="button" class="btn tiny" id="hireFilterAll" data-hire-filter="all">All applications</button>
-    <button type="button" class="btn tiny" id="hireFilterAwait" data-hire-filter="awaiting">Awaiting reply</button>
-    <span class="pill gray" id="hireFilterLabel">Showing pipeline</span>
+    <span class="pill gray" id="hireFilterLabel">Showing open pipeline</span>
   </div>
   <div class="hire-desk">
     <div class="card hire-apps-card"><div class="card-head"><b>Applications</b><span class="pill gray" id="appCount"></span></div>
       <div class="table-scroll"><table class="apps-table"><thead><tr>
-        <th>Applicant</th><th>Stage</th><th>Age</th><th>Papers</th><th>Clearance</th><th>Next</th><th class="r">Actions</th>
+        <th>Applicant</th><th>Stage</th><th>Age</th><th>Papers</th><th>Clearance</th><th>Next step</th><th class="r">Actions</th>
       </tr></thead><tbody id="apps"></tbody></table></div>
     </div>
     <div class="card"><div class="card-head"><b>Filed replies</b><span class="pill gray" id="filedCount"></span></div>
-      <div class="panel-note">Imported applicant replies — newest first.</div>
+      <div class="panel-note">Signed returns on file — newest first. Each filed reply marks that hiring step complete.</div>
       <div class="filed-list" id="filedReplies"></div>
     </div>
   </div>
   <details class="fold quiet">
-    <summary>How Discord forms work</summary>
+    <summary>How hiring packets work</summary>
     <div class="fold-body">
       <ol class="paper-steps">
-        <li><b>Send</b> downloads a fillable form for Discord — you don’t fill it here.</li>
-        <li>They complete starred fields, sign, hit <b>Download reply</b>, and send it back.</li>
-        <li><b>Import reply</b> files it under Filed replies and onto the employee after hire.</li>
+        <li><b>Issue</b> downloads a fillable .html packet and posts a formal notice to the hiring channel. The applicant does not fill the form inside this desk.</li>
+        <li>The applicant completes every required field, signs, selects <b>Download reply</b>, and returns that completed .html file to Human Resources.</li>
+        <li><b>Import reply</b> files the return under Filed replies, advances the pipeline where appropriate, and posts a step-complete notice to Discord.</li>
       </ol>
     </div>
   </details>
@@ -3870,7 +3903,7 @@ body.session-staff #pullSharedBtn{display:none!important}
   <div class="paper-list" id="paperList"></div>
   <div class="paper-import">
     <h3>Applicant reply</h3>
-    <div class="mini-note" style="padding:0;margin:0">The applicant presses <b>Download reply</b> inside the packet and sends the completed .html back. Importing files it under Filed replies.</div>
+    <div class="mini-note" style="padding:0;margin:0">The applicant selects <b>Download reply</b> inside the issued packet and returns the completed .html file to Human Resources. Importing files the return under Filed replies and marks that hiring step complete.</div>
     <div class="paper-actions">
       <input type="file" class="file-mini" id="paperReplyFile" accept=".html,.htm,.json,.txt,text/html,application/json">
       <button class="btn tiny soft" id="paperReplyBtn">Import reply file</button>
@@ -3937,7 +3970,7 @@ body.session-staff #pullSharedBtn{display:none!important}
 
 <div class="modal" id="hrSignModal" role="dialog" aria-modal="true" aria-labelledby="hrSignModalTitle" hidden><div class="dialog" role="document" tabindex="-1">
   <h2 id="hrSignModalTitle">Sign for the house</h2>
-  <p class="mini-note" style="margin-top:-6px">You sign and date the <b>Contract</b> first. Then download and send it — they sign, date, press Download reply, and send it back. Import their reply to file the signed contract.</p>
+  <p class="mini-note" style="margin-top:-6px">Sign and date the <b>Contract</b> for the house first. Then issue it to the employee — they sign, date, select Download reply, and return the completed file. Import their reply to file the signed contract.</p>
   <div class="field"><label>Employee</label><div id="hrSignWho" style="font-weight:600;padding:6px 0"></div></div>
   <div class="field"><label>House signature — your name *</label><input id="hrSignName" value="Kenzie Long, HR Director"></div>
   <div class="field"><label>Date signed *</label><input id="hrSignDate" type="date"></div>
@@ -4213,16 +4246,16 @@ const DAY_NAMES = ['Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat', 'Sun'];
 
 /* ---- hiring paperwork pack ---- */
 const PAPER_KINDS = {
-  application: { title: 'Application', short: 'Application', sendable: true, note: 'Applicant fills it in and returns a signed reply.' },
-  screening: { title: 'Screening sheet', short: 'Screening', sendable: false, hrOnly: true, note: 'HR desk only — never handed to the applicant.' },
-  invite: { title: 'Interview invitation', short: 'Invitation', sendable: true, note: 'Applicant confirms the time or asks for another.' },
-  interviewIc: { title: 'Interviewer questions', short: 'Questions', sendable: true, note: 'Written interview answers — or used at the table.' },
-  interviewOoc: { title: 'Interviewer notes', short: 'Notes', sendable: false, hrOnly: true, note: 'HR desk only — stays in the file.' },
-  offer: { title: 'Offer letter', short: 'Offer letter', sendable: true, note: 'The job offer only — Contract comes after they accept.' },
-  contract: { title: 'Contract', short: 'Contract', sendable: true, note: 'Binding employment agreement — separate from the offer and the packet.' },
+  application: { title: 'Employment application', short: 'Application', sendable: true, note: 'Issue to the candidate. They complete, sign, and return a reply for filing.' },
+  screening: { title: 'Screening sheet', short: 'Screening', sendable: false, hrOnly: true, note: 'Human Resources only — never issued to the candidate.' },
+  invite: { title: 'Interview invitation', short: 'Invitation', sendable: true, note: 'Issue proposed interview time. Candidate confirms or requests another slot.' },
+  interviewIc: { title: 'Interviewer questions', short: 'Questions', sendable: true, note: 'Written interview answers — issued for return, or used at the table.' },
+  interviewOoc: { title: 'Interviewer notes', short: 'Notes', sendable: false, hrOnly: true, note: 'Human Resources only — stays in the file.' },
+  offer: { title: 'Offer letter', short: 'Offer letter', sendable: true, note: 'Formal job offer. Contract is issued separately after acceptance and hire.' },
+  contract: { title: 'Employment contract', short: 'Contract', sendable: true, note: 'Binding agreement — separate from the offer and the new-hire packet.' },
   packet: { title: 'New-hire packet', short: 'New-hire packet', sendable: true, note: 'Week-one orientation checklist — not the contract.' },
-  login: { title: 'Account login information', short: 'Account login', sendable: true, note: 'Last hire step — credentials sheet. When the signed reply is filed, desk access is granted.' },
-  decline: { title: 'Decline letter', short: 'Decline letter', sendable: true, note: 'Polite outcome letter when we do not take them forward.' }
+  login: { title: 'Account login information', short: 'Account login', sendable: true, note: 'Final hire step. Desk access is granted when the signed acknowledgement is filed.' },
+  decline: { title: 'Decline letter', short: 'Decline letter', sendable: true, note: 'Formal outcome letter when the application is not taken forward.' }
 };
 const PAPER_ORDER = ['application', 'screening', 'invite', 'interviewIc', 'interviewOoc', 'offer', 'contract', 'packet', 'login', 'decline'];
 const PAPER_RANK = { none: 0, draft: 1, sent: 2, returned: 3, signed: 4, confirmed: 4, accepted: 5, declined: 5 };
@@ -5425,35 +5458,46 @@ function paperKindsFor(a) {
 
 function nextHireAction(a) {
   if (!a) return '—';
-  if (a.stage === 'rejected') return 'Closed';
+  if (a.stage === 'rejected') return 'File closed';
   if (a.stage === 'hired') {
     const e = a.employeeId ? empById(a.employeeId) : null;
-    if (!e) return 'Hire onto roster (no employee linked)';
+    if (!e) return 'Link employee on roster';
     if (!empHasSignedContract(e)) {
       const st = appContractStatus(a);
-      return st === 'sent' ? 'Awaiting contract reply' : 'Send contract';
+      return st === 'sent' ? 'Awaiting signed contract' : 'Issue employment contract';
     }
-    if (!empHasPacket(e)) return 'File & send packet';
-    if (!empHasAcknowledgedPacket(e)) return 'Awaiting packet reply';
-    if (!empHasLoginPaper(e)) return 'Send account login info';
+    if (!empHasPacket(e)) return 'Issue new-hire packet';
+    if (!empHasAcknowledgedPacket(e)) return 'Awaiting packet acknowledgement';
+    if (!empHasLoginPaper(e)) return 'Issue account login information';
     if (!empHasLoginAccess(e)) return 'Awaiting login acknowledgement';
-    return 'Desk access granted';
+    return 'Onboarding complete — desk access granted';
   }
   ensurePaperwork(a);
   const app = a.paperwork.application;
-  if (!app || !app.reply) return 'Send application';
-  if (!eligible(a)) return 'Clear eligibility';
-  if (STAGE_ORDER.indexOf(a.stage) < 2) return 'Move to interview';
+  if (!app || !app.reply) {
+    return app && app.sendStatus === 'sent' ? 'Awaiting application return' : 'Issue application form';
+  }
+  if (!eligible(a)) return 'Complete eligibility clearance';
+  if (a.stage === 'application') return 'Advance to eligibility';
+  if (STAGE_ORDER.indexOf(a.stage) < 2) return 'Advance to interview';
   const inv = a.paperwork.invite;
-  if (!inv || !inv.reply) return 'Send invitation';
-  if (!(a.paperwork.interviewIc && a.paperwork.interviewIc.reply)) return 'Send interview questions';
-  if (!paperHasSubstance(a.paperwork.interviewOoc)) return 'Add interviewer notes';
-  if (STAGE_ORDER.indexOf(a.stage) < 3) return 'Move to offer';
+  if (!inv || !inv.reply) {
+    return inv && inv.sendStatus === 'sent' ? 'Awaiting invitation reply' : 'Issue interview invitation';
+  }
+  if (inv.sendStatus === 'returned') return 'Reschedule interview time';
+  if (!(a.paperwork.interviewIc && a.paperwork.interviewIc.reply)) {
+    const iq = a.paperwork.interviewIc;
+    return iq && iq.sendStatus === 'sent' ? 'Awaiting interview answers' : 'Issue interviewer questions';
+  }
+  if (!paperHasSubstance(a.paperwork.interviewOoc)) return 'Record interviewer notes';
+  if (STAGE_ORDER.indexOf(a.stage) < 3) return 'Advance to offer';
   const offer = a.paperwork.offer;
-  if (!offer || !offer.reply) return a.stage === 'offer' && offer && offer.sendStatus === 'sent' ? 'Awaiting offer reply' : 'Send offer';
-  if (offerAccepted(a)) return 'Ready to hire';
-  if (offer.sendStatus === 'declined') return 'Offer declined';
-  return 'Review paperwork';
+  if (!offer || !offer.reply) {
+    return offer && offer.sendStatus === 'sent' ? 'Awaiting offer response' : 'Issue offer letter';
+  }
+  if (offerAccepted(a)) return 'Ready to hire onto roster';
+  if (offer.sendStatus === 'declined') return 'Offer declined — close or reissue';
+  return 'Review filed paperwork';
 }
 function paperSummary(a) {
   const pw = (a && a.paperwork) || {};
@@ -6986,7 +7030,12 @@ function renderAttention() {
 ===================================================== */
 function paperCompletionPct(a) {
   ensurePaperwork(a);
-  const keys = PAPER_ORDER.filter(k => PAPER_KINDS[k] && PAPER_KINDS[k].sendable && !(a.stage !== 'hired' && (k === 'contract' || k === 'packet')));
+  const keys = PAPER_ORDER.filter(k => {
+    if (!PAPER_KINDS[k] || !PAPER_KINDS[k].sendable) return false;
+    if (k === 'decline') return a.stage === 'rejected';
+    if (a.stage !== 'hired' && (k === 'contract' || k === 'packet' || k === 'login')) return false;
+    return true;
+  });
   if (!keys.length) return 0;
   let done = 0;
   keys.forEach(k => {
@@ -7340,13 +7389,15 @@ function renderInterviewAgenda() {
     .sort((a, b) => String(a.interviewDate || '').localeCompare(String(b.interviewDate || '')) || String(a.interviewTime || '').localeCompare(String(b.interviewTime || '')));
   if ($('agendaCount')) $('agendaCount').textContent = String(rows.length);
   el.innerHTML = rows.length ? rows.map(a =>
-    '<div class="log-row" style="align-items:flex-start"><i class="dot"></i><span><b>' + esc(a.name) + '</b> · ' + esc(a.offerRole || 'New Hire') +
-    '<div class="history">' + esc(a.interviewDate || 'TBD') + (a.interviewTime ? ' · ' + esc(formatInterviewTime(a.interviewTime)) : '') +
-    (a.interviewSlot ? ' · ' + esc(a.interviewSlot) : '') + '</div></span>' +
-    '<button class="btn tiny" type="button" onclick="editApp(' + a.id + ')">Open</button></div>'
-  ).join('') : '<div class="ui-hint">No interviews scheduled.</div>';
-  const fold = el.closest('details.fold');
-  if (fold && !fold.dataset.userToggle) fold.open = rows.length > 0;
+    '<div class="hire-spot-row"><div><b>' + esc(a.name) + '</b><div class="history">' + esc(a.offerRole || 'New Hire') + ' · ' +
+    esc(a.interviewDate || 'Date TBD') + (a.interviewTime ? ' · ' + esc(formatInterviewTime(a.interviewTime)) : '') +
+    (a.interviewSlot ? ' · ' + esc(a.interviewSlot) : '') +
+    (a.interviewConfirm ? ' · ' + esc(a.interviewConfirm) : '') + '</div></div>' +
+    '<div class="hire-spot-actions">' +
+      '<button class="btn tiny soft" type="button" onclick="openAppPaper(' + a.id + ')">Paperwork</button>' +
+      '<button class="btn tiny" type="button" onclick="editApp(' + a.id + ')">Open</button>' +
+    '</div></div>'
+  ).join('') : '<div class="ui-hint">No interviews on the agenda.</div>';
 }
 
 function renderReadyHire() {
@@ -7355,12 +7406,44 @@ function renderReadyHire() {
   const rows = s.applications.filter(a => a.stage === 'offer' && offerAccepted(a) && !a.employeeId);
   if ($('readyHireCount')) $('readyHireCount').textContent = String(rows.length);
   el.innerHTML = rows.length ? rows.map(a =>
-    '<div class="log-row"><i class="dot"></i><span><b>' + esc(a.name) + '</b> accepted · ' + esc(a.offerRole || 'New Hire') +
-    ' · papers ' + paperCompletionPct(a) + '%</span>' +
-    '<button class="btn tiny primary" type="button" onclick="hireChecklist(' + a.id + ')">Hire ✓</button></div>'
-  ).join('') : '<div class="ui-hint">Nobody waiting on Hire.</div>';
-  const fold = el.closest('details.fold');
-  if (fold && !fold.dataset.userToggle) fold.open = rows.length > 0;
+    '<div class="hire-spot-row"><div><b>' + esc(a.name) + '</b><div class="history">Offer accepted · ' + esc(a.offerRole || 'New Hire') +
+    ' · papers ' + paperCompletionPct(a) + '%</div></div>' +
+    '<button class="btn tiny primary" type="button" onclick="hireChecklist(' + a.id + ')">Hire</button></div>'
+  ).join('') : '<div class="ui-hint">No candidates ready to hire.</div>';
+}
+
+function renderAwaitingSpotlight() {
+  const el = $('awaitingSpotlight');
+  if (!el) return;
+  const rows = [];
+  s.applications.forEach(a => {
+    if (a.stage === 'rejected') return;
+    ensurePaperwork(a);
+    Object.keys(a.paperwork || {}).forEach(k => {
+      const rec = a.paperwork[k];
+      if (!rec || rec.reply || PAPER_AWAITING_STATUS.indexOf(rec.sendStatus) < 0) return;
+      rows.push({
+        appId: a.id,
+        name: a.name,
+        kind: k,
+        title: (PAPER_KINDS[k] && PAPER_KINDS[k].title) || k,
+        packetId: rec.packetId || '',
+        sentAt: rec.sentAt || ''
+      });
+    });
+  });
+  rows.sort((x, y) => String(x.sentAt).localeCompare(String(y.sentAt)) || String(x.name).localeCompare(String(y.name)));
+  if ($('awaitingCount')) $('awaitingCount').textContent = String(rows.length);
+  el.innerHTML = rows.length ? rows.slice(0, 8).map(r =>
+    '<div class="hire-spot-row"><div><b>' + esc(r.name) + '</b><div class="history">' + esc(r.title) +
+    (r.packetId ? ' · ' + esc(r.packetId) : '') +
+    (r.sentAt ? ' · sent ' + esc(r.sentAt) : '') + '</div></div>' +
+    '<div class="hire-spot-actions">' +
+      '<button class="btn tiny soft" type="button" onclick="openAppPaper(' + r.appId + ')">Paperwork</button>' +
+      '<button class="btn tiny" type="button" onclick="document.getElementById(\'importReplyBtn\').click()">Import</button>' +
+    '</div></div>'
+  ).join('') + (rows.length > 8 ? '<div class="ui-hint">' + (rows.length - 8) + ' more awaiting reply</div>' : '')
+    : '<div class="ui-hint">No outstanding packets.</div>';
 }
 
 window.rateApplicant = function (id, value) {
@@ -7898,17 +7981,17 @@ function renderHiring() {
   $('mOffer').textContent = s.applications.filter(a => a.stage === 'offer').length;
   if ($('hirePathStrip')) {
     const openApps = s.applications.filter(a => !['hired', 'rejected'].includes(a.stage));
-    const probation = s.employees.filter(e => e.status === 'probation');
-    const order = ['application', 'eligibility', 'interview', 'offer', 'hired', 'contract', 'packet'];
+    const postHire = s.employees.filter(e => e.status === 'probation' || (e.status === 'active' && (!empHasLoginAccess(e) || !empHasSignedContract(e))));
+    const order = ['application', 'eligibility', 'interview', 'offer', 'hired', 'contract', 'packet', 'login'];
     let current = 'application';
     if (openApps.some(a => a.stage === 'offer')) current = 'offer';
     else if (openApps.some(a => a.stage === 'interview')) current = 'interview';
     else if (openApps.some(a => a.stage === 'eligibility')) current = 'eligibility';
     else if (openApps.some(a => a.stage === 'application')) current = 'application';
-    else if (probation.some(e => !empHasSignedContract(e))) current = 'contract';
-    else if (probation.some(e => empHasSignedContract(e) && !empHasPacket(e))) current = 'packet';
-    else if (probation.some(e => empHasPacket(e) && !empHasAcknowledgedPacket(e))) current = 'packet';
-    else if (probation.length || s.applications.some(a => a.stage === 'hired')) current = 'hired';
+    else if (postHire.some(e => !empHasSignedContract(e))) current = 'contract';
+    else if (postHire.some(e => empHasSignedContract(e) && (!empHasPacket(e) || !empHasAcknowledgedPacket(e)))) current = 'packet';
+    else if (postHire.some(e => empHasAcknowledgedPacket(e) && !empHasLoginAccess(e))) current = 'login';
+    else if (postHire.length || s.applications.some(a => a.stage === 'hired')) current = 'hired';
     const cur = order.indexOf(current);
     $('hirePathStrip').querySelectorAll('[data-step]').forEach(el => {
       const st = el.getAttribute('data-step');
@@ -7917,6 +8000,7 @@ function renderHiring() {
       if (st === current) el.classList.add('now');
       else if (idx >= 0 && idx < cur) el.classList.add('done');
       else el.classList.add('on');
+      el.setAttribute('aria-current', st === current ? 'step' : 'false');
     });
   }
 
@@ -7926,74 +8010,96 @@ function renderHiring() {
     if (hireFilter === 'pipeline' && closed) return false;
     if (hireFilter === 'closed' && !closed) return false;
     if (hireFilter === 'awaiting') {
-      if (closed) return false;
       ensurePaperwork(a);
-      const waiting = Object.values(a.paperwork || {}).some(r => r && r.sendStatus === 'sent' && !r.reply);
-      if (!(waiting || a.stage === 'offer')) return false;
+      const waiting = Object.values(a.paperwork || {}).some(r => r && PAPER_AWAITING_STATUS.indexOf(r.sendStatus) >= 0 && !r.reply);
+      const empWait = (() => {
+        if (a.stage !== 'hired' || !a.employeeId) return false;
+        const e = empById(a.employeeId);
+        if (!e) return false;
+        return EMP_HIRE_PAPER.some(k => {
+          const st = empPaperRecord(e, k).state;
+          return PAPER_AWAITING_STATUS.indexOf(st) >= 0;
+        });
+      })();
+      if (!(waiting || empWait)) return false;
     }
     if (hireFilter === 'interview' && a.stage !== 'interview') return false;
     if (hireFilter === 'offer' && a.stage !== 'offer') return false;
     if (hireFilter === 'elig' && (closed || eligible(a))) return false;
-    if (hq && !(String(a.name || '').toLowerCase().includes(hq) || String(a.offerRole || '').toLowerCase().includes(hq))) return false;
+    if (hireFilter === 'application' && a.stage !== 'application') return false;
+    if (hireFilter === 'hired' && a.stage !== 'hired') return false;
+    if (hq && !(String(a.name || '').toLowerCase().includes(hq) || String(a.offerRole || '').toLowerCase().includes(hq) || String((a.paperwork && Object.values(a.paperwork).map(r => r && r.packetId).filter(Boolean).join(' ')) || '').toLowerCase().includes(hq))) return false;
     return true;
   });
   $('appCount').textContent = list.length + ' shown · ' + s.applications.length + ' total';
   const filterLabel = ({
-    pipeline: 'Showing pipeline',
+    pipeline: 'Showing open pipeline',
     closed: 'Showing closed files',
     awaiting: 'Showing awaiting reply',
-    interview: 'Showing interviews',
-    offer: 'Showing offers',
+    interview: 'Showing interview stage',
+    offer: 'Showing offer stage',
     elig: 'Showing eligibility holds',
+    application: 'Showing application stage',
+    hired: 'Showing hired — post-hire paper',
     all: 'Showing all applications'
   })[hireFilter] || 'Showing applications';
   if ($('hireFilterLabel')) $('hireFilterLabel').textContent = filterLabel;
-  document.querySelectorAll('[data-hire-filter]').forEach(btn => {
+  document.querySelectorAll('.filter-rail [data-hire-filter]').forEach(btn => {
     const on = btn.getAttribute('data-hire-filter') === hireFilter;
     btn.classList.toggle('soft', on);
     btn.setAttribute('aria-pressed', on ? 'true' : 'false');
   });
+  if ($('hirePathStrip')) {
+    $('hirePathStrip').querySelectorAll('[data-hire-filter]').forEach(btn => {
+      btn.setAttribute('aria-pressed', btn.getAttribute('data-hire-filter') === hireFilter ? 'true' : 'false');
+    });
+  }
 
   $('apps').innerHTML = list.length ? list.map(a => {
     ensurePaperwork(a);
     const idx = STAGE_ORDER.indexOf(a.stage);
-    const canAdvance = idx > -1 && idx < STAGE_ORDER.length - 1;
+    const canAdvance = idx > -1 && idx < STAGE_ORDER.length - 1 && a.stage !== 'offer';
     const pct = paperCompletionPct(a);
     const aged = a.applied ? daysBetween(a.applied, today()) : 0;
     const ready = a.stage === 'offer' && offerAccepted(a) && !a.employeeId;
     const nextAct = nextHireAction(a);
+    const awaiting = Object.values(a.paperwork || {}).some(r => r && PAPER_AWAITING_STATUS.indexOf(r.sendStatus) >= 0 && !r.reply);
+    const nextTone = ready ? 'tone-ready' : (awaiting || /Awaiting|Reschedule/.test(nextAct) ? 'tone-wait' : (/Issue|Advance|Complete|Record|Ready/.test(nextAct) ? 'tone-action' : 'tone-done'));
     const moveBtns = ['hired', 'rejected'].includes(a.stage)
       ? ''
-      : (a.stage === 'offer' ? '<button class="btn tiny primary" onclick="hireChecklist(' + a.id + ')">Hire</button>' : '') +
-        (canAdvance ? '<button class="btn tiny soft" onclick="advanceApp(' + a.id + ')">' + esc(STAGES[STAGE_ORDER[idx + 1]]) + '</button>' : '') +
-        '<button class="btn tiny" onclick="rejectApp(' + a.id + ')" title="Reject">Reject</button>';
+      : (ready || a.stage === 'offer' ? '<button class="btn tiny primary" onclick="hireChecklist(' + a.id + ')">Hire</button>' : '') +
+        (canAdvance ? '<button class="btn tiny soft" onclick="advanceApp(' + a.id + ')" title="Advance stage">→ ' + esc(STAGES[STAGE_ORDER[idx + 1]]) + '</button>' : '') +
+        '<button class="btn tiny" onclick="rejectApp(' + a.id + ')" title="Decline application">Decline</button>';
     const actions = '<div class="app-actions">' +
-      '<button class="btn tiny" onclick="openAppPaper(' + a.id + ')">Paperwork</button>' +
-      '<button class="btn tiny" onclick="editApp(' + a.id + ')">Open</button>' +
+      '<button class="btn tiny primary" onclick="openAppPaper(' + a.id + ')">Paperwork</button>' +
+      '<button class="btn tiny" onclick="editApp(' + a.id + ')">Open file</button>' +
       moveBtns +
       '<button class="btn tiny danger" onclick="deleteApplication(' + a.id + ')">Delete</button>' +
       '</div>';
-    return '<tr' + (ready ? ' class="spotlight-row"' : '') + '>' +
-      '<td class="name">' + esc(a.name) + (ready ? ' <span class="pill gold">Ready</span>' : '') +
+    const rowClass = [ready ? 'spotlight-row' : '', (!ready && awaiting) ? 'await-row' : ''].filter(Boolean).join(' ');
+    return '<tr' + (rowClass ? ' class="' + rowClass + '"' : '') + '>' +
+      '<td class="name">' + esc(a.name) + (ready ? ' <span class="pill gold">Ready to hire</span>' : '') + (awaiting && !ready ? ' <span class="pill blue">Awaiting reply</span>' : '') +
       '<div class="history">' + esc(a.applied || '—') + (a.offerRole ? ' · ' + esc(a.offerRole) : '') + '</div></td>' +
       '<td>' + stagePill(a.stage) + '</td>' +
-      '<td><span class="pill ' + (aged >= 7 ? 'warn' : 'gray') + '">' + aged + 'd</span></td>' +
+      '<td><span class="pill ' + (aged >= 7 ? 'warn' : 'gray') + '" title="Days on desk">' + aged + 'd</span></td>' +
       '<td><span class="mono">' + pct + '%</span><div class="paper-meter"><i style="width:' + pct + '%"></i></div></td>' +
       '<td><div class="app-clear">' +
-        '<span class="pill ' + (a.adminClear ? 'green' : 'warn') + '" title="City standing">' + (a.adminClear ? 'Standing' : 'Standing?') + '</span>' +
-        '<span class="pill ' + (a.felonyClear ? 'green' : 'warn') + '" title="Record">' + (a.felonyClear ? 'Record' : 'Record?') + '</span>' +
+        '<span class="pill ' + (a.adminClear ? 'green' : 'warn') + '" title="City standing">' + (a.adminClear ? 'Standing ✓' : 'Standing') + '</span>' +
+        '<span class="pill ' + (a.felonyClear ? 'green' : 'warn') + '" title="Criminal record clear">' + (a.felonyClear ? 'Record ✓' : 'Record') + '</span>' +
+        '<span class="pill ' + ((a.noTerror !== false && a.noGovMurder !== false) ? 'green' : 'danger') + '" title="Hard bars">' + ((a.noTerror !== false && a.noGovMurder !== false) ? 'Bars clear' : 'Hard bar') + '</span>' +
       '</div></td>' +
-      '<td><div class="app-next">' + esc(nextAct) + '</div></td>' +
+      '<td><div class="app-next ' + nextTone + '">' + esc(nextAct) + '</div></td>' +
       '<td class="r">' + actions + '</td>' +
       '</tr>';
   }).join('') : emptyState(
-    hireFilter === 'closed' ? 'No closed files yet.' : (hireFilter === 'pipeline' ? 'No open applications.' : 'No applications on the desk.'),
-    hireFilter === 'pipeline' ? 'Click New application to start a hire.' : '',
+    hireFilter === 'closed' ? 'No closed files yet.' : (hireFilter === 'awaiting' ? 'No packets awaiting reply.' : (hireFilter === 'pipeline' ? 'No open applications.' : 'No applications match this filter.')),
+    hireFilter === 'pipeline' ? 'Start with New application, then issue the employment application form.' : '',
     7
   );
 
   renderInterviewAgenda();
   renderReadyHire();
+  renderAwaitingSpotlight();
   renderFiledReplies();
   if ($('paperModal').classList.contains('open') && paperAppId != null && findApp(paperAppId)) renderPaperList(paperAppId);
 }
@@ -8172,15 +8278,17 @@ function renderFiledReplies() {
   el.innerHTML = rows.length ? rows.map((r, i) =>
     '<div class="filed-row">' +
       '<div><div class="filed-who">' + esc(r.name) + '</div>' +
-      '<div class="filed-meta">' + esc(r.title) + (r.returnedAt ? ' · ' + esc(r.returnedAt) : '') + '</div></div>' +
+      '<div class="filed-meta">' + esc(r.title) + ' · step complete' + (r.returnedAt ? ' · ' + esc(r.returnedAt) : '') +
+      (r.packetId ? ' · ' + esc(r.packetId) : '') + '</div></div>' +
       '<div><span class="pill ' + statusClass(r.status) + '">' + esc(decisionLabel(r.decision || r.status)) + '</span></div>' +
       '<div class="filed-meta">Signed by ' + esc(r.signature || '—') + '</div>' +
       '<div class="filed-actions">' +
         '<button class="btn tiny" onclick="viewFiledReply(' + i + ')">Read</button>' +
         '<button class="btn tiny soft" onclick="openAppPaper(' + r.appId + ')">Paperwork</button>' +
+        '<button class="btn tiny danger" onclick="shredFiledReply(' + i + ')" title="Remove this filed reply">Shred</button>' +
       '</div>' +
     '</div>'
-  ).join('') : '<div class="ui-hint" style="padding:8px 0">No replies filed yet. Import a completed .html reply from an applicant.</div>';
+  ).join('') : '<div class="ui-hint" style="padding:8px 0">No replies filed yet. Import a completed .html reply to mark that hiring step complete.</div>';
   window.__filedRows = rows;
 }
 
@@ -8189,6 +8297,81 @@ window.viewFiledReply = function (idx) {
   const row = rows[idx];
   if (!row) return toast('That reply is gone');
   openReplyViewer(row);
+};
+window.shredFiledReply = function (idx) {
+  if (!requireHire('Hiring')) return;
+  const rows = window.__filedRows || collectFiledReplies();
+  const row = rows[idx];
+  if (!row) return toast('That reply is gone');
+  const title = row.title || ((PAPER_KINDS[row.kind] && PAPER_KINDS[row.kind].title) || 'Reply');
+  if (!confirmDanger(
+    'Shred filed reply — ' + title + ' for ' + (row.name || 'applicant') + '?',
+    'Removes this return from Filed replies' + (row.packetId ? ' (' + row.packetId + ')' : '') + '. You can issue or import again afterward.'
+  )) return;
+  const a = findApp(row.appId);
+  if (!a || !a.paperwork || !a.paperwork[row.kind]) {
+    toast('Nothing left to shred');
+    return;
+  }
+  const rec = a.paperwork[row.kind];
+  const keptPacketId = rec.packetId || '';
+  const keptSentAt = rec.sentAt || '';
+  const keptHtml = rec.html || '';
+  const keptHouse = rec.houseSign || null;
+  const hadSend = !!(keptSentAt || keptPacketId);
+  if (hadSend) {
+    /* Keep the issued packet stub so HR can re-import without re-issuing */
+    a.paperwork[row.kind] = {
+      title: (PAPER_KINDS[row.kind] && PAPER_KINDS[row.kind].title) || row.kind,
+      html: keptHtml,
+      updated: today(),
+      sendStatus: 'sent',
+      sentAt: keptSentAt || today(),
+      returnedAt: '',
+      packetId: keptPacketId || null,
+      reply: null,
+      houseSign: keptHouse || undefined,
+      hireCycle: rec.hireCycle || 1
+    };
+  } else {
+    delete a.paperwork[row.kind];
+  }
+  const emp = empForApp(a) || (a.employeeId ? empById(a.employeeId) : null);
+  if (emp) {
+    if (emp.documents) {
+      const doc = findEmpDoc(emp, row.kind);
+      if (doc) {
+        if (hadSend) {
+          doc.reply = null;
+          doc.status = 'sent';
+          doc.returnedAt = '';
+          if (keptPacketId) doc.packetId = keptPacketId;
+        } else {
+          emp.documents = emp.documents.filter(d => d.kind !== row.kind);
+        }
+      }
+    }
+    if (row.kind === 'contract') emp.contractSignedAt = '';
+    if (row.kind === 'login' && emp.loginAccess) {
+      emp.loginAccess = false;
+      emp.loginGrantedAt = '';
+      try {
+        pushEmpLog(emp, {
+          type: 'status',
+          summary: 'Desk login access revoked',
+          detail: 'Filed login acknowledgement was shredded'
+        });
+      } catch (err) {}
+    }
+  }
+  if (replyViewCtx && replyViewCtx.appId === row.appId && replyViewCtx.kind === row.kind) {
+    replyViewCtx = null;
+    if ($('replyModal')) $('replyModal').classList.remove('open');
+  }
+  log('Shredded filed reply — ' + title + ' for ' + a.name + (keptPacketId ? ' (' + keptPacketId + ')' : ''));
+  save();
+  render();
+  toast('Shredded · ' + title + ' for ' + a.name);
 };
 window.copyPacketId = function (id) {
   if (!id) return toast('No packet ID');
@@ -8208,7 +8391,7 @@ function renderPaperList(id) {
       '<span>Applied <b>' + esc(a.applied || '—') + '</b></span>' +
       '<span>Offer role <b>' + esc(a.offerRole || 'New Hire') + '</b></span>' +
     '</div>' +
-    '<div class="paper-next-chip">Next · ' + esc(next) + '</div>';
+    '<div class="paper-next-chip">Next step · ' + esc(next) + '</div>';
   $('paperList').innerHTML = paperKindsFor(a).map(k => {
     const def = PAPER_KINDS[k];
     const rec = a.paperwork[k];
@@ -8224,7 +8407,7 @@ function renderPaperList(id) {
     const sendBtn = !def.sendable
       ? '<span class="pill gray">HR only</span>'
       : (canSend
-        ? '<button class="btn tiny primary" onclick="downloadSendPacket(' + a.id + ',\'' + k + '\')">Send to applicant</button>'
+        ? '<button class="btn tiny primary" onclick="downloadSendPacket(' + a.id + ',\'' + k + '\')">Issue to applicant</button>'
         : '<span class="pill ' + (sendGate && sendGate.awaiting ? 'warn' : (filed ? 'green' : 'gray')) + '" title="' + esc((sendGate && sendGate.msg) || '') + '">' +
           esc(empPaperStatusLabel((sendGate && sendGate.state) || st)) + '</span>');
     const cardClass = 'paper-card' + (st === 'none' ? ' is-needed' : '') + (canSend ? ' is-ready' : '');
@@ -9597,51 +9780,101 @@ function postDiscordHrLog(payload, label) {
 }
 function discordHireKindMeta(kind) {
   const map = {
-    contract: {
-      title: 'Employment contract',
-      body: 'House already signed. Open the .html, review terms, sign, hit **Download reply**, and send that file back to HR.'
+    application: {
+      title: 'Employment application',
+      step: 'Application',
+      issued: 'Human Resources has successfully issued the employment application for this candidate.',
+      action: 'Open the attached .html packet, complete every required field, sign the form, select **Download reply**, and return the completed file to Human Resources.',
+      filed: 'The employment application has been returned and filed. This hiring step is complete.'
     },
     invite: {
       title: 'Interview invitation',
-      body: 'Open the .html, confirm or propose a time, sign, hit **Download reply**, and send that completed file back to HR.'
+      step: 'Interview invitation',
+      issued: 'Human Resources has successfully issued an interview invitation for this candidate.',
+      action: 'Open the attached .html packet, confirm the proposed time or request an alternative, sign the form, select **Download reply**, and return the completed file to Human Resources.',
+      filed: 'The interview invitation reply has been filed. This hiring step is complete.'
     },
-    decline: {
-      title: 'Decline letter',
-      body: 'Open the .html, acknowledge, sign, hit **Download reply**, and send that completed file back to HR.'
-    },
-    packet: {
-      title: 'New-hire packet',
-      body: 'Open the .html, complete every starred field and declarations, sign, hit **Download reply**, and send that acknowledgement back to HR.'
-    },
-    login: {
-      title: 'Account login information',
-      body: 'Open the .html, review your username and house password, tick the acknowledgements, sign, hit **Download reply**, and send that file back to HR. Access starts when we file it.'
+    interviewIc: {
+      title: 'Interviewer questions',
+      step: 'Interview questions',
+      issued: 'Human Resources has successfully issued the interviewer questions packet for this candidate.',
+      action: 'Open the attached .html packet, complete the written answers, sign the form, select **Download reply**, and return the completed file to Human Resources.',
+      filed: 'Interview answers have been returned and filed. This hiring step is complete.'
     },
     offer: {
       title: 'Offer letter',
-      body: 'Open the .html, accept or decline, sign, hit **Download reply**, and send that file back to HR.'
+      step: 'Offer',
+      issued: 'Human Resources has successfully issued a formal offer of employment for this candidate.',
+      action: 'Open the attached .html packet, accept or decline the offer, sign the form, select **Download reply**, and return the completed file to Human Resources.',
+      filed: 'The offer response has been filed. This hiring step is complete.'
     },
-    application: {
-      title: 'Application form',
-      body: 'Open the .html, complete every starred field, sign, hit **Download reply**, and send that file back to HR.'
+    contract: {
+      title: 'Employment contract',
+      step: 'Contract',
+      issued: 'Human Resources has successfully issued the employment contract. The house signature is already on file.',
+      action: 'Open the attached .html packet, review the terms, sign as the employee, select **Download reply**, and return the completed file to Human Resources.',
+      filed: 'The signed employment contract has been filed. This hiring step is complete.'
+    },
+    packet: {
+      title: 'New-hire packet',
+      step: 'New-hire packet',
+      issued: 'Human Resources has successfully issued the new-hire orientation packet.',
+      action: 'Open the attached .html packet, complete every required field and declaration, sign the form, select **Download reply**, and return the acknowledgement to Human Resources.',
+      filed: 'The new-hire packet acknowledgement has been filed. This hiring step is complete.'
+    },
+    login: {
+      title: 'Account login information',
+      step: 'Account login',
+      issued: 'Human Resources has successfully issued account login credentials for this employee.',
+      action: 'Open the attached .html packet, review the username and house password, complete the acknowledgements, sign the form, select **Download reply**, and return the completed file to Human Resources. Desk access is granted when the reply is filed.',
+      filed: 'Account login has been acknowledged and filed. Desk access is now granted. This hiring step is complete.'
+    },
+    decline: {
+      title: 'Decline letter',
+      step: 'Decline',
+      issued: 'Human Resources has issued a formal decline letter for this application.',
+      action: 'Open the attached .html packet, acknowledge receipt, sign the form, select **Download reply**, and return the completed file to Human Resources.',
+      filed: 'The decline letter acknowledgement has been filed. This hiring step is complete.'
     }
   };
   return map[kind] || {
     title: (PAPER_KINDS[kind] && PAPER_KINDS[kind].title) || kind,
-    body: 'Open the .html, complete, sign, hit **Download reply**, and send that file back to HR.'
+    step: (PAPER_KINDS[kind] && PAPER_KINDS[kind].short) || kind,
+    issued: 'Human Resources has successfully issued this hiring document.',
+    action: 'Open the attached .html packet, complete and sign the form, select **Download reply**, and return the completed file to Human Resources.',
+    filed: 'The signed reply has been filed. This hiring step is complete.'
   };
 }
 function discordHirePaperCard(name, kind, packetId) {
   const meta = discordHireKindMeta(kind);
   const fields = [
     discordField('Applicant', name || '—', true),
-    discordField('Document', meta.title, true)
+    discordField('Document', meta.title, true),
+    discordField('Status', 'Issued — awaiting signed return', true)
   ];
   if (packetId) fields.push(discordField('Packet ID', '`' + packetId + '`', true));
-  fields.push(discordField('Next step', 'Download reply → send .html back to HR', false));
+  fields.push(discordField('Return instruction', 'Select **Download reply** inside the packet, then return the completed .html file to Human Resources.', false));
   return discordCard('hiring', {
-    title: meta.title + ' · ' + (name || 'Applicant'),
-    description: meta.body,
+    title: meta.title + ' issued · ' + (name || 'Applicant'),
+    description: '**' + meta.step + ' — document issued**\n\n' + meta.issued + '\n\n**Applicant action**\n' + meta.action,
+    fields
+  });
+}
+function discordHireStepCompleteCard(name, kind, packetId, status, nextAction) {
+  const meta = discordHireKindMeta(kind);
+  const statusLabel = decisionLabel(status) || empPaperStatusLabel(status) || String(status || 'On file');
+  const fields = [
+    discordField('Applicant', name || '—', true),
+    discordField('Document', meta.title, true),
+    discordField('Status', statusLabel + ' — on file', true)
+  ];
+  if (packetId) fields.push(discordField('Packet ID', '`' + packetId + '`', true));
+  if (nextAction && nextAction !== '—' && nextAction !== 'Closed') {
+    fields.push(discordField('Next hiring step', nextAction, false));
+  }
+  return discordCard('hiring', {
+    title: meta.title + ' filed · ' + (name || 'Applicant'),
+    description: '**' + meta.step + ' — step complete**\n\n' + meta.filed,
     fields
   });
 }
@@ -10736,7 +10969,7 @@ function bindPacketForm(root, meta) {
     const tag = kindSlug(meta.kind) + '-' + safeName(reply.signature || reply.name || 'applicant');
     const html = buildFilledReplyHtml(root, reply, meta);
     downloadFile(html, 'Frenchies-Reply-' + tag + '.html', 'text/html');
-    say('Completed reply downloaded — send that .html file back to HR.', 'ok');
+    say('Completed reply downloaded — return this .html file to Human Resources.', 'ok');
     if (meta.template) {
       toast('Reply .html downloaded. Import it on the Hiring desk to file it.');
       return;
@@ -10767,7 +11000,7 @@ function buildPacketSheet(a, kind, packetId, embed) {
       '<label class="pk-f"><span>Date signed by house</span><input data-house-sign="date" type="date" value="' + esc(hsDate) + '" readonly disabled></label>' +
       '</div>' +
       '<h2>Employee signature *</h2>' +
-      '<p class="pk-hint">Sign and date below, then press Download reply and send that .html back to HR.</p>' +
+      '<p class="pk-hint">Sign and date below, then select <b>Download reply</b> and return the completed .html file to Human Resources.</p>' +
       '<div class="sign">' +
       '<label class="pk-f req"><span>Employee signature — type your full name *</span>' +
       '<input data-sign="name" class="pk-sign-cursive" placeholder="Your signature" value="' + esc(a.name || '') + '"></label>' +
@@ -10794,7 +11027,7 @@ function buildPacketSheet(a, kind, packetId, embed) {
     '<button type="button" class="ghost" id="pkPr">Print this sheet</button>' +
     '<span class="msg" id="pkMsg"></span>' +
     '</div>' +
-    '<div class="foot"><b>Kenzie Long — HR Director</b>Required fields are marked *. Press Download reply and send the completed .html file back to the HR office. Payday at Frenchie\'s is Sunday, 9:00 AM, paid from the house.</div>' +
+    '<div class="foot"><b>Kenzie Long — HR Director</b>Required fields are marked *. Select <b>Download reply</b> and return the completed .html file to Human Resources at Frenchie\'s Restaurant, 8 Elgin Ave. Payday is Sunday, 9:00 AM, paid from the house.</div>' +
     '</div>';
 }
 
@@ -10844,7 +11077,7 @@ function packetBody(a, kind, c) {
   ]);
 
   if (kind === 'application') {
-    return '<p>Thank you for your interest in Frenchie\'s Restaurant, 8 Elgin Ave, Legion Square. This is the full employment application. Fields marked * are required. Click the choices that fit, write in anything else, then press <b>Download reply</b> and send that completed .html file back to the HR office.</p>' +
+    return '<p>Thank you for your interest in Frenchie\'s Restaurant, 8 Elgin Ave, Legion Square. This is the official employment application. Fields marked * are required. Complete every section, sign below, then select <b>Download reply</b> and return the completed .html file to Human Resources.</p>' +
       '<h2>1. Applicant details</h2>' +
       '<div class="pk-grid">' + pkIn('Full legal name', 'fullName', c.name, 'text', true) + pkIn('Preferred name on the floor', 'preferredName', '') + '</div>' +
       '<div class="pk-grid">' + pkIn('Phone / contact', 'phone', c.phone, 'text', true) + pkIn('Date of birth (optional)', 'dob', '', 'date') + '</div>' +
@@ -10911,40 +11144,40 @@ function packetBody(a, kind, c) {
       ], true, true) +
       '<div class="note ooc">(( Eligibility: admin violation clear 14 days &middot; no felony convictions within 14 days &middot; terrorism or the murder of a government employee is a hard bar. ))</div>' +
       '<h2>Submit</h2>' +
-      pkChoice('submitted', 'I am ready to submit this application', 'Signs the form and downloads your completed reply for the HR office.');
+      pkChoice('submitted', 'I am ready to submit this application', 'Signs the form and prepares your completed reply for Human Resources.');
   }
 
   if (kind === 'invite') {
     const known = c.name && c.name !== 'Applicant' ? c.name : '';
     return '<p>Dear ' + esc(known || 'applicant') + ',</p>' +
-      '<p>Thank you for your application to Frenchie\'s Restaurant. We would like to sit you down for an interview with the HR office.</p>' +
+      '<p>Thank you for your application to Frenchie\'s Restaurant. Human Resources invites you to an interview at the address below.</p>' +
       pkIn('Your full name', 'fullName', known, 'text', true) +
-      '<p class="pk-hint">Write your name in even if the letter above is blank — HR can file your reply without moving you through the stages first.</p>' +
+      '<p class="pk-hint">Enter your full name even if the greeting above is blank so Human Resources can file your reply correctly.</p>' +
       pkTerms([
         ['Date', c.interviewDate ? fmtLong(c.interviewDate) : 'to be arranged'],
         ['Time', interviewTimeLine(c)],
         ['Place', '8 Elgin Ave, Legion Square'],
         ['Ask for', 'Kenzie Long, HR Director · 636']
       ]) +
-      '<p>Come as you would come to a shift: presentable and on time. It runs about twenty minutes and covers the floor, the stations, your availability, and how you carry yourself in a rush.</p>' +
+      '<p>Please arrive as you would for a shift: presentable and on time. The interview runs about twenty minutes and covers the floor, the stations, your availability, and how you carry yourself in a rush.</p>' +
       '<h2>Your answer *</h2>' +
-      pkChoice('confirm', 'I will be there', 'Confirms the date and time above.') +
-      pkChoice('reschedule', 'I need a different time', 'Fill in a date, time, and/or time slots below.') +
+      pkChoice('confirm', 'I confirm this appointment', 'Confirms the date and time above.') +
+      pkChoice('reschedule', 'I need a different time', 'Provide a date, time, and/or preferred slots below.') +
       '<h2>If you need a different time</h2>' +
-      '<p class="pk-hint">Required only if you chose "I need a different time". Give us a date, a clock time, and/or preferred slots.</p>' +
+      '<p class="pk-hint">Required only if you selected "I need a different time". Provide a date, a clock time, and/or preferred slots.</p>' +
       '<div class="pk-grid">' +
         pkIn('Date that works for you', 'interviewDate', '', 'date') +
         pkIn('Time that works for you', 'interviewTime', '', 'time') +
       '</div>' +
-      '<p class="pk-hint">Preferred time slots (tick any that work):</p>' +
+      '<p class="pk-hint">Preferred time slots (select any that work):</p>' +
       pkBoxes('preferredSlots', ['Morning / lunch', 'Afternoon', 'Evening / dinner', 'Late / close', 'Flexible — any slot'], true) +
       pkWriteIn('preferredTime', 'Or write in exact time / slot') +
       pkTa('Anything we should know', 'note', 3) +
-      '<div class="note">If we have not heard from you within three days the application is set aside and the desk moves on. Press <b>Download reply</b> and send the completed .html back.</div>';
+      '<div class="note">If we have not received your reply within three business days, this application may be set aside. Select <b>Download reply</b> and return the completed .html file to Human Resources.</div>';
   }
 
   if (kind === 'interviewIc') {
-    return '<p>Frenchie\'s asks the same questions of everyone who sits at the table. Fields marked * are required. Answer in your own words, then press <b>Download reply</b> and send the completed .html back.</p>' +
+    return '<p>Frenchie\'s asks the same written questions of every candidate. Fields marked * are required. Answer in your own words, then select <b>Download reply</b> and return the completed .html file to Human Resources.</p>' +
       IC_QUESTIONS.map((q, i) => pkTa((i + 1) + '. ' + q, 'q' + (i + 1), 3, true)).join('') +
       '<h2>About the house</h2>' +
       pkRadios('Would you rather start on the floor, in the kitchen, or wherever we need you?', 'preferStation',
@@ -10954,12 +11187,12 @@ function packetBody(a, kind, c) {
         ['This week', 'Within two weeks', 'After a set date — note it below', 'Flexible'], true) +
       pkTa('If you need a set start date, write it here', 'startNote', 2) +
       '<h2>Your answer *</h2>' +
-      pkChoice('submitted', 'I am done — send my answers', 'Downloads your completed reply for the HR office.');
+      pkChoice('submitted', 'I have completed my answers', 'Downloads your completed reply for Human Resources.');
   }
 
   if (kind === 'offer') {
     return '<p>Dear ' + esc(c.name || 'applicant') + ',</p>' +
-      '<p>On behalf of Frenchie\'s Restaurant, I am pleased to <b>offer</b> you the position of ' + esc(c.role) + '. This letter is the offer — not the contract. If you accept, we will send the Contract separately for signature before your first shift.</p>' +
+      '<p>On behalf of Frenchie\'s Restaurant, I am pleased to <b>offer</b> you the position of ' + esc(c.role) + '. This letter is the offer — not the contract. If you accept, we will issue the Contract separately for signature before your first shift.</p>' +
       pkTerms([
         ['Position offered', c.role],
         ['Rate of pay', money(c.rate) + ' per hour'],
@@ -10974,10 +11207,10 @@ function packetBody(a, kind, c) {
       '<div class="note">This offer holds so long as your standing with the city remains in good order. Accept below and return this sheet; the Contract follows once you are on the books.</div>' +
       '<h2>Your answer *</h2>' +
       pkChoice('accept', 'I accept this offer', 'Your signature below stands as acceptance of the offer.') +
-      pkChoice('decline', 'I decline this offer', 'No hard feelings — the desk will close the file.') +
+      pkChoice('decline', 'I decline this offer', 'No hard feelings — Human Resources will close the file.') +
       pkWriteIn('startPref', 'Preferred first shift date — write in if you have one') +
       pkTa('Anything to add', 'note', 3) +
-      '<p class="pk-hint">Press <b>Download reply</b> and send the completed .html back to HR.</p>';
+      '<p class="pk-hint">Select <b>Download reply</b> and return the completed .html file to Human Resources.</p>';
   }
 
   if (kind === 'contract') {
@@ -11017,13 +11250,13 @@ function packetBody(a, kind, c) {
       ], true, true) +
       '<h2>Your answer *</h2>' +
       pkChoice('accept', 'I accept these terms and enter into this contract', 'Your signature below binds you to the agreement.') +
-      pkChoice('decline', 'I decline these terms', 'The desk will close the hire file.') +
+      pkChoice('decline', 'I decline these terms', 'Human Resources will close the hire file.') +
       pkTa('Anything to add on the record', 'note', 3) +
-      '<p class="pk-hint">HR signs for the house above your signature block. Then you sign, press <b>Download reply</b>, and send the completed .html back.</p>';
+      '<p class="pk-hint">Human Resources signs for the house above your signature block. Then sign, select <b>Download reply</b>, and return the completed .html file.</p>';
   }
 
   if (kind === 'packet') {
-    return '<p>Welcome to the family, <b>' + esc(c.name || 'new hire') + '</b>. This is your <b>New-hire packet</b> — a first-week orientation sheet. It is <b>not</b> your Contract and <b>not</b> your Offer letter. Keep it on hand for your first shifts.</p>' +
+    return '<p>Welcome to Frenchie\'s, <b>' + esc(c.name || 'new hire') + '</b>. This is your <b>New-hire packet</b> — a first-week orientation sheet. It is <b>not</b> your Contract and <b>not</b> your Offer letter. Keep it on hand for your first shifts.</p>' +
       pkTerms([
         ['Your station role', c.role],
         ['Your rate', money(c.rate) + ' per hour'],
@@ -11056,18 +11289,18 @@ function packetBody(a, kind, c) {
       '<h2>Confirm *</h2>' +
       pkChoice('confirm', 'I have read the new-hire packet', 'Confirms you have the checklist, contacts, and radio codes for week one.') +
       pkTa('Questions for HR before or during week one', 'note', 3) +
-      '<p class="pk-hint">Press <b>Download reply</b> and send the completed .html back to HR.</p>';
+      '<p class="pk-hint">Select <b>Download reply</b> and return the completed .html file to Human Resources.</p>';
   }
 
   if (kind === 'login') {
     const user = loginUsernameFromName(c.name);
-    return '<p>Welcome, <b>' + esc(c.name || 'employee') + '</b>. This is your <b>Account login information</b> — the last hire paper before desk access.</p>' +
+    return '<p>Welcome, <b>' + esc(c.name || 'employee') + '</b>. This is your <b>Account login information</b> — the final hire document before desk access is granted.</p>' +
       pkTerms([
         ['Your username', user],
         ['First sign-in password', HOUSE_LOGIN_PASSWORD + ' (house)'],
         ['Then', 'Create your own password on first desk sign-in'],
         ['Your role', c.role],
-        ['Access starts', 'After HR files this signed reply']
+        ['Access starts', 'After Human Resources files this signed reply']
       ]) +
       '<div class="note">Username is Firstname_Lastname from your name on file. First login uses the house password, then you must create your own. Keep passwords out of public Discord. Floor staff see stubs, shifts, and the handbook; management sees the full desk.</div>' +
       '<h2>Acknowledgements *</h2>' +
@@ -11075,25 +11308,25 @@ function packetBody(a, kind, c) {
       pkBoxes('loginAck', [
         'I received my username and the house password for first sign-in',
         'I will create my own password when the desk asks, and keep it private',
-        'I understand access starts only after HR files this signed reply'
+        'I understand access starts only after Human Resources files this signed reply'
       ], true, true) +
       '<h2>Your answer *</h2>' +
-      pkChoice('accept', 'I acknowledge these login details', 'HR will file this reply and grant desk access.') +
+      pkChoice('accept', 'I acknowledge these login details', 'Human Resources will file this reply and grant desk access.') +
       pkTa('Anything to add for HR', 'note', 3) +
-      '<p class="pk-hint">Press <b>Download reply</b> and send the completed .html back to HR.</p>';
+      '<p class="pk-hint">Select <b>Download reply</b> and return the completed .html file to Human Resources.</p>';
   }
 
   if (kind === 'decline') {
     return '<p>Dear ' + esc(c.name || 'applicant') + ',</p>' +
       '<p>Thank you for applying to Frenchie\'s Restaurant, and for the time you gave us through the process.</p>' +
-      '<p>After going through the applications on the desk, we will not be taking yours forward on this occasion. That is not a judgement of your character — the house has a small number of stations and we fill them against the coverage we need on the board.</p>' +
-      '<p>Your details stay on file at the HR office. If our needs change, or if you would like to be considered again later, you are welcome to apply once more. If you would like a word about the decision, I am on 636.</p>' +
+      '<p>After careful review of the applications on file, we will not be taking yours forward on this occasion. That is not a judgement of your character — the house has a limited number of stations and we fill them against the coverage required on the board.</p>' +
+      '<p>Your details remain on file with Human Resources. If our needs change, or if you would like to be considered again later, you are welcome to apply once more. If you would like a word about the decision, I am on 636.</p>' +
       '<p>We wish you well, and you are always welcome at 8 Elgin Ave as a guest.</p>' +
       '<h2>Your answer *</h2>' +
-      pkChoice('acknowledged', 'I have read this letter', 'Notes the desk that you saw the outcome.') +
+      pkChoice('acknowledged', 'I have read this letter', 'Confirms receipt of this outcome.') +
       pkChoice('reapply', 'I may apply again later', 'Keeps the door open on the file.') +
       pkTa('Anything you would like on file', 'note', 3) +
-      '<p class="pk-hint">Press <b>Download reply</b> and send the completed .html back if you want the desk to note your answer.</p>';
+      '<p class="pk-hint">Select <b>Download reply</b> and return the completed .html file if you wish Human Resources to note your response.</p>';
   }
 
   return '<p>Nothing to fill in.</p>';
@@ -11290,7 +11523,7 @@ ${sheet}
     link.click();
     if (link.parentNode) link.parentNode.removeChild(link);
     setTimeout(function(){ URL.revokeObjectURL(url); }, 1500);
-    say('Completed reply downloaded — send that .html file back to HR (same form, filled in).', 'ok');
+    say('Completed reply downloaded — return this .html file to Human Resources.', 'ok');
   };
 })();
 <\/script>
@@ -11448,6 +11681,11 @@ function applyReply(reply) {
     if (f.roleSought && s.roles[f.roleSought]) a.offerRole = f.roleSought;
     a.notes = appendNote(a.notes, formSummary(reply));
     extra = 'application form returned';
+    if (a.stage === 'application') {
+      a.stage = 'eligibility';
+      a.stageChangedAt = today();
+      extra += ' · advanced to eligibility';
+    }
   } else if (kind === 'invite') {
     if (f.interviewDate) a.interviewDate = f.interviewDate;
     if (f.interviewTime) a.interviewTime = f.interviewTime;
@@ -11457,9 +11695,16 @@ function applyReply(reply) {
       a.interviewSlot = f.preferredTime;
     }
     if (status === 'confirmed') {
+      a.interviewConfirm = 'confirmed';
       extra = 'interview confirmed — ' + (a.interviewDate ? fmtLong(a.interviewDate) : 'date set') +
         (a.interviewTime ? ' at ' + formatInterviewTime(a.interviewTime) : '');
+      if (STAGE_ORDER.indexOf(a.stage) > -1 && STAGE_ORDER.indexOf(a.stage) < STAGE_ORDER.indexOf('interview')) {
+        a.stage = 'interview';
+        a.stageChangedAt = today();
+        extra += ' · advanced to interview';
+      }
     } else {
+      a.interviewConfirm = 'reschedule';
       const bits = [];
       if (f.interviewDate) bits.push(fmtLong(f.interviewDate));
       if (f.interviewTime) bits.push(formatInterviewTime(f.interviewTime));
@@ -11484,13 +11729,13 @@ function applyReply(reply) {
     }
   } else if (kind === 'contract') {
     if (status === 'accepted') {
-      extra = 'contract signed — next: File & send new-hire packet from their employee file';
+      extra = 'contract signed — next: issue new-hire packet from their employee file';
     } else {
       extra = 'contract declined / returned';
     }
   } else if (kind === 'packet') {
     extra = status === 'acknowledged' || status === 'confirmed' || status === 'accepted'
-      ? 'new-hire packet acknowledged — next: send Account login information'
+      ? 'new-hire packet acknowledged — next: issue account login information'
       : 'new-hire packet returned';
   } else if (kind === 'login') {
     if (status === 'accepted' || status === 'signed' || status === 'acknowledged' || status === 'confirmed') {
@@ -11527,6 +11772,15 @@ function applyReply(reply) {
   save();
   render();
   const out = { ok: true, app: a, emp: emp || null, kind, status, rec, msg: extra, empUpdated: !!emp };
+  if (PAPER_FILED_STATUS.indexOf(status) >= 0 || status === 'declined' || status === 'signed') {
+    if (discordWebhookConfigured('hiring')) {
+      postDiscord('hiring', discordHireStepCompleteCard(a.name, kind, reply.packetId || (rec && rec.packetId) || '', status, nextHireAction(a)), {
+        label: 'Filed · ' + kind + ' · ' + a.name,
+        quiet: true,
+        fallbackCopy: false
+      });
+    }
+  }
   if (kind === 'offer' && status === 'accepted') offerHireFollowUp(a);
   else if (kind === 'offer' && status === 'declined') {
     setTimeout(() => {
@@ -11716,7 +11970,7 @@ function importReplyFrom(input, after) {
     } catch (err) {
       if (err && err.message === 'blank-form') {
         const title = (err.meta && PAPER_KINDS[err.meta.kind] && PAPER_KINDS[err.meta.kind].title) || 'form';
-        toast('That is the blank ' + title + ' — open it, sign, press Download reply, then import that Reply file');
+        toast('That is the blank ' + title + ' — open it, complete and sign, select Download reply, then import that Reply file');
       } else {
         toast('That file could not be read — use the completed Frenchies-Reply-….html from Download reply');
       }
@@ -16136,12 +16390,13 @@ window.setInterviewOutcome = function (id, outcome) {
     save();
     openInterviewBoard();
     postDiscord('hiring', discordCard('hiring', {
-      title: 'Interview complete',
-      description: 'Moving toward offer — watch this channel for next steps.',
+      title: 'Interview complete · ' + a.name,
+      description: '**Interview — step complete**\n\nThe interview has been marked complete. This hiring step is finished; Human Resources may proceed toward an offer.',
       fields: [
         discordField('Applicant', a.name, true),
         discordField('Role', a.offerRole || 'New Hire', true),
-        discordField('Outcome', 'Done', true)
+        discordField('Outcome', 'Complete', true),
+        discordField('Next hiring step', a.stage === 'offer' ? 'Issue offer letter' : 'Advance to offer', false)
       ]
     }), { label: 'Interview done · ' + a.name });
     render();
