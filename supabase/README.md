@@ -411,16 +411,146 @@ Frenchie's house income
 
 ---
 
-## Upgrading from v40 (register-only)
+## Upgrading from v40 (register-only) — detailed steps
 
-If `/register` already works and you only need deposit / treasury + dropdowns:
+You already have Discord `/register` → Supabase → Income working. These steps only add **income-type dropdowns** (including **Deposit / Treasury**) and desk **v41** pull.
 
-1. Run [`migrations/20260801_register_sales_kind.sql`](migrations/20260801_register_sales_kind.sql) in the SQL Editor.
-2. Redeploy: `supabase functions deploy discord-register --no-verify-jwt`
-3. Re-run the command script (updates `/register` description; optional `POST_BUTTON=1` for a new channel button).
-4. Upload desk **v41** `index.html` so Pull books the correct Income kind.
+Use **PowerShell**. Do **not** use `\` line continuations (those break on Windows).
+
+### A — Get the new code on your PC
+
+1. Open PowerShell.
+2. Go to your FrenchiesHR folder (adjust if your path differs):
+
+```powershell
+cd C:\Users\Caleb\OneDrive\Documents\FrenchiesHR
+```
+
+3. Fetch and check out the upgrade branch (or `main` after the PR is merged):
+
+```powershell
+git fetch origin
+git checkout cursor/register-modal-kinds-ec6d
+git pull origin cursor/register-modal-kinds-ec6d
+```
+
+4. Confirm these files exist:
+
+```powershell
+dir supabase\migrations\20260801_register_sales_kind.sql
+dir supabase\functions\discord-register\index.ts
+```
+
+### B — Add the `kind` column in Supabase (SQL)
+
+1. Open https://supabase.com/dashboard → your Frenchie's project.
+2. Left sidebar → **SQL Editor** → **New query**.
+3. On your PC, open:
+
+   `supabase\migrations\20260801_register_sales_kind.sql`
+
+4. Select **all** of that file → Copy → paste into the SQL Editor.
+5. Click **Run**.
+6. You should see success (no red errors). Safe to run twice.
+7. Confirm: left sidebar → **Table Editor** → `register_sales` → you should see a **`kind`** column (default `register`).
+
+If submit later fails with a save/kind error, you skipped this step.
+
+### C — Redeploy the Edge Function
+
+Secrets from v40 stay in place. You only redeploy the function code.
+
+1. In the same PowerShell folder (`FrenchiesHR` root):
+
+```powershell
+supabase login
+supabase link --project-ref lvrdxsjnthlyshdidvyy
+supabase functions deploy discord-register --no-verify-jwt
+```
+
+(Replace `lvrdxsjnthlyshdidvyy` if your project ref is different.)
+
+2. Wait until deploy finishes successfully.
+3. Optional health check:
+
+```powershell
+curl.exe -s "https://lvrdxsjnthlyshdidvyy.supabase.co/functions/v1/discord-register"
+```
+
+You want: `{"ok":true,"service":"frenchies-discord-register"}`.
+
+4. You do **not** need to change Discord’s Interactions Endpoint URL if it already points at that function URL and Save already worked.
+
+### D — Refresh the `/register` command (and optional new button)
+
+This updates the slash-command description. Optional: post a new **Log house income** button.
+
+1. Set your Discord values (use your real token / IDs — same as v40):
+
+```powershell
+$env:DISCORD_BOT_TOKEN="YOUR_BOT_TOKEN"
+$env:DISCORD_APP_ID="YOUR_APP_ID"
+$env:DISCORD_GUILD_ID="YOUR_GUILD_ID"
+$env:DISCORD_REGISTER_CHANNEL_ID="YOUR_CHANNEL_ID"
+```
+
+2. Update the slash command only (safest if channel perms are still messy):
+
+```powershell
+node supabase\scripts\register-discord-commands.mjs
+```
+
+3. Or also post a new channel button:
+
+```powershell
+$env:POST_BUTTON="1"
+node supabase\scripts\register-discord-commands.mjs
+```
+
+If button post fails with **Missing Access**, `/register` still works — fix channel permissions later and re-run with `POST_BUTTON=1`.
+
+4. In Discord, type `/register` — description should mention house income / deposit / treasury.
+5. If Discord still shows the old description, wait ~1 minute or restart Discord.
+
+### E — Upload desk v41
+
+1. Open `index.html` from this branch and confirm near the top of the script it says `DESK_BUILD = 'v41'` (or Settings changelog shows v41).
+2. Upload that `index.html` to Tiiny Host (same way you uploaded v40).
+3. Hard-refresh the live desk (Ctrl+F5).
+4. Sign in as management → Settings → confirm Supabase URL + anon key are still filled → Save if needed.
+5. Office → Income → chip should still say **Supabase · ready** or **Supabase · synced** (not **off**).
+
+### F — Test Deposit / Treasury end-to-end
+
+1. In Discord, run `/register` (or tap **Log house income**).
+2. Modal title should be **Log house income**.
+3. Fill:
+   - **Income type:** Deposit / Treasury
+   - **Station:** None / House
+   - **Amount:** `500`
+   - **Source / notes:** `House deposit`
+   - **Date:** leave today
+4. Submit → ephemeral reply should say Deposit / Treasury saved.
+5. `#register-sales` embed title should say **Deposit / Treasury logged**.
+6. Supabase **Table Editor → register_sales**: newest row `kind = deposit`, `status = pending`.
+7. Desk → Income → **Pull from Supabase** (or wait for auto-pull).
+8. A new income line should appear as **Deposit / Treasury** (not Register).
+9. That Supabase row should flip to `booked`.
+10. Repeat once with **Income type: Register** + Station **Bar** to confirm register still works.
+
+### Quick checklist
+
+| Done? | Step |
+|-------|------|
+| ☐ | Git pull upgrade branch / merged main |
+| ☐ | SQL: run `20260801_register_sales_kind.sql` |
+| ☐ | `supabase functions deploy discord-register --no-verify-jwt` |
+| ☐ | Re-run `register-discord-commands.mjs` |
+| ☐ | Upload desk `index.html` with **v41** |
+| ☐ | Test Deposit / Treasury + Register in Discord → desk Pull |
 
 ---
+
 
 ## Order of operations (summary)
 
