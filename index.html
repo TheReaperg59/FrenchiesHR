@@ -3067,8 +3067,9 @@ body.session-staff #pullSharedBtn{display:none!important}
 <!-- INCOME -->
 <section class="view" id="view-income" role="region" aria-labelledby="title-income" tabindex="-1">
   <div class="header">
-    <div><div class="eyebrow">Office</div><h1 class="title" id="title-income">Income</h1><div class="subtitle">House cash-in — register drops, tip jars, event proceeds, deposits, and rebate cash-in. Players post register lines in Discord <b>#register-sales</b>; import them here.</div></div>
+    <div><div class="eyebrow">Office</div><h1 class="title" id="title-income">Income</h1><div class="subtitle">House cash-in — register drops, tip jars, event proceeds, deposits, and rebate cash-in. Players use Discord <b>/register</b> (modal) or <b>Log register drop</b> in <b>#register-sales</b>; this desk auto-pulls from Supabase.</div></div>
     <div class="actions">
+      <button class="btn soft" id="pullSupabaseIncome" type="button">Pull from Supabase</button>
       <button class="btn" id="csvIncomes" type="button">Export CSV</button>
       <button class="btn soft" id="pdfIncomes" type="button">Print week sheet</button>
       <button class="btn soft" id="postIncomeWeekDiscord" type="button">Post week to Discord</button>
@@ -3076,6 +3077,11 @@ body.session-staff #pullSharedBtn{display:none!important}
       <button class="btn soft" id="copyRegisterTemplate" type="button">Copy register template</button>
       <button class="btn primary" id="addIncome" type="button">Log income</button>
     </div>
+  </div>
+  <p class="ui-hint" id="incSupabaseHint" style="margin:0 0 10px">Supabase register feed — set URL + anon key in Settings. Players: Discord <code>/register</code>.</p>
+  <div class="toolbar" style="margin:0 0 10px;gap:8px;align-items:center;flex-wrap:wrap">
+    <span class="pill gray" id="incSupabaseChip">Supabase · off</span>
+    <span class="mini-note" id="incSupabaseStatus">Not configured</span>
   </div>
   <div class="metrics" id="incomeWeekStrip">
     <div class="metric"><label>House in</label><strong id="incHouseIn">$0</strong><span id="incWeekLabel">Selected week</span></div>
@@ -4246,6 +4252,11 @@ body.session-staff #pullSharedBtn{display:none!important}
     <div class="field"><label>HR desk log webhook</label><input id="setWhHrLog" placeholder="https://discord.com/api/webhooks/…" autocomplete="off"></div>
     <div class="field"><label>Announcements webhook</label><input id="setWhAnnounce" placeholder="https://discord.com/api/webhooks/…" autocomplete="off"></div>
     <div class="field"><label>Income reports webhook (#hr-income-reports)</label><input id="setWhIncomeReports" placeholder="https://discord.com/api/webhooks/…" autocomplete="off"></div>
+    <h3 style="margin:16px 0 8px;font:700 .72rem 'DM Sans',sans-serif;letter-spacing:.08em;text-transform:uppercase;color:var(--muted)">Supabase register feed</h3>
+    <p class="ui-hint" style="margin:0 0 10px">Discord <code>/register</code> modal writes here; Income tab pulls pending rows. See <code>supabase/README.md</code>. Anon key is redacted from shared packs.</p>
+    <div class="field"><label>Supabase URL</label><input id="setSupabaseUrl" placeholder="https://xxxx.supabase.co" autocomplete="off"></div>
+    <div class="field"><label>Supabase anon key</label><input id="setSupabaseAnon" placeholder="eyJ…" autocomplete="off"></div>
+    <label class="checkline"><input type="checkbox" id="setRegisterAutoPull" checked><span>Auto-pull register sales on login / focus / Income tab</span></label>
     <label class="checkline"><input type="checkbox" id="setQuietMode"><span>Quiet mode (less motion / hover)</span></label>
     <label class="checkline"><input type="checkbox" id="setRequireNotes"><span>Warn if closing period without notes</span></label>
     <label class="checkline"><input type="checkbox" id="setCompactTodos"><span>Compact to-do rows by default</span></label>
@@ -4311,7 +4322,7 @@ const LOG_TYPES = {
 };
 const TIP_ROLES_DEFAULT = ['Waiter', 'Hostess', 'Cook'];
 const TIP_ROLES = TIP_ROLES_DEFAULT; /* legacy alias — use tipRoles() */
-const DESK_BUILD = 'v39';
+const DESK_BUILD = 'v40';
 const HOUSE_LOGIN_PASSWORD = 'frenchies636'; /* fallback seed — prefer settings.housePassword */
 const SESSION_KEY = 'frenchies_desk_session';
 const SESSION_DURABLE_KEY = 'frenchies_desk_session_durable';
@@ -5012,6 +5023,9 @@ function ensureMeta() {
   if (!('sessionDays' in s.settings)) s.settings.sessionDays = 14;
   if (!('sharedDeskUrl' in s.settings)) s.settings.sharedDeskUrl = '';
   if (!('sharedAutoPull' in s.settings)) s.settings.sharedAutoPull = false;
+  if (!('supabaseUrl' in s.settings)) s.settings.supabaseUrl = '';
+  if (!('supabaseAnonKey' in s.settings)) s.settings.supabaseAnonKey = '';
+  if (!('registerAutoPull' in s.settings)) s.settings.registerAutoPull = true;
   if (!('handbookUrl' in s.settings)) s.settings.handbookUrl = '';
   if (!(s.settings.handbookUrl || '').trim()) s.settings.handbookUrl = LINK_HANDBOOK;
   if (!('housePassword' in s.settings)) s.settings.housePassword = HOUSE_LOGIN_PASSWORD;
@@ -6226,6 +6240,7 @@ function enterDeskSession(e, opts) {
   render();
   log(e.name + ' logged into the desk');
   save({ quiet: true, skipSnapshot: true });
+  setTimeout(function () { maybeAutoPullRegisterSales('login'); }, 900);
 }
 function completePasswordSetup(pass1, pass2) {
   const e = empById(pendingPasswordEmpId);
@@ -7623,6 +7638,7 @@ function cmdCommands() {
   cmds.push({ label: 'Log tip jar', hint: 'Income', run: () => { goView('income'); setTimeout(() => openIncomeForm(null, { kind: 'tips', source: 'Tip jar' }), 40); } });
   cmds.push({ label: 'Log deposit', hint: 'Income', run: () => { goView('income'); setTimeout(() => openIncomeForm(null, { kind: 'deposit', source: 'House deposit' }), 40); } });
   cmds.push({ label: 'Import Discord register lines', hint: 'Income', run: () => { goView('income'); setTimeout(() => openImportIncomeModal(), 40); } });
+  cmds.push({ label: 'Pull register sales from Supabase', hint: 'Income', run: () => { goView('income'); setTimeout(() => pullRegisterSalesFromSupabase({ quiet: false }), 40); } });
   cmds.push({ label: 'Post income week report', hint: 'Discord', run: () => { goView('income'); setTimeout(() => postDiscord('incomeReports', incomeWeekDiscordCard(), { label: 'Income week' }), 40); } });
   cmds.push({ label: 'Open settings', hint: 'Desk', run: () => openSettings() });
   cmds.push({ label: 'Export to-dos', hint: 'Todos', run: () => copyTextSafe(exportTodosText(), 'To-dos copied') });
@@ -7689,6 +7705,9 @@ function openSettings() {
   if ($('setWhHrLog')) $('setWhHrLog').value = dw.hrLog || '';
   if ($('setWhAnnounce')) $('setWhAnnounce').value = dw.announcements || '';
   if ($('setWhIncomeReports')) $('setWhIncomeReports').value = dw.incomeReports || '';
+  if ($('setSupabaseUrl')) $('setSupabaseUrl').value = s.settings.supabaseUrl || '';
+  if ($('setSupabaseAnon')) $('setSupabaseAnon').value = s.settings.supabaseAnonKey || '';
+  if ($('setRegisterAutoPull')) $('setRegisterAutoPull').checked = s.settings.registerAutoPull !== false;
   d.classList.add('open'); d.removeAttribute('hidden');
 }
 function closeSettings() {
@@ -7710,6 +7729,9 @@ function saveSettings() {
   if ($('setSessionDays')) s.settings.sessionDays = Number($('setSessionDays').value) || 14;
   if ($('setSharedUrl')) s.settings.sharedDeskUrl = ($('setSharedUrl').value || '').trim();
   if ($('setSharedAutoPull')) s.settings.sharedAutoPull = !!$('setSharedAutoPull').checked;
+  if ($('setSupabaseUrl')) s.settings.supabaseUrl = ($('setSupabaseUrl').value || '').trim();
+  if ($('setSupabaseAnon')) s.settings.supabaseAnonKey = ($('setSupabaseAnon').value || '').trim();
+  if ($('setRegisterAutoPull')) s.settings.registerAutoPull = !!$('setRegisterAutoPull').checked;
   if ($('setHandbookUrl')) s.settings.handbookUrl = ($('setHandbookUrl').value || '').trim() || LINK_HANDBOOK;
   if ($('setHousePass')) {
     const hp = ($('setHousePass').value || '').trim();
@@ -7733,6 +7755,7 @@ function openChangelog() {
   const grid = $('upgradeGrid');
   if (grid) {
     const recent = [
+      ['v40', 'Discord /register modal → Supabase → Income auto-pull · Log register drop button · pending feed chip'],
       ['v39', 'House Income desk — register/tip jar/event/deposit/rebate · #hr-income-reports · #register-sales import · net house P&L'],
       ['v38', 'Tiiny publish checklist · shared-ahead probe · house password off login · handbook URL + assets modal'],
       ['v37', 'Storage survival — activity/clock caps, lighter mirror, near-quota export & trim'],
@@ -9452,6 +9475,10 @@ function renderIncomes() {
   if ($('incExpenses')) $('incExpenses').textContent = money(net.expenses);
   if ($('incNetHouse')) $('incNetHouse').textContent = money(net.net);
   if ($('incTableCount')) $('incTableCount').textContent = list.length + ' shown';
+  updateIncomeSupabaseChip();
+  if (supabaseConfigured() && canEditIncomes() && __registerPendingCount == null) {
+    refreshRegisterPendingCount({ keepMsg: true }).catch(function () {});
+  }
 
   const bits = [];
   if (win.label && $('incPeriod') && $('incPeriod').value !== 'all') bits.push(win.label);
@@ -9687,11 +9714,14 @@ function ensureRebateIncome(expense) {
 
 function registerTemplateText() {
   return [
-    "Frenchie's #register-sales — one line per drop",
-    'Format: REGISTER | YYYY-MM-DD | Station | Amount | Source/notes | @Who',
-    'Example: REGISTER | ' + today() + ' | Bar | 1000 | Food & drinks till drop | @Alex',
+    "Frenchie's #register-sales",
+    'Preferred: type /register or tap Log register drop — fill the modal (Amount, Station, Source, Date).',
     'Stations: Bar · Floor · Door · Kitchen · Other',
-    'Managers import these lines on the Income tab.'
+    'Drops sync to Supabase → Income desk Pull / auto-pull.',
+    '',
+    'Backup text format (Import Discord lines):',
+    'REGISTER | YYYY-MM-DD | Station | Amount | Source/notes | @Who',
+    'Example: REGISTER | ' + today() + ' | Bar | 1000 | Food & drinks till drop | @Alex'
   ].join('\n');
 }
 
@@ -9829,6 +9859,203 @@ window.postIncomeLineDiscord = function (id) {
   if (!x) return;
   return postDiscord('incomeReports', incomeLineDiscordCard(x), { label: 'Income · ' + money(x.amount) });
 };
+
+/* ---------------- supabase register pull ---------------- */
+let __registerPullBusy = false;
+let __registerPendingCount = null;
+let __registerPullLastMsg = '';
+
+function supabaseConfigured() {
+  ensureMeta();
+  const url = String(s.settings.supabaseUrl || '').trim();
+  const key = String(s.settings.supabaseAnonKey || '').trim();
+  return !!(url && key && /^https:\/\//i.test(url));
+}
+
+function supabaseBaseUrl() {
+  ensureMeta();
+  return String(s.settings.supabaseUrl || '').trim().replace(/\/+$/, '');
+}
+
+function supabaseAnonKey() {
+  ensureMeta();
+  return String(s.settings.supabaseAnonKey || '').trim();
+}
+
+async function supabaseFetch(path, opts) {
+  opts = opts || {};
+  if (!supabaseConfigured()) return { ok: false, error: 'not-configured', status: 0 };
+  const url = supabaseBaseUrl() + path;
+  const key = supabaseAnonKey();
+  const headers = Object.assign({
+    apikey: key,
+    Authorization: 'Bearer ' + key,
+    'Content-Type': 'application/json'
+  }, opts.headers || {});
+  if (opts.prefer) headers.Prefer = opts.prefer;
+  try {
+    const res = await fetch(url, {
+      method: opts.method || 'GET',
+      headers: headers,
+      body: opts.body != null ? (typeof opts.body === 'string' ? opts.body : JSON.stringify(opts.body)) : undefined
+    });
+    const text = await res.text();
+    let data = null;
+    try { data = text ? JSON.parse(text) : null; } catch (e) { data = text; }
+    if (!res.ok) {
+      return { ok: false, status: res.status, error: (data && data.message) || (data && data.error) || text || ('HTTP ' + res.status), data: data };
+    }
+    return { ok: true, status: res.status, data: data };
+  } catch (err) {
+    return { ok: false, status: 0, error: String(err && err.message || err) };
+  }
+}
+
+function updateIncomeSupabaseChip(opts) {
+  opts = opts || {};
+  const chip = $('incSupabaseChip');
+  const status = $('incSupabaseStatus');
+  const hint = $('incSupabaseHint');
+  if (!chip && !status) return;
+  if (!supabaseConfigured()) {
+    if (chip) { chip.textContent = 'Supabase · off'; chip.className = 'pill gray'; }
+    if (status) status.textContent = 'Set Supabase URL + anon key in Settings';
+    if (hint) hint.style.display = '';
+    return;
+  }
+  if (hint) hint.style.display = 'none';
+  const n = opts.pending != null ? opts.pending : __registerPendingCount;
+  if (n == null) {
+    if (chip) { chip.textContent = 'Supabase · ready'; chip.className = 'pill blue'; }
+    if (status) status.textContent = __registerPullLastMsg || (s.settings.registerAutoPull !== false ? 'Auto-pull on' : 'Manual pull');
+    return;
+  }
+  if (n > 0) {
+    if (chip) { chip.textContent = 'Supabase · ' + n + ' pending'; chip.className = 'pill warn'; }
+    if (status) status.textContent = __registerPullLastMsg || 'Waiting to book into Income';
+  } else {
+    if (chip) { chip.textContent = 'Supabase · synced'; chip.className = 'pill green'; }
+    if (status) status.textContent = __registerPullLastMsg || 'No pending register drops';
+  }
+}
+
+async function refreshRegisterPendingCount(opts) {
+  opts = opts || {};
+  if (!supabaseConfigured() || !canEditIncomes()) {
+    updateIncomeSupabaseChip();
+    return null;
+  }
+  const listRes = await supabaseFetch('/rest/v1/register_sales?status=eq.pending&select=id&order=created_at.asc');
+  if (!listRes.ok) {
+    __registerPullLastMsg = 'Pending check failed: ' + (listRes.error || 'error');
+    updateIncomeSupabaseChip();
+    return null;
+  }
+  const rows = Array.isArray(listRes.data) ? listRes.data : [];
+  __registerPendingCount = rows.length;
+  if (!opts.keepMsg) __registerPullLastMsg = rows.length ? (rows.length + ' waiting') : 'Synced';
+  updateIncomeSupabaseChip({ pending: rows.length });
+  return rows.length;
+}
+
+async function pullRegisterSalesFromSupabase(opts) {
+  opts = opts || {};
+  if (!canEditIncomes()) {
+    if (!opts.quiet) toast('Income pull — management only');
+    return { ok: false, msg: 'denied' };
+  }
+  if (!supabaseConfigured()) {
+    if (!opts.quiet) toast('Set Supabase URL + anon key in Settings first');
+    updateIncomeSupabaseChip();
+    return { ok: false, msg: 'not-configured' };
+  }
+  if (__registerPullBusy) return { ok: false, msg: 'busy' };
+  __registerPullBusy = true;
+  try {
+    const listRes = await supabaseFetch('/rest/v1/register_sales?status=eq.pending&select=*&order=created_at.asc');
+    if (!listRes.ok) {
+      __registerPullLastMsg = 'Pull failed: ' + (listRes.error || 'error');
+      updateIncomeSupabaseChip();
+      if (!opts.quiet) toast(__registerPullLastMsg);
+      return { ok: false, msg: listRes.error };
+    }
+    const rows = Array.isArray(listRes.data) ? listRes.data : [];
+    __registerPendingCount = rows.length;
+    if (!rows.length) {
+      __registerPullLastMsg = 'Synced — nothing pending';
+      updateIncomeSupabaseChip({ pending: 0 });
+      if (!opts.quiet) toast('No pending register sales');
+      return { ok: true, added: 0 };
+    }
+    ensureMeta();
+    const before = JSON.parse(JSON.stringify(s.incomes || []));
+    const win = incomePeriodWindow('open');
+    let added = 0;
+    const booked = [];
+    for (let i = 0; i < rows.length; i++) {
+      const row = rows[i];
+      const ref = 'sb:' + row.id;
+      if ((s.incomes || []).some(x => String(x.discordRef || '') === ref)) {
+        await supabaseFetch('/rest/v1/rpc/book_register_sale', {
+          method: 'POST',
+          body: { p_id: row.id, p_desk_income_id: null }
+        });
+        continue;
+      }
+      let station = String(row.station || '').trim();
+      const hit = INCOME_STATIONS.find(st => st && st.toLowerCase() === station.toLowerCase());
+      station = hit || (station ? 'Other' : '');
+      const data = normalizeIncome({
+        id: s.nextIncomeId++,
+        date: row.sale_date || today(),
+        periodIndex: win.index,
+        kind: 'register',
+        source: row.source || 'Register',
+        amount: Math.round(Number(row.amount || 0)),
+        station: station,
+        paidBy: row.paid_by || '',
+        discordRef: ref,
+        notes: 'Discord /register · ' + (row.discord_user_id ? 'uid ' + row.discord_user_id : 'modal'),
+        receipt: row.discord_msg_id ? ('msg:' + row.discord_msg_id) : ''
+      });
+      if (!data.amount) continue;
+      s.incomes.unshift(data);
+      const book = await supabaseFetch('/rest/v1/rpc/book_register_sale', {
+        method: 'POST',
+        body: { p_id: row.id, p_desk_income_id: data.id }
+      });
+      if (!book.ok) {
+        console.warn('book_register_sale failed', book.error);
+      }
+      booked.push(data);
+      added++;
+    }
+    if (added) {
+      pushUndo({
+        label: 'pull register sales',
+        restore: () => { s.incomes = before; }
+      });
+      log('Pulled ' + added + ' register sale' + (added === 1 ? '' : 's') + ' from Supabase');
+      save();
+      render();
+    }
+    __registerPendingCount = 0;
+    __registerPullLastMsg = added ? ('Pulled ' + added + ' register drop' + (added === 1 ? '' : 's')) : 'Already booked locally';
+    updateIncomeSupabaseChip({ pending: 0 });
+    if (!opts.quiet || added) toast(__registerPullLastMsg);
+    return { ok: true, added: added, rows: booked };
+  } finally {
+    __registerPullBusy = false;
+  }
+}
+
+async function maybeAutoPullRegisterSales(reason) {
+  ensureMeta();
+  if (!sessionUser || !canEditIncomes()) return;
+  if (!supabaseConfigured()) return;
+  if (s.settings.registerAutoPull === false) return;
+  await pullRegisterSalesFromSupabase({ quiet: reason !== 'manual' });
+}
 
 
 function renderRelations() {
@@ -14635,6 +14862,10 @@ function activateView(viewName, opts) {
   if (!opts.skipScroll) window.scrollTo(0, 0);
   if (viewName === 'paystubs') syncStubToOverview();
   if (viewName === 'overview') syncOverviewToStub();
+  if (viewName === 'income' && canEditIncomes()) {
+    updateIncomeSupabaseChip();
+    setTimeout(function () { maybeAutoPullRegisterSales('income-tab'); }, 200);
+  }
   if (!opts.skipHash) {
     try {
       const hash = '#' + viewName;
@@ -16253,6 +16484,7 @@ if ($('incApplyTipJar')) $('incApplyTipJar').onclick = () => {
 ['incPeriod', 'incKind'].forEach(id => { if ($(id)) $(id).onchange = () => renderIncomes(); });
 if ($('incSearch')) $('incSearch').oninput = () => renderIncomes();
 if ($('ovGotoIncome')) $('ovGotoIncome').onclick = () => goView('income');
+if ($('pullSupabaseIncome')) $('pullSupabaseIncome').onclick = () => pullRegisterSalesFromSupabase({ quiet: false });
 
 
 /* ---------- relations ---------- */
@@ -16607,6 +16839,7 @@ document.addEventListener('visibilitychange', () => {
     pullRemote({ reason: 'visible' });
     updateSaveBadge();
     maybeAutoPullSharedDesk('focus');
+    maybeAutoPullRegisterSales('focus');
   }
 });
 
@@ -16759,6 +16992,7 @@ if (s.meta && s.meta.lastSharedPublishAt) {
 if (sessionUser) render();
 updateSaveBadge();
 if (sessionUser) setTimeout(() => maybeAutoPullSharedDesk('login'), 800);
+if (sessionUser) setTimeout(() => maybeAutoPullRegisterSales('login'), 1100);
 setSyncChip(syncChannel ? 'live' : 'offline');
 try { renderSnapshots(); } catch (err) {}
 if ($('ovTipMode')) $('ovTipMode').value = (s.settings && s.settings.tipMode) || 'equal';
@@ -18095,6 +18329,8 @@ function redactPasswordsInState(raw) {
     if (clone.settings.discordWebhooks) {
       clone.settings.discordWebhooks = { payroll: '', hiring: '', coverage: '', hrLog: '', announcements: '', incomeReports: '' };
     }
+    if ('supabaseAnonKey' in clone.settings) clone.settings.supabaseAnonKey = '';
+    if ('supabaseUrl' in clone.settings) clone.settings.supabaseUrl = '';
   }
   return clone;
 }

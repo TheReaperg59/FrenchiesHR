@@ -1,0 +1,5 @@
+# Minimal Supabase config for Frenchie's register feed functions.
+# Full project config is managed in your linked Supabase project.
+
+[functions.discord-register]
+verify_jwt = false
