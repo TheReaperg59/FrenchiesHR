@@ -2570,7 +2570,7 @@ body.session-staff #pullSharedBtn{display:none!important}
         <button type="button" class="top-account-item danger" id="logoutBtn" role="menuitem">Sign out</button>
         <button type="button" class="top-account-item" id="logoutAllBtn" role="menuitem">Sign out all remembered</button>
         <div class="top-account-foot">
-          <span class="build-chip" title="Desk build">v32</span>
+          <span class="build-chip" id="deskBuildChip" title="Desk build">v35</span>
           <label class="top-jump-label" for="quickJump">Jump to</label>
           <select class="top-jump" id="quickJump" title="Jump to any tab">
             <option value="overview">Overview</option>
@@ -2683,6 +2683,7 @@ body.session-staff #pullSharedBtn{display:none!important}
       <span class="ov-tool-label">Payroll actions</span>
       <div class="ov-rail-row">
         <button class="btn tiny soft" id="bulkHoursBtn" type="button">Set hours</button>
+        <button class="btn tiny soft" id="applyClockSincePayBtn" type="button" title="Apply unapplied clock pairs for this open period">Apply clock</button>
         <button class="btn tiny primary" id="markAllPaid" type="button">Mark all paid</button>
         <button type="button" class="btn tiny soft" id="undoBtn" title="Undo last desk action">Undo</button>
       </div>
@@ -3340,12 +3341,14 @@ body.session-staff #pullSharedBtn{display:none!important}
       <button class="btn" id="importJson">Import JSON</button>
     </div></div>
   </div>
-  <div class="card mgmt-only" style="margin-top:12px" data-mgmt-only><div class="card-head"><b>Shared desk sync</b><span class="pill gray">v20</span></div>
+  <div class="card mgmt-only" style="margin-top:12px" data-mgmt-only><div class="card-head"><b>Shared desk sync</b><span class="pill gray" id="sharedDeskBuildPill">v35</span></div>
     <div class="card-body">
-      <p class="ui-hint">Publish a password-redacted pack for another PC, or pull one in. Highest rev wins — you always choose Keep mine or Take theirs on a clash.</p>
-      <div class="field"><label>Default shared raw URL</label><input id="sharedDeskUrlSetting" placeholder="https://…/frenchies-shared-desk.json"></div>
+      <p class="ui-hint"><b>Publish to domain</b> tries to write your redacted pack to the raw URL (when the host allows PUT). If that fails, it downloads the JSON — upload that file to Tiiny Host so every PC can <b>Pull</b>. Passwords stay on each browser.</p>
+      <div class="field"><label>Shared raw URL (same file every PC pulls)</label><input id="sharedDeskUrlSetting" placeholder="https://yourdomain/…/frenchies-shared-desk.json"></div>
+      <div class="mini-note" id="sharedDeskLiveStatus" style="margin:8px 0">No publish yet this session.</div>
       <div class="actions" style="margin-top:10px">
-        <button type="button" class="btn primary" id="publishSharedBtn">Publish shared pack</button>
+        <button type="button" class="btn primary" id="publishSharedBtn">Publish to domain</button>
+        <button type="button" class="btn soft" id="downloadSharedPackBtn">Download pack only</button>
         <button type="button" class="btn soft" id="pullSharedFromBackupBtn">Pull shared desk…</button>
       </div>
     </div>
@@ -3673,7 +3676,8 @@ body.session-staff #pullSharedBtn{display:none!important}
     <div id="clockApplyPreview" class="roadmap-panel" style="display:none;margin:10px 0"></div>
     <div class="dialog-foot" style="border:0;padding-top:0;margin:0 0 12px"><button class="btn primary" id="addClockEntry" type="button">Add entry</button>
       <button class="btn soft" id="previewClockHours" type="button">Preview pairs</button>
-      <button class="btn soft" id="applyClockHours" type="button">Apply pairs to open period</button></div>
+      <button class="btn soft" id="applyClockHours" type="button">Apply all unapplied</button>
+      <button class="btn soft" id="applyClockSincePay" type="button">Apply since payday</button></div>
     <div id="clockList"></div>
   </div>
   <div class="dialog-foot"><button class="btn" id="closeClock">Close</button></div>
@@ -3732,8 +3736,8 @@ body.session-staff #pullSharedBtn{display:none!important}
 <div class="modal" id="sharedPullModal" role="dialog" aria-modal="true" hidden><div class="dialog" role="document" tabindex="-1">
   <h2>Pull shared desk</h2>
   <div class="dialog-scroll">
-    <p class="ui-hint">Paste a shared desk JSON pack or a raw URL. A snapshot is taken first. On a rev clash you choose Keep mine or Take theirs.</p>
-    <div class="field"><label>Raw URL (optional)</label><input id="sharedUrl" placeholder="https://…/desk.json"></div>
+    <p class="ui-hint">Paste a shared desk JSON pack or fetch your domain raw URL. A snapshot is taken first. Personal passwords from this browser are kept when the pack is redacted. On a rev clash you choose Keep mine or Take theirs.</p>
+    <div class="field"><label>Raw URL (optional)</label><input id="sharedUrl" placeholder="https://…/frenchies-shared-desk.json"></div>
     <div class="field"><label>Or paste JSON</label><textarea id="sharedPaste" rows="8" placeholder="{ … }"></textarea></div>
     <div id="sharedConflictBox" class="roadmap-panel" style="display:none">
       <h3>Conflict</h3>
@@ -4029,10 +4033,12 @@ body.session-staff #pullSharedBtn{display:none!important}
 <div class="modal" id="sundayRunModal" role="dialog" aria-modal="true" aria-labelledby="sundayRunTitle" hidden>
   <div class="dialog wide" role="document" tabindex="-1">
     <h2 id="sundayRunTitle">Sunday pay run</h2>
-    <div class="mini-note">Discord-ready paste for the house — unpaid stubs, tip pool, and period label.</div>
+    <div class="mini-note">Checklist first, then Discord-ready paste for the house.</div>
+    <div id="sundayRunChecklist" class="roadmap-panel" style="margin-bottom:12px"></div>
     <div class="sunday-preview" id="sundayRunPreview"></div>
     <div class="dialog-foot">
       <button type="button" class="btn" id="closeSundayRun">Close</button>
+      <button type="button" class="btn soft" id="announcePaydayModal">Announce payday</button>
       <button type="button" class="btn primary" id="copySundayRunModal">Copy to clipboard</button>
       <button type="button" class="btn soft" id="postSundayRunModal">Post to Discord</button>
     </div>
@@ -4172,7 +4178,7 @@ const LOG_TYPES = {
 };
 const TIP_ROLES_DEFAULT = ['Waiter', 'Hostess', 'Cook'];
 const TIP_ROLES = TIP_ROLES_DEFAULT; /* legacy alias — use tipRoles() */
-const DESK_BUILD = 'v32';
+const DESK_BUILD = 'v35';
 const HOUSE_LOGIN_PASSWORD = 'frenchies636';
 const SESSION_KEY = 'frenchies_desk_session';
 const SESSION_DURABLE_KEY = 'frenchies_desk_session_durable';
@@ -6331,6 +6337,34 @@ function buildTodos() {
         go: { type: 'view', view: 'overview', period: workingPeriodIndex() }
       });
     }
+
+    const clockWin = openPeriodClockWindow(pWork);
+    const clockPairs = countUnappliedClockPairs(clockWin);
+    const clockMarks = countUnappliedClockMarks(clockWin);
+    if (clockPairs > 0 || clockMarks > 0) {
+      push({
+        id: 'clock-unapplied-' + shortLabel(pWork),
+        group: 'payroll',
+        tone: (dow === 0 || dow === 5 || dow === 6) ? 'danger' : 'warn',
+        priority: (dow === 0 || dow === 5 || dow === 6) ? 3 : 2,
+        tag: 'Clock',
+        title: 'Unapplied clock pairs',
+        detail: (clockPairs
+          ? clockPairs + ' pair(s) ready for ' + shortLabel(pWork)
+          : clockMarks + ' in/out mark(s) still unpaired') +
+          ' · Apply since payday, then fix stragglers in Set hours.',
+        due: (dow === 0 || dow === 5 || dow === 6) ? t : '',
+        go: { type: 'clock' },
+        action: {
+          label: 'Apply since payday',
+          run: () => applyClockHoursSincePayday()
+        },
+        action2: {
+          label: 'Open clock',
+          run: () => openClockModal()
+        }
+      });
+    }
   }
 
   
@@ -6816,6 +6850,11 @@ function goTodo(item) {
   if (g.type === 'dispute') {
     goView('overview');
     setTimeout(() => openDisputeForResolve(g.id), 60);
+    return;
+  }
+  if (g.type === 'clock') {
+    goView('overview');
+    setTimeout(() => openClockModal(), 60);
   }
 }
 
@@ -7279,6 +7318,10 @@ function cmdCommands() {
   cmds.push({ label: 'Copy Sunday pay run', hint: 'Payroll', run: () => copySundayRun() });
   cmds.push({ label: 'Set hours', hint: 'Payroll', run: () => openBulkHours() });
   cmds.push({ label: 'Bulk hours', hint: 'Payroll', run: () => openBulkHours() });
+  cmds.push({ label: 'Apply clock since payday', hint: 'Payroll', run: () => applyClockHoursSincePayday() });
+  cmds.push({ label: 'Sunday checklist', hint: 'Payroll', run: () => openSundayRunPreview() });
+  cmds.push({ label: 'Publish shared desk', hint: 'Backup', run: () => publishSharedPack() });
+  cmds.push({ label: 'Announce payday', hint: 'Discord', run: () => postPaydayAnnouncement() });
   cmds.push({ label: 'Open settings', hint: 'Desk', run: () => openSettings() });
   cmds.push({ label: 'Export to-dos', hint: 'Todos', run: () => copyTextSafe(exportTodosText(), 'To-dos copied') });
   cmds.push({ label: 'New application', hint: 'Hiring', run: () => { goView('hiring'); setTimeout(() => $('addApp') && $('addApp').click(), 40); } });
@@ -7378,6 +7421,9 @@ function openChangelog() {
   const grid = $('upgradeGrid');
   if (grid) {
     const recent = [
+      ['v35', 'Sunday payday hard gates · run checklist · Announcements webhook for payday open'],
+      ['v34', 'Apply clock since payday · unapplied clock todos · Overview Apply clock'],
+      ['v33', 'Publish shared desk to domain URL · Download pack · keep local passwords on redacted pull'],
       ['v32', 'Discord embeds (pro channel posts) · Hiring desk + paperwork modal layout polish'],
       ['v31', 'Discord Post-to-channel webhooks · signed hire papers Open/Print on employee file'],
       ['v30', 'Shared desk auto-pull on focus · backup vs shared pack warnings · Sync vs Pull labels'],
@@ -12062,13 +12108,45 @@ function createNextPeriod() {
   return p;
 }
 
+function requireTypedOverride(reason, message) {
+  const typed = prompt(message + '\n\nType OVERRIDE to continue anyway:');
+  if (typed == null) return false;
+  if (String(typed).trim().toUpperCase() !== 'OVERRIDE') {
+    toast('Override cancelled — type OVERRIDE exactly');
+    return false;
+  }
+  log('Override: ' + reason);
+  return true;
+}
+
 function closePeriodAndRoll(p, opts) {
   if (!requireMgmt('Close period')) return false;
   opts = opts || {};
   if (!p || p.status === 'closed') { toast('Already closed'); return false; }
   ensureMeta();
   const unpaid = unpaidCount(p);
-  if (!opts.skipUnpaidConfirm && unpaid > 0 && !confirm(unpaid + ' unpaid stub(s) remain. Close anyway?')) return false;
+  const disputes = openDisputesCount();
+  const clockPairs = countUnappliedClockPairs(openPeriodClockWindow(p));
+  if (!opts.skipPaydayGates) {
+    if (disputes > 0) {
+      if (!requireTypedOverride(
+        'close period with ' + disputes + ' open dispute(s)',
+        disputes + ' open hours dispute(s) block closing this period.'
+      )) return false;
+    }
+    if (clockPairs > 0) {
+      if (!requireTypedOverride(
+        'close period with ' + clockPairs + ' unapplied clock pair(s)',
+        clockPairs + ' unapplied clock pair(s) still pending for ' + shortLabel(p) + '.'
+      )) return false;
+    }
+  }
+  if (!opts.skipUnpaidConfirm && unpaid > 0) {
+    if (!requireTypedOverride(
+      'close period with ' + unpaid + ' unpaid stub(s)',
+      unpaid + ' unpaid stub(s) remain. Closing will roll a new week.'
+    )) return false;
+  }
   if (s.settings.requireNotesOnClose && !String(p.notes || '').trim()) {
     const fold = $('periodNotes') && $('periodNotes').closest('details.fold');
     if (fold) fold.open = true;
@@ -13294,8 +13372,70 @@ function buildSundayRunText(p) {
   return lines.join('\n');
 }
 
+function sundayRunChecklistItems(p) {
+  p = p || current() || workingPeriod();
+  if (!p) return [];
+  const unpaid = unpaidCount(p);
+  const disputes = openDisputesCount();
+  const clockPairs = countUnappliedClockPairs(openPeriodClockWindow(p));
+  const tipPool = Number(p.tipPool || 0);
+  const tipWarn = tipPool > 0 && tipEligibleIds(p).length === 0;
+  return [
+    {
+      ok: tipPool > 0 && !tipWarn,
+      warn: tipPool === 0 || tipWarn,
+      label: 'Tip pool',
+      detail: tipPool <= 0 ? 'Not set yet' : (tipWarn ? money(tipPool) + ' set but nobody tip-eligible with hours' : money(tipPool) + ' ready')
+    },
+    {
+      ok: clockPairs === 0,
+      warn: clockPairs > 0,
+      label: 'Clock pairs',
+      detail: clockPairs ? (clockPairs + ' unapplied pair(s) — Apply since payday') : 'All clock pairs applied for this window'
+    },
+    {
+      ok: disputes === 0,
+      warn: disputes > 0,
+      label: 'Disputes',
+      detail: disputes ? (disputes + ' open dispute(s) block Mark all paid') : 'No open disputes'
+    },
+    {
+      ok: unpaid === 0,
+      warn: unpaid > 0,
+      label: 'Unpaid stubs',
+      detail: unpaid ? (unpaid + ' still unpaid · ' + money(owedGrossOf(p)) + ' owed') : 'All payable stubs marked paid'
+    },
+    {
+      ok: discordWebhookConfigured('payroll') || discordWebhookConfigured('announcements'),
+      warn: !(discordWebhookConfigured('payroll') || discordWebhookConfigured('announcements')),
+      label: 'Discord',
+      detail: discordWebhookConfigured('payroll')
+        ? 'Payroll webhook ready'
+        : (discordWebhookConfigured('announcements') ? 'Announcements webhook ready' : 'No payroll/announcements webhook — posts will copy instead')
+    }
+  ];
+}
+
+function renderSundayRunChecklist(p) {
+  const el = $('sundayRunChecklist');
+  if (!el) return;
+  const items = sundayRunChecklistItems(p);
+  const ready = items.every(i => i.ok);
+  el.innerHTML = '<h3 style="margin:0 0 8px">Sunday checklist</h3>' +
+    items.map(i =>
+      '<div class="history" style="display:flex;gap:8px;align-items:flex-start;margin:0 0 6px">' +
+        '<span class="pill ' + (i.ok ? 'green' : 'warn') + '">' + (i.ok ? 'Ready' : 'Check') + '</span>' +
+        '<span><b>' + esc(i.label) + '</b> — ' + esc(i.detail) + '</span></div>'
+    ).join('') +
+    '<p class="ui-hint" style="margin:8px 0 0">' + (ready
+      ? 'Checklist clear — copy or post the Sunday run.'
+      : 'Clear the checks above (or type OVERRIDE on Mark all paid / Close period if you must continue).') + '</p>';
+}
+
 function openSundayRunPreview() {
-  const text = buildSundayRunText(current());
+  const p = current();
+  renderSundayRunChecklist(p);
+  const text = buildSundayRunText(p);
   if ($('sundayRunPreview')) $('sundayRunPreview').textContent = text;
   if ($('sundayRunModal')) $('sundayRunModal').classList.add('open');
 }
@@ -13303,6 +13443,7 @@ function openSundayRunPreview() {
 function copySundayRun() {
   const text = buildSundayRunText(current());
   if ($('sundayRunPreview')) $('sundayRunPreview').textContent = text;
+  renderSundayRunChecklist(current());
   copyText(text, 'Sunday pay run copied');
 }
 function sundayRunDiscordCard(p) {
@@ -13318,6 +13459,7 @@ function sundayRunDiscordCard(p) {
       return '• **' + e.name + '** — ' + e.role + ' — ' + dec(x.hours) + 'h — ' + money(lineGross(e, x));
     }).join('\n');
   }
+  const clockPairs = countUnappliedClockPairs(openPeriodClockWindow(p));
   return discordCard('payroll', {
     title: 'Sunday pay run',
     description,
@@ -13326,6 +13468,7 @@ function sundayRunDiscordCard(p) {
       discordField('Status', String(p.status || '—').toUpperCase(), true),
       discordField('Tip pool', money(p.tipPool || 0), true),
       discordField('Still owed', money(owedGrossOf(p)), true),
+      discordField('Clock backlog', clockPairs ? (clockPairs + ' unapplied pair(s)') : 'Clear', true),
       discordField('Payday', 'Sunday 9:00 AM from the house', false)
     ]
   });
@@ -13333,7 +13476,30 @@ function sundayRunDiscordCard(p) {
 function postSundayRunDiscord() {
   const text = buildSundayRunText(current());
   if ($('sundayRunPreview')) $('sundayRunPreview').textContent = text;
+  renderSundayRunChecklist(current());
   return postDiscord('payroll', sundayRunDiscordCard(current()), { label: 'Sunday run' });
+}
+
+function paydayAnnouncementCard(p) {
+  p = p || current() || workingPeriod();
+  if (!p) return discordCard('announcements', { title: 'Payday', description: 'No open period on the desk.' });
+  const unpaid = unpaidCount(p);
+  return discordCard('announcements', {
+    title: 'Sunday payday — house open at 9:00 AM',
+    description: 'Pay from the house for **' + label(p) + '**. Bring questions on hours before the run.',
+    fields: [
+      discordField('Period', shortLabel(p), true),
+      discordField('Tip pool', money(p.tipPool || 0), true),
+      discordField('Still unpaid', String(unpaid), true),
+      discordField('Where', '8 Elgin Ave · Legion Square', false)
+    ]
+  });
+}
+
+function postPaydayAnnouncement() {
+  if (!canPostDiscord()) return toast('Leads and management only');
+  const p = current() || workingPeriod();
+  return postDiscord('announcements', paydayAnnouncementCard(p), { label: 'Payday announcement' });
 }
 
 function setEmpFileTab(name) {
@@ -13964,7 +14130,19 @@ $('markAllPaid').onclick = () => {
   if (!pending.length) return toast('Nothing outstanding');
   ensureMeta();
   const openDisputes = (s.disputes || []).filter(d => d.status === 'open');
-  if (openDisputes.length && !confirm(openDisputes.length + ' open hours dispute(s) still on the desk. Mark all paid anyway?')) return;
+  const clockPairs = countUnappliedClockPairs(openPeriodClockWindow(p));
+  if (openDisputes.length) {
+    if (!requireTypedOverride(
+      'mark all paid with ' + openDisputes.length + ' open dispute(s)',
+      openDisputes.length + ' open hours dispute(s) block Mark all paid.'
+    )) return;
+  }
+  if (clockPairs > 0) {
+    if (!requireTypedOverride(
+      'mark all paid with ' + clockPairs + ' unapplied clock pair(s)',
+      clockPairs + ' unapplied clock pair(s) still pending. Apply since payday first when you can.'
+    )) return;
+  }
   if (p.status === 'closed' && !confirm('This period is closed. Mark all unpaid stubs paid anyway?')) return;
   if (!confirm('Mark ' + pending.length + ' stub(s) as paid for the Sunday run?')) return;
   const method = promptPayMethod();
@@ -14010,6 +14188,7 @@ bindClick('postSundayRun', postSundayRunDiscord);
 bindClick('previewSundayRun', openSundayRunPreview);
 bindClick('copySundayRunModal', () => { copySundayRun(); });
 bindClick('postSundayRunModal', postSundayRunDiscord);
+bindClick('announcePaydayModal', postPaydayAnnouncement);
 bindClick('closeSundayRun', () => { if ($('sundayRunModal')) $('sundayRunModal').classList.remove('open'); });
 bindClick('closePeriodTop', () => { if (!requireMgmt('Close period')) return; closePeriodAndRoll(current()); });
 bindClick('probPassBtn', () => completeProbation(true));
@@ -15428,8 +15607,10 @@ if ($('saveTimeOff')) $('saveTimeOff').onclick = () => submitTimeOff();
 if ($('clockLogBtn')) $('clockLogBtn').onclick = () => openClockModal();
 if ($('closeClock')) $('closeClock').onclick = () => $('clockModal').classList.remove('open');
 if ($('addClockEntry')) $('addClockEntry').onclick = () => addClockEntry();
-if ($('previewClockHours')) $('previewClockHours').onclick = () => previewClockPairs(false);
+if ($('previewClockHours')) $('previewClockHours').onclick = () => previewClockPairs(false, openPeriodClockWindow());
 if ($('applyClockHours')) $('applyClockHours').onclick = () => applyClockHoursToPeriod();
+if ($('applyClockSincePay')) $('applyClockSincePay').onclick = () => applyClockHoursSincePayday();
+if ($('applyClockSincePayBtn')) $('applyClockSincePayBtn').onclick = () => applyClockHoursSincePayday();
 if ($('interviewBoardBtn')) $('interviewBoardBtn').onclick = () => openInterviewBoard();
 if ($('closeInterviewBoard')) $('closeInterviewBoard').onclick = () => $('interviewBoardModal').classList.remove('open');
 if ($('postInterviewBoard')) $('postInterviewBoard').onclick = () => postInterviewBoardDiscord();
@@ -15450,7 +15631,8 @@ if ($('promoEmp')) $('promoEmp').onchange = () => {
   $('promoRate').value = e.rate;
 };
 if ($('addAssetBtn')) $('addAssetBtn').onclick = () => addEmpAsset();
-if ($('publishSharedBtn')) $('publishSharedBtn').onclick = () => publishSharedPack();
+if ($('publishSharedBtn')) $('publishSharedBtn').onclick = () => { publishSharedPack(); };
+if ($('downloadSharedPackBtn')) $('downloadSharedPackBtn').onclick = () => downloadSharedPackOnly();
 if ($('pullSharedFromBackupBtn')) $('pullSharedFromBackupBtn').onclick = () => pullSharedDesk();
 if ($('cancelSharedPull')) $('cancelSharedPull').onclick = () => { pendingSharedPull = null; $('sharedPullModal').classList.remove('open'); };
 if ($('confirmSharedPull')) $('confirmSharedPull').onclick = () => confirmSharedPull();
@@ -15494,6 +15676,11 @@ if ($('setSessionDays')) {
   if (!canAccessView(start)) start = (viewsForSession() || ['overview'])[0];
   activateView(start, { skipRender: true, skipHash: !!fromHash, focusView: false });
 })();
+if ($('deskBuildChip')) $('deskBuildChip').textContent = DESK_BUILD;
+if ($('sharedDeskBuildPill')) $('sharedDeskBuildPill').textContent = DESK_BUILD;
+if (s.meta && s.meta.lastSharedPublishAt) {
+  setSharedDeskLiveStatus('Last publish ' + s.meta.lastSharedPublishAt + (s.meta.lastSharedPublishUrl ? ' · ' + s.meta.lastSharedPublishUrl : ''));
+}
 if (sessionUser) render();
 updateSaveBadge();
 if (sessionUser) setTimeout(() => maybeAutoPullSharedDesk('login'), 800);
@@ -15511,7 +15698,7 @@ document.querySelectorAll('#view-hiring details.fold').forEach(fold => {
 const HANDBOOK_EXCERPTS = [
   { id: 'payday', title: 'Payday', tags: 'pay sunday cash tips', body: 'Payday is Sunday at 9:00 AM from the house. Confirm hours and tip pool before the run. Mark stubs paid after cash is handed out.' },
   { id: 'tips', title: 'Tip pool', tags: 'tips bar floor host cook equal hours', body: 'Tip-eligible roles share the pool. Split is equal share or weighted by hours (Settings). Paid stubs lock their tip line; unpaid lines recompute when the pool changes.' },
-  { id: 'hours', title: 'Hours & disputes', tags: 'hours radio clock dispute', body: 'Leads log hours from the radio clock or bulk grid. If your hours look wrong, file an Hours dispute from the account menu — do not edit the payroll yourself.' },
+  { id: 'hours', title: 'Hours & disputes', tags: 'hours radio clock dispute', body: 'Staff log 10-1/10-2 on the clock. Leads use Apply since payday to push pairs into the open period, then fix stragglers in Set hours. If your hours look wrong, file an Hours dispute from the account menu — do not edit the payroll yourself.' },
   { id: 'calloff', title: 'Call-offs', tags: 'call-off time-off sick', body: 'Same-day or next-shift absences are Call-offs. Future ranges are Time-off. Submit from the account menu; leads approve and mark the shift board Off.' },
   { id: 'uniform', title: 'Uniform & assets', tags: 'uniform assets equipment', body: 'Uniforms and house assets are listed on your personnel file. Return items when leaving or on request. Termination checklist includes outstanding assets.' },
   { id: 'shifts', title: 'Shifts & Host', tags: 'shifts host station coverage', body: 'The shift board uses Bar, Kitchen, Floor, Host, or Off. Staff set availability on their file; leads edit the board. Coverage gaps flag empty days.' },
@@ -15538,27 +15725,42 @@ function renderPaydayDesk(p) {
   const disputes = openDisputesCount();
   const pool = Number(p.tipPool || 0);
   const owed = owedGrossOf(p);
+  const clockPairs = countUnappliedClockPairs(openPeriodClockWindow(p));
+  const checks = sundayRunChecklistItems(p);
+  const blocked = checks.some(c => !c.ok);
   if ($('paydayDeskPill')) {
-    $('paydayDeskPill').textContent = disputes ? (disputes + ' dispute' + (disputes === 1 ? '' : 's')) : (unpaid ? unpaid + ' unpaid' : 'Clear');
-    $('paydayDeskPill').className = 'pill ' + (disputes || unpaid ? 'warn' : 'green');
+    $('paydayDeskPill').textContent = blocked
+      ? ((disputes ? disputes + ' dispute' + (disputes === 1 ? '' : 's') : '') ||
+        (clockPairs ? clockPairs + ' clock' : '') ||
+        (unpaid ? unpaid + ' unpaid' : 'Check'))
+      : 'Clear';
+    $('paydayDeskPill').className = 'pill ' + (blocked ? 'warn' : 'green');
   }
   if ($('paydayDeskBody')) {
     $('paydayDeskBody').innerHTML =
       '<div class="payday-desk-stat"><b>' + unpaid + '</b><span>Unpaid stubs</span></div>' +
       '<div class="payday-desk-stat"><b>' + disputes + '</b><span>Open disputes</span></div>' +
+      '<div class="payday-desk-stat"><b>' + clockPairs + '</b><span>Clock pairs</span></div>' +
       '<div class="payday-desk-stat"><b>' + money(pool) + '</b><span>Tip pool</span></div>' +
-      '<div class="payday-desk-stat"><b>' + money(owed) + '</b><span>Still owed</span></div>';
+      '<div class="payday-desk-stat"><b>' + money(owed) + '</b><span>Still owed</span></div>' +
+      '<div class="payday-desk-stat"><b>' + checks.filter(c => c.ok).length + '/' + checks.length + '</b><span>Checklist</span></div>';
   }
   if ($('paydayDeskActions')) {
     $('paydayDeskActions').innerHTML =
-      '<button type="button" class="btn tiny primary" id="pdCopySunday">Copy Sunday run</button>' +
-      '<button type="button" class="btn tiny soft" id="pdPostSunday">Post to Discord</button>' +
+      '<button type="button" class="btn tiny primary" id="pdSundayChecklist">Sunday checklist</button>' +
+      (clockPairs ? '<button type="button" class="btn tiny soft" id="pdApplyClock">Apply clock</button>' : '') +
+      '<button type="button" class="btn tiny soft" id="pdCopySunday">Copy Sunday run</button>' +
+      '<button type="button" class="btn tiny soft" id="pdPostSunday">Post payroll</button>' +
+      '<button type="button" class="btn tiny soft" id="pdAnnounce">Announce payday</button>' +
       '<button type="button" class="btn tiny soft" id="pdTips">Tip settlement</button>' +
       '<button type="button" class="btn tiny soft" id="pdDisputes">Open disputes</button>' +
       '<button type="button" class="btn tiny soft" id="pdStubs">Pay stubs</button>' +
       (unpaid ? '<button type="button" class="btn tiny" id="pdMarkAll">Mark all paid</button>' : '');
+    if ($('pdSundayChecklist')) $('pdSundayChecklist').onclick = () => openSundayRunPreview();
+    if ($('pdApplyClock')) $('pdApplyClock').onclick = () => applyClockHoursSincePayday();
     if ($('pdCopySunday')) $('pdCopySunday').onclick = () => copySundayRun();
     if ($('pdPostSunday')) $('pdPostSunday').onclick = () => postSundayRunDiscord();
+    if ($('pdAnnounce')) $('pdAnnounce').onclick = () => postPaydayAnnouncement();
     if ($('pdTips')) $('pdTips').onclick = () => openTipSettlement();
     if ($('pdDisputes')) $('pdDisputes').onclick = () => openDisputeModal();
     if ($('pdStubs')) $('pdStubs').onclick = () => goView('paystubs');
@@ -16015,6 +16217,70 @@ function clockTimeToMinutes(t) {
   return h * 60 + m;
 }
 
+function openPeriodClockWindow(p) {
+  p = p || workingPeriod() || current();
+  if (!p) return { since: null, until: null, label: '' };
+  return {
+    since: p.start || null,
+    until: p.end || null,
+    label: shortLabel(p)
+  };
+}
+
+function lastPaydayCutoff() {
+  const closed = (s.periods || []).filter(p => p && p.status === 'closed' && p.end)
+    .slice()
+    .sort((a, b) => String(b.end).localeCompare(String(a.end)));
+  if (closed.length) return closed[0].end;
+  const win = openPeriodClockWindow();
+  return win.since || null;
+}
+
+function unappliedClockEntries(opts) {
+  opts = opts || {};
+  ensureMeta();
+  return (s.clockLog || []).filter(c => {
+    if (c.applied) return false;
+    if (c.mark !== '10-1' && c.mark !== '10-2') return false;
+    if (opts.since && String(c.date || '') < String(opts.since)) return false;
+    if (opts.until && String(c.date || '') > String(opts.until)) return false;
+    return true;
+  });
+}
+
+function summarizeUnappliedClock(opts) {
+  const byEmp = {};
+  unappliedClockEntries(opts).forEach(c => {
+    if (!byEmp[c.empId]) byEmp[c.empId] = [];
+    byEmp[c.empId].push(c);
+  });
+  const lines = [];
+  let totalH = 0, totalP = 0, marks = 0;
+  Object.keys(byEmp).forEach(id => {
+    marks += byEmp[id].length;
+    const result = pairClockHours(byEmp[id]);
+    if (!result.pairs) return;
+    const e = empById(id);
+    totalH += result.hours;
+    totalP += result.pairs;
+    lines.push({
+      id, name: (e && e.name) || id, pairs: result.pairs, hours: result.hours,
+      default1h: result.details.some(d => d.how === 'default-1h'),
+      overnight: result.details.some(d => d.how === 'overnight'),
+      result
+    });
+  });
+  return { byEmp, lines, totalH, totalP, marks };
+}
+
+function countUnappliedClockPairs(opts) {
+  return summarizeUnappliedClock(opts || {}).totalP;
+}
+
+function countUnappliedClockMarks(opts) {
+  return unappliedClockEntries(opts || {}).length;
+}
+
 function openClockModal() {
   if (!sessionUser) return toast('Sign in first');
   if (!canEditHours() && !isStaffSession()) return toast('Sign in to clock');
@@ -16038,14 +16304,15 @@ function openClockModal() {
   if ($('clkNote')) $('clkNote').value = '';
   if ($('clkMark') && staffSelf && $('clkMark').value === 'note') $('clkMark').value = '10-1';
   if ($('applyClockHours')) $('applyClockHours').style.display = canEditHours() ? '' : 'none';
+  if ($('applyClockSincePay')) $('applyClockSincePay').style.display = canEditHours() ? '' : 'none';
   if ($('previewClockHours')) $('previewClockHours').style.display = canEditHours() ? '' : 'none';
   if ($('clockHint')) {
     $('clockHint').textContent = staffSelf
       ? 'Log your own 10-1 (in) and 10-2 (out). A lead applies pairs to the open period.'
-      : 'Log floor marks, preview unapplied pairs, then apply to the open period. Overnight spans OK when out is earlier than in.';
+      : 'Log floor marks, preview unapplied pairs, then Apply since payday (open period dates) or Apply all. Overnight spans OK when out is earlier than in.';
   }
   renderClockList();
-  previewClockPairs(true);
+  previewClockPairs(true, openPeriodClockWindow());
   $('clockModal').classList.add('open');
   $('clockModal').removeAttribute('hidden');
 }
@@ -16085,7 +16352,7 @@ window.deleteClockEntry = function (id) {
   s.clockLog = (s.clockLog || []).filter(x => String(x.id) !== String(id));
   save();
   renderClockList();
-  previewClockPairs(true);
+  previewClockPairs(true, openPeriodClockWindow());
   toast('Entry removed');
 };
 
@@ -16113,7 +16380,7 @@ function addClockEntry() {
   });
   save();
   renderClockList();
-  previewClockPairs(true);
+  previewClockPairs(true, openPeriodClockWindow());
   toast('Logged ' + e.name + ' ' + mark + (time ? ' @ ' + time : ''));
 }
 
@@ -16163,60 +16430,53 @@ function pairClockHours(entries, opts) {
   return { hours, pairs, used, details };
 }
 
-function previewClockPairs(quiet) {
+function previewClockPairs(quiet, windowOpts) {
   ensureMeta();
   const box = $('clockApplyPreview');
   if (!box) return null;
   if (!canEditHours()) { box.style.display = 'none'; return null; }
-  const byEmp = {};
-  (s.clockLog || []).filter(c => !c.applied).forEach(c => {
-    if (!byEmp[c.empId]) byEmp[c.empId] = [];
-    byEmp[c.empId].push(c);
-  });
-  const lines = [];
-  let totalH = 0, totalP = 0;
-  Object.keys(byEmp).forEach(id => {
-    const result = pairClockHours(byEmp[id]);
-    if (!result.pairs) return;
-    const e = empById(id);
-    totalH += result.hours;
-    totalP += result.pairs;
-    lines.push('<div class="history"><b>' + esc((e && e.name) || id) + '</b> — ' + result.pairs + ' pair(s) · ' + dec(result.hours) + 'h' +
-      (result.details.some(d => d.how === 'default-1h') ? ' (includes 1h default)' : '') +
-      (result.details.some(d => d.how === 'overnight') ? ' (overnight)' : '') + '</div>');
-  });
-  if (!lines.length) {
+  const win = windowOpts || {};
+  const summary = summarizeUnappliedClock(win);
+  const scope = (win.since || win.until)
+    ? (' · window ' + (win.since || '…') + ' → ' + (win.until || '…'))
+    : ' · all unapplied';
+  if (!summary.lines.length) {
     box.style.display = quiet ? 'none' : '';
-    box.innerHTML = quiet ? '' : '<h3>Apply preview</h3><div class="mini-note">No unapplied 10-1/10-2 pairs.</div>';
-    return { totalH: 0, totalP: 0 };
+    box.innerHTML = quiet ? '' : '<h3>Apply preview</h3><div class="mini-note">No unapplied 10-1/10-2 pairs' + scope + '.</div>';
+    return { totalH: 0, totalP: 0, marks: 0, window };
   }
+  const lines = summary.lines.map(row =>
+    '<div class="history"><b>' + esc(row.name) + '</b> — ' + row.pairs + ' pair(s) · ' + dec(row.hours) + 'h' +
+      (row.default1h ? ' (includes 1h default)' : '') +
+      (row.overnight ? ' (overnight)' : '') + '</div>'
+  );
   box.style.display = '';
-  box.innerHTML = '<h3>Apply preview</h3><p class="ui-hint">' + totalP + ' pair(s) · <b>' + dec(totalH) + 'h</b> total to add to the open period.</p>' + lines.join('');
-  return { totalH, totalP };
+  box.innerHTML = '<h3>Apply preview</h3><p class="ui-hint">' + summary.totalP + ' pair(s) · <b>' + dec(summary.totalH) + 'h</b> to add to the open period' + scope + '.</p>' + lines.join('');
+  return { totalH: summary.totalH, totalP: summary.totalP, marks: summary.marks, scope, summary };
 }
 
-function applyClockHoursToPeriod() {
+function applyClockHoursToPeriod(opts) {
+  opts = opts || {};
   ensureMeta();
   if (!canEditHours()) return toast('Leads and management only');
   const p = workingPeriod();
   if (!p || p.status !== 'open') return toast('No open period');
-  const preview = previewClockPairs(false);
-  if (!preview || !preview.totalP) return toast('No unapplied 10-1/10-2 pairs');
-  if (!confirm('Apply ' + preview.totalP + ' clock pair(s) (' + dec(preview.totalH) + 'h) to ' + shortLabel(p) + '?')) return;
-  const byEmp = {};
-  (s.clockLog || []).filter(c => !c.applied).forEach(c => {
-    if (!byEmp[c.empId]) byEmp[c.empId] = [];
-    byEmp[c.empId].push(c);
-  });
+  const win = opts.sincePayday ? openPeriodClockWindow(p) : (opts.window || {});
+  const preview = previewClockPairs(false, win);
+  if (!preview || !preview.totalP) return toast('No unapplied 10-1/10-2 pairs' + (preview && preview.scope ? preview.scope : ''));
+  const label = opts.sincePayday ? ('since payday window for ' + shortLabel(p)) : shortLabel(p);
+  if (!opts.skipConfirm && !confirm('Apply ' + preview.totalP + ' clock pair(s) (' + dec(preview.totalH) + 'h) to ' + label + '?\n\nPaid stubs stay locked. Review Set hours after if someone needs a fix.')) return false;
+  const summary = summarizeUnappliedClock(win);
   let n = 0;
   let totalH = 0;
-  Object.keys(byEmp).forEach(id => {
-    const result = pairClockHours(byEmp[id]);
+  let skippedPaid = 0;
+  summary.lines.forEach(row => {
+    const result = row.result;
     if (result.hours <= 0) return;
-    const e = empById(id);
-    if (!p.entries[id]) p.entries[id] = emptyEntry(e);
-    if (p.entries[id].paidOut) return;
-    p.entries[id].hours = Number(p.entries[id].hours || 0) + result.hours;
+    const e = empById(row.id);
+    if (!p.entries[row.id]) p.entries[row.id] = emptyEntry(e);
+    if (p.entries[row.id].paidOut) { skippedPaid++; return; }
+    p.entries[row.id].hours = Number(p.entries[row.id].hours || 0) + result.hours;
     (s.clockLog || []).forEach(c => {
       if (result.used.indexOf(c.id) >= 0) c.applied = true;
     });
@@ -16226,9 +16486,17 @@ function applyClockHoursToPeriod() {
   if (n) distributeTips(p);
   save();
   renderClockList();
-  previewClockPairs(true);
+  previewClockPairs(true, openPeriodClockWindow(p));
   render();
-  toast(n ? ('Applied ' + dec(totalH) + 'h across ' + n + ' staff') : 'Nothing applied (paid stubs skipped)');
+  const msg = n
+    ? ('Applied ' + dec(totalH) + 'h across ' + n + ' staff' + (skippedPaid ? ' · ' + skippedPaid + ' paid stub(s) skipped' : ''))
+    : (skippedPaid ? 'Nothing applied — paid stubs skipped' : 'Nothing applied');
+  toast(msg);
+  return n > 0;
+}
+
+function applyClockHoursSincePayday() {
+  return applyClockHoursToPeriod({ sincePayday: true });
 }
 
 function openPromoteModal(empId) {
@@ -16631,16 +16899,128 @@ function redactPasswordsInState(raw) {
   return clone;
 }
 
-function publishSharedPack() {
+function buildSharedPackText() {
+  ensureMeta();
+  const pack = redactPasswordsInState(s);
+  pack.meta = Object.assign({}, pack.meta || {}, {
+    sharedAt: new Date().toISOString(),
+    build: DESK_BUILD,
+    passwordsRedacted: true
+  });
+  return JSON.stringify(pack, null, 2);
+}
+
+function setSharedDeskLiveStatus(msg) {
+  if ($('sharedDeskLiveStatus')) $('sharedDeskLiveStatus').textContent = msg || '';
+}
+
+function downloadSharedPackOnly() {
+  if (!requireMgmt('Download shared pack')) return;
+  ensureMeta();
+  pushSnapshot('pre-publish');
+  const text = buildSharedPackText();
+  const name = 'frenchies-shared-desk-r' + (s.meta.rev || 0) + '.json';
+  downloadFile(text, name, 'application/json');
+  copyText(text, 'Pack downloaded · JSON copied (passwords redacted)');
+  markExported();
+  setSharedDeskLiveStatus('Downloaded ' + name + ' · upload this file to your Tiiny Host raw URL, then Pull on other PCs.');
+  log('Shared pack downloaded (rev ' + (s.meta.rev || 0) + ')');
+}
+
+async function tryPublishSharedToUrl(text, url) {
+  const headersJson = { 'Content-Type': 'application/json', 'Cache-Control': 'no-cache' };
+  const attempts = [
+    { method: 'PUT', headers: headersJson },
+    { method: 'POST', headers: headersJson },
+    { method: 'PUT', headers: { 'Content-Type': 'text/plain;charset=utf-8' } }
+  ];
+  let lastErr = null;
+  for (let i = 0; i < attempts.length; i++) {
+    try {
+      const res = await fetch(url, {
+        method: attempts[i].method,
+        headers: attempts[i].headers,
+        body: text,
+        mode: 'cors',
+        cache: 'no-store'
+      });
+      if (res.ok || res.status === 201 || res.status === 204) {
+        return { ok: true, status: res.status, method: attempts[i].method };
+      }
+      lastErr = 'HTTP ' + res.status;
+    } catch (err) {
+      lastErr = (err && err.message) ? err.message : 'network/CORS blocked';
+    }
+  }
+  return { ok: false, error: lastErr || 'upload failed' };
+}
+
+async function publishSharedPack() {
   if (!requireMgmt('Publish shared desk')) return;
   ensureMeta();
   pushSnapshot('pre-publish');
-  const pack = redactPasswordsInState(s);
-  pack.meta = Object.assign({}, pack.meta || {}, { sharedAt: new Date().toISOString(), build: DESK_BUILD, passwordsRedacted: true });
-  const text = JSON.stringify(pack, null, 2);
-  downloadFile(text, 'frenchies-shared-desk-r' + (s.meta.rev || 0) + '.json', 'application/json');
-  copyText(text, 'Shared pack downloaded · JSON copied (passwords redacted)');
+  const text = buildSharedPackText();
+  const name = 'frenchies-shared-desk-r' + (s.meta.rev || 0) + '.json';
+  const url = ((s.settings && s.settings.sharedDeskUrl) || ($('sharedDeskUrlSetting') && $('sharedDeskUrlSetting').value) || '').trim();
+  if (url && $('sharedDeskUrlSetting')) {
+    s.settings.sharedDeskUrl = url;
+  }
   markExported();
+  if (url) {
+    setSharedDeskLiveStatus('Publishing to ' + url + '…');
+    const result = await tryPublishSharedToUrl(text, url);
+    if (result.ok) {
+      s.meta.lastSharedPublishAt = new Date().toISOString();
+      s.meta.lastSharedPublishUrl = url;
+      save({ quiet: true });
+      setSharedDeskLiveStatus('Published to domain via ' + result.method + ' · rev ' + (s.meta.rev || 0) + ' · ' + (s.meta.lastSharedPublishAt || ''));
+      log('Shared desk published to URL (rev ' + (s.meta.rev || 0) + ')');
+      toast('Published shared desk to your domain');
+      copyText(text, 'JSON also copied (passwords redacted)');
+      return;
+    }
+    setSharedDeskLiveStatus('Live PUT blocked (' + result.error + '). Downloaded ' + name + ' — upload it to Tiiny Host at your raw URL, then Pull on other PCs.');
+    downloadFile(text, name, 'application/json');
+    copyText(text, 'Host blocked live write · pack downloaded & copied — upload to Tiiny Host');
+    log('Shared publish fell back to download (' + result.error + ')');
+    return;
+  }
+  downloadFile(text, name, 'application/json');
+  copyText(text, 'No shared URL set · pack downloaded & copied. Set the raw URL, then Publish again.');
+  setSharedDeskLiveStatus('No shared raw URL in Settings/Backup. Pack downloaded — set the URL, upload to Tiiny Host, then Pull on other PCs.');
+  log('Shared pack downloaded without URL (rev ' + (s.meta.rev || 0) + ')');
+}
+
+function mergeLocalSecretsIntoShared(migrated, localState) {
+  if (!migrated || !localState) return migrated;
+  const redacted = !!(migrated.meta && migrated.meta.passwordsRedacted);
+  if (redacted) {
+    const localPw = {};
+    (localState.employees || []).forEach(e => {
+      if (e && e.loginPassword) localPw[String(e.id)] = e.loginPassword;
+    });
+    (migrated.employees || []).forEach(e => {
+      if (!e) return;
+      if (!e.loginPassword && localPw[String(e.id)]) e.loginPassword = localPw[String(e.id)];
+    });
+  }
+  if (!migrated.settings) migrated.settings = {};
+  const lw = (localState.settings && localState.settings.discordWebhooks) || {};
+  const mw = migrated.settings.discordWebhooks || {};
+  migrated.settings.discordWebhooks = {
+    payroll: mw.payroll || lw.payroll || '',
+    hiring: mw.hiring || lw.hiring || '',
+    coverage: mw.coverage || lw.coverage || '',
+    hrLog: mw.hrLog || lw.hrLog || '',
+    announcements: mw.announcements || lw.announcements || ''
+  };
+  if (!(migrated.settings.sharedDeskUrl || '').trim() && (localState.settings && localState.settings.sharedDeskUrl)) {
+    migrated.settings.sharedDeskUrl = localState.settings.sharedDeskUrl;
+  }
+  if (localState.settings && typeof localState.settings.sharedAutoPull === 'boolean' && migrated.settings.sharedAutoPull == null) {
+    migrated.settings.sharedAutoPull = localState.settings.sharedAutoPull;
+  }
+  return migrated;
 }
 
 let pendingSharedPull = null;
@@ -16659,10 +17039,10 @@ async function pullSharedDesk() {
 
 function applySharedDesk(migrated, labelText) {
   pushSnapshot('pre-pull');
+  const localBefore = s;
+  migrated = mergeLocalSecretsIntoShared(migrated, localBefore);
   s = migrated;
   ensureMeta();
-  /* After redacted pull, durable sessions still work if epoch matches and password empty —
-     users sign in with house password then re-set personal password if needed. */
   save({ quiet: false });
   $('sharedPullModal').classList.remove('open');
   if ($('sharedConflictModal')) $('sharedConflictModal').classList.remove('open');
@@ -16675,7 +17055,7 @@ function applySharedDesk(migrated, labelText) {
       logoutDesk();
       toast('Session ended — employee missing or closed after pull');
     } else if (!empHasOwnPassword(e)) {
-      /* password redacted — drop durable remember so they re-auth cleanly */
+      /* Still no password after merge — ask them to set one */
       clearDurableSession();
       persistSession(null);
       pendingPasswordEmpId = e.id;
@@ -16683,6 +17063,8 @@ function applySharedDesk(migrated, labelText) {
       applySessionChrome();
       setLoginGateMode('setup');
       toast('Re-set your personal password after shared pull');
+    } else {
+      setSharedDeskLiveStatus('Pulled rev ' + (s.meta.rev || 0) + ' · local passwords kept');
     }
   }
 }
