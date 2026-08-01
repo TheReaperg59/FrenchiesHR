@@ -346,20 +346,17 @@ Notes:
 
 1. In Discord (as a player/staff account), go to `#register-sales`.
 2. Click **Log house income** (or type `/register`).
-3. Fill the modal (dropdowns match the Income desk):
-   - **Income type:** `Register` (or try `Deposit / Treasury`)
-   - **Station:** `Bar` (or `None / House` for deposits)
-   - **Amount:** `1000`
-   - **Source / notes:** `Food & drinks till drop` or `House deposit`
-   - **Date:** leave today’s date or set `YYYY-MM-DD`
-4. Submit.
-5. You should get an ephemeral “…saved…” reply naming the type.
-6. `#register-sales` should show an embed titled **Register logged** or **Deposit / Treasury logged**.
-7. In Supabase **Table Editor → register_sales**, a new row should exist with `status = pending` and the matching `kind`.
-8. On the desk (mgmt), open **Income** (or wait for auto-pull).
-9. An income line with that **kind** should appear (notes mention Discord `/register`).
-10. In Supabase, that row’s `status` should become `booked`.
-11. Pull again — nothing new should duplicate.
+3. Fill the modal (same ideas as desk **Log income**):
+   - **Kind:** `Register` (or `Deposit / Treasury` / `Tip jar`)
+   - **Station:** `Bar` (or `—` for deposits)
+   - **Amount ($):** `1000`
+   - **Tips → pool ($):** `0` (or tip-pool amount if Tip jar)
+   - **Source:** `Food & drinks till drop` / `House deposit`
+4. Submit — reply includes amount + **your Discord nick** as Logged by. Date is today automatically.
+5. `#register-sales` embed shows Kind, Amount, Station, Date, Logged by, Source.
+6. Supabase `register_sales` row: `pending`, correct `kind`, `paid_by`, `tips_to_pool`.
+7. Desk Income pull → matching kind + Logged by name (+ tips→pool for tip jar).
+8. Row becomes `booked`. Pull again — no duplicate.
 
 Backup path (if Discord/Supabase is down): Income → **Import Discord lines** still accepts:
 
