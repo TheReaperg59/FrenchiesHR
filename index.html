@@ -7318,6 +7318,10 @@ function cmdCommands() {
   cmds.push({ label: 'Copy Sunday pay run', hint: 'Payroll', run: () => copySundayRun() });
   cmds.push({ label: 'Set hours', hint: 'Payroll', run: () => openBulkHours() });
   cmds.push({ label: 'Bulk hours', hint: 'Payroll', run: () => openBulkHours() });
+  cmds.push({ label: 'Apply clock since payday', hint: 'Payroll', run: () => applyClockHoursSincePayday() });
+  cmds.push({ label: 'Sunday checklist', hint: 'Payroll', run: () => openSundayRunPreview() });
+  cmds.push({ label: 'Publish shared desk', hint: 'Backup', run: () => publishSharedPack() });
+  cmds.push({ label: 'Announce payday', hint: 'Discord', run: () => postPaydayAnnouncement() });
   cmds.push({ label: 'Open settings', hint: 'Desk', run: () => openSettings() });
   cmds.push({ label: 'Export to-dos', hint: 'Todos', run: () => copyTextSafe(exportTodosText(), 'To-dos copied') });
   cmds.push({ label: 'New application', hint: 'Hiring', run: () => { goView('hiring'); setTimeout(() => $('addApp') && $('addApp').click(), 40); } });
