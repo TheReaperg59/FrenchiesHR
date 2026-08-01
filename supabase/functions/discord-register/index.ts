@@ -144,7 +144,7 @@ function labelText(label: string, description: string | undefined, component: Re
 
 /**
  * Desk "Log income" fields that fit Discord's 5-slot modal:
- * Kind, Station, Amount, Source, Date.
+ * Kind, Station, Amount, What was sold / notes, Date.
  * No tip jar — staff keep 100% of tips (not house income).
  * Auto: Logged by=Discord nick, Receipt=msg id, Discord ref on pull.
  */
@@ -188,13 +188,13 @@ function registerModal() {
           placeholder: '1000',
           required: true,
         }),
-        labelText('Source', 'e.g. Bar register, City rebate, House deposit', {
+        labelText('What was sold / notes', 'Food & drinks sold, or deposit/treasury notes', {
           type: ComponentType.TEXT_INPUT,
           custom_id: 'source',
           style: 2,
           min_length: 1,
           max_length: 200,
-          placeholder: 'e.g. Bar register, City rebate, House deposit',
+          placeholder: 'Food & drinks · Weekly house deposit · City rebate note',
           required: true,
         }),
         labelText('Date (YYYY-MM-DD)', 'Defaults to today', {
@@ -289,7 +289,7 @@ async function postChannelEmbed(opts: {
     { name: 'Station', value: opts.station || '—', inline: true },
     { name: 'Date', value: opts.saleDate, inline: true },
     { name: 'Logged by', value: opts.paidBy.slice(0, 256), inline: true },
-    { name: 'Source', value: opts.source.slice(0, 1024), inline: false },
+    { name: 'What was sold / notes', value: opts.source.slice(0, 1024), inline: false },
   ];
   const res = await fetch(`https://discord.com/api/v10/channels/${opts.channelId}/messages`, {
     method: 'POST',

@@ -3933,7 +3933,7 @@ body.session-staff #pullSharedBtn{display:none!important}
     <div class="field"><label>Amount ($)</label><input id="incAmount" type="number" min="0" step="1" placeholder="0"></div>
     <div class="field"><label>Tips → pool ($)</label><input id="incTipsToPool" type="number" min="0" step="1" placeholder="0" disabled title="Unused — staff keep 100% of tips; not house income"></div>
   </div>
-    <div class="field"><label>Source</label><input id="incSource" placeholder="e.g. Bar register, City rebate, House deposit"></div>
+    <div class="field"><label>What was sold / notes</label><input id="incSource" placeholder="Food & drinks sold, or notes for deposit / treasury"></div>
   <div class="field-row">
     <div class="field"><label>Station</label><select id="incStation"></select></div>
     <div class="field"><label>Logged by</label><input id="incPaidBy" placeholder="Who logged / player name"></div>
@@ -4322,7 +4322,7 @@ const LOG_TYPES = {
 };
 const TIP_ROLES_DEFAULT = ['Waiter', 'Hostess', 'Cook'];
 const TIP_ROLES = TIP_ROLES_DEFAULT; /* legacy alias — use tipRoles() */
-const DESK_BUILD = 'v43';
+const DESK_BUILD = 'v44';
 const HOUSE_LOGIN_PASSWORD = 'frenchies636'; /* fallback seed — prefer settings.housePassword */
 const SESSION_KEY = 'frenchies_desk_session';
 const SESSION_DURABLE_KEY = 'frenchies_desk_session_durable';
@@ -7756,6 +7756,7 @@ function openChangelog() {
   const grid = $('upgradeGrid');
   if (grid) {
     const recent = [
+      ['v44', 'Discord field: What was sold / notes (replaces Source label — Kind already covers type)'],
       ['v43', 'No tip jar on Discord/desk logs — staff keep 100% tips · Discord modal: Kind, Station, Amount, Source, Date'],
       ['v42', 'Discord Log income modal mirrors desk — Kind, Station, Amount, Source · Logged by = Discord nick · auto receipt/ref'],
       ['v41', 'Discord /register dropdowns — income type (register, tips, event, deposit/treasury, rebate) + station · pull books correct kind'],

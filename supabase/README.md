@@ -9,7 +9,7 @@ Discord only allows **5 fields** in a modal, so the form matches the desk like t
 | Kind | Dropdown (Register, Event, Deposit / Treasury, Rebate, Other) — **no Tip jar** (staff keep 100% of tips) |
 | Station | Dropdown (—, Bar, Floor, Door, Kitchen, Other) |
 | Amount ($) | Text |
-| Source | Text |
+| What was sold / notes | Text (sold items for register; notes for deposit / treasury) |
 | Date | Text (YYYY-MM-DD, defaults to today) |
 | Logged by | **Auto** = Discord **server nickname** (IC name), else display name |
 | Receipt / reference | **Auto** = Discord message id after channel post |
