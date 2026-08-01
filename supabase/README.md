@@ -6,25 +6,26 @@ Discord only allows **5 fields** in a modal, so the form matches the desk like t
 
 | Desk field | Discord `/register` |
 |------------|---------------------|
-| Kind | Dropdown (Register, Tip jar, Event, Deposit / Treasury, Rebate, Other) |
+| Kind | Dropdown (Register, Event, Deposit / Treasury, Rebate, Other) — **no Tip jar** (staff keep 100% of tips) |
 | Station | Dropdown (—, Bar, Floor, Door, Kitchen, Other) |
 | Amount ($) | Text |
-| Tips → pool ($) | Text (use `0` unless Tip jar) |
 | Source | Text |
-| Date | **Auto** = today |
+| Date | Text (YYYY-MM-DD, defaults to today) |
 | Logged by | **Auto** = Discord **server nickname** (IC name), else display name |
 | Receipt / reference | **Auto** = Discord message id after channel post |
 | Discord ref | **Auto** = `sb:<uuid>` when the desk pulls |
 
+Tip jar / Tips→pool are **not** collected — employees keep their tips; that is not house income.
+
 ```
 Player: /register or button
-        → Discord modal (Kind ▼, Station ▼, Amount, Tips→pool, Source)
+        → Discord modal (Kind ▼, Station ▼, Amount, Source, Date)
         → Supabase Edge Function (verifies Discord signature)
-        → row in register_sales (kind, tips_to_pool, paid_by, pending)
+        → row in register_sales (kind, paid_by, pending)
         → embed in #register-sales (includes Logged by)
 
 Manager: opens Income (or auto-pull)
-        → desk books matching Income line (name, tips pool, kind, …)
+        → desk books matching Income line (name, kind, station, …)
         → marks row booked
 ```
 

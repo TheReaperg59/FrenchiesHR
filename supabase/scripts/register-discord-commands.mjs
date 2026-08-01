@@ -24,7 +24,7 @@ if (!token || !appId || !guildId) {
 
 const command = {
   name: 'register',
-  description: "Log house income — register, tips, deposit/treasury, event, rebate",
+  description: "Log house income — register, deposit/treasury, event, rebate (tips stay with staff)",
   type: 1,
 };
 
