@@ -18886,6 +18886,15 @@ function mergeLocalSecretsIntoShared(migrated, localState) {
   if (localState.settings && typeof localState.settings.sharedAutoPull === 'boolean' && migrated.settings.sharedAutoPull == null) {
     migrated.settings.sharedAutoPull = localState.settings.sharedAutoPull;
   }
+  if (!(migrated.settings.supabaseUrl || '').trim() && localState.settings && localState.settings.supabaseUrl) {
+    migrated.settings.supabaseUrl = localState.settings.supabaseUrl;
+  }
+  if (!(migrated.settings.supabaseAnonKey || '').trim() && localState.settings && localState.settings.supabaseAnonKey) {
+    migrated.settings.supabaseAnonKey = localState.settings.supabaseAnonKey;
+  }
+  if (localState.settings && typeof localState.settings.sharedPreferSupabase === 'boolean' && migrated.settings.sharedPreferSupabase == null) {
+    migrated.settings.sharedPreferSupabase = localState.settings.sharedPreferSupabase;
+  }
   return migrated;
 }
 
