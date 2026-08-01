@@ -3067,7 +3067,7 @@ body.session-staff #pullSharedBtn{display:none!important}
 <!-- INCOME -->
 <section class="view" id="view-income" role="region" aria-labelledby="title-income" tabindex="-1">
   <div class="header">
-    <div><div class="eyebrow">Office</div><h1 class="title" id="title-income">Income</h1><div class="subtitle">House cash-in — register drops, tip jars, event proceeds, deposits, and rebate cash-in. Players use Discord <b>/register</b> (modal) or <b>Log register drop</b> in <b>#register-sales</b>; this desk auto-pulls from Supabase.</div></div>
+      <div><div class="eyebrow">Office</div><h1 class="title" id="title-income">Income</h1><div class="subtitle">House cash-in — register drops, tip jars, event proceeds, deposits / treasury, and rebate cash-in. Players use Discord <b>/register</b> (modal with income-type dropdown) or the channel button; this desk auto-pulls from Supabase.</div></div>
     <div class="actions">
       <button class="btn soft" id="pullSupabaseIncome" type="button">Pull from Supabase</button>
       <button class="btn" id="csvIncomes" type="button">Export CSV</button>
@@ -3078,7 +3078,7 @@ body.session-staff #pullSharedBtn{display:none!important}
       <button class="btn primary" id="addIncome" type="button">Log income</button>
     </div>
   </div>
-  <p class="ui-hint" id="incSupabaseHint" style="margin:0 0 10px">Supabase register feed — set URL + anon key in Settings. Players: Discord <code>/register</code>.</p>
+  <p class="ui-hint" id="incSupabaseHint" style="margin:0 0 10px">Supabase income feed — set URL + anon key in Settings. Players: Discord <code>/register</code> (Register, Tip jar, Deposit / Treasury, etc.).</p>
   <div class="toolbar" style="margin:0 0 10px;gap:8px;align-items:center;flex-wrap:wrap">
     <span class="pill gray" id="incSupabaseChip">Supabase · off</span>
     <span class="mini-note" id="incSupabaseStatus">Not configured</span>
@@ -4252,7 +4252,7 @@ body.session-staff #pullSharedBtn{display:none!important}
     <div class="field"><label>HR desk log webhook</label><input id="setWhHrLog" placeholder="https://discord.com/api/webhooks/…" autocomplete="off"></div>
     <div class="field"><label>Announcements webhook</label><input id="setWhAnnounce" placeholder="https://discord.com/api/webhooks/…" autocomplete="off"></div>
     <div class="field"><label>Income reports webhook (#hr-income-reports)</label><input id="setWhIncomeReports" placeholder="https://discord.com/api/webhooks/…" autocomplete="off"></div>
-    <h3 style="margin:16px 0 8px;font:700 .72rem 'DM Sans',sans-serif;letter-spacing:.08em;text-transform:uppercase;color:var(--muted)">Supabase register feed</h3>
+    <h3 style="margin:16px 0 8px;font:700 .72rem 'DM Sans',sans-serif;letter-spacing:.08em;text-transform:uppercase;color:var(--muted)">Supabase Discord income feed</h3>
     <p class="ui-hint" style="margin:0 0 10px">Discord <code>/register</code> modal writes here; Income tab pulls pending rows. See <code>supabase/README.md</code>. Anon key is redacted from shared packs.</p>
     <div class="field"><label>Supabase URL</label><input id="setSupabaseUrl" placeholder="https://xxxx.supabase.co" autocomplete="off"></div>
     <div class="field"><label>Supabase anon key</label><input id="setSupabaseAnon" placeholder="eyJ…" autocomplete="off"></div>
@@ -4322,7 +4322,7 @@ const LOG_TYPES = {
 };
 const TIP_ROLES_DEFAULT = ['Waiter', 'Hostess', 'Cook'];
 const TIP_ROLES = TIP_ROLES_DEFAULT; /* legacy alias — use tipRoles() */
-const DESK_BUILD = 'v40';
+const DESK_BUILD = 'v41';
 const HOUSE_LOGIN_PASSWORD = 'frenchies636'; /* fallback seed — prefer settings.housePassword */
 const SESSION_KEY = 'frenchies_desk_session';
 const SESSION_DURABLE_KEY = 'frenchies_desk_session_durable';
@@ -4403,7 +4403,7 @@ const INCOME_KINDS = {
   register: 'Register',
   tips: 'Tip jar',
   event: 'Event proceeds',
-  deposit: 'Deposit',
+  deposit: 'Deposit / Treasury',
   rebate: 'Rebate cash-in',
   other: 'Other'
 };
@@ -7638,7 +7638,7 @@ function cmdCommands() {
   cmds.push({ label: 'Log tip jar', hint: 'Income', run: () => { goView('income'); setTimeout(() => openIncomeForm(null, { kind: 'tips', source: 'Tip jar' }), 40); } });
   cmds.push({ label: 'Log deposit', hint: 'Income', run: () => { goView('income'); setTimeout(() => openIncomeForm(null, { kind: 'deposit', source: 'House deposit' }), 40); } });
   cmds.push({ label: 'Import Discord register lines', hint: 'Income', run: () => { goView('income'); setTimeout(() => openImportIncomeModal(), 40); } });
-  cmds.push({ label: 'Pull register sales from Supabase', hint: 'Income', run: () => { goView('income'); setTimeout(() => pullRegisterSalesFromSupabase({ quiet: false }), 40); } });
+  cmds.push({ label: 'Pull Discord income from Supabase', hint: 'Income', run: () => { goView('income'); setTimeout(() => pullRegisterSalesFromSupabase({ quiet: false }), 40); } });
   cmds.push({ label: 'Post income week report', hint: 'Discord', run: () => { goView('income'); setTimeout(() => postDiscord('incomeReports', incomeWeekDiscordCard(), { label: 'Income week' }), 40); } });
   cmds.push({ label: 'Open settings', hint: 'Desk', run: () => openSettings() });
   cmds.push({ label: 'Export to-dos', hint: 'Todos', run: () => copyTextSafe(exportTodosText(), 'To-dos copied') });
@@ -7755,6 +7755,7 @@ function openChangelog() {
   const grid = $('upgradeGrid');
   if (grid) {
     const recent = [
+      ['v41', 'Discord /register dropdowns — income type (register, tips, event, deposit/treasury, rebate) + station · pull books correct kind'],
       ['v40', 'Discord /register modal → Supabase → Income auto-pull · Log register drop button · pending feed chip'],
       ['v39', 'House Income desk — register/tip jar/event/deposit/rebate · #hr-income-reports · #register-sales import · net house P&L'],
       ['v38', 'Tiiny publish checklist · shared-ahead probe · house password off login · handbook URL + assets modal'],
@@ -9984,7 +9985,7 @@ async function pullRegisterSalesFromSupabase(opts) {
     if (!rows.length) {
       __registerPullLastMsg = 'Synced — nothing pending';
       updateIncomeSupabaseChip({ pending: 0 });
-      if (!opts.quiet) toast('No pending register sales');
+      if (!opts.quiet) toast('No pending Discord income rows');
       return { ok: true, added: 0 };
     }
     ensureMeta();
@@ -10003,19 +10004,22 @@ async function pullRegisterSalesFromSupabase(opts) {
         continue;
       }
       let station = String(row.station || '').trim();
+      if (/^(none|house)$/i.test(station)) station = '';
       const hit = INCOME_STATIONS.find(st => st && st.toLowerCase() === station.toLowerCase());
       station = hit || (station ? 'Other' : '');
+      let kind = String(row.kind || 'register').trim().toLowerCase();
+      if (!INCOME_KINDS[kind]) kind = 'register';
       const data = normalizeIncome({
         id: s.nextIncomeId++,
         date: row.sale_date || today(),
         periodIndex: win.index,
-        kind: 'register',
-        source: row.source || 'Register',
+        kind: kind,
+        source: row.source || (kind === 'deposit' ? 'House deposit' : incomeKindLabel(kind)),
         amount: Math.round(Number(row.amount || 0)),
         station: station,
         paidBy: row.paid_by || '',
         discordRef: ref,
-        notes: 'Discord /register · ' + (row.discord_user_id ? 'uid ' + row.discord_user_id : 'modal'),
+        notes: 'Discord /register · ' + incomeKindLabel(kind) + (row.discord_user_id ? ' · uid ' + row.discord_user_id : ''),
         receipt: row.discord_msg_id ? ('msg:' + row.discord_msg_id) : ''
       });
       if (!data.amount) continue;
@@ -10032,15 +10036,15 @@ async function pullRegisterSalesFromSupabase(opts) {
     }
     if (added) {
       pushUndo({
-        label: 'pull register sales',
+        label: 'pull Discord income',
         restore: () => { s.incomes = before; }
       });
-      log('Pulled ' + added + ' register sale' + (added === 1 ? '' : 's') + ' from Supabase');
+      log('Pulled ' + added + ' Discord income row' + (added === 1 ? '' : 's') + ' from Supabase');
       save();
       render();
     }
     __registerPendingCount = 0;
-    __registerPullLastMsg = added ? ('Pulled ' + added + ' register drop' + (added === 1 ? '' : 's')) : 'Already booked locally';
+    __registerPullLastMsg = added ? ('Pulled ' + added + ' income row' + (added === 1 ? '' : 's')) : 'Already booked locally';
     updateIncomeSupabaseChip({ pending: 0 });
     if (!opts.quiet || added) toast(__registerPullLastMsg);
     return { ok: true, added: added, rows: booked };
