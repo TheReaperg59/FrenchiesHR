@@ -2682,7 +2682,7 @@ body.session-staff #pullSharedBtn{display:none!important}
     <div class="ov-rail-card ov-rail-pay ov-tool-actions">
       <span class="ov-tool-label">Payroll actions</span>
       <div class="ov-rail-row">
-        <button class="btn tiny soft" id="bulkHoursBtn" type="button">Bulk hours</button>
+        <button class="btn tiny soft" id="bulkHoursBtn" type="button">Set hours</button>
         <button class="btn tiny primary" id="markAllPaid" type="button">Mark all paid</button>
         <button type="button" class="btn tiny soft" id="undoBtn" title="Undo last desk action">Undo</button>
       </div>
@@ -3533,6 +3533,7 @@ body.session-staff #pullSharedBtn{display:none!important}
 <div class="modal" id="hoursModal" role="dialog" aria-modal="true" aria-labelledby="hoursModalTitle" hidden><div class="dialog" role="document" tabindex="-1">
   <h2 id="hoursModalTitle">Record hours &amp; bonus</h2>
   <div class="field"><label>Employee</label><input id="hoursName" disabled></div>
+  <div class="mini-note" id="hoursNavHint" style="margin:-4px 0 10px">Use Prev / Next to walk the roster without leaving this desk.</div>
   <div class="mini-note" id="hoursPaidLock" style="display:none;margin-bottom:10px"></div>
   <div class="field-row">
     <div class="field"><label>Hours</label><input id="hoursValue" type="number" step=".01" min="0"></div>
@@ -3542,7 +3543,13 @@ body.session-staff #pullSharedBtn{display:none!important}
   <div class="mini-note">The rate is stamped onto this entry when saved, so later ladder changes do not rewrite old pay.</div>
   <div class="mini-note" id="hoursTipsRead" style="display:none"></div>
   <label class="checkline"><input type="checkbox" id="paidOut"><span>Paid out (Sunday run complete)</span></label>
-  <div class="dialog-foot"><button class="btn" id="cancelHours">Cancel</button><button class="btn primary" id="saveHours">Save</button></div>
+  <div class="dialog-foot">
+    <button type="button" class="btn" id="hoursPrev" style="margin-right:0">Prev</button>
+    <button type="button" class="btn" id="hoursNext" style="margin-right:auto">Next</button>
+    <button type="button" class="btn" id="cancelHours">Close</button>
+    <button type="button" class="btn soft" id="saveHoursNext">Save &amp; next</button>
+    <button type="button" class="btn primary" id="saveHours">Save</button>
+  </div>
 </div></div>
 
 <!-- Application modal -->
@@ -4036,11 +4043,12 @@ body.session-staff #pullSharedBtn{display:none!important}
 <!-- Bulk hours -->
 <div class="modal" id="bulkHoursModal" role="dialog" aria-modal="true" aria-labelledby="bulkHoursTitle" hidden>
   <div class="dialog xl" role="document" tabindex="-1">
-    <h2 id="bulkHoursTitle">Bulk hours</h2>
-    <div class="mini-note">Set hours for the current open period. Paid stubs are locked.</div>
+    <h2 id="bulkHoursTitle">Set hours</h2>
+    <div class="mini-note">Set hours for the current open period. Paid stubs are locked. Save keeps this sheet open so you can keep editing.</div>
     <div class="table-scroll" style="max-height:55vh"><table><thead><tr><th>Employee</th><th>Role</th><th class="r">Hours</th><th class="r">Bonus</th><th>Paid</th></tr></thead><tbody id="bulkHoursBody"></tbody></table></div>
     <div class="dialog-foot">
-      <button type="button" class="btn" id="cancelBulkHours">Cancel</button>
+      <button type="button" class="btn" id="cancelBulkHours">Done</button>
+      <button type="button" class="btn soft" id="saveCloseBulkHours">Save &amp; close</button>
       <button type="button" class="btn primary" id="saveBulkHours">Save hours</button>
     </div>
   </div>
@@ -4768,7 +4776,7 @@ function loadState() {
 }
 
 let s = loadState();
-let editId = null, hourId = null, appId = null, eventId = null, licId = null, relId = null;
+let editId = null, hourId = null, hoursReturnView = null, appId = null, eventId = null, licId = null, relId = null;
 let shiftWeek = mondayOf(today());
 let docCtx = { appId: null, empId: null, kind: null, packetId: null, docId: null, title: '' };
 let paperAppId = null;
@@ -7159,12 +7167,10 @@ function copyTextSafe(text, okMsg) {
   } else { window.prompt('Copy:', text); toast(okMsg || 'Copied'); }
 }
 
-function openBulkHours() {
-  if (!requireHoursEdit('Bulk hours')) return;
+function fillBulkHoursBody() {
   const p = current();
-  if (!p || p.status === 'closed') return toast('Open period only');
   const body = $('bulkHoursBody');
-  if (!body) return;
+  if (!p || !body) return;
   body.innerHTML = payableEmployees().map(e => {
     const x = entry(p, e.id);
     return '<tr><td class="name">' + esc(e.name) + '</td><td>' + esc(e.role) + '</td>' +
@@ -7172,14 +7178,22 @@ function openBulkHours() {
       '<td class="r"><input data-bh-bonus="' + e.id + '" type="number" min="0" step="1" value="' + Number(x.bonus || 0) + '" ' + (x.paidOut ? 'disabled' : '') + ' style="width:90px;text-align:right"></td>' +
       '<td>' + (x.paidOut ? '<span class="pill green">Paid</span>' : '—') + '</td></tr>';
   }).join('') || emptyState('No payable staff');
+}
+
+function openBulkHours() {
+  if (!requireHoursEdit('Set hours')) return;
+  const p = current();
+  if (!p || p.status === 'closed') return toast('Open period only');
+  fillBulkHoursBody();
   $('bulkHoursModal').classList.add('open');
   $('bulkHoursModal').removeAttribute('hidden');
 }
 
-function saveBulkHours() {
-  if (!requireHoursEdit('Bulk hours')) return;
+function saveBulkHours(opts) {
+  opts = opts || {};
+  if (!requireHoursEdit('Set hours')) return false;
   const p = current();
-  if (!p || p.status === 'closed') return;
+  if (!p || p.status === 'closed') return false;
   const before = JSON.parse(JSON.stringify(p.entries));
   document.querySelectorAll('[data-bh-hours]').forEach(inp => {
     const id = inp.getAttribute('data-bh-hours');
@@ -7193,14 +7207,23 @@ function saveBulkHours() {
     p.entries[id].bonus = Math.max(0, Number(inp.value) || 0);
   });
   pushUndo({
-    label: 'bulk hours',
+    label: 'set hours',
     restore: () => { p.entries = before; }
   });
   distributeTips(p);
-  log('Bulk hours saved for ' + shortLabel(p));
-  save(); render();
-  $('bulkHoursModal').classList.remove('open');
-  toast('Bulk hours saved');
+  log('Set hours saved for ' + shortLabel(p));
+  save();
+  render();
+  if (opts.close) {
+    $('bulkHoursModal').classList.remove('open');
+    toast('Hours saved');
+  } else {
+    fillBulkHoursBody();
+    $('bulkHoursModal').classList.add('open');
+    $('bulkHoursModal').removeAttribute('hidden');
+    toast('Hours saved — keep editing or press Done');
+  }
+  return true;
 }
 
 function copyLastWeekShifts() {
@@ -7254,6 +7277,7 @@ function cmdCommands() {
     cmds.push({ label: 'Open ' + (b.dataset.label || b.textContent), hint: 'Tab', run: () => activateView(b.dataset.view, { focusView: true }) });
   });
   cmds.push({ label: 'Copy Sunday pay run', hint: 'Payroll', run: () => copySundayRun() });
+  cmds.push({ label: 'Set hours', hint: 'Payroll', run: () => openBulkHours() });
   cmds.push({ label: 'Bulk hours', hint: 'Payroll', run: () => openBulkHours() });
   cmds.push({ label: 'Open settings', hint: 'Desk', run: () => openSettings() });
   cmds.push({ label: 'Export to-dos', hint: 'Todos', run: () => copyTextSafe(exportTodosText(), 'To-dos copied') });
@@ -12149,15 +12173,53 @@ window.togglePaid = function (id) {
   }
 };
 
-window.openHours = function (id) {
+function activeDeskView() {
+  const btn = document.querySelector('.nav button[data-view].active');
+  return (btn && btn.getAttribute('data-view')) || 'overview';
+}
+
+function hoursRosterList() {
+  return payableEmployees();
+}
+
+function hoursRosterIndex(id) {
+  return hoursRosterList().findIndex(e => String(e.id) === String(id));
+}
+
+function closeHoursModal() {
+  if ($('hoursModal')) $('hoursModal').classList.remove('open');
+  const back = hoursReturnView;
+  hoursReturnView = null;
+  if (back && back !== activeDeskView()) goView(back);
+}
+
+function stepHoursEmployee(delta) {
+  const list = hoursRosterList();
+  if (!list.length) return;
+  let idx = hoursRosterIndex(hourId);
+  if (idx < 0) idx = 0;
+  const next = list[(idx + delta + list.length) % list.length];
+  if (next) openHours(next.id, { keepReturn: true });
+}
+
+window.openHours = function (id, opts) {
+  opts = opts || {};
   if (!requireHoursEdit('Edit hours')) return;
   const p = current();
   if (p.status === 'closed') return toast('This period is closed');
+  if (!opts.keepReturn) hoursReturnView = activeDeskView();
   hourId = id;
   const e = empById(id);
   const x = entry(p, id);
   const locked = !!x.paidOut;
+  const list = hoursRosterList();
+  const idx = hoursRosterIndex(id);
   $('hoursName').value = e ? e.name : '';
+  if ($('hoursNavHint')) {
+    $('hoursNavHint').textContent = list.length
+      ? ('Employee ' + (idx >= 0 ? idx + 1 : '?') + ' of ' + list.length + ' — Prev / Next stays on this sheet.')
+      : 'No payable staff in this period.';
+  }
   $('hoursValue').value = x.hours;
   $('bonusValue').value = x.bonus || 0;
   $('rateSnapshot').value = entryRate(e, x) || (e ? e.rate : 0);
@@ -12175,7 +12237,12 @@ window.openHours = function (id) {
     $('hoursTipsRead').style.display = 'block';
     $('hoursTipsRead').textContent = 'Tips this period: ' + money(x.tips || 0) + ' (from tip pool — edit pool on Overview).';
   }
+  if ($('hoursPrev')) $('hoursPrev').disabled = list.length < 2;
+  if ($('hoursNext')) $('hoursNext').disabled = list.length < 2;
+  if ($('saveHoursNext')) $('saveHoursNext').disabled = list.length < 2;
   $('hoursModal').classList.add('open');
+  $('hoursModal').removeAttribute('hidden');
+  setTimeout(() => { try { if ($('hoursValue') && !$('hoursValue').disabled) $('hoursValue').focus(); } catch (err) {} }, 40);
 };
 
 window.openPayStubs = openPayStubs;
@@ -13591,7 +13658,11 @@ if ($('shortcutSheet')) {
 }
 
 document.querySelectorAll('.modal').forEach(m => {
-  m.addEventListener('mousedown', ev => { if (ev.target === m) setOverlayOpen(m, false); });
+  m.addEventListener('mousedown', ev => {
+    if (ev.target !== m) return;
+    if (m.id === 'hoursModal') closeHoursModal();
+    else setOverlayOpen(m, false);
+  });
 });
 const _modalObserver = new MutationObserver(muts => {
   muts.forEach(mu => {
@@ -13649,7 +13720,11 @@ document.addEventListener('keydown', ev => {
     if (cmdOpen) { closeCmdPalette(); return; }
     if (settingsOpen) { closeSettings(); return; }
     if (sheetOpen) { closeShortcutSheet(); return; }
-    if (modalOpen) { setOverlayOpen(modalOpen, false); return; }
+    if (modalOpen) {
+      if (modalOpen.id === 'hoursModal') closeHoursModal();
+      else setOverlayOpen(modalOpen, false);
+      return;
+    }
     if ($('side').classList.contains('open')) { closeSidebar(); return; }
     return;
   }
@@ -13942,7 +14017,8 @@ bindClick('probFailBtn', () => completeProbation(false));
 
 /* ---------- v9 wiring ---------- */
 bindClick('bulkHoursBtn', openBulkHours);
-bindClick('saveBulkHours', saveBulkHours);
+bindClick('saveBulkHours', () => saveBulkHours({ close: false }));
+bindClick('saveCloseBulkHours', () => saveBulkHours({ close: true }));
 bindClick('cancelBulkHours', () => { if ($('bulkHoursModal')) $('bulkHoursModal').classList.remove('open'); });
 bindClick('copyLastWeekShifts', copyLastWeekShifts);
 bindClick('openSettingsBtn', openSettings);
@@ -14394,28 +14470,28 @@ $('confirmHrSign').onclick = () => {
 };
 
 /* ---------- hours ---------- */
-$('cancelHours').onclick = () => $('hoursModal').classList.remove('open');
-$('saveHours').onclick = () => {
-  if (!requireHoursEdit('Save hours')) return;
+function commitHoursEntry(opts) {
+  opts = opts || {};
+  if (!requireHoursEdit('Save hours')) return false;
   const p = current();
-  if (p.status === 'closed') return toast('Closed period is locked');
+  if (p.status === 'closed') { toast('Closed period is locked'); return false; }
   const e = empById(hourId);
-  if (!e) return;
+  if (!e) return false;
   const prev = entry(p, hourId);
   const wasPaid = !!prev.paidOut;
   const nowPaid = $('paidOut').checked;
   if (wasPaid) {
     if (wasPaid !== nowPaid) {
       setPaidStatus(p, hourId, nowPaid);
-      log('Marked unpaid so the stub can be edited: ' + e.name);
+      log((nowPaid ? 'Marked paid: ' : 'Marked unpaid so the stub can be edited: ') + e.name);
       save();
-      $('hoursModal').classList.remove('open');
       render();
-      toast(nowPaid ? 'Marked paid' : 'Marked unpaid — edit hours and save again');
-      return;
+      openHours(hourId, { keepReturn: true });
+      toast(nowPaid ? 'Marked paid' : 'Unlocked — edit hours and save');
+      return true;
     }
     toast('Paid stub is locked — mark unpaid first to change hours, rate, or bonus');
-    return;
+    return false;
   }
   const newBonus = Number($('bonusValue').value) || 0;
   const newHours = Number($('hoursValue').value) || 0;
@@ -14442,10 +14518,32 @@ $('saveHours').onclick = () => {
   if (nowPaid) setPaidStatus(p, hourId, true);
   log('Hours logged for ' + e.name + ' — ' + dec(p.entries[hourId].hours) + ' hrs at ' + money(p.entries[hourId].rate) + '/hr');
   save();
-  $('hoursModal').classList.remove('open');
   render();
+  if (opts.advance) {
+    const list = hoursRosterList();
+    const idx = hoursRosterIndex(hourId);
+    if (list.length && idx >= 0) {
+      const next = list[(idx + 1) % list.length];
+      openHours(next.id, { keepReturn: true });
+      toast('Saved ' + e.name + ' — next: ' + (next.name || 'employee'));
+      return true;
+    }
+  }
+  if (opts.keepOpen) {
+    openHours(hourId, { keepReturn: true });
+    toast('Saved');
+    return true;
+  }
+  closeHoursModal();
   toast('Saved');
-};
+  return true;
+}
+
+$('cancelHours').onclick = () => closeHoursModal();
+$('saveHours').onclick = () => commitHoursEntry({ keepOpen: false });
+if ($('saveHoursNext')) $('saveHoursNext').onclick = () => commitHoursEntry({ advance: true });
+if ($('hoursPrev')) $('hoursPrev').onclick = () => stepHoursEmployee(-1);
+if ($('hoursNext')) $('hoursNext').onclick = () => stepHoursEmployee(1);
 
 if ($('markStubPaid')) $('markStubPaid').onclick = () => {
   if (!requireHoursEdit('Mark paid')) return;
@@ -14494,9 +14592,7 @@ if ($('stubEditHours')) $('stubEditHours').onclick = () => {
   syncOverviewToStub();
   const e = empById($('stubEmployee').value);
   if (!e) return;
-  const btn = document.querySelector('[data-view="overview"]');
-  if (btn) btn.click();
-  setTimeout(() => openHours(e.id), 40);
+  openHours(e.id);
 };
 if ($('copyStubBtn')) $('copyStubBtn').onclick = () => {
   const p = s.periods[Number($('stubPeriod').value) || 0];
