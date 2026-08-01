@@ -486,7 +486,7 @@ Deno.serve(async (req) => {
           (station ? ` · **${station}**` : '') +
           ` · **${who.name}** · ${saleDate}` +
           (msgId
-            ? '\nPosted in #register-sales. Income desk pulls Kind, Amount, Station, Source, Date, and Logged by.'
+            ? '\nPosted in #register-sales. Income desk pulls Kind, Amount, Station, notes, Date, and Logged by.'
             : '\nSaved to Supabase for the Income desk.'),
         flags: 64,
       },
