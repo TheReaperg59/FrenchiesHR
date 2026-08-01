@@ -485,13 +485,14 @@ You want: `{"ok":true,"service":"frenchies-discord-register"}`.
 
 This updates the slash-command description. Optional: post a new **Log house income** button.
 
-1. Set your Discord values (use your real token / IDs — same as v40):
+1. Set your Discord values. App / guild / channel IDs below are already filled from your v40 setup.  
+   **Only replace the bot token** — Discord Developer Portal → your app → **Bot** → **Reset Token** / **Copy**.
 
 ```powershell
-$env:DISCORD_BOT_TOKEN="YOUR_BOT_TOKEN"
-$env:DISCORD_APP_ID="YOUR_APP_ID"
-$env:DISCORD_GUILD_ID="YOUR_GUILD_ID"
-$env:DISCORD_REGISTER_CHANNEL_ID="YOUR_CHANNEL_ID"
+$env:DISCORD_BOT_TOKEN="PASTE_BOT_TOKEN_HERE"
+$env:DISCORD_APP_ID="1532992006962282556"
+$env:DISCORD_GUILD_ID="1515796104955035668"
+$env:DISCORD_REGISTER_CHANNEL_ID="1532982839690268772"
 ```
 
 2. Update the slash command only (safest if channel perms are still messy):
