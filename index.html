@@ -4403,7 +4403,7 @@ const INCOME_KINDS = {
   register: 'Register',
   tips: 'Tip jar',
   event: 'Event proceeds',
-  deposit: 'Deposit',
+  deposit: 'Deposit / Treasury',
   rebate: 'Rebate cash-in',
   other: 'Other'
 };
@@ -7638,7 +7638,7 @@ function cmdCommands() {
   cmds.push({ label: 'Log tip jar', hint: 'Income', run: () => { goView('income'); setTimeout(() => openIncomeForm(null, { kind: 'tips', source: 'Tip jar' }), 40); } });
   cmds.push({ label: 'Log deposit', hint: 'Income', run: () => { goView('income'); setTimeout(() => openIncomeForm(null, { kind: 'deposit', source: 'House deposit' }), 40); } });
   cmds.push({ label: 'Import Discord register lines', hint: 'Income', run: () => { goView('income'); setTimeout(() => openImportIncomeModal(), 40); } });
-  cmds.push({ label: 'Pull register sales from Supabase', hint: 'Income', run: () => { goView('income'); setTimeout(() => pullRegisterSalesFromSupabase({ quiet: false }), 40); } });
+  cmds.push({ label: 'Pull Discord income from Supabase', hint: 'Income', run: () => { goView('income'); setTimeout(() => pullRegisterSalesFromSupabase({ quiet: false }), 40); } });
   cmds.push({ label: 'Post income week report', hint: 'Discord', run: () => { goView('income'); setTimeout(() => postDiscord('incomeReports', incomeWeekDiscordCard(), { label: 'Income week' }), 40); } });
   cmds.push({ label: 'Open settings', hint: 'Desk', run: () => openSettings() });
   cmds.push({ label: 'Export to-dos', hint: 'Todos', run: () => copyTextSafe(exportTodosText(), 'To-dos copied') });
