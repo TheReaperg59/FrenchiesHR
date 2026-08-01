@@ -4322,7 +4322,7 @@ const LOG_TYPES = {
 };
 const TIP_ROLES_DEFAULT = ['Waiter', 'Hostess', 'Cook'];
 const TIP_ROLES = TIP_ROLES_DEFAULT; /* legacy alias — use tipRoles() */
-const DESK_BUILD = 'v41';
+const DESK_BUILD = 'v42';
 const HOUSE_LOGIN_PASSWORD = 'frenchies636'; /* fallback seed — prefer settings.housePassword */
 const SESSION_KEY = 'frenchies_desk_session';
 const SESSION_DURABLE_KEY = 'frenchies_desk_session_durable';
@@ -7755,6 +7755,7 @@ function openChangelog() {
   const grid = $('upgradeGrid');
   if (grid) {
     const recent = [
+      ['v42', 'Discord Log income modal mirrors desk — Kind, Station, Amount, Tips→pool, Source · Logged by = Discord nick · auto date/receipt/ref'],
       ['v41', 'Discord /register dropdowns — income type (register, tips, event, deposit/treasury, rebate) + station · pull books correct kind'],
       ['v40', 'Discord /register modal → Supabase → Income auto-pull · Log register drop button · pending feed chip'],
       ['v39', 'House Income desk — register/tip jar/event/deposit/rebate · #hr-income-reports · #register-sales import · net house P&L'],
@@ -10009,6 +10010,8 @@ async function pullRegisterSalesFromSupabase(opts) {
       station = hit || (station ? 'Other' : '');
       let kind = String(row.kind || 'register').trim().toLowerCase();
       if (!INCOME_KINDS[kind]) kind = 'register';
+      const tipPool = Math.max(0, Math.round(Number(row.tips_to_pool || 0)));
+      const extraNotes = String(row.notes || '').trim();
       const data = normalizeIncome({
         id: s.nextIncomeId++,
         date: row.sale_date || today(),
@@ -10016,10 +10019,13 @@ async function pullRegisterSalesFromSupabase(opts) {
         kind: kind,
         source: row.source || (kind === 'deposit' ? 'House deposit' : incomeKindLabel(kind)),
         amount: Math.round(Number(row.amount || 0)),
+        tipsToPool: tipPool,
         station: station,
         paidBy: row.paid_by || '',
         discordRef: ref,
-        notes: 'Discord /register · ' + incomeKindLabel(kind) + (row.discord_user_id ? ' · uid ' + row.discord_user_id : ''),
+        notes: (extraNotes ? extraNotes + ' · ' : '') +
+          'Discord /register · ' + incomeKindLabel(kind) +
+          (row.discord_user_id ? ' · uid ' + row.discord_user_id : ''),
         receipt: row.discord_msg_id ? ('msg:' + row.discord_msg_id) : ''
       });
       if (!data.amount) continue;
