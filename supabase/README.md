@@ -97,31 +97,108 @@ supabase db push          # applies migrations under supabase/migrations/
 
 ## Step 3 — Create the Discord application + bot
 
-Do this **before** you set the Interactions Endpoint URL (that URL needs the Edge Function from Step 5).
+Do this **before** you set the Interactions Endpoint URL (that URL needs the Edge Function from Step 5 — skip Interactions URL for now).
 
-1. Open [Discord Developer Portal](https://discord.com/developers/applications) → **New Application**.
-2. Name it something like `Frenchies Register` → **Create**.
-3. On **General Information**:
-   - Copy **Application ID** → `DISCORD_APP_ID`
-   - Copy **Public Key** → `DISCORD_PUBLIC_KEY`
-4. Left sidebar → **Bot**:
-   - Click **Add Bot** / **Reset Token** if needed.
-   - Copy the **token** once → `DISCORD_BOT_TOKEN` (if you lose it, reset and update secrets later).
-   - Turn **Public Bot** off if you only want it on your server (optional).
-   - Under **Privileged Gateway Intents**: you do **not** need message content intent for the modal flow (slash + button only).
-5. Left sidebar → **OAuth2** → **URL Generator**:
-   - Scopes: check **`bot`** and **`applications.commands`**
-   - Bot permissions: check at least:
-     - **Send Messages**
-     - **Embed Links**
-     - **Read Message History** (helpful)
-     - **Manage Messages** (only if you want the bot able to help with pins; optional)
-   - Copy the generated URL at the bottom, open it in a browser, pick your Frenchie's Discord server, authorize.
-6. In the Discord app (desktop/web), open your server:
-   - Make sure the bot role can **View Channel** + **Send Messages** in `#register-sales`.
-7. Enable **Developer Mode** (User Settings → App Settings → Advanced → Developer Mode).
-8. Right-click your **server name** → **Copy Server ID** → `DISCORD_GUILD_ID`.
-9. Right-click **`#register-sales`** → **Copy Channel ID** → `DISCORD_REGISTER_CHANNEL_ID`.
+### Important (why perms “don’t save”)
+
+On the **OAuth2 → URL Generator** page, Discord does **not** save your permission checkboxes when you leave the page. That screen only **builds an invite link**. You must:
+
+1. Check scopes + permissions  
+2. **Copy the long URL at the bottom**  
+3. **Open that URL** in a browser and click **Authorize** on your server  
+
+If you leave without copying/opening the URL, the checks reset — that is normal.
+
+There is **no separate “invite URL” button** on the Bot page. The invite link lives only under **OAuth2 → URL Generator**.
+
+---
+
+### 3A — Create the app
+
+1. Open [https://discord.com/developers/applications](https://discord.com/developers/applications) while logged into Discord.
+2. Top right: **New Application**.
+3. Name: `Frenchies Register` (or similar) → agree to ToS → **Create**.
+4. You land on **General Information** (left sidebar).
+
+### 3B — Copy IDs from General Information
+
+Stay on **General Information** (left sidebar — first item).
+
+1. Find **Application ID** → click **Copy** → paste into your notes as `DISCORD_APP_ID`.
+2. Scroll to **Public Key** → click **Copy** → paste as `DISCORD_PUBLIC_KEY`.
+3. **Leave “Interactions Endpoint URL” blank for now.** You fill that in Step 6 after the Edge Function is deployed. If you paste a fake URL and Save, Discord will reject it.
+
+### 3C — Create the bot user + token
+
+1. Left sidebar → click **Bot** (under “Settings”).
+2. If you see **Add Bot**, click it → **Yes, do it!**.
+3. Under **Token**:
+   - Click **Reset Token** → confirm (or **View Token** if shown).
+   - Click **Copy** immediately → paste as `DISCORD_BOT_TOKEN`.
+   - You only see the full token once; if lost, Reset Token again and update Supabase secrets later.
+4. Optional: turn **Public Bot** **Off** (so only you invite it).
+5. Scroll past **Privileged Gateway Intents** — leave **Message Content Intent** **off** (not needed for `/register` modal).
+6. If there is a **Save Changes** button on this Bot page, click it. (Token/intents changes need Save; URL Generator does not.)
+
+### 3D — Build the invite URL (this is the “URL link”)
+
+1. Left sidebar → click **OAuth2**.
+2. Under OAuth2, click the sub-item **URL Generator** (not “General”).
+3. You should see two big sections: **SCOPES** and **BOT PERMISSIONS**.
+
+**SCOPES** (top checklist) — check exactly these two:
+
+- [x] **`bot`**
+- [x] **`applications.commands`**
+
+(Do not only check `bot` — without `applications.commands`, `/register` will not install.)
+
+**BOT PERMISSIONS** (appears after you check `bot`) — check:
+
+- [x] **Send Messages**
+- [x] **Embed Links**
+- [x] **Read Message History**
+- [x] **View Channels** (if listed)
+
+You do **not** need Administrator.
+
+4. **Scroll all the way to the bottom** of the URL Generator page.
+5. Find the box labeled **GENERATED URL** (long link starting with `https://discord.com/api/oauth2/authorize?...`).
+6. Click **Copy** next to that box (or select all + copy).
+7. **Paste the URL into a new browser tab** and press Enter.
+8. Discord shows **Add to Server**:
+   - Dropdown → pick your **Frenchie's** server  
+   - Click **Continue** → **Authorize** → complete captcha if asked  
+9. You should see “Authorized” / bot joins the server.
+
+If the Generated URL box is empty: you have not checked **`bot`** under Scopes yet — check it and the URL appears.
+
+### 3E — Confirm the bot is in your Discord server
+
+1. Open the Discord app (desktop or discord.com).
+2. Open your Frenchie's server.
+3. Open the member list (right side) — you should see the bot (e.g. **Frenchies Register**) with a bot tag.
+4. Open `#register-sales` (create the channel if needed: right-click category → Create Channel → text → name `register-sales`).
+5. Server Settings → **Roles** → find the bot’s role → ensure it can see `#register-sales`.
+   - Or: channel gear on `#register-sales` → **Permissions** → add the bot role → allow **View Channel**, **Send Messages**, **Embed Links**.
+
+### 3F — Copy Server ID and Channel ID
+
+1. Discord app → User Settings (gear next to your name) → **App Settings** → **Advanced** → turn **Developer Mode** **On** → Esc to close.
+2. Right-click your **server icon/name** (top of channel list) → **Copy Server ID** → `DISCORD_GUILD_ID`.
+3. Right-click the **`#register-sales`** channel → **Copy Channel ID** → `DISCORD_REGISTER_CHANNEL_ID`.
+
+### 3G — What you should have before Step 4
+
+- [ ] `DISCORD_APP_ID`  
+- [ ] `DISCORD_PUBLIC_KEY`  
+- [ ] `DISCORD_BOT_TOKEN`  
+- [ ] `DISCORD_GUILD_ID`  
+- [ ] `DISCORD_REGISTER_CHANNEL_ID`  
+- [ ] Bot visible in the server member list  
+- [ ] Bot can post in `#register-sales`  
+
+**Still skip Interactions Endpoint URL** until Step 6.
 
 ---
 
