@@ -13,6 +13,24 @@ import { createClient } from 'https://esm.sh/@supabase/supabase-js@2.49.1';
 
 const STATIONS = ['Bar', 'Floor', 'Door', 'Kitchen', 'Other'] as const;
 
+const INCOME_KINDS: Record<string, string> = {
+  register: 'Register',
+  tips: 'Tip jar',
+  event: 'Event proceeds',
+  deposit: 'Deposit / Treasury',
+  rebate: 'Rebate cash-in',
+  other: 'Other',
+};
+
+type DiscordComponent = {
+  type?: number;
+  custom_id?: string;
+  value?: string;
+  values?: string[];
+  components?: DiscordComponent[];
+  component?: DiscordComponent;
+};
+
 type DiscordInteraction = {
   id: string;
   type: number;
@@ -22,9 +40,7 @@ type DiscordInteraction = {
   data?: {
     name?: string;
     custom_id?: string;
-    components?: Array<{
-      components?: Array<{ custom_id?: string; value?: string }>;
-    }>;
+    components?: DiscordComponent[];
   };
   member?: { user?: { id?: string; username?: string; global_name?: string } };
   user?: { id?: string; username?: string; global_name?: string };
@@ -42,6 +58,13 @@ const ResponseType = {
   CHANNEL_MESSAGE_WITH_SOURCE: 4,
   DEFERRED_CHANNEL_MESSAGE_WITH_SOURCE: 5,
   MODAL: 9,
+} as const;
+
+const ComponentType = {
+  ACTION_ROW: 1,
+  STRING_SELECT: 3,
+  TEXT_INPUT: 4,
+  LABEL: 18,
 } as const;
 
 function json(data: unknown, status = 200) {
@@ -82,7 +105,6 @@ async function verifyDiscordSignature(
       message,
     );
   } catch {
-    // Fallback for runtimes without Ed25519 in SubtleCrypto
     try {
       const nacl = await import('https://esm.sh/tweetnacl@1.0.3');
       const message = new TextEncoder().encode(timestamp + body);
@@ -103,84 +125,114 @@ function actorName(interaction: DiscordInteraction): { id: string; name: string 
   return { id: String(u.id || ''), name };
 }
 
+function labelText(label: string, description: string | undefined, component: Record<string, unknown>) {
+  return {
+    type: ComponentType.LABEL,
+    label,
+    ...(description ? { description } : {}),
+    component,
+  };
+}
+
 function registerModal() {
   const today = new Date().toISOString().slice(0, 10);
   return {
     type: ResponseType.MODAL,
     data: {
       custom_id: 'register_modal',
-      title: "Log register drop",
+      title: 'Log house income',
       components: [
-        {
-          type: 1,
-          components: [{
-            type: 4,
-            custom_id: 'amount',
-            label: 'Amount ($)',
-            style: 1,
-            min_length: 1,
-            max_length: 12,
-            placeholder: '1000',
-            required: true,
-          }],
-        },
-        {
-          type: 1,
-          components: [{
-            type: 4,
-            custom_id: 'station',
-            label: 'Station',
-            style: 1,
-            min_length: 1,
-            max_length: 20,
-            placeholder: 'Bar | Floor | Door | Kitchen | Other',
-            required: true,
-          }],
-        },
-        {
-          type: 1,
-          components: [{
-            type: 4,
-            custom_id: 'source',
-            label: 'What was sold / source',
-            style: 2,
-            min_length: 1,
-            max_length: 200,
-            placeholder: 'Food & drinks till drop',
-            required: true,
-          }],
-        },
-        {
-          type: 1,
-          components: [{
-            type: 4,
-            custom_id: 'sale_date',
-            label: 'Date (YYYY-MM-DD)',
-            style: 1,
-            min_length: 10,
-            max_length: 10,
-            placeholder: today,
-            required: true,
-            value: today,
-          }],
-        },
+        labelText('Income type', 'Matches the Income desk kinds', {
+          type: ComponentType.STRING_SELECT,
+          custom_id: 'kind',
+          required: true,
+          placeholder: 'Choose type…',
+          options: [
+            { label: 'Register', value: 'register', description: 'Till / register drop' },
+            { label: 'Tip jar', value: 'tips', description: 'Tip jar into the house' },
+            { label: 'Event proceeds', value: 'event', description: 'Event cash-in' },
+            { label: 'Deposit / Treasury', value: 'deposit', description: 'House deposit / treasury' },
+            { label: 'Rebate cash-in', value: 'rebate', description: 'Rebate returned to house' },
+            { label: 'Other', value: 'other', description: 'Other house income' },
+          ],
+        }),
+        labelText('Station', 'Optional for deposit / tip jar / rebate', {
+          type: ComponentType.STRING_SELECT,
+          custom_id: 'station',
+          required: true,
+          placeholder: 'Choose station…',
+          options: [
+            { label: 'None / House', value: 'none', description: 'No specific station' },
+            ...STATIONS.map((s) => ({ label: s, value: s })),
+          ],
+        }),
+        labelText('Amount ($)', undefined, {
+          type: ComponentType.TEXT_INPUT,
+          custom_id: 'amount',
+          style: 1,
+          min_length: 1,
+          max_length: 12,
+          placeholder: '1000',
+          required: true,
+        }),
+        labelText('Source / notes', 'What was sold, or why the deposit', {
+          type: ComponentType.TEXT_INPUT,
+          custom_id: 'source',
+          style: 2,
+          min_length: 1,
+          max_length: 200,
+          placeholder: 'Food & drinks · House deposit · Tip jar',
+          required: true,
+        }),
+        labelText('Date (YYYY-MM-DD)', undefined, {
+          type: ComponentType.TEXT_INPUT,
+          custom_id: 'sale_date',
+          style: 1,
+          min_length: 10,
+          max_length: 10,
+          placeholder: today,
+          required: true,
+          value: today,
+        }),
       ],
     },
   };
 }
 
+function collectField(out: Record<string, string>, c: DiscordComponent | undefined) {
+  if (!c) return;
+  if (c.type === ComponentType.LABEL && c.component) {
+    collectField(out, c.component);
+    return;
+  }
+  if (c.type === ComponentType.ACTION_ROW && c.components) {
+    for (const child of c.components) collectField(out, child);
+    return;
+  }
+  if (!c.custom_id) return;
+  if (Array.isArray(c.values) && c.values.length) {
+    out[c.custom_id] = String(c.values[0] || '').trim();
+    return;
+  }
+  if (c.value != null) out[c.custom_id] = String(c.value || '').trim();
+}
+
 function fieldMap(interaction: DiscordInteraction): Record<string, string> {
   const out: Record<string, string> = {};
   for (const row of interaction.data?.components || []) {
-    for (const c of row.components || []) {
-      if (c.custom_id) out[c.custom_id] = String(c.value || '').trim();
-    }
+    collectField(out, row);
   }
   return out;
 }
 
+function normalizeKind(raw: string): string | null {
+  const t = (raw || '').trim().toLowerCase();
+  return INCOME_KINDS[t] ? t : null;
+}
+
 function normalizeStation(raw: string): string | null {
-  const t = raw.trim();
+  const t = (raw || '').trim();
+  if (!t || t.toLowerCase() === 'none' || t.toLowerCase() === 'house') return '';
   const hit = STATIONS.find((s) => s.toLowerCase() === t.toLowerCase());
   return hit || null;
 }
@@ -194,9 +246,19 @@ function todayIso(): string {
   return new Date().toISOString().slice(0, 10);
 }
 
+function defaultSource(kind: string): string {
+  if (kind === 'deposit') return 'House deposit';
+  if (kind === 'tips') return 'Tip jar';
+  if (kind === 'event') return 'Event proceeds';
+  if (kind === 'rebate') return 'Rebate cash-in';
+  if (kind === 'register') return 'Register';
+  return 'Income';
+}
+
 async function postChannelEmbed(opts: {
   token: string;
   channelId: string;
+  kind: string;
   amount: number;
   station: string;
   source: string;
@@ -208,6 +270,7 @@ async function postChannelEmbed(opts: {
     currency: 'USD',
     maximumFractionDigits: 0,
   });
+  const kindLabel = INCOME_KINDS[opts.kind] || opts.kind;
   const res = await fetch(`https://discord.com/api/v10/channels/${opts.channelId}/messages`, {
     method: 'POST',
     headers: {
@@ -216,11 +279,12 @@ async function postChannelEmbed(opts: {
     },
     body: JSON.stringify({
       embeds: [{
-        title: 'Register drop logged',
-        color: 0x3f7a56,
+        title: `${kindLabel} logged`,
+        color: opts.kind === 'deposit' ? 0xc4a35a : 0x3f7a56,
         fields: [
+          { name: 'Type', value: kindLabel, inline: true },
           { name: 'Amount', value: money, inline: true },
-          { name: 'Station', value: opts.station, inline: true },
+          { name: 'Station', value: opts.station || 'House', inline: true },
           { name: 'Date', value: opts.saleDate, inline: true },
           { name: 'Source', value: opts.source.slice(0, 1024), inline: false },
           { name: 'Logged by', value: opts.paidBy.slice(0, 256), inline: true },
@@ -276,7 +340,6 @@ Deno.serve(async (req) => {
     return json({ type: ResponseType.PONG });
   }
 
-  // Open modal: /register or button
   if (
     interaction.type === InteractionType.APPLICATION_COMMAND &&
     (interaction.data?.name || '').toLowerCase() === 'register'
@@ -296,24 +359,35 @@ Deno.serve(async (req) => {
     interaction.data?.custom_id === 'register_modal'
   ) {
     const fields = fieldMap(interaction);
+    const kind = normalizeKind(fields.kind || 'register') || (fields.kind ? null : 'register');
     const amount = parseAmount(fields.amount || '');
-    const station = normalizeStation(fields.station || '');
-    const source = (fields.source || 'Register').slice(0, 200);
+    const stationRaw = fields.station || '';
+    const stationNorm = normalizeStation(stationRaw);
+    const source = (fields.source || defaultSource(kind || 'register')).slice(0, 200);
     let saleDate = (fields.sale_date || '').trim() || todayIso();
     if (!/^\d{4}-\d{2}-\d{2}$/.test(saleDate)) saleDate = todayIso();
     const who = actorName(interaction);
 
+    if (!kind) {
+      return json({
+        type: ResponseType.CHANNEL_MESSAGE_WITH_SOURCE,
+        data: {
+          content: 'Pick an income type: Register, Tip jar, Event, Deposit / Treasury, Rebate, or Other.',
+          flags: 64,
+        },
+      });
+    }
     if (!amount) {
       return json({
         type: ResponseType.CHANNEL_MESSAGE_WITH_SOURCE,
         data: { content: 'Amount must be a positive number.', flags: 64 },
       });
     }
-    if (!station) {
+    if (stationNorm === null) {
       return json({
         type: ResponseType.CHANNEL_MESSAGE_WITH_SOURCE,
         data: {
-          content: 'Station must be one of: Bar, Floor, Door, Kitchen, Other.',
+          content: 'Station must be None/House, Bar, Floor, Door, Kitchen, or Other.',
           flags: 64,
         },
       });
@@ -325,6 +399,9 @@ Deno.serve(async (req) => {
       });
     }
 
+    const station = stationNorm;
+    const kindLabel = INCOME_KINDS[kind] || kind;
+
     const sb = createClient(supabaseUrl, serviceKey, {
       auth: { persistSession: false, autoRefreshToken: false },
     });
@@ -333,6 +410,7 @@ Deno.serve(async (req) => {
       .from('register_sales')
       .insert({
         sale_date: saleDate,
+        kind,
         station,
         amount,
         source,
@@ -345,12 +423,11 @@ Deno.serve(async (req) => {
       .single();
 
     if (error) {
-      // Duplicate interaction (Discord retry) — treat as success
       if (String(error.code) === '23505') {
         return json({
           type: ResponseType.CHANNEL_MESSAGE_WITH_SOURCE,
           data: {
-            content: `Already booked — **$${amount.toLocaleString()}** at **${station}**. Managers will see it on the Income desk.`,
+            content: `Already booked — **${kindLabel}** · **$${amount.toLocaleString()}**${station ? ` at **${station}**` : ''}. Managers will see it on the Income desk.`,
             flags: 64,
           },
         });
@@ -358,7 +435,11 @@ Deno.serve(async (req) => {
       console.error('insert error', error);
       return json({
         type: ResponseType.CHANNEL_MESSAGE_WITH_SOURCE,
-        data: { content: 'Could not save register drop. Try again or ping management.', flags: 64 },
+        data: {
+          content:
+            'Could not save income row. If you just added kinds, run the kind migration in Supabase SQL Editor, then try again.',
+          flags: 64,
+        },
       });
     }
 
@@ -367,6 +448,7 @@ Deno.serve(async (req) => {
       msgId = await postChannelEmbed({
         token: botToken,
         channelId,
+        kind,
         amount,
         station,
         source,
@@ -383,8 +465,12 @@ Deno.serve(async (req) => {
       type: ResponseType.CHANNEL_MESSAGE_WITH_SOURCE,
       data: {
         content:
-          `Register drop saved — **$${money}** · **${station}** · ${saleDate}` +
-          (msgId ? '\nPosted in #register-sales. It will appear on the Income desk when management pulls.' : '\nSaved to Supabase for the Income desk.'),
+          `${kindLabel} saved — **$${money}**` +
+          (station ? ` · **${station}**` : ' · House') +
+          ` · ${saleDate}` +
+          (msgId
+            ? '\nPosted in #register-sales. It will appear on the Income desk when management pulls.'
+            : '\nSaved to Supabase for the Income desk.'),
         flags: 64,
       },
     });

@@ -1,17 +1,17 @@
 # Frenchie's register sales (Discord → Supabase → Income desk)
 
-Players log register drops with Discord **`/register`** (a form/modal) or a **Log register drop** button — not free-text chat. Each submission is saved in **Supabase**. Management’s **Income** tab on the Frenchie's desk **auto-pulls** those rows into the books.
+Players log house income with Discord **`/register`** (a form/modal with dropdowns) or a **Log house income** button — not free-text chat. Each submission is saved in **Supabase**. Management’s **Income** tab on the Frenchie's desk **auto-pulls** those rows into the books under the correct kind (register, tip jar, event, deposit / treasury, rebate, other).
 
 ```
 Player: /register or button
-        → Discord modal (Amount, Station, Source, Date)
+        → Discord modal (Income type ▼, Station ▼, Amount, Source, Date)
         → Supabase Edge Function (verifies Discord signature)
-        → row in table register_sales (status: pending)
+        → row in table register_sales (kind + status: pending)
         → pretty embed posted in #register-sales
 
 Manager: opens Income (or auto-pull on login/focus)
         → desk reads pending rows
-        → creates Income · Register lines
+        → creates Income lines with matching kind (Register, Deposit, …)
         → marks rows booked
 ```
 
@@ -80,8 +80,9 @@ This creates `register_sales`, row-level security, and the `book_register_sale` 
 
 4. Select **all** of that SQL, copy it, paste into the SQL Editor.
 5. Click **Run** (or Ctrl/Cmd + Enter).
-6. You should see success with no errors.
-7. Confirm the table exists: left sidebar → **Table Editor** → `register_sales` (columns like `sale_date`, `amount`, `station`, `status`, etc.).
+6. Also run [`migrations/20260801_register_sales_kind.sql`](migrations/20260801_register_sales_kind.sql) the same way (adds the `kind` column for deposit / treasury / tips / etc.).
+7. You should see success with no errors.
+8. Confirm the table exists: left sidebar → **Table Editor** → `register_sales` (columns like `sale_date`, `kind`, `amount`, `station`, `status`, etc.).
 
 ### Option B — Supabase CLI
 
@@ -265,7 +266,7 @@ You should see JSON like `{"ok":true,"service":"frenchies-discord-register"}`.
 
 ## Step 7 — Register `/register` and post the channel button
 
-This tells Discord your guild has a `/register` slash command, and (with `POST_BUTTON=1`) posts the green **Log register drop** button message into `#register-sales`.
+This tells Discord your guild has a `/register` slash command, and (with `POST_BUTTON=1`) posts the green **Log house income** button message into `#register-sales`.
 
 From the repo root:
 
@@ -287,9 +288,9 @@ Expected console output:
 In Discord:
 
 1. Open `#register-sales`.
-2. You should see the bot message with **Log register drop**.
+2. You should see the bot message with **Log house income**.
 3. Right-click that message → **Pin** (so players always see it).
-4. Type `/register` — Discord should offer **Log a Frenchie's register drop**.
+4. Type `/register` — Discord should offer **Log house income — register, tips, deposit/treasury…**.
 
 If `/register` does not appear:
 
@@ -304,14 +305,14 @@ If `/register` does not appear:
 
 1. Open your live desk (Tiiny Host / local `index.html`) and sign in as **management** (Owner / HR / Store Manager, etc.).
 2. Open **Settings** (account menu → Settings).
-3. Scroll to **Supabase register feed**.
+3. Scroll to **Supabase Discord income feed**.
 4. Paste:
 
    | Field | Value |
    |--------|--------|
    | **Supabase URL** | `https://YOUR_PROJECT_REF.supabase.co` |
    | **Supabase anon key** | `SUPABASE_ANON_KEY` from Project Settings → API |
-   | **Auto-pull register sales** | Checked (recommended) |
+   | **Auto-pull register sales** | Checked (recommended) — pulls all Discord income kinds |
 
 5. Click **Save settings**.
 6. Go to **Office → Income**.
@@ -329,18 +330,19 @@ Notes:
 ## Step 9 — End-to-end test
 
 1. In Discord (as a player/staff account), go to `#register-sales`.
-2. Click **Log register drop** (or type `/register`).
-3. Fill the modal:
+2. Click **Log house income** (or type `/register`).
+3. Fill the modal (dropdowns match the Income desk):
+   - **Income type:** `Register` (or try `Deposit / Treasury`)
+   - **Station:** `Bar` (or `None / House` for deposits)
    - **Amount:** `1000`
-   - **Station:** `Bar` (must be exactly one of: `Bar`, `Floor`, `Door`, `Kitchen`, `Other`)
-   - **Source:** `Food & drinks till drop`
+   - **Source / notes:** `Food & drinks till drop` or `House deposit`
    - **Date:** leave today’s date or set `YYYY-MM-DD`
 4. Submit.
-5. You should get an ephemeral “Register drop saved…” reply.
-6. `#register-sales` should show a green/house **Register drop logged** embed.
-7. In Supabase **Table Editor → register_sales**, a new row should exist with `status = pending`.
+5. You should get an ephemeral “…saved…” reply naming the type.
+6. `#register-sales` should show an embed titled **Register logged** or **Deposit / Treasury logged**.
+7. In Supabase **Table Editor → register_sales**, a new row should exist with `status = pending` and the matching `kind`.
 8. On the desk (mgmt), open **Income** (or wait for auto-pull).
-9. A **Register** income line should appear (notes mention Discord `/register`).
+9. An income line with that **kind** should appear (notes mention Discord `/register`).
 10. In Supabase, that row’s `status` should become `booked`.
 11. Pull again — nothing new should duplicate.
 
@@ -357,11 +359,12 @@ REGISTER | 2026-08-01 | Bar | 1000 | Food & drinks till drop | @Alex
 You can pin this in `#register-sales` under the button:
 
 ```text
-Frenchie's register sales
-• Tap “Log register drop” or type /register
-• Fill Amount, Station (Bar / Floor / Door / Kitchen / Other), what was sold, Date
+Frenchie's house income
+• Tap “Log house income” or type /register
+• Pick Income type (Register, Tip jar, Event, Deposit / Treasury, Rebate, Other)
+• Pick Station (or None / House), Amount, Source / notes, Date
 • Do not paste free-text REGISTER lines unless a manager asks you to
-• Drops sync to the Income desk for management
+• Rows sync to the Income desk for management
 ```
 
 ---
@@ -375,7 +378,8 @@ Frenchie's register sales
 | Discord “Interactions endpoint URL” fails to save | Function not deployed, wrong Public Key secret, or JWT still verified — redeploy with `--no-verify-jwt` and re-set `DISCORD_PUBLIC_KEY` |
 | `/register` missing | Re-run command script; confirm guild ID; wait a minute; restart Discord |
 | Modal submit: “Register sync is not configured” | Edge Function missing `SUPABASE_URL` / `SUPABASE_SERVICE_ROLE_KEY` secrets |
-| Modal submit: station error | Station must be exactly `Bar`, `Floor`, `Door`, `Kitchen`, or `Other` |
+| Modal submit: station error | Use the Station dropdown (`None / House`, `Bar`, `Floor`, `Door`, `Kitchen`, `Other`) |
+| Modal submit: could not save / kind migration hint | Run `20260801_register_sales_kind.sql` in SQL Editor, then redeploy `discord-register` |
 | Embed does not post in channel | Bad `DISCORD_BOT_TOKEN` or `DISCORD_REGISTER_CHANNEL_ID`; bot lacks Send Messages in that channel |
 | Desk chip “Supabase · off” | URL/anon key blank or invalid in Settings |
 | Desk pull fails / CORS or 401 | Wrong anon key; migration/RLS not applied; URL missing `https://` |
@@ -399,10 +403,22 @@ Frenchie's register sales
 | Path | Purpose |
 |------|---------|
 | [`migrations/20260801_register_sales.sql`](migrations/20260801_register_sales.sql) | Table + RLS + `book_register_sale` |
-| [`functions/discord-register/index.ts`](functions/discord-register/index.ts) | Discord interactions handler |
+| [`migrations/20260801_register_sales_kind.sql`](migrations/20260801_register_sales_kind.sql) | Adds `kind` (register / tips / event / deposit / rebate / other) |
+| [`functions/discord-register/index.ts`](functions/discord-register/index.ts) | Discord interactions handler (dropdown modal) |
 | [`scripts/register-discord-commands.mjs`](scripts/register-discord-commands.mjs) | Register `/register` + optional button message |
 | [`config.toml`](config.toml) | `verify_jwt = false` for this function |
 | Desk `index.html` Settings / Income | Pull + auto-pull into Income |
+
+---
+
+## Upgrading from v40 (register-only)
+
+If `/register` already works and you only need deposit / treasury + dropdowns:
+
+1. Run [`migrations/20260801_register_sales_kind.sql`](migrations/20260801_register_sales_kind.sql) in the SQL Editor.
+2. Redeploy: `supabase functions deploy discord-register --no-verify-jwt`
+3. Re-run the command script (updates `/register` description; optional `POST_BUTTON=1` for a new channel button).
+4. Upload desk **v41** `index.html` so Pull books the correct Income kind.
 
 ---
 
@@ -410,7 +426,7 @@ Frenchie's register sales
 
 1. Create `#register-sales`  
 2. Create Supabase project → copy URL, anon, service role, project ref  
-3. Run SQL migration  
+3. Run SQL migrations (base table + kind column)  
 4. Create Discord app/bot → copy public key, bot token, app id, guild id, channel id → invite bot  
 5. `supabase secrets set …` + `functions deploy discord-register --no-verify-jwt`  
 6. Set Discord **Interactions Endpoint URL** → Save  

@@ -24,7 +24,7 @@ if (!token || !appId || !guildId) {
 
 const command = {
   name: 'register',
-  description: "Log a Frenchie's register drop (food, drinks, service)",
+  description: "Log house income — register, tips, deposit/treasury, event, rebate",
   type: 1,
 };
 
@@ -59,16 +59,16 @@ const main = async () => {
     try {
       const msg = await api('POST', `/channels/${channelId}/messages`, {
         content:
-          "**Register sales**\n" +
-          "Tap the button (or type `/register`) to log what the customer paid — food, drinks, or service.\n" +
-          "Drops sync to the Frenchie's Income desk via Supabase.",
+          "**House income**\n" +
+          "Tap the button (or type `/register`) to log register drops, tip jars, deposits / treasury, events, or rebates.\n" +
+          "Rows sync to the Frenchie's Income desk via Supabase.",
         components: [{
           type: 1,
           components: [{
             type: 2,
             style: 3,
             custom_id: 'register_open',
-            label: 'Log register drop',
+            label: 'Log house income',
           }],
         }],
       });
