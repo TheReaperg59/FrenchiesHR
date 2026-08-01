@@ -2448,36 +2448,36 @@ body.session-staff #pullSharedBtn{display:none!important}
   <div class="login-card">
     <form class="login-panel" id="loginSignInPanel" autocomplete="on">
       <div class="brand" id="loginTitle">Frenchie's desk</div>
-      <p class="sub">Staff login · Username is Firstname_Lastname · First sign-in uses the house password, then you create your own</p>
+      <p class="sub">Staff login · Username is Firstname_Lastname · First sign-in uses the house PIN, then you create your own 6+ digit PIN (ECRP)</p>
       <div class="field">
         <label for="loginUser">Username</label>
         <input id="loginUser" name="username" placeholder="Kenzie_Long" autocomplete="username" required>
       </div>
       <div class="field">
-        <label for="loginPass">Password</label>
-        <input id="loginPass" name="password" type="password" placeholder="House or personal password" autocomplete="current-password" required>
+        <label for="loginPass">PIN</label>
+        <input id="loginPass" name="password" type="password" placeholder="House or personal PIN · Owner may use master password" autocomplete="current-password" required>
       </div>
       <label class="checkline" style="margin:4px 0 10px"><input type="checkbox" id="loginStay" checked><span>Stay logged in on this device</span></label>
       <div class="login-err" id="loginErr" role="status"></div>
       <div class="actions">
         <button type="submit" class="btn primary" id="loginSubmit">Sign in</button>
       </div>
-      <p class="sub" style="margin:14px 0 0">Access is granted only after your <b>Account login information</b> paper is signed and filed by HR. First time: use the house password from that paper (or ask HR), then set your own password.</p>
+      <p class="sub" style="margin:14px 0 0">Access is granted only after your <b>Account login information</b> paper is signed and filed by HR. First time: use the house PIN from that paper (or ask HR), then set your own PIN. Owner may use a master password instead of a PIN.</p>
     </form>
     <form class="login-panel" id="loginSetupPanel" autocomplete="off">
-      <div class="brand">Create your password</div>
-      <p class="sub" id="loginSetupSub">Choose a personal password for this desk. You will use it next time instead of the house password.</p>
+      <div class="brand">Create your PIN</div>
+      <p class="sub" id="loginSetupSub">Choose a personal PIN (6 or more digits) for this desk. You will use it next time instead of the house PIN.</p>
       <div class="field">
-        <label for="setupPass">New password</label>
-        <input id="setupPass" type="password" minlength="6" placeholder="At least 6 characters" autocomplete="new-password" required>
+        <label for="setupPass">New PIN</label>
+        <input id="setupPass" type="password" inputmode="numeric" pattern="[0-9]*" minlength="6" placeholder="At least 6 digits" autocomplete="new-password" required>
       </div>
       <div class="field">
-        <label for="setupPass2">Confirm password</label>
-        <input id="setupPass2" type="password" minlength="6" placeholder="Repeat password" autocomplete="new-password" required>
+        <label for="setupPass2">Confirm PIN</label>
+        <input id="setupPass2" type="password" inputmode="numeric" pattern="[0-9]*" minlength="6" placeholder="Repeat PIN" autocomplete="new-password" required>
       </div>
       <div class="login-err" id="setupErr" role="status"></div>
       <div class="actions">
-        <button type="submit" class="btn primary" id="setupSubmit">Save password &amp; enter desk</button>
+        <button type="submit" class="btn primary" id="setupSubmit">Save PIN &amp; enter desk</button>
         <button type="button" class="btn" id="setupCancel">Cancel</button>
       </div>
     </form>
@@ -3404,7 +3404,7 @@ body.session-staff #pullSharedBtn{display:none!important}
   </div>
   <div class="card mgmt-only" style="margin-top:12px" data-mgmt-only><div class="card-head"><b>Shared desk sync</b><span class="pill gray" id="sharedDeskBuildPill">v38</span></div>
     <div class="card-body">
-      <p class="ui-hint"><b>Publish to domain</b> tries to write your redacted pack to the raw URL (when the host allows PUT). If that fails, it downloads the JSON — follow the Tiiny checklist below, then <b>Pull</b> on other PCs. Passwords stay on each browser.</p>
+      <p class="ui-hint"><b>Publish to domain</b> tries to write your redacted pack to the raw URL (when the host allows PUT). If that fails, it downloads the JSON — follow the Tiiny checklist below, then <b>Pull</b> on other PCs. PINs / passwords stay on each browser.</p>
       <div class="field"><label>Shared raw URL (same file every PC pulls)</label><input id="sharedDeskUrlSetting" placeholder="https://yourdomain/…/frenchies-shared-desk.json"></div>
       <div class="mini-note" id="sharedDeskLiveStatus" style="margin:8px 0">No publish yet this session.</div>
       <div id="sharedPublishChecklist" class="roadmap-panel" style="display:none;margin:10px 0"></div>
@@ -3575,7 +3575,7 @@ body.session-staff #pullSharedBtn{display:none!important}
             <button class="btn tiny soft" id="sendEmpLogin">Send account login</button>
             <button class="btn tiny soft" id="importEmpReplyBtn" type="button" title="Import the completed Frenchies-Reply-….html from the employee">Import reply</button>
             <input type="file" class="file-mini" id="importEmpReplyFile" accept=".html,.htm,.json,.txt,text/html,application/json" title="Import reply file" hidden>
-            <button class="btn tiny" id="resetEmpPasswordBtn" type="button" title="Clear personal password — they sign in with house password again">Reset password</button>
+            <button class="btn tiny" id="resetEmpPasswordBtn" type="button" title="Clear personal PIN — they sign in with house PIN again">Reset PIN</button>
             <button class="btn tiny" id="openHirePapersBtn" type="button" style="display:none">Hiring file</button>
           </div>
         </div>
@@ -3801,7 +3801,7 @@ body.session-staff #pullSharedBtn{display:none!important}
 <div class="modal" id="sharedPullModal" role="dialog" aria-modal="true" hidden><div class="dialog" role="document" tabindex="-1">
   <h2>Pull shared desk</h2>
   <div class="dialog-scroll">
-    <p class="ui-hint">Paste a shared desk JSON pack or fetch your domain raw URL. A snapshot is taken first. Personal passwords from this browser are kept when the pack is redacted. On a rev clash you choose Keep mine or Take theirs.</p>
+    <p class="ui-hint">Paste a shared desk JSON pack or fetch your domain raw URL. A snapshot is taken first. Personal PINs from this browser are kept when the pack is redacted. On a rev clash you choose Keep mine or Take theirs.</p>
     <div class="field"><label>Raw URL (optional)</label><input id="sharedUrl" placeholder="https://…/frenchies-shared-desk.json"></div>
     <div class="field"><label>Or paste JSON</label><textarea id="sharedPaste" rows="8" placeholder="{ … }"></textarea></div>
     <div id="sharedConflictBox" class="roadmap-panel" style="display:none">
@@ -4239,8 +4239,8 @@ body.session-staff #pullSharedBtn{display:none!important}
     <div class="field"><label>Tip-eligible roles (comma-separated)</label><input id="setTipRoles" placeholder="Waiter, Hostess, Cook"></div>
     <div class="field"><label>High-hours warning threshold</label><input id="setOtHours" type="number" min="1" step="0.5" value="40"></div>
     <div class="field"><label>Stay-logged-in days</label><select id="setSessionDays"><option value="1">1</option><option value="7">7</option><option value="14" selected>14</option><option value="30">30</option></select></div>
-    <div class="field"><label>House password (first sign-in)</label><input id="setHousePass" type="password" placeholder="Leave blank to keep current" autocomplete="new-password"></div>
-    <p class="ui-hint" style="margin:-6px 0 10px">Shown on Account login papers for new hires — not printed on the login screen.</p>
+    <div class="field"><label>House PIN (first sign-in)</label><input id="setHousePass" type="password" inputmode="numeric" pattern="[0-9]*" placeholder="Leave blank to keep current · 6+ digits" autocomplete="new-password"></div>
+    <p class="ui-hint" style="margin:-6px 0 10px">ECRP: 6+ digit PIN shown on Account login papers for new hires — not printed on the login screen. Staff then create their own PIN. Owner may keep a personal master password (letters OK) after first sign-in.</p>
     <div class="field"><label>Shared desk raw URL</label><input id="setSharedUrl" placeholder="https://…/frenchies-shared-desk.json"></div>
     <label class="checkline"><input type="checkbox" id="setSharedAutoPull"><span>Auto-pull shared desk on login / tab focus (mgmt &amp; leads)</span></label>
     <div class="field"><label>Handbook Google Doc URL</label><input id="setHandbookUrl" placeholder="https://docs.google.com/document/d/…"></div>
@@ -4322,8 +4322,13 @@ const LOG_TYPES = {
 };
 const TIP_ROLES_DEFAULT = ['Waiter', 'Hostess', 'Cook'];
 const TIP_ROLES = TIP_ROLES_DEFAULT; /* legacy alias — use tipRoles() */
-const DESK_BUILD = 'v44';
-const HOUSE_LOGIN_PASSWORD = 'frenchies636'; /* fallback seed — prefer settings.housePassword */
+const DESK_BUILD = 'v45';
+/** ECRP: house first-sign-in secret is a 6+ digit PIN (override in Settings). */
+const HOUSE_LOGIN_PIN = '86368636';
+const HOUSE_LOGIN_PASSWORD = HOUSE_LOGIN_PIN; /* legacy alias — prefer settings.housePassword */
+const LOGIN_FAIL_KEY = 'frenchies_login_fails_v1';
+const LOGIN_FAIL_MAX = 5;
+const LOGIN_FAIL_LOCK_MS = 60000;
 const SESSION_KEY = 'frenchies_desk_session';
 const SESSION_DURABLE_KEY = 'frenchies_desk_session_durable';
 const MGMT_ROLES = ['Owner', 'District Manager', 'Store Manager', 'HR Director', 'Operations Manager'];
@@ -5030,8 +5035,10 @@ function ensureMeta() {
   if (!('registerAutoPull' in s.settings)) s.settings.registerAutoPull = true;
   if (!('handbookUrl' in s.settings)) s.settings.handbookUrl = '';
   if (!(s.settings.handbookUrl || '').trim()) s.settings.handbookUrl = LINK_HANDBOOK;
-  if (!('housePassword' in s.settings)) s.settings.housePassword = HOUSE_LOGIN_PASSWORD;
-  if (!(s.settings.housePassword || '').trim()) s.settings.housePassword = HOUSE_LOGIN_PASSWORD;
+  if (!('housePassword' in s.settings)) s.settings.housePassword = HOUSE_LOGIN_PIN;
+  if (!(s.settings.housePassword || '').trim()) s.settings.housePassword = HOUSE_LOGIN_PIN;
+  /* Migrate pre-PIN seed so hire papers / first sign-in stay ECRP-legal */
+  if (String(s.settings.housePassword) === 'frenchies636') s.settings.housePassword = HOUSE_LOGIN_PIN;
   if (!s.settings.discordWebhooks || typeof s.settings.discordWebhooks !== 'object') {
     s.settings.discordWebhooks = { payroll: '', hiring: '', coverage: '', hrLog: '', announcements: '', incomeReports: '' };
   } else {
@@ -6173,7 +6180,7 @@ function grantEmpLoginAccess(e, detail) {
       pushEmpLog(e, {
         type: 'status',
         summary: 'Desk login access granted',
-        detail: detail || ('Username ' + e.loginUsername + ' · first sign-in with house password, then create your own')
+        detail: detail || ('Username ' + e.loginUsername + ' · first sign-in with house PIN, then create your own PIN')
       });
     } catch (err) {}
   }
@@ -6185,7 +6192,91 @@ function empHasOwnPassword(e) {
 function housePassword() {
   ensureMeta();
   const fromSettings = (s.settings && s.settings.housePassword) ? String(s.settings.housePassword).trim() : '';
-  return fromSettings || HOUSE_LOGIN_PASSWORD;
+  return fromSettings || HOUSE_LOGIN_PIN;
+}
+function isDigitPin(raw) {
+  return /^\d{6,20}$/.test(String(raw || ''));
+}
+function isWeakPin(raw) {
+  const p = String(raw || '');
+  if (!isDigitPin(p)) return true;
+  if (/^(\d)\1+$/.test(p)) return true;
+  const weak = {
+    '123456': 1, '654321': 1, '123123': 1, '121212': 1, '112233': 1,
+    '123321': 1, '111222': 1, '000000': 1, '012345': 1, '543210': 1
+  };
+  if (weak[p]) return true;
+  let asc = true;
+  let desc = true;
+  for (let i = 1; i < p.length; i++) {
+    const a = p.charCodeAt(i - 1) - 48;
+    const b = p.charCodeAt(i) - 48;
+    if (b !== (a + 1) % 10) asc = false;
+    if (b !== (a + 9) % 10) desc = false;
+  }
+  return !!(asc || desc);
+}
+function empMayUseMasterPassword(e) {
+  return !!(e && e.role === 'Owner');
+}
+function empNeedsPinMigration(e) {
+  if (!e || !empHasOwnPassword(e)) return false;
+  if (empMayUseMasterPassword(e)) return false;
+  return !isDigitPin(String(e.loginPassword || ''));
+}
+function validatePersonalSecret(raw, e) {
+  const a = String(raw || '');
+  if (empMayUseMasterPassword(e)) {
+    if (a.length < 6) return { ok: false, msg: 'Master password or PIN must be at least 6 characters' };
+    if (a === housePassword()) return { ok: false, msg: 'Choose something other than the house PIN' };
+    if (isDigitPin(a) && isWeakPin(a)) return { ok: false, msg: 'That PIN is too easy to guess — pick different digits' };
+    return { ok: true, kind: isDigitPin(a) ? 'pin' : 'master' };
+  }
+  if (!isDigitPin(a)) return { ok: false, msg: 'Personal PIN must be 6 or more digits (ECRP rule)' };
+  if (isWeakPin(a)) return { ok: false, msg: 'PIN is too easy to guess — avoid repeats (111111) and sequences (123456)' };
+  if (a === housePassword()) return { ok: false, msg: 'Choose something other than the house PIN' };
+  return { ok: true, kind: 'pin' };
+}
+function validateHousePin(raw) {
+  const a = String(raw || '').trim();
+  if (!isDigitPin(a)) return { ok: false, msg: 'House PIN must be 6 or more digits (ECRP)' };
+  if (isWeakPin(a)) return { ok: false, msg: 'House PIN is too weak — avoid sequences and repeats' };
+  return { ok: true };
+}
+function readLoginFailState() {
+  try {
+    const raw = sessionStorage.getItem(LOGIN_FAIL_KEY);
+    if (!raw) return { n: 0, until: 0 };
+    const o = JSON.parse(raw);
+    return { n: Number(o.n || 0), until: Number(o.until || 0) };
+  } catch (err) {
+    return { n: 0, until: 0 };
+  }
+}
+function writeLoginFailState(st) {
+  try { sessionStorage.setItem(LOGIN_FAIL_KEY, JSON.stringify(st)); } catch (err) {}
+}
+function clearLoginFails() {
+  try { sessionStorage.removeItem(LOGIN_FAIL_KEY); } catch (err) {}
+}
+function loginLockStatus() {
+  const st = readLoginFailState();
+  const now = Date.now();
+  if (st.until && now < st.until) {
+    return { locked: true, waitSec: Math.max(1, Math.ceil((st.until - now) / 1000)) };
+  }
+  return { locked: false, waitSec: 0, fails: st.n || 0 };
+}
+function recordLoginFail() {
+  const st = readLoginFailState();
+  const n = (st.n || 0) + 1;
+  const next = { n: n, until: 0 };
+  if (n >= LOGIN_FAIL_MAX) {
+    next.until = Date.now() + LOGIN_FAIL_LOCK_MS;
+    next.n = 0;
+  }
+  writeLoginFailState(next);
+  return next;
 }
 function resetEmpLoginPassword(e, reason) {
   if (!canMutateDesk()) return false;
@@ -6195,8 +6286,8 @@ function resetEmpLoginPassword(e, reason) {
   bumpLoginSessionEpoch(e);
   pushEmpLog(e, {
     type: 'status',
-    summary: 'Desk password reset',
-    detail: reason || 'Must sign in with house password and create a new personal password'
+    summary: 'Desk PIN reset',
+    detail: reason || 'Must sign in with house PIN and create a new personal PIN'
   });
   return true;
 }
@@ -6210,8 +6301,26 @@ function setLoginGateMode(mode) {
     if ($('setupErr')) $('setupErr').textContent = '';
     const e = empById(pendingPasswordEmpId);
     if ($('loginSetupSub') && e) {
-      $('loginSetupSub').textContent = 'Welcome, ' + e.name + '. Create a personal password for ' +
-        (e.loginUsername || loginUsernameFromName(e.name)) + '. You will use this next time instead of the house password.';
+      if (empMayUseMasterPassword(e)) {
+        $('loginSetupSub').textContent = 'Welcome, ' + e.name + '. As Owner you may set a personal PIN (6+ digits) or a master password (6+ characters) for ' +
+          (e.loginUsername || loginUsernameFromName(e.name)) + '.';
+        if ($('setupPass')) { $('setupPass').removeAttribute('inputmode'); $('setupPass').removeAttribute('pattern'); $('setupPass').placeholder = 'PIN or master password'; }
+        if ($('setupPass2')) { $('setupPass2').removeAttribute('inputmode'); $('setupPass2').removeAttribute('pattern'); $('setupPass2').placeholder = 'Repeat'; }
+        const brand = document.querySelector('#loginSetupPanel .brand');
+        if (brand) brand.textContent = 'Create your PIN or master password';
+        if ($('setupSubmit')) $('setupSubmit').textContent = 'Save & enter desk';
+      } else {
+        const migrate = empNeedsPinMigration(e);
+        $('loginSetupSub').textContent = 'Welcome, ' + e.name + '. ' +
+          (migrate ? 'ECRP requires a digit PIN now — ' : '') +
+          'Create a personal PIN (6 or more digits) for ' +
+          (e.loginUsername || loginUsernameFromName(e.name)) + '. You will use this next time instead of the house PIN.';
+        if ($('setupPass')) { $('setupPass').setAttribute('inputmode', 'numeric'); $('setupPass').setAttribute('pattern', '[0-9]*'); $('setupPass').placeholder = 'At least 6 digits'; }
+        if ($('setupPass2')) { $('setupPass2').setAttribute('inputmode', 'numeric'); $('setupPass2').setAttribute('pattern', '[0-9]*'); $('setupPass2').placeholder = 'Repeat PIN'; }
+        const brand = document.querySelector('#loginSetupPanel .brand');
+        if (brand) brand.textContent = 'Create your PIN';
+        if ($('setupSubmit')) $('setupSubmit').textContent = 'Save PIN & enter desk';
+      }
     }
     setTimeout(() => { try { $('setupPass').focus(); } catch (err) {} }, 40);
   } else {
@@ -6249,15 +6358,15 @@ function completePasswordSetup(pass1, pass2) {
   if (!e) return { ok: false, msg: 'Sign-in expired — start again' };
   const a = String(pass1 || '');
   const b = String(pass2 || '');
-  if (a.length < 6) return { ok: false, msg: 'Password must be at least 6 characters' };
-  if (a !== b) return { ok: false, msg: 'Passwords do not match' };
-  if (a === housePassword()) return { ok: false, msg: 'Choose something other than the house password' };
+  if (a !== b) return { ok: false, msg: empMayUseMasterPassword(e) ? 'Entries do not match' : 'PINs do not match' };
+  const check = validatePersonalSecret(a, e);
+  if (!check.ok) return check;
   e.loginPassword = a;
   e.loginPasswordSetAt = today();
   pushEmpLog(e, {
     type: 'status',
-    summary: 'Personal desk password created',
-    detail: 'First-time password setup complete'
+    summary: check.kind === 'master' ? 'Personal master password created' : 'Personal desk PIN created',
+    detail: check.kind === 'master' ? 'Owner master password setup complete' : 'PIN setup complete (ECRP)'
   });
   save();
   enterDeskSession(e, { forceDurable: true });
@@ -6339,8 +6448,8 @@ function loadSession() {
     if (!data || !data.empId) return null;
     const e = empById(data.empId);
     if (!e || !empHasLoginAccess(e)) return null;
-    /* Old sessions without a personal password must set one before desk use */
-    if (!empHasOwnPassword(e)) {
+    /* No personal secret, or legacy non-PIN staff password → force PIN setup */
+    if (!empHasOwnPassword(e) || empNeedsPinMigration(e)) {
       pendingPasswordEmpId = e.id;
       try { sessionStorage.removeItem(SESSION_KEY); } catch (err) {}
       return null;
@@ -6381,11 +6490,11 @@ function applySessionChrome() {
     if (shell) shell.setAttribute('aria-hidden', 'true');
     document.body.classList.add('login-locked');
     setAccount(
-      needsSetup ? 'Set password' : 'Signed out',
+      needsSetup ? 'Set PIN' : 'Signed out',
       needsSetup ? 'Almost in' : 'Guest',
-      needsSetup ? 'Create your password' : 'Not signed in',
+      needsSetup ? 'Create your PIN' : 'Not signed in',
       needsSetup ? '!' : '?',
-      needsSetup ? 'Create your personal password to continue' : 'Not signed in'
+      needsSetup ? 'Create your personal PIN to continue' : 'Not signed in'
     );
     return;
   }
@@ -6421,16 +6530,23 @@ function applySessionChrome() {
   });
 }
 function loginAsEmployee(username, password) {
+  const lock = loginLockStatus();
+  if (lock.locked) {
+    return { ok: false, msg: 'Too many attempts — try again in ' + lock.waitSec + 's' };
+  }
   const u = String(username || '').trim();
   const p = String(password || '');
   if (!u) return { ok: false, msg: 'Enter your username (Firstname_Lastname)' };
-  if (!p) return { ok: false, msg: 'Enter your password' };
+  if (!p) return { ok: false, msg: 'Enter your PIN' };
   const want = u.replace(/\s+/g, '_');
   const e = s.employees.find(x => {
     const un = (x.loginUsername || loginUsernameFromName(x.name) || '').toLowerCase();
     return un === want.toLowerCase();
   });
-  if (!e) return { ok: false, msg: 'No staff file matches that username' };
+  if (!e) {
+    recordLoginFail();
+    return { ok: false, msg: 'No staff file matches that username' };
+  }
   if (e.status === 'terminated') return { ok: false, msg: 'That file is closed — see HR' };
   if (e.status === 'suspended') return { ok: false, msg: 'Access suspended — see HR' };
   if (!empHasLoginAccess(e)) {
@@ -6440,18 +6556,30 @@ function loginAsEmployee(username, password) {
   const hasOwn = empHasOwnPassword(e);
   if (hasOwn) {
     if (p !== String(e.loginPassword)) {
+      recordLoginFail();
       if (p === housePassword()) {
-        return { ok: false, msg: 'House password no longer works — use your personal password (HR can reset)' };
+        return { ok: false, msg: 'House PIN no longer works — use your personal PIN (HR can reset)' };
       }
-      return { ok: false, msg: 'Wrong password' };
+      return { ok: false, msg: empMayUseMasterPassword(e) ? 'Wrong PIN or master password' : 'Wrong PIN' };
+    }
+    clearLoginFails();
+    /* Legacy text passwords → force PIN setup (Owner may keep master) */
+    if (empNeedsPinMigration(e)) {
+      sessionUser = null;
+      persistSession(null);
+      pendingPasswordEmpId = e.id;
+      applySessionChrome();
+      return { ok: true, emp: e, needPassword: true, migratePin: true };
     }
     enterDeskSession(e);
     return { ok: true, emp: e, needPassword: false };
   }
   if (p !== housePassword()) {
-    return { ok: false, msg: 'First sign-in uses the house password from your Account login paper (ask HR)' };
+    recordLoginFail();
+    return { ok: false, msg: 'First sign-in uses the house PIN from your Account login paper (ask HR)' };
   }
-  /* First-time: house password accepted → force personal password setup before desk */
+  clearLoginFails();
+  /* First-time: house PIN accepted → force personal PIN (or Owner master) setup */
   sessionUser = null;
   persistSession(null);
   pendingPasswordEmpId = e.id;
@@ -7737,7 +7865,8 @@ function saveSettings() {
   if ($('setHousePass')) {
     const hp = ($('setHousePass').value || '').trim();
     if (hp) {
-      if (hp.length < 6) return toast('House password must be at least 6 characters');
+      const hpCheck = validateHousePin(hp);
+      if (!hpCheck.ok) return toast(hpCheck.msg);
       s.settings.housePassword = hp;
     }
   }
@@ -7756,6 +7885,7 @@ function openChangelog() {
   const grid = $('upgradeGrid');
   if (grid) {
     const recent = [
+      ['v45', 'ECRP PIN login — staff 6+ digit PIN · house PIN on hire papers · Owner may keep master password · weak-PIN block + lockout'],
       ['v44', 'Discord field: What was sold / notes (replaces Source label — Kind already covers type)'],
       ['v43', 'No tip jar on Discord/desk logs — staff keep 100% tips · Discord modal: Kind, Station, Amount, Source, Date'],
       ['v42', 'Discord Log income modal mirrors desk — Kind, Station, Amount, Source · Logged by = Discord nick · auto receipt/ref'],
@@ -11014,7 +11144,7 @@ function discordHireKindMeta(kind) {
       title: 'Account login information',
       step: 'Account login',
       issued: 'Human Resources has successfully issued account login credentials for this employee.',
-      action: 'Open the attached .html packet, review the username and house password, complete the acknowledgements, sign the form, select **Download reply**, and return the completed file to Human Resources. Desk access is granted when the reply is filed.',
+      action: 'Open the attached .html packet, review the username and house PIN, complete the acknowledgements, sign the form, select **Download reply**, and return the completed file to Human Resources. On first desk sign-in you will create your own 6+ digit PIN. Desk access is granted when the reply is filed.',
       filed: 'Account login has been acknowledged and filed. Desk access is now granted. This hiring step is complete.'
     },
     decline: {
@@ -11507,12 +11637,12 @@ function letterLogin(c) {
     ff('Employee', c.name) +
     ff('Role', c.role) +
     ff('Username', user) +
-    ff('First sign-in password', housePassword() + ' (house password)') +
-    '<div class="letter-note">Username format is Firstname_Lastname from your legal name on file. Sign in once with the house password — the desk will ask you to create your own password before you continue. Do not post either password in public Discord channels.</div>' +
+    ff('First sign-in PIN', housePassword() + ' (house PIN)') +
+    '<div class="letter-note">Username format is Firstname_Lastname from your legal name on file. Sign in once with the <b>house PIN</b> — the desk will ask you to create your own <b>personal PIN (6 or more digits)</b> before you continue. ECRP requires digit PINs for site logins (not word passwords). Do not post either PIN in public Discord channels — ask HR in person or DMs if you need it again.</div>' +
     '<h4>What you can see</h4>' +
     '<p>Access follows your role on the ladder. Owner and management see the full desk. Shift Leads see coverage and roster tools. Floor staff see their pay stubs, shifts, and handbook.</p>' +
     '<h4>Acknowledgement</h4>' +
-    '<p>By signing you confirm you received these credentials, will create your own password on first sign-in, will keep passwords off public chats, and understand desk access starts only after HR files this signed reply.</p>' +
+    '<p>By signing you confirm you received these credentials, will create your own PIN on first sign-in, will keep PINs off public chats, and understand desk access starts only after HR files this signed reply.</p>' +
     signGrid('Employee — ' + (c.name || ''), '', 'Date', '');
   return wrapLetter('Account login information', body, (c.name || 'Employee') + ' · desk login · ' + today());
 }
@@ -12485,17 +12615,17 @@ function packetBody(a, kind, c) {
     return '<p>Welcome, <b>' + esc(c.name || 'employee') + '</b>. This is your <b>Account login information</b> — the final hire document before desk access is granted.</p>' +
       pkTerms([
         ['Your username', user],
-        ['First sign-in password', housePassword() + ' (house)'],
-        ['Then', 'Create your own password on first desk sign-in'],
+        ['First sign-in PIN', housePassword() + ' (house PIN)'],
+        ['Then', 'Create your own personal PIN (6 or more digits) on first desk sign-in'],
         ['Your role', c.role],
         ['Access starts', 'After Human Resources files this signed reply']
       ]) +
-      '<div class="note">Username is Firstname_Lastname from your name on file. First login uses the house password, then you must create your own. Keep passwords out of public Discord. Floor staff see stubs, shifts, and the handbook; management sees the full desk.</div>' +
+      '<div class="note">Username is Firstname_Lastname from your name on file. First login uses the <b>house PIN</b>, then you must create your own <b>6+ digit PIN</b> (ECRP rule — digit PINs, not word passwords). Keep PINs out of public Discord — ask HR in person or DMs if needed. Floor staff see stubs, shifts, and the handbook; management sees the full desk.</div>' +
       '<h2>Acknowledgements *</h2>' +
       '<p class="pk-hint">Tick every box before you sign:</p>' +
       pkBoxes('loginAck', [
-        'I received my username and the house password for first sign-in',
-        'I will create my own password when the desk asks, and keep it private',
+        'I received my username and the house PIN for first sign-in',
+        'I will create my own 6+ digit PIN when the desk asks, and keep it private',
         'I understand access starts only after Human Resources files this signed reply'
       ], true, true) +
       '<h2>Your answer *</h2>' +
@@ -14317,7 +14447,7 @@ function renderEmployeeFile(e) {
     const hasPw = empHasOwnPassword(e);
     $('resetEmpPasswordBtn').style.display = canMutateDesk() ? '' : 'none';
     $('resetEmpPasswordBtn').disabled = !hasPw;
-    $('resetEmpPasswordBtn').textContent = hasPw ? 'Reset password' : 'No password set';
+    $('resetEmpPasswordBtn').textContent = hasPw ? 'Reset PIN' : 'No PIN set';
   }
   if ($('empDocHint')) {
     if (!hasContract) $('empDocHint').textContent = 'Send the employment contract first (you sign, then they reply).';
@@ -14327,7 +14457,9 @@ function renderEmployeeFile(e) {
     else if (!hasLogin) $('empDocHint').textContent = 'Packet acknowledged — send Account login information next.';
     else if (!loginOk) $('empDocHint').textContent = 'Login sent — import Frenchies-Reply-….html. Do not send a duplicate.';
     else $('empDocHint').textContent = 'Desk access granted · ' + (e.loginUsername || loginUsernameFromName(e.name)) +
-      (empHasOwnPassword(e) ? ' · personal password set' : ' · first sign-in with house password, then create their own');
+      (empHasOwnPassword(e)
+        ? (empNeedsPinMigration(e) ? ' · legacy password — will force PIN on next login' : ' · personal PIN set')
+        : ' · first sign-in with house PIN, then create their own PIN');
   }
   if ($('openHirePapersBtn')) {
     if (linkedApp) {
@@ -15693,15 +15825,15 @@ $('sendEmpPacket').onclick = () => {
 };
 
 if ($('resetEmpPasswordBtn')) $('resetEmpPasswordBtn').onclick = () => {
-  if (!requireMgmt('Password reset')) return;
+  if (!requireMgmt('PIN reset')) return;
   const e = empById(editId);
   if (!e) return toast('Save the file first');
-  if (!empHasOwnPassword(e)) return toast('No personal password on file yet');
-  if (!confirm('Reset desk password for ' + e.name + '? They must sign in with the house password and create a new one.')) return;
+  if (!empHasOwnPassword(e)) return toast('No personal PIN on file yet');
+  if (!confirm('Reset desk PIN for ' + e.name + '? They must sign in with the house PIN and create a new personal PIN.')) return;
   resetEmpLoginPassword(e, 'Reset by ' + ((sessionUser && sessionUser.name) || 'HR'));
   save();
   renderEmployeeFile(e);
-  toast('Password reset · ' + e.name + ' uses house password next');
+  toast('PIN reset · ' + e.name + ' uses house PIN next');
 };
 
 if ($('sendEmpLogin')) $('sendEmpLogin').onclick = () => {
@@ -16816,7 +16948,7 @@ $('importJson').onclick = () => {
   if (!requireMgmt('Import backup')) return;
   const f = $('importFile').files[0];
   if (!f) return toast('Choose a JSON file first');
-  if (!confirm('Replace the entire office file with this backup? A local snapshot will be kept first.\n\nFull backups include login passwords. Shared packs are password-redacted — use Pull shared desk for those.')) return;
+  if (!confirm('Replace the entire office file with this backup? A local snapshot will be kept first.\n\nFull backups include login PINs. Shared packs are PIN-redacted — use Pull shared desk for those.')) return;
   const reader = new FileReader();
   reader.onload = () => {
     try {
@@ -16824,7 +16956,7 @@ $('importJson').onclick = () => {
       const looksShared = !!(parsed && parsed.meta && parsed.meta.passwordsRedacted);
       if (looksShared && !confirm('This file looks like a shared pack (passwords redacted), not a full backup. Import anyway? Prefer Pull shared desk for multi-PC sync.')) return;
       const hasPasswords = (parsed.employees || []).some(e => e && String(e.loginPassword || '').length);
-      if (hasPasswords && !confirm('This backup includes personal login passwords. Continue import?')) return;
+      if (hasPasswords && !confirm('This backup includes personal login PINs. Continue import?')) return;
       const data = migrate(parsed);
       if (!data || !data.employees) throw new Error('bad file');
       pushSnapshot('pre-import');
@@ -16888,7 +17020,7 @@ if ($('loginSignInPanel')) {
     if ($('loginErr')) $('loginErr').textContent = res.ok ? '' : (res.msg || 'Sign-in failed');
     if (res.ok && res.needPassword) {
       if ($('loginErr')) $('loginErr').textContent = '';
-      toast('Create your own password to continue');
+      toast(res.migratePin ? 'ECRP requires a PIN — create yours to continue' : 'Create your own PIN to continue');
     } else if (res.ok) toast('Welcome, ' + res.emp.name);
   };
 }
@@ -16896,8 +17028,8 @@ if ($('loginSetupPanel')) {
   $('loginSetupPanel').onsubmit = (ev) => {
     ev.preventDefault();
     const res = completePasswordSetup($('setupPass').value, $('setupPass2').value);
-    if ($('setupErr')) $('setupErr').textContent = res.ok ? '' : (res.msg || 'Could not save password');
-    if (res.ok) toast('Password saved · welcome, ' + res.emp.name);
+    if ($('setupErr')) $('setupErr').textContent = res.ok ? '' : (res.msg || 'Could not save PIN');
+    if (res.ok) toast('PIN saved · welcome, ' + res.emp.name);
   };
 }
 if ($('setupCancel')) {
@@ -17029,7 +17161,7 @@ const HANDBOOK_EXCERPTS = [
   { id: 'calloff', title: 'Call-offs', tags: 'call-off time-off sick', body: 'Same-day or next-shift absences are Call-offs. Future ranges are Time-off. Submit from the account menu; leads approve and mark the shift board Off.' },
   { id: 'uniform', title: 'Uniform & assets', tags: 'uniform assets equipment', body: 'Uniforms and house assets are listed on your personnel file. Return items when leaving or on request. Termination checklist includes outstanding assets.' },
   { id: 'shifts', title: 'Shifts & Host', tags: 'shifts host station coverage', body: 'The shift board uses Bar, Kitchen, Floor, Host, or Off. Staff set availability on their file; leads edit the board. Coverage gaps flag empty days.' },
-  { id: 'login', title: 'Desk login', tags: 'login password stay', body: 'House password first, then your personal password. Stay logged in keeps you signed in on this device until expiry or Sign out. Never share personal passwords.' },
+  { id: 'login', title: 'Desk login', tags: 'login pin password stay ecrp', body: 'House PIN first, then your personal 6+ digit PIN (ECRP). Owner may use a master password. Stay logged in keeps you signed in on this device until expiry or Sign out. Never share PINs in public Discord.' },
   { id: 'conduct', title: 'Floor conduct', tags: 'radio respect guests', body: 'Stay professional on radio and Discord. Log serious issues with Relations. Commendations and warnings live on the personnel file.' }
 ];
 
@@ -18568,17 +18700,17 @@ function applySharedDesk(migrated, labelText) {
     if (!e || !empHasLoginAccess(e) || e.status === 'terminated' || e.status === 'suspended') {
       logoutDesk();
       toast('Session ended — employee missing or closed after pull');
-    } else if (!empHasOwnPassword(e)) {
-      /* Still no password after merge — ask them to set one */
+    } else if (!empHasOwnPassword(e) || empNeedsPinMigration(e)) {
+      /* Still no PIN after merge — ask them to set one */
       clearDurableSession();
       persistSession(null);
       pendingPasswordEmpId = e.id;
       sessionUser = null;
       applySessionChrome();
       setLoginGateMode('setup');
-      toast('Re-set your personal password after shared pull');
+      toast('Re-set your personal PIN after shared pull');
     } else {
-      setSharedDeskLiveStatus('Pulled rev ' + (s.meta.rev || 0) + ' · local passwords kept');
+      setSharedDeskLiveStatus('Pulled rev ' + (s.meta.rev || 0) + ' · local PINs kept');
     }
   }
 }
@@ -18732,7 +18864,11 @@ function loadDurableSession() {
       clearDurableSession();
       return null;
     }
-    if (!empHasOwnPassword(e)) { clearDurableSession(); return null; }
+    if (!empHasOwnPassword(e) || empNeedsPinMigration(e)) {
+      clearDurableSession();
+      if (empNeedsPinMigration(e) || !empHasOwnPassword(e)) pendingPasswordEmpId = e.id;
+      return null;
+    }
     if (Number(data.epoch || 1) !== Number(e.loginSessionEpoch || 1)) {
       clearDurableSession();
       return null;
