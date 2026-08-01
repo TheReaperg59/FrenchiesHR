@@ -3801,7 +3801,7 @@ body.session-staff #pullSharedBtn{display:none!important}
 <div class="modal" id="sharedPullModal" role="dialog" aria-modal="true" hidden><div class="dialog" role="document" tabindex="-1">
   <h2>Pull shared desk</h2>
   <div class="dialog-scroll">
-    <p class="ui-hint">Paste a shared desk JSON pack or fetch your domain raw URL. A snapshot is taken first. Personal passwords from this browser are kept when the pack is redacted. On a rev clash you choose Keep mine or Take theirs.</p>
+    <p class="ui-hint">Paste a shared desk JSON pack or fetch your domain raw URL. A snapshot is taken first. Personal PINs from this browser are kept when the pack is redacted. On a rev clash you choose Keep mine or Take theirs.</p>
     <div class="field"><label>Raw URL (optional)</label><input id="sharedUrl" placeholder="https://…/frenchies-shared-desk.json"></div>
     <div class="field"><label>Or paste JSON</label><textarea id="sharedPaste" rows="8" placeholder="{ … }"></textarea></div>
     <div id="sharedConflictBox" class="roadmap-panel" style="display:none">
@@ -16948,7 +16948,7 @@ $('importJson').onclick = () => {
   if (!requireMgmt('Import backup')) return;
   const f = $('importFile').files[0];
   if (!f) return toast('Choose a JSON file first');
-  if (!confirm('Replace the entire office file with this backup? A local snapshot will be kept first.\n\nFull backups include login passwords. Shared packs are password-redacted — use Pull shared desk for those.')) return;
+  if (!confirm('Replace the entire office file with this backup? A local snapshot will be kept first.\n\nFull backups include login PINs. Shared packs are PIN-redacted — use Pull shared desk for those.')) return;
   const reader = new FileReader();
   reader.onload = () => {
     try {
@@ -16956,7 +16956,7 @@ $('importJson').onclick = () => {
       const looksShared = !!(parsed && parsed.meta && parsed.meta.passwordsRedacted);
       if (looksShared && !confirm('This file looks like a shared pack (passwords redacted), not a full backup. Import anyway? Prefer Pull shared desk for multi-PC sync.')) return;
       const hasPasswords = (parsed.employees || []).some(e => e && String(e.loginPassword || '').length);
-      if (hasPasswords && !confirm('This backup includes personal login passwords. Continue import?')) return;
+      if (hasPasswords && !confirm('This backup includes personal login PINs. Continue import?')) return;
       const data = migrate(parsed);
       if (!data || !data.employees) throw new Error('bad file');
       pushSnapshot('pre-import');
