@@ -142,9 +142,29 @@ Stay on **General Information** (left sidebar — first item).
 
 ### 3D — Build the invite URL (this is the “URL link”)
 
-1. Left sidebar → click **OAuth2**.
-2. Under OAuth2, click the sub-item **URL Generator** (not “General”).
-3. You should see two big sections: **SCOPES** and **BOT PERMISSIONS**.
+**If Discord says:** *“You must specify at least one URI for authentication…”*  
+you are on the wrong requirement for invites — fix redirects first (3D-0), then generate the URL.
+
+#### 3D-0 — Add one Redirect URI (required by Discord before OAuth works)
+
+1. Left sidebar → **OAuth2** (the main OAuth2 page, sometimes called **General** under OAuth2 — **not** URL Generator yet).
+2. Find the section **Redirects**.
+3. Click **Add Redirect** (or the empty field).
+4. Paste exactly this (Discord’s own “success” page for bot invites):
+
+   ```text
+   https://discord.com/oauth2/authorized
+   ```
+
+5. Click **Save Changes** (important — wait until it saves).
+6. You should now see that URI listed under Redirects.
+
+You are **not** putting your Supabase URL or Tiiny Host URL here. This redirect is only so Discord’s OAuth form will work.
+
+#### 3D-1 — URL Generator
+
+1. Left sidebar → **OAuth2** → click the sub-item **URL Generator**.
+2. You should see two big sections: **SCOPES** and **BOT PERMISSIONS**.
 
 **SCOPES** (top checklist) — check exactly these two:
 
@@ -392,6 +412,7 @@ Frenchie's register sales
 
 | Symptom | Likely fix |
 |---------|------------|
+| Discord “You must specify at least one URI for authentication” | OAuth2 → add Redirect `https://discord.com/oauth2/authorized` → Save Changes → then use URL Generator |
 | Discord “Interactions endpoint URL” fails to save | Function not deployed, wrong Public Key secret, or JWT still verified — redeploy with `--no-verify-jwt` and re-set `DISCORD_PUBLIC_KEY` |
 | `/register` missing | Re-run command script; confirm guild ID; wait a minute; restart Discord |
 | Modal submit: “Register sync is not configured” | Edge Function missing `SUPABASE_URL` / `SUPABASE_SERVICE_ROLE_KEY` secrets |
