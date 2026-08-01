@@ -191,6 +191,11 @@ You do **not** need Administrator.
    - Click **Continue** → **Authorize** → complete captcha if asked  
 9. You should see “Authorized” / bot joins the server.
 
+**If Discord then shows a toast “Invalid Form Body” after you close the success page and open the app:**  
+that is a common Discord **client glitch on the OAuth redirect**. It is **not** `/register` failing. Check the server member list for your bot — if the bot is there, **ignore the toast** and continue setup. Prefer: finish Authorize in the **browser**, close that tab, then open the Discord app yourself (don’t use “Open Discord” if it errors).
+
+If the bot is **not** in the member list, generate a **fresh** invite URL (3D-1), Authorize again in Chrome/Edge (not the Discord app browser), then check members again.
+
 If the Generated URL box is empty: you have not checked **`bot`** under Scopes yet — check it and the URL appears.
 
 ### 3E — Confirm the bot is in your Discord server
