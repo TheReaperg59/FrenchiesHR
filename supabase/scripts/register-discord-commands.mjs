@@ -56,23 +56,32 @@ const main = async () => {
       console.error('POST_BUTTON set but DISCORD_REGISTER_CHANNEL_ID missing');
       process.exit(1);
     }
-    const msg = await api('POST', `/channels/${channelId}/messages`, {
-      content:
-        "**Register sales**\n" +
-        "Tap the button (or type `/register`) to log what the customer paid — food, drinks, or service.\n" +
-        "Drops sync to the Frenchie's Income desk via Supabase.",
-      components: [{
-        type: 1,
+    try {
+      const msg = await api('POST', `/channels/${channelId}/messages`, {
+        content:
+          "**Register sales**\n" +
+          "Tap the button (or type `/register`) to log what the customer paid — food, drinks, or service.\n" +
+          "Drops sync to the Frenchie's Income desk via Supabase.",
         components: [{
-          type: 2,
-          style: 3,
-          custom_id: 'register_open',
-          label: 'Log register drop',
+          type: 1,
+          components: [{
+            type: 2,
+            style: 3,
+            custom_id: 'register_open',
+            label: 'Log register drop',
+          }],
         }],
-      }],
-    });
-    console.log('Posted button message:', msg.id);
-    console.log('Pin it in #register-sales so players always see it.');
+      });
+      console.log('Posted button message:', msg.id);
+      console.log('Pin it in #register-sales so players always see it.');
+    } catch (err) {
+      console.error('\n/register command is OK, but the bot cannot post in that channel (Missing Access).');
+      console.error('Fix: Discord → #register-sales → Edit Channel → Permissions → add Frenchies Register');
+      console.error('Allow: View Channel, Send Messages, Embed Links, Read Message History → Save.');
+      console.error('Confirm channel ID: right-click the channel → Copy Channel ID (must match DISCORD_REGISTER_CHANNEL_ID).');
+      console.error('You can still use /register in Discord without the button.');
+      process.exitCode = 2;
+    }
   } else {
     console.log('Tip: set POST_BUTTON=1 and DISCORD_REGISTER_CHANNEL_ID to post the channel button.');
   }
