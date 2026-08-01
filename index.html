@@ -16801,6 +16801,7 @@ function renderEmpAssets(e) {
   ).join('') : '<div class="mini-note">No uniforms or assets issued.</div>';
   if ($('empAssetAddRow')) $('empAssetAddRow').style.display = canEdit ? '' : 'none';
   if ($('addAssetBtn')) $('addAssetBtn').style.display = canEdit ? '' : 'none';
+  if ($('assetNote')) $('assetNote').style.display = canEdit ? '' : 'none';
   if ($('assetDate') && !$('assetDate').value) $('assetDate').value = today();
   /* Termination checklist outstanding assets */
   const termBox = $('termAssetWarn');
