@@ -95,137 +95,90 @@ supabase db push          # applies migrations under supabase/migrations/
 
 ---
 
-## Step 3 — Create the Discord application + bot
+## Step 3 — Create the Discord application + bot (fixed invite method)
 
-Do this **before** you set the Interactions Endpoint URL (that URL needs the Edge Function from Step 5 — skip Interactions URL for now).
+**App Verification is not required.**  
+**Do not use a custom Redirect URI for this bot.** Discord’s docs say bot invites with only `bot` + `applications.commands` should **not** use `redirect_uri`. Adding `https://discord.com/oauth2/authorized` and authorizing often makes the Discord desktop app show **Invalid Form Body** after “success.”
 
-### Important (why perms “don’t save”)
+Use the **Installation** page + **Discord Provided Link** (current Discord-recommended path).
 
-On the **OAuth2 → URL Generator** page, Discord does **not** save your permission checkboxes when you leave the page. That screen only **builds an invite link**. You must:
+### 3A — Create the app + bot user
 
-1. Check scopes + permissions  
-2. **Copy the long URL at the bottom**  
-3. **Open that URL** in a browser and click **Authorize** on your server  
+1. Open https://discord.com/developers/applications in **Chrome or Edge**.
+2. **New Application** → name `Frenchies Register` → **Create**.
+3. On **General Information**, copy:
+   - **Application ID** → `DISCORD_APP_ID`
+   - **Public Key** → `DISCORD_PUBLIC_KEY`
+4. Leave **Interactions Endpoint URL** empty.
+5. Left sidebar → **Bot** → **Add Bot** if needed → **Reset Token** → **Copy** → `DISCORD_BOT_TOKEN`.
+6. Optional: Public Bot = Off. Leave privileged intents off. Click **Save Changes** if shown.
 
-If you leave without copying/opening the URL, the checks reset — that is normal.
+### 3B — Remove Redirects that break the invite
 
-There is **no separate “invite URL” button** on the Bot page. The invite link lives only under **OAuth2 → URL Generator**.
+1. Left sidebar → **OAuth2**.
+2. Under **Redirects**, **delete** every redirect (including `https://discord.com/oauth2/authorized` if you added it).
+3. Click **Save Changes**.
 
----
+### 3C — Installation page (use this invite)
 
-### 3A — Create the app
+1. Left sidebar → **Installation**.
+2. **Installation Contexts**:
+   - Check **Guild Install**
+   - Uncheck **User Install** (simpler for a server-only bot)
+3. **Install Link** → select **Discord Provided Link**.
+4. **Default Install Settings** for **Guild Install**:
+   - Scopes: **`bot`** and **`applications.commands`**
+   - Permissions: **View Channels**, **Send Messages**, **Embed Links**, **Read Message History**
+5. Click **Save Changes** and wait until it saves.
+6. Copy the **Install Link** at the top of the Installation page.
+7. Paste into a **new Chrome/Edge tab** → Enter.
+8. Choose **[ECRP] Frenchies** → **Authorize**.
+9. Close the browser tab. If Discord shows **Invalid Form Body**, click Close, then do 3D anyway.
 
-1. Open [https://discord.com/developers/applications](https://discord.com/developers/applications) while logged into Discord.
-2. Top right: **New Application**.
-3. Name: `Frenchies Register` (or similar) → agree to ToS → **Create**.
-4. You land on **General Information** (left sidebar).
+### 3D — Confirm in Integrations (source of truth)
 
-### 3B — Copy IDs from General Information
+Member list can hide bots. Do this:
 
-Stay on **General Information** (left sidebar — first item).
+1. Discord → **[ECRP] Frenchies** → click server name → **Server Settings**.
+2. Left: **Integrations** → **Bots and Apps**.
+3. Find **Frenchies Register**.
+4. Create `#register-sales` if needed; channel Permissions → allow the bot View / Send / Embed / Read History.
 
-1. Find **Application ID** → click **Copy** → paste into your notes as `DISCORD_APP_ID`.
-2. Scroll to **Public Key** → click **Copy** → paste as `DISCORD_PUBLIC_KEY`.
-3. **Leave “Interactions Endpoint URL” blank for now.** You fill that in Step 6 after the Edge Function is deployed. If you paste a fake URL and Save, Discord will reject it.
+### 3E — Backup invite (no redirect in the URL)
 
-### 3C — Create the bot user + token
+If Installation still fails, open this in Chrome (replace `YOUR_APP_ID` with Application ID):
 
-1. Left sidebar → click **Bot** (under “Settings”).
-2. If you see **Add Bot**, click it → **Yes, do it!**.
-3. Under **Token**:
-   - Click **Reset Token** → confirm (or **View Token** if shown).
-   - Click **Copy** immediately → paste as `DISCORD_BOT_TOKEN`.
-   - You only see the full token once; if lost, Reset Token again and update Supabase secrets later.
-4. Optional: turn **Public Bot** **Off** (so only you invite it).
-5. Scroll past **Privileged Gateway Intents** — leave **Message Content Intent** **off** (not needed for `/register` modal).
-6. If there is a **Save Changes** button on this Bot page, click it. (Token/intents changes need Save; URL Generator does not.)
+```text
+https://discord.com/api/oauth2/authorize?client_id=YOUR_APP_ID&permissions=3072&scope=bot%20applications.commands
+```
 
-### 3D — Build the invite URL (this is the “URL link”)
+That URL has **no** `redirect_uri`. Authorize → check **Integrations** again.  
+(`3072` = View Channel + Send Messages; raise channel perms after if needed.)
 
-**If Discord says:** *“You must specify at least one URI for authentication…”*  
-you are on the wrong requirement for invites — fix redirects first (3D-0), then generate the URL.
+### 3F — Copy server + channel IDs
 
-#### 3D-0 — Add one Redirect URI (required by Discord before OAuth works)
+1. User Settings → Advanced → **Developer Mode** On.
+2. Right-click server → **Copy Server ID** → `DISCORD_GUILD_ID`.
+3. Right-click `#register-sales` → **Copy Channel ID** → `DISCORD_REGISTER_CHANNEL_ID`.
 
-1. Left sidebar → **OAuth2** (the main OAuth2 page, sometimes called **General** under OAuth2 — **not** URL Generator yet).
-2. Find the section **Redirects**.
-3. Click **Add Redirect** (or the empty field).
-4. Paste exactly this (Discord’s own “success” page for bot invites):
+### 3G — Checklist before Step 4
 
-   ```text
-   https://discord.com/oauth2/authorized
-   ```
+- [ ] `DISCORD_APP_ID`
+- [ ] `DISCORD_PUBLIC_KEY`
+- [ ] `DISCORD_BOT_TOKEN`
+- [ ] `DISCORD_GUILD_ID`
+- [ ] `DISCORD_REGISTER_CHANNEL_ID`
+- [ ] Bot listed under Server Settings → Integrations
+- [ ] Bot can access `#register-sales`
+- [ ] Redirects list empty (or unused)
+- [ ] Interactions Endpoint URL still blank
 
-5. Click **Save Changes** (important — wait until it saves).
-6. You should now see that URI listed under Redirects.
-
-You are **not** putting your Supabase URL or Tiiny Host URL here. This redirect is only so Discord’s OAuth form will work.
-
-#### 3D-1 — URL Generator
-
-1. Left sidebar → **OAuth2** → click the sub-item **URL Generator**.
-2. You should see two big sections: **SCOPES** and **BOT PERMISSIONS**.
-
-**SCOPES** (top checklist) — check exactly these two:
-
-- [x] **`bot`**
-- [x] **`applications.commands`**
-
-(Do not only check `bot` — without `applications.commands`, `/register` will not install.)
-
-**BOT PERMISSIONS** (appears after you check `bot`) — check:
-
-- [x] **Send Messages**
-- [x] **Embed Links**
-- [x] **Read Message History**
-- [x] **View Channels** (if listed)
-
-You do **not** need Administrator.
-
-4. **Scroll all the way to the bottom** of the URL Generator page.
-5. Find the box labeled **GENERATED URL** (long link starting with `https://discord.com/api/oauth2/authorize?...`).
-6. Click **Copy** next to that box (or select all + copy).
-7. **Paste the URL into a new browser tab** and press Enter.
-8. Discord shows **Add to Server**:
-   - Dropdown → pick your **Frenchie's** server  
-   - Click **Continue** → **Authorize** → complete captcha if asked  
-9. You should see “Authorized” / bot joins the server.
-
-**If Discord then shows a toast “Invalid Form Body” after you close the success page and open the app:**  
-that is a common Discord **client glitch on the OAuth redirect**. It is **not** `/register` failing. Check the server member list for your bot — if the bot is there, **ignore the toast** and continue setup. Prefer: finish Authorize in the **browser**, close that tab, then open the Discord app yourself (don’t use “Open Discord” if it errors).
-
-If the bot is **not** in the member list, generate a **fresh** invite URL (3D-1), Authorize again in Chrome/Edge (not the Discord app browser), then check members again.
-
-If the Generated URL box is empty: you have not checked **`bot`** under Scopes yet — check it and the URL appears.
-
-### 3E — Confirm the bot is in your Discord server
-
-1. Open the Discord app (desktop or discord.com).
-2. Open your Frenchie's server.
-3. Open the member list (right side) — you should see the bot (e.g. **Frenchies Register**) with a bot tag.
-4. Open `#register-sales` (create the channel if needed: right-click category → Create Channel → text → name `register-sales`).
-5. Server Settings → **Roles** → find the bot’s role → ensure it can see `#register-sales`.
-   - Or: channel gear on `#register-sales` → **Permissions** → add the bot role → allow **View Channel**, **Send Messages**, **Embed Links**.
-
-### 3F — Copy Server ID and Channel ID
-
-1. Discord app → User Settings (gear next to your name) → **App Settings** → **Advanced** → turn **Developer Mode** **On** → Esc to close.
-2. Right-click your **server icon/name** (top of channel list) → **Copy Server ID** → `DISCORD_GUILD_ID`.
-3. Right-click the **`#register-sales`** channel → **Copy Channel ID** → `DISCORD_REGISTER_CHANNEL_ID`.
-
-### 3G — What you should have before Step 4
-
-- [ ] `DISCORD_APP_ID`  
-- [ ] `DISCORD_PUBLIC_KEY`  
-- [ ] `DISCORD_BOT_TOKEN`  
-- [ ] `DISCORD_GUILD_ID`  
-- [ ] `DISCORD_REGISTER_CHANNEL_ID`  
-- [ ] Bot visible in the server member list  
-- [ ] Bot can post in `#register-sales`  
-
-**Still skip Interactions Endpoint URL** until Step 6.
-
----
+| Still stuck? | Fix |
+|--------------|-----|
+| No Manage Server on the guild | Ask an admin to Authorize, or get Manage Server |
+| Server requires 2FA for mods | Enable 2FA on your Discord account |
+| Wrong app | Confirm Application ID matches the Install Link |
+| App Verification tab | Ignore — not needed under 100 servers |
 
 ## Step 4 — Install Supabase CLI (if you have not)
 
