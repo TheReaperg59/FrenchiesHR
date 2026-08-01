@@ -413,6 +413,7 @@ Frenchie's register sales
 | Symptom | Likely fix |
 |---------|------------|
 | Discord “You must specify at least one URI for authentication” | OAuth2 → add Redirect `https://discord.com/oauth2/authorized` → Save Changes → then use URL Generator |
+| Discord app toast **Invalid Form Body** on `/register` or button | Usually a bad modal payload from the Edge Function — pull latest `discord-register`, redeploy, try again. Do not click the button until Interactions URL Save succeeded. |
 | Discord “Interactions endpoint URL” fails to save | Function not deployed, wrong Public Key secret, or JWT still verified — redeploy with `--no-verify-jwt` and re-set `DISCORD_PUBLIC_KEY` |
 | `/register` missing | Re-run command script; confirm guild ID; wait a minute; restart Discord |
 | Modal submit: “Register sync is not configured” | Edge Function missing `SUPABASE_URL` / `SUPABASE_SERVICE_ROLE_KEY` secrets |
