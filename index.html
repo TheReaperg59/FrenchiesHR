@@ -2462,7 +2462,7 @@ body.session-staff #pullSharedBtn{display:none!important}
       <div class="actions">
         <button type="submit" class="btn primary" id="loginSubmit">Sign in</button>
       </div>
-      <p class="sub" style="margin:14px 0 0">Access is granted only after your <b>Account login information</b> paper is signed and filed by HR. First time: sign in with <b>frenchies636</b>, then set your own password.</p>
+      <p class="sub" style="margin:14px 0 0">Access is granted only after your <b>Account login information</b> paper is signed and filed by HR. First time: use the house password from that paper (or ask HR), then set your own password.</p>
     </form>
     <form class="login-panel" id="loginSetupPanel" autocomplete="off">
       <div class="brand">Create your password</div>
@@ -2570,7 +2570,7 @@ body.session-staff #pullSharedBtn{display:none!important}
         <button type="button" class="top-account-item danger" id="logoutBtn" role="menuitem">Sign out</button>
         <button type="button" class="top-account-item" id="logoutAllBtn" role="menuitem">Sign out all remembered</button>
         <div class="top-account-foot">
-          <span class="build-chip" id="deskBuildChip" title="Desk build">v35</span>
+          <span class="build-chip" id="deskBuildChip" title="Desk build">v38</span>
           <label class="top-jump-label" for="quickJump">Jump to</label>
           <select class="top-jump" id="quickJump" title="Jump to any tab">
             <option value="overview">Overview</option>
@@ -3214,7 +3214,7 @@ body.session-staff #pullSharedBtn{display:none!important}
       <details class="fold quiet" open>
         <summary>Office library &amp; house rules</summary>
         <div class="fold-body">
-          <p class="ui-hint"><a href="https://docs.google.com/document/d/11gAskCqa9xXbTfopR7q1RmLu_pdVenVh-qVK4Rcyd8c/edit?usp=sharing" target="_blank" rel="noopener">Full employee handbook</a></p>
+          <p class="ui-hint"><a id="complianceHandbookLink" href="https://docs.google.com/document/d/11gAskCqa9xXbTfopR7q1RmLu_pdVenVh-qVK4Rcyd8c/edit?usp=sharing" target="_blank" rel="noopener">Full employee handbook</a></p>
           <p class="ui-hint">Restaurant first, then raffles and adult entertainment as licenses allow.</p>
           <p class="ui-hint">Hiring bar: city standing + no recent felony. Terrorism or gov-employee murder is a hard bar.</p>
         </div>
@@ -3313,7 +3313,11 @@ body.session-staff #pullSharedBtn{display:none!important}
     <div class="card-body">
       <div class="mini-note" id="storageHealthText">Checking localStorage…</div>
       <div class="storage-meter" aria-hidden="true"><i id="storageMeterBar"></i></div>
+      <div class="tip-warn" id="storageQuotaWarn" style="display:none;margin-top:10px" role="status">Storage is getting full — export a backup, then trim activity or old clock marks.</div>
       <div class="actions" style="margin-top:12px">
+        <button type="button" class="btn tiny primary" id="exportJsonFromHealth">Export backup now</button>
+        <button type="button" class="btn tiny soft" id="trimActivityBtn">Trim activity</button>
+        <button type="button" class="btn tiny soft" id="trimClockBtn">Clear old clock</button>
         <button type="button" class="btn tiny soft" id="validateImportBtn">Validate current file</button>
         <button type="button" class="btn tiny" id="exportLicensesBtn">Export license calendar</button>
         <button type="button" class="btn tiny soft" id="pushSnapshotBtn">Save snapshot now</button>
@@ -3341,14 +3345,16 @@ body.session-staff #pullSharedBtn{display:none!important}
       <button class="btn" id="importJson">Import JSON</button>
     </div></div>
   </div>
-  <div class="card mgmt-only" style="margin-top:12px" data-mgmt-only><div class="card-head"><b>Shared desk sync</b><span class="pill gray" id="sharedDeskBuildPill">v35</span></div>
+  <div class="card mgmt-only" style="margin-top:12px" data-mgmt-only><div class="card-head"><b>Shared desk sync</b><span class="pill gray" id="sharedDeskBuildPill">v38</span></div>
     <div class="card-body">
-      <p class="ui-hint"><b>Publish to domain</b> tries to write your redacted pack to the raw URL (when the host allows PUT). If that fails, it downloads the JSON — upload that file to Tiiny Host so every PC can <b>Pull</b>. Passwords stay on each browser.</p>
+      <p class="ui-hint"><b>Publish to domain</b> tries to write your redacted pack to the raw URL (when the host allows PUT). If that fails, it downloads the JSON — follow the Tiiny checklist below, then <b>Pull</b> on other PCs. Passwords stay on each browser.</p>
       <div class="field"><label>Shared raw URL (same file every PC pulls)</label><input id="sharedDeskUrlSetting" placeholder="https://yourdomain/…/frenchies-shared-desk.json"></div>
       <div class="mini-note" id="sharedDeskLiveStatus" style="margin:8px 0">No publish yet this session.</div>
+      <div id="sharedPublishChecklist" class="roadmap-panel" style="display:none;margin:10px 0"></div>
       <div class="actions" style="margin-top:10px">
         <button type="button" class="btn primary" id="publishSharedBtn">Publish to domain</button>
         <button type="button" class="btn soft" id="downloadSharedPackBtn">Download pack only</button>
+        <button type="button" class="btn soft" id="probeSharedAheadBtn">Check if shared ahead</button>
         <button type="button" class="btn soft" id="pullSharedFromBackupBtn">Pull shared desk…</button>
       </div>
     </div>
@@ -3492,6 +3498,7 @@ body.session-staff #pullSharedBtn{display:none!important}
           <div class="field"><label>Item</label><input id="assetItem" placeholder="e.g. Black apron"></div>
           <div class="field"><label>Issued</label><input id="assetDate" type="date"></div>
         </div>
+        <div class="field"><label>Note</label><input id="assetNote" placeholder="Optional — size, locker, radio #"></div>
         <button class="btn tiny soft" type="button" id="addAssetBtn">Add asset</button>
       </div>
     </details>
@@ -3671,11 +3678,12 @@ body.session-staff #pullSharedBtn{display:none!important}
       <div class="field"><label>Mark</label><select id="clkMark"><option value="10-1">10-1 (in)</option><option value="10-2">10-2 (out)</option><option value="note">Note</option></select></div>
       <div class="field"><label>Time</label><input id="clkTime" type="time" value="09:00"></div>
     </div>
-    <div class="field"><label>Note</label><input id="clkNote" placeholder="Optional — e.g. mid-shift break"></div>
-    <p class="ui-hint" id="clockHint">Staff log their own 10-1/10-2. Leads apply unapplied pairs to the open period. Overnight spans allowed when out time is earlier than in (next calendar day). Note text like &quot;4h&quot; overrides.</p>
+    <div class="field"><label>Note</label><input id="clkNote" placeholder="Optional — e.g. 4h (overrides times)"></div>
+    <p class="ui-hint" id="clockHint">Staff log their own 10-1/10-2. Leads apply unapplied pairs to the open period. Overnight spans allowed when out time is earlier than in (next calendar day). Note text like &quot;4h&quot; overrides. Pairs without times or note hours cannot silently default to 1h.</p>
     <div id="clockApplyPreview" class="roadmap-panel" style="display:none;margin:10px 0"></div>
     <div class="dialog-foot" style="border:0;padding-top:0;margin:0 0 12px"><button class="btn primary" id="addClockEntry" type="button">Add entry</button>
       <button class="btn soft" id="previewClockHours" type="button">Preview pairs</button>
+      <button class="btn soft" id="clockShowMissingBtn" type="button">Show missing times</button>
       <button class="btn soft" id="applyClockHours" type="button">Apply all unapplied</button>
       <button class="btn soft" id="applyClockSincePay" type="button">Apply since payday</button></div>
     <div id="clockList"></div>
@@ -4030,6 +4038,20 @@ body.session-staff #pullSharedBtn{display:none!important}
 </div>
 
 
+<div class="modal" id="assetEditModal" role="dialog" aria-modal="true" aria-labelledby="assetEditTitle" hidden>
+  <div class="dialog" role="document" tabindex="-1">
+    <h2 id="assetEditTitle">Edit asset</h2>
+    <div class="field"><label>Item</label><input id="assetEditItem" placeholder="e.g. Black apron"></div>
+    <div class="field"><label>Issued</label><input id="assetEditDate" type="date"></div>
+    <div class="field"><label>Note</label><input id="assetEditNote" placeholder="Optional"></div>
+    <label class="checkline"><input type="checkbox" id="assetEditReturned"><span>Returned</span></label>
+    <div class="dialog-foot">
+      <button type="button" class="btn" id="cancelAssetEdit">Cancel</button>
+      <button type="button" class="btn primary" id="saveAssetEdit">Save asset</button>
+    </div>
+  </div>
+</div>
+
 <div class="modal" id="sundayRunModal" role="dialog" aria-modal="true" aria-labelledby="sundayRunTitle" hidden>
   <div class="dialog wide" role="document" tabindex="-1">
     <h2 id="sundayRunTitle">Sunday pay run</h2>
@@ -4106,6 +4128,8 @@ body.session-staff #pullSharedBtn{display:none!important}
     <div class="field"><label>Tip-eligible roles (comma-separated)</label><input id="setTipRoles" placeholder="Waiter, Hostess, Cook"></div>
     <div class="field"><label>High-hours warning threshold</label><input id="setOtHours" type="number" min="1" step="0.5" value="40"></div>
     <div class="field"><label>Stay-logged-in days</label><select id="setSessionDays"><option value="1">1</option><option value="7">7</option><option value="14" selected>14</option><option value="30">30</option></select></div>
+    <div class="field"><label>House password (first sign-in)</label><input id="setHousePass" type="password" placeholder="Leave blank to keep current" autocomplete="new-password"></div>
+    <p class="ui-hint" style="margin:-6px 0 10px">Shown on Account login papers for new hires — not printed on the login screen.</p>
     <div class="field"><label>Shared desk raw URL</label><input id="setSharedUrl" placeholder="https://…/frenchies-shared-desk.json"></div>
     <label class="checkline"><input type="checkbox" id="setSharedAutoPull"><span>Auto-pull shared desk on login / tab focus (mgmt &amp; leads)</span></label>
     <div class="field"><label>Handbook Google Doc URL</label><input id="setHandbookUrl" placeholder="https://docs.google.com/document/d/…"></div>
@@ -4140,8 +4164,11 @@ const STORAGE = 'frenchies_hr_v7';
 const STORAGE_MIRROR = 'frenchies_hr_v7_mirror';
 const OLD_V6 = 'frenchies_hr_v6';
 const OLD_V5 = 'frenchies_final_v5';
-const ACTIVITY_CAP = Infinity; /* no trim — keep full office activity history */
+const ACTIVITY_CAP = 800; /* trim older office activity to protect localStorage */
 const PAYLOG_CAP = 2500;
+const CLOCK_LOG_CAP = 400; /* keep unapplied + newest applied marks */
+const SNAPSHOT_KEEP = 3;
+const SNAPSHOT_EVERY_N_SAVES = 12;
 
 const DEFAULT_ROLES = {
   'Owner': 7500,
@@ -4178,8 +4205,8 @@ const LOG_TYPES = {
 };
 const TIP_ROLES_DEFAULT = ['Waiter', 'Hostess', 'Cook'];
 const TIP_ROLES = TIP_ROLES_DEFAULT; /* legacy alias — use tipRoles() */
-const DESK_BUILD = 'v35';
-const HOUSE_LOGIN_PASSWORD = 'frenchies636';
+const DESK_BUILD = 'v38';
+const HOUSE_LOGIN_PASSWORD = 'frenchies636'; /* fallback seed — prefer settings.housePassword */
 const SESSION_KEY = 'frenchies_desk_session';
 const SESSION_DURABLE_KEY = 'frenchies_desk_session_durable';
 const MGMT_ROLES = ['Owner', 'District Manager', 'Store Manager', 'HR Director', 'Operations Manager'];
@@ -4768,8 +4795,10 @@ function loadState() {
     if (!raw) continue;
     try {
       const parsed = JSON.parse(raw);
+      /* v37+ mirror is integrity meta only — skip for full restore */
+      if (parsed && parsed.kind === 'desk-mirror-meta') continue;
       const migrated = migrate(parsed);
-      if (migrated) {
+      if (migrated && Array.isArray(migrated.employees)) {
         if (k !== STORAGE) {
           migrated.activity = migrated.activity || [];
           migrated.activity.unshift({ text: 'Office file recovered from backup store (' + k + ')', date: today() });
@@ -4821,6 +4850,9 @@ function ensureMeta() {
   if (!('sharedDeskUrl' in s.settings)) s.settings.sharedDeskUrl = '';
   if (!('sharedAutoPull' in s.settings)) s.settings.sharedAutoPull = false;
   if (!('handbookUrl' in s.settings)) s.settings.handbookUrl = '';
+  if (!(s.settings.handbookUrl || '').trim()) s.settings.handbookUrl = LINK_HANDBOOK;
+  if (!('housePassword' in s.settings)) s.settings.housePassword = HOUSE_LOGIN_PASSWORD;
+  if (!(s.settings.housePassword || '').trim()) s.settings.housePassword = HOUSE_LOGIN_PASSWORD;
   if (!s.settings.discordWebhooks || typeof s.settings.discordWebhooks !== 'object') {
     s.settings.discordWebhooks = { payroll: '', hiring: '', coverage: '', hrLog: '', announcements: '' };
   } else {
@@ -4950,8 +4982,8 @@ function pushSnapshot(reason) {
       bytes: 0,
       data: s
     });
-    /* store compact: only keep JSON string of data */
-    const packed = snaps.slice(0, 5).map(x => ({
+    /* keep fewer full copies — storage survival */
+    const packed = snaps.slice(0, SNAPSHOT_KEEP).map(x => ({
       at: x.at,
       rev: x.rev,
       reason: x.reason,
@@ -4963,6 +4995,28 @@ function pushSnapshot(reason) {
   } catch (err) {
     return false;
   }
+}
+
+function trimClockLogInPlace() {
+  ensureMeta();
+  if (!Array.isArray(s.clockLog)) { s.clockLog = []; return 0; }
+  const pending = s.clockLog.filter(c => !c.applied);
+  const applied = s.clockLog.filter(c => c.applied);
+  const keepApplied = Math.max(0, CLOCK_LOG_CAP - pending.length);
+  const next = pending.concat(applied.slice(0, keepApplied));
+  const removed = s.clockLog.length - next.length;
+  s.clockLog = next;
+  return removed;
+}
+
+function trimActivityInPlace(extraCap) {
+  ensureMeta();
+  if (!Array.isArray(s.activity)) { s.activity = []; return 0; }
+  const cap = Math.max(50, Number(extraCap || ACTIVITY_CAP));
+  if (s.activity.length <= cap) return 0;
+  const removed = s.activity.length - cap;
+  s.activity.length = cap;
+  return removed;
 }
 
 function listSnapshots() {
@@ -5036,14 +5090,26 @@ function save(opts) {
     }
     s.meta.lastSaved = new Date().toISOString();
     s.meta.saveCount = Number(s.meta.saveCount || 0) + 1;
-    if (s.activity && s.activity.length > ACTIVITY_CAP) s.activity.length = ACTIVITY_CAP;
+    trimActivityInPlace(ACTIVITY_CAP);
+    trimClockLogInPlace();
     if (s.payLog && s.payLog.length > PAYLOG_CAP) s.payLog.length = PAYLOG_CAP;
     const json = JSON.stringify(s);
     localStorage.setItem(STORAGE, json);
-    localStorage.setItem(STORAGE_MIRROR, json);
-    if (!opts.skipSnapshot && (s.meta.saveCount === 1 || s.meta.saveCount % 8 === 0)) pushSnapshot('auto');
+    /* Light integrity mirror — not a second full copy */
+    try {
+      localStorage.setItem(STORAGE_MIRROR, JSON.stringify({
+        kind: 'desk-mirror-meta',
+        rev: Number(s.meta.rev || 0),
+        updatedAt: s.meta.updatedAt || '',
+        saveCount: Number(s.meta.saveCount || 0),
+        bytes: json.length,
+        build: DESK_BUILD
+      }));
+    } catch (mirrorErr) { /* primary write already succeeded */ }
+    if (!opts.skipSnapshot && (s.meta.saveCount === 1 || s.meta.saveCount % SNAPSHOT_EVERY_N_SAVES === 0)) pushSnapshot('auto');
     updateSaveBadge();
     setSyncChip('live');
+    try { maybeWarnStorageQuota(); } catch (quotaErr) {}
     if (!opts.silentBroadcast) {
       broadcastSync({ type: 'state', rev: s.meta.rev, clientId: CLIENT_ID, at: s.meta.updatedAt });
     }
@@ -5932,6 +5998,11 @@ function grantEmpLoginAccess(e, detail) {
 function empHasOwnPassword(e) {
   return !!(e && String(e.loginPassword || '').length);
 }
+function housePassword() {
+  ensureMeta();
+  const fromSettings = (s.settings && s.settings.housePassword) ? String(s.settings.housePassword).trim() : '';
+  return fromSettings || HOUSE_LOGIN_PASSWORD;
+}
 function resetEmpLoginPassword(e, reason) {
   if (!canMutateDesk()) return false;
   if (!e) return false;
@@ -5995,7 +6066,7 @@ function completePasswordSetup(pass1, pass2) {
   const b = String(pass2 || '');
   if (a.length < 6) return { ok: false, msg: 'Password must be at least 6 characters' };
   if (a !== b) return { ok: false, msg: 'Passwords do not match' };
-  if (a === HOUSE_LOGIN_PASSWORD) return { ok: false, msg: 'Choose something other than the house password' };
+  if (a === housePassword()) return { ok: false, msg: 'Choose something other than the house password' };
   e.loginPassword = a;
   e.loginPasswordSetAt = today();
   pushEmpLog(e, {
@@ -6181,7 +6252,7 @@ function loginAsEmployee(username, password) {
   const hasOwn = empHasOwnPassword(e);
   if (hasOwn) {
     if (p !== String(e.loginPassword)) {
-      if (p === HOUSE_LOGIN_PASSWORD) {
+      if (p === housePassword()) {
         return { ok: false, msg: 'House password no longer works — use your personal password (HR can reset)' };
       }
       return { ok: false, msg: 'Wrong password' };
@@ -6189,8 +6260,8 @@ function loginAsEmployee(username, password) {
     enterDeskSession(e);
     return { ok: true, emp: e, needPassword: false };
   }
-  if (p !== HOUSE_LOGIN_PASSWORD) {
-    return { ok: false, msg: 'First sign-in uses the house password (frenchies636)' };
+  if (p !== housePassword()) {
+    return { ok: false, msg: 'First sign-in uses the house password from your Account login paper (ask HR)' };
   }
   /* First-time: house password accepted → force personal password setup before desk */
   sessionUser = null;
@@ -7160,13 +7231,68 @@ function renderNba() {
 function storageHealth() {
   try {
     const json = JSON.stringify(s);
-    const bytes = json.length * 2;
+    let snapBytes = 0;
+    try { snapBytes = (localStorage.getItem(SNAPSHOT_KEY) || '').length; } catch (e) {}
+    let mirrorBytes = 0;
+    try { mirrorBytes = (localStorage.getItem(STORAGE_MIRROR) || '').length; } catch (e) {}
+    const bytes = (json.length + snapBytes + mirrorBytes) * 2;
     const limit = 5 * 1024 * 1024;
     const pct = Math.min(100, Math.round((bytes / limit) * 1000) / 10);
-    return { bytes, pct, ok: pct < 70 };
+    return {
+      bytes, pct,
+      ok: pct < 70,
+      warn: pct >= 70,
+      critical: pct >= 85,
+      activity: (s.activity || []).length,
+      clock: (s.clockLog || []).length
+    };
   } catch (err) {
-    return { bytes: 0, pct: 100, ok: false };
+    return { bytes: 0, pct: 100, ok: false, warn: true, critical: true, activity: 0, clock: 0 };
   }
+}
+
+function maybeWarnStorageQuota() {
+  const sh = storageHealth();
+  const banner = $('storageQuotaWarn');
+  if (banner) {
+    banner.style.display = sh.warn ? '' : 'none';
+    if (sh.critical) {
+      banner.textContent = 'Storage is nearly full (~' + sh.pct + '%). Export a JSON backup now, then Trim activity or Clear old clock.';
+    } else if (sh.warn) {
+      banner.textContent = 'Storage is getting full (~' + sh.pct + '%). Export a backup soon; trim activity or old clock marks if needed.';
+    }
+  }
+  if (sh.critical && !window.__storageCriticalToastAt) {
+    window.__storageCriticalToastAt = Date.now();
+    toast('Storage nearly full — export a backup from Backup');
+  } else if (!sh.critical) {
+    window.__storageCriticalToastAt = 0;
+  }
+}
+
+function trimActivityNow() {
+  if (!requireMgmt('Trim activity')) return;
+  const before = (s.activity || []).length;
+  const removed = trimActivityInPlace(Math.min(ACTIVITY_CAP, 400));
+  if (!removed) return toast('Activity already under the cap (' + before + ')');
+  save({ skipSnapshot: true });
+  render();
+  toast('Trimmed ' + removed + ' activity rows');
+}
+
+function clearOldClockNow() {
+  if (!requireMgmt('Clear old clock')) return;
+  ensureMeta();
+  const before = (s.clockLog || []).length;
+  const pending = (s.clockLog || []).filter(c => !c.applied);
+  const appliedKept = Math.min(80, Math.max(0, CLOCK_LOG_CAP - pending.length));
+  const applied = (s.clockLog || []).filter(c => c.applied).slice(0, appliedKept);
+  s.clockLog = pending.concat(applied);
+  const removed = before - s.clockLog.length;
+  if (!removed) return toast('No old applied clock marks to clear');
+  save({ skipSnapshot: true });
+  render();
+  toast('Cleared ' + removed + ' old applied clock marks · kept ' + pending.length + ' pending');
 }
 
 function validateDeskData() {
@@ -7378,7 +7504,8 @@ function openSettings() {
   if ($('setSessionDays')) $('setSessionDays').value = String(s.settings.sessionDays || 14);
   if ($('setSharedUrl')) $('setSharedUrl').value = s.settings.sharedDeskUrl || '';
   if ($('setSharedAutoPull')) $('setSharedAutoPull').checked = !!s.settings.sharedAutoPull;
-  if ($('setHandbookUrl')) $('setHandbookUrl').value = s.settings.handbookUrl || '';
+  if ($('setHandbookUrl')) $('setHandbookUrl').value = handbookUrl();
+  if ($('setHousePass')) { $('setHousePass').value = ''; $('setHousePass').placeholder = 'Leave blank to keep current'; }
   const dw = s.settings.discordWebhooks || {};
   if ($('setWhPayroll')) $('setWhPayroll').value = dw.payroll || '';
   if ($('setWhHiring')) $('setWhHiring').value = dw.hiring || '';
@@ -7406,7 +7533,14 @@ function saveSettings() {
   if ($('setSessionDays')) s.settings.sessionDays = Number($('setSessionDays').value) || 14;
   if ($('setSharedUrl')) s.settings.sharedDeskUrl = ($('setSharedUrl').value || '').trim();
   if ($('setSharedAutoPull')) s.settings.sharedAutoPull = !!$('setSharedAutoPull').checked;
-  if ($('setHandbookUrl')) s.settings.handbookUrl = ($('setHandbookUrl').value || '').trim();
+  if ($('setHandbookUrl')) s.settings.handbookUrl = ($('setHandbookUrl').value || '').trim() || LINK_HANDBOOK;
+  if ($('setHousePass')) {
+    const hp = ($('setHousePass').value || '').trim();
+    if (hp) {
+      if (hp.length < 6) return toast('House password must be at least 6 characters');
+      s.settings.housePassword = hp;
+    }
+  }
   s.settings.discordWebhooks = {
     payroll: ($('setWhPayroll') && $('setWhPayroll').value || '').trim(),
     hiring: ($('setWhHiring') && $('setWhHiring').value || '').trim(),
@@ -7421,6 +7555,9 @@ function openChangelog() {
   const grid = $('upgradeGrid');
   if (grid) {
     const recent = [
+      ['v38', 'Tiiny publish checklist · shared-ahead probe · house password off login · handbook URL + assets modal'],
+      ['v37', 'Storage survival — activity/clock caps, lighter mirror, near-quota export & trim'],
+      ['v36', 'Clock hours safety — no silent 1h defaults · missing-times filter · OVERRIDE to force'],
       ['v35', 'Sunday payday hard gates · run checklist · Announcements webhook for payday open'],
       ['v34', 'Apply clock since payday · unapplied clock todos · Overview Apply clock'],
       ['v33', 'Publish shared desk to domain URL · Download pack · keep local passwords on redacted pull'],
@@ -7902,6 +8039,7 @@ function render() {
   renderPayStubs();
   renderBackupStats();
   updateSaveBadge();
+  try { syncHandbookLinks(); } catch (hbErr) {}
 
   if ($('activitySearch') && $('activitySearch').value.trim()) filterActivityLog($('activitySearch').value);
   else {
@@ -7924,15 +8062,20 @@ function renderBackupStats() {
   if ($('backupLastSaved')) $('backupLastSaved').textContent = fmt(s.meta.lastSaved);
   if ($('backupLastExport')) $('backupLastExport').textContent = s.meta.lastExport ? fmt(s.meta.lastExport) : 'Never';
   if ($('backupActivityCount')) $('backupActivityCount').textContent = (s.activity || []).length;
-  if ($('backupActivityCap')) $('backupActivityCap').textContent = 'Entries kept (no cap)';
+  if ($('backupActivityCap')) $('backupActivityCap').textContent = 'Cap ' + ACTIVITY_CAP + ' · clock ' + ((s.clockLog || []).length) + '/' + CLOCK_LOG_CAP;
   if ($('backupPayCount')) $('backupPayCount').textContent = (s.payLog || []).length;
   const sh = storageHealth();
-  if ($('storageHealthText')) $('storageHealthText').textContent = 'About ' + Math.round(sh.bytes / 1024) + ' KB in localStorage (~' + sh.pct + '% of a 5 MB soft ceiling).';
+  if ($('storageHealthText')) {
+    $('storageHealthText').textContent = 'About ' + Math.round(sh.bytes / 1024) + ' KB in localStorage (~' + sh.pct +
+      '% of a 5 MB ceiling) · activity ' + sh.activity + '/' + ACTIVITY_CAP + ' · clock ' + sh.clock + '/' + CLOCK_LOG_CAP +
+      ' · snapshots ' + SNAPSHOT_KEEP + ' max.';
+  }
   if ($('storageMeterBar')) $('storageMeterBar').style.width = sh.pct + '%';
   if ($('storageHealthPill')) {
-    $('storageHealthPill').textContent = sh.ok ? 'OK' : 'HIGH';
-    $('storageHealthPill').className = 'pill ' + (sh.ok ? 'green' : 'warn');
+    $('storageHealthPill').textContent = sh.critical ? 'FULL' : (sh.warn ? 'HIGH' : 'OK');
+    $('storageHealthPill').className = 'pill ' + (sh.critical ? 'warn' : (sh.ok ? 'green' : 'warn'));
   }
+  maybeWarnStorageQuota();
   renderSnapshots();
 }
 
@@ -10376,7 +10519,7 @@ function letterPacket(c) {
     '<ul><li><b>10-1</b> — clocking in</li><li><b>10-2</b> — clocking out</li><li><b>10-4</b> — understood</li><li><b>10-20</b> — your location</li><li><b>10-99</b> — emergency, all hands</li></ul>' +
     '<h4>House notes for week one</h4>' +
     '<p>Your rate is ' + esc(money(c.rate)) + ' per hour. Hours are logged by HR through the week and payday is Sunday at 9:00 AM, paid out of the house. Raise any problem with your hours before Sunday, not after. The bar register runs a flat $1,000 rate per the handbook — that is the counter price a guest pays, not your wage.</p>' +
-    '<div class="letter-note">Full handbook: ' + esc(LINK_HANDBOOK) + '</div>' +
+    '<div class="letter-note">Full handbook: ' + esc(handbookUrl()) + '</div>' +
     signGrid('Received by ' + (c.name || ''), '', 'Date', '');
   return wrapLetter('New-hire packet', body, (c.name || 'New hire') + ' · ' + c.role + ' · ' + today());
 }
@@ -10389,7 +10532,7 @@ function letterLogin(c) {
     ff('Employee', c.name) +
     ff('Role', c.role) +
     ff('Username', user) +
-    ff('First sign-in password', HOUSE_LOGIN_PASSWORD + ' (house password)') +
+    ff('First sign-in password', housePassword() + ' (house password)') +
     '<div class="letter-note">Username format is Firstname_Lastname from your legal name on file. Sign in once with the house password — the desk will ask you to create your own password before you continue. Do not post either password in public Discord channels.</div>' +
     '<h4>What you can see</h4>' +
     '<p>Access follows your role on the ladder. Owner and management see the full desk. Shift Leads see coverage and roster tools. Floor staff see their pay stubs, shifts, and handbook.</p>' +
@@ -11355,7 +11498,7 @@ function packetBody(a, kind, c) {
       ]) +
       '<h2>House notes for week one</h2>' +
       '<p>Payday is Sunday at 9:00 AM, paid from the house. Raise hour problems before Sunday. The bar register\'s flat $1,000 is the guest counter price — not your wage.</p>' +
-      '<div class="note">Full handbook: ' + esc(LINK_HANDBOOK) + '</div>' +
+      '<div class="note">Full handbook: ' + esc(handbookUrl()) + '</div>' +
       '<h2>Confirm *</h2>' +
       pkChoice('confirm', 'I have read the new-hire packet', 'Confirms you have the checklist, contacts, and radio codes for week one.') +
       pkTa('Questions for HR before or during week one', 'note', 3) +
@@ -11367,7 +11510,7 @@ function packetBody(a, kind, c) {
     return '<p>Welcome, <b>' + esc(c.name || 'employee') + '</b>. This is your <b>Account login information</b> — the final hire document before desk access is granted.</p>' +
       pkTerms([
         ['Your username', user],
-        ['First sign-in password', HOUSE_LOGIN_PASSWORD + ' (house)'],
+        ['First sign-in password', housePassword() + ' (house)'],
         ['Then', 'Create your own password on first desk sign-in'],
         ['Your role', c.role],
         ['Access starts', 'After Human Resources files this signed reply']
@@ -15611,6 +15754,7 @@ if ($('previewClockHours')) $('previewClockHours').onclick = () => previewClockP
 if ($('applyClockHours')) $('applyClockHours').onclick = () => applyClockHoursToPeriod();
 if ($('applyClockSincePay')) $('applyClockSincePay').onclick = () => applyClockHoursSincePayday();
 if ($('applyClockSincePayBtn')) $('applyClockSincePayBtn').onclick = () => applyClockHoursSincePayday();
+if ($('clockShowMissingBtn')) $('clockShowMissingBtn').onclick = () => toggleClockMissingFilter();
 if ($('interviewBoardBtn')) $('interviewBoardBtn').onclick = () => openInterviewBoard();
 if ($('closeInterviewBoard')) $('closeInterviewBoard').onclick = () => $('interviewBoardModal').classList.remove('open');
 if ($('postInterviewBoard')) $('postInterviewBoard').onclick = () => postInterviewBoardDiscord();
@@ -15633,7 +15777,13 @@ if ($('promoEmp')) $('promoEmp').onchange = () => {
 if ($('addAssetBtn')) $('addAssetBtn').onclick = () => addEmpAsset();
 if ($('publishSharedBtn')) $('publishSharedBtn').onclick = () => { publishSharedPack(); };
 if ($('downloadSharedPackBtn')) $('downloadSharedPackBtn').onclick = () => downloadSharedPackOnly();
+if ($('probeSharedAheadBtn')) $('probeSharedAheadBtn').onclick = () => probeSharedDeskAhead();
 if ($('pullSharedFromBackupBtn')) $('pullSharedFromBackupBtn').onclick = () => pullSharedDesk();
+if ($('trimActivityBtn')) $('trimActivityBtn').onclick = () => trimActivityNow();
+if ($('trimClockBtn')) $('trimClockBtn').onclick = () => clearOldClockNow();
+if ($('exportJsonFromHealth')) $('exportJsonFromHealth').onclick = () => { if ($('exportJson')) $('exportJson').click(); };
+if ($('saveAssetEdit')) $('saveAssetEdit').onclick = () => saveAssetEdit();
+if ($('cancelAssetEdit')) $('cancelAssetEdit').onclick = () => cancelAssetEdit();
 if ($('cancelSharedPull')) $('cancelSharedPull').onclick = () => { pendingSharedPull = null; $('sharedPullModal').classList.remove('open'); };
 if ($('confirmSharedPull')) $('confirmSharedPull').onclick = () => confirmSharedPull();
 if ($('sharedKeepMine')) $('sharedKeepMine').onclick = () => sharedKeepMine();
@@ -15797,16 +15947,29 @@ function renderMyRequestsPanel(e) {
 
 function handbookUrl() {
   ensureMeta();
-  return (s.settings && s.settings.handbookUrl) || '';
+  return ((s.settings && s.settings.handbookUrl) || '').trim() || LINK_HANDBOOK;
+}
+
+function syncHandbookLinks() {
+  const url = handbookUrl();
+  const link = $('handbookDocLink');
+  if (link) {
+    link.href = url;
+    link.textContent = 'Open full handbook (Google Doc)';
+    link.onclick = null;
+  }
+  if ($('complianceHandbookLink')) $('complianceHandbookLink').href = url;
 }
 
 function openHandbookHub() {
   if (!sessionUser) return toast('Sign in first');
+  syncHandbookLinks();
   const link = $('handbookDocLink');
   const url = handbookUrl();
-  if (link) {
-    if (url) { link.href = url; link.textContent = 'Open full handbook (Google Doc)'; }
-    else { link.href = '#'; link.textContent = 'Set handbook URL in Settings'; link.onclick = (ev) => { ev.preventDefault(); if (canMutateDesk()) openSettings(); else toast('Ask HR to set the handbook link'); }; }
+  if (link && !url) {
+    link.href = '#';
+    link.textContent = 'Set handbook URL in Settings';
+    link.onclick = (ev) => { ev.preventDefault(); if (canMutateDesk()) openSettings(); else toast('Ask HR to set the handbook link'); };
   }
   if ($('handbookSearch')) $('handbookSearch').value = '';
   renderHandbookResults('');
@@ -16306,15 +16469,35 @@ function openClockModal() {
   if ($('applyClockHours')) $('applyClockHours').style.display = canEditHours() ? '' : 'none';
   if ($('applyClockSincePay')) $('applyClockSincePay').style.display = canEditHours() ? '' : 'none';
   if ($('previewClockHours')) $('previewClockHours').style.display = canEditHours() ? '' : 'none';
+  if ($('clockShowMissingBtn')) $('clockShowMissingBtn').style.display = canEditHours() ? '' : 'none';
+  clockShowMissingOnly = false;
   if ($('clockHint')) {
     $('clockHint').textContent = staffSelf
-      ? 'Log your own 10-1 (in) and 10-2 (out). A lead applies pairs to the open period.'
-      : 'Log floor marks, preview unapplied pairs, then Apply since payday (open period dates) or Apply all. Overnight spans OK when out is earlier than in.';
+      ? 'Log your own 10-1 (in) and 10-2 (out). Include times (or a note like 4h). A lead applies pairs to the open period.'
+      : 'Log floor marks with times or note hours (4h). Apply since payday skips silent 1h defaults unless you type OVERRIDE. Overnight spans OK when out is earlier than in.';
   }
   renderClockList();
   previewClockPairs(true, openPeriodClockWindow());
   $('clockModal').classList.add('open');
   $('clockModal').removeAttribute('hidden');
+}
+
+let clockShowMissingOnly = false;
+
+function clockEntryMissingTime(c) {
+  if (!c || c.applied) return false;
+  if (c.mark !== '10-1' && c.mark !== '10-2') return false;
+  if (parseClockHoursFromNote(c.note) != null) return false;
+  return clockTimeToMinutes(c.time) == null;
+}
+
+function toggleClockMissingFilter() {
+  clockShowMissingOnly = !clockShowMissingOnly;
+  if ($('clockShowMissingBtn')) {
+    $('clockShowMissingBtn').textContent = clockShowMissingOnly ? 'Show all marks' : 'Show missing times';
+  }
+  renderClockList();
+  previewClockPairs(false, openPeriodClockWindow());
 }
 
 function renderClockList() {
@@ -16324,19 +16507,37 @@ function renderClockList() {
   const staffSelf = isStaffSession() && !canEditHours();
   let rows = (s.clockLog || []).slice();
   if (staffSelf && sessionUser) rows = rows.filter(c => String(c.empId) === String(sessionUser.empId));
+  if (clockShowMissingOnly && canEditHours()) {
+    const win = openPeriodClockWindow();
+    const summary = summarizeUnappliedClock(win);
+    const badIds = new Set();
+    summary.lines.forEach(row => {
+      if (!row.default1h) return;
+      (row.result.details || []).forEach(d => {
+        if (d.how === 'default-1h') {
+          (summary.byEmp[row.id] || []).forEach(c => badIds.add(c.id));
+        }
+      });
+    });
+    rows = rows.filter(c => badIds.has(c.id) || clockEntryMissingTime(c));
+  }
   rows = rows.slice(0, 60);
   const unapplied = rows.filter(c => !c.applied && (c.mark === '10-1' || c.mark === '10-2')).length;
-  root.innerHTML = (canEditHours() && unapplied ? '<div class="mini-note" style="margin-bottom:8px"><b>' + unapplied + '</b> unapplied in/out marks in this list.</div>' : '') +
+  const missing = rows.filter(clockEntryMissingTime).length;
+  root.innerHTML = (canEditHours() && (unapplied || missing) ? '<div class="mini-note" style="margin-bottom:8px"><b>' + unapplied + '</b> unapplied in/out marks' +
+      (missing ? ' · <b>' + missing + '</b> missing times/note hours' : '') +
+      (clockShowMissingOnly ? ' · filter on' : '') + '.</div>' : '') +
     (rows.length ? rows.map(c => {
     const e = empById(c.empId);
     const canDel = canEditHours() || (staffSelf && !c.applied && sessionUser && String(c.empId) === String(sessionUser.empId));
-    return '<div class="clk-row"><div><b>' + esc((e && e.name) || c.name || '—') + '</b> · ' + esc(c.mark) +
-      (c.time ? ' · ' + esc(c.time) : '') +
+    const miss = clockEntryMissingTime(c);
+    return '<div class="clk-row"' + (miss ? ' style="outline:1px solid oklch(70% .12 55);border-radius:8px;padding:4px"' : '') + '><div><b>' + esc((e && e.name) || c.name || '—') + '</b> · ' + esc(c.mark) +
+      (c.time ? ' · ' + esc(c.time) : ' · <span class="pill warn">no time</span>') +
       '<div class="history">' + esc(c.date) + (c.note ? ' — ' + esc(c.note) : '') +
-      (c.applied ? ' · applied' : ' · pending') + '</div></div>' +
+      (c.applied ? ' · applied' : ' · pending') + (miss ? ' · needs time or 4h note' : '') + '</div></div>' +
       (canDel ? '<button class="btn tiny soft" onclick="deleteClockEntry(' + c.id + ')">Remove</button>' : '') +
       '</div>';
-  }).join('') : '<div class="mini-note">No clock entries yet.</div>');
+  }).join('') : '<div class="mini-note">' + (clockShowMissingOnly ? 'No missing-time marks in this window.' : 'No clock entries yet.') + '</div>');
 }
 
 window.deleteClockEntry = function (id) {
@@ -16445,14 +16646,17 @@ function previewClockPairs(quiet, windowOpts) {
     box.innerHTML = quiet ? '' : '<h3>Apply preview</h3><div class="mini-note">No unapplied 10-1/10-2 pairs' + scope + '.</div>';
     return { totalH: 0, totalP: 0, marks: 0, window };
   }
+  const defaultRows = summary.lines.filter(row => row.default1h);
   const lines = summary.lines.map(row =>
     '<div class="history"><b>' + esc(row.name) + '</b> — ' + row.pairs + ' pair(s) · ' + dec(row.hours) + 'h' +
-      (row.default1h ? ' (includes 1h default)' : '') +
+      (row.default1h ? ' <span class="pill warn">1h default — fix times</span>' : '') +
       (row.overnight ? ' (overnight)' : '') + '</div>'
   );
   box.style.display = '';
-  box.innerHTML = '<h3>Apply preview</h3><p class="ui-hint">' + summary.totalP + ' pair(s) · <b>' + dec(summary.totalH) + 'h</b> to add to the open period' + scope + '.</p>' + lines.join('');
-  return { totalH: summary.totalH, totalP: summary.totalP, marks: summary.marks, scope, summary };
+  box.innerHTML = '<h3>Apply preview</h3><p class="ui-hint">' + summary.totalP + ' pair(s) · <b>' + dec(summary.totalH) + 'h</b> to add to the open period' + scope +
+    (defaultRows.length ? ' · <b>' + defaultRows.length + ' staff</b> would use a silent 1h default — fix times/notes or OVERRIDE.' : '') +
+    '</p>' + lines.join('');
+  return { totalH: summary.totalH, totalP: summary.totalP, marks: summary.marks, scope, summary, defaultRows };
 }
 
 function applyClockHoursToPeriod(opts) {
@@ -16465,14 +16669,43 @@ function applyClockHoursToPeriod(opts) {
   const preview = previewClockPairs(false, win);
   if (!preview || !preview.totalP) return toast('No unapplied 10-1/10-2 pairs' + (preview && preview.scope ? preview.scope : ''));
   const label = opts.sincePayday ? ('since payday window for ' + shortLabel(p)) : shortLabel(p);
-  if (!opts.skipConfirm && !confirm('Apply ' + preview.totalP + ' clock pair(s) (' + dec(preview.totalH) + 'h) to ' + label + '?\n\nPaid stubs stay locked. Review Set hours after if someone needs a fix.')) return false;
+  const defaultRows = (preview.defaultRows || []).slice();
+  let allowDefaults = !!opts.allowDefaults;
+  let cleanOnly = !!opts.cleanOnly;
+  if (defaultRows.length && !allowDefaults && !cleanOnly) {
+    const names = defaultRows.map(r => r.name).slice(0, 6).join(', ') + (defaultRows.length > 6 ? '…' : '');
+    const choice = prompt(
+      defaultRows.length + ' pair(s) are missing times/note hours and would invent 1h:\n' + names +
+      '\n\nType CLEAN to apply only good pairs\nType OVERRIDE to force include 1h defaults\nCancel to fix times first'
+    );
+    if (choice == null) return false;
+    const typed = String(choice).trim().toUpperCase();
+    if (typed === 'CLEAN') cleanOnly = true;
+    else if (typed === 'OVERRIDE') {
+      if (!requireTypedOverride('apply clock with ' + defaultRows.length + ' default-1h pair(s)',
+        'Force-apply ' + defaultRows.length + ' pair(s) that invent 1h because times/notes are missing.')) return false;
+      allowDefaults = true;
+    } else {
+      toast('Cancelled — type CLEAN or OVERRIDE, or fix missing times');
+      clockShowMissingOnly = true;
+      if ($('clockShowMissingBtn')) $('clockShowMissingBtn').textContent = 'Show all marks';
+      renderClockList();
+      return false;
+    }
+  }
+  if (!opts.skipConfirm && !confirm('Apply ' + (cleanOnly ? 'clean ' : '') + 'clock pair(s) to ' + label + '?\n\nPaid stubs stay locked. Review Set hours after if someone needs a fix.')) return false;
   const summary = summarizeUnappliedClock(win);
   let n = 0;
   let totalH = 0;
   let skippedPaid = 0;
+  let skippedDefault = 0;
   summary.lines.forEach(row => {
     const result = row.result;
     if (result.hours <= 0) return;
+    if (row.default1h && !allowDefaults) {
+      skippedDefault++;
+      return;
+    }
     const e = empById(row.id);
     if (!p.entries[row.id]) p.entries[row.id] = emptyEntry(e);
     if (p.entries[row.id].paidOut) { skippedPaid++; return; }
@@ -16489,8 +16722,10 @@ function applyClockHoursToPeriod(opts) {
   previewClockPairs(true, openPeriodClockWindow(p));
   render();
   const msg = n
-    ? ('Applied ' + dec(totalH) + 'h across ' + n + ' staff' + (skippedPaid ? ' · ' + skippedPaid + ' paid stub(s) skipped' : ''))
-    : (skippedPaid ? 'Nothing applied — paid stubs skipped' : 'Nothing applied');
+    ? ('Applied ' + dec(totalH) + 'h across ' + n + ' staff' +
+      (skippedPaid ? ' · ' + skippedPaid + ' paid stub(s) skipped' : '') +
+      (skippedDefault ? ' · ' + skippedDefault + ' default-1h row(s) held back' : ''))
+    : (skippedDefault ? 'Nothing applied — fix missing times (or OVERRIDE)' : (skippedPaid ? 'Nothing applied — paid stubs skipped' : 'Nothing applied'));
   toast(msg);
   return n > 0;
 }
@@ -16586,19 +16821,49 @@ window.returnAsset = function (empId, idx) {
   save(); renderEmpAssets(e); toast('Asset updated');
 };
 
+let assetEditCtx = null;
+
 window.editEmpAsset = function (empId, idx) {
   if (!requireMgmt('Assets')) return;
   const e = empById(empId);
   if (!e || !e.assets || !e.assets[idx]) return;
   const a = e.assets[idx];
-  const item = prompt('Item name', a.item);
-  if (item == null) return;
-  const note = prompt('Note (optional)', a.note || '');
-  if (note == null) return;
-  a.item = String(item).trim() || a.item;
-  a.note = String(note).trim();
-  save(); renderEmpAssets(e); toast('Asset edited');
+  assetEditCtx = { empId, idx };
+  if ($('assetEditItem')) $('assetEditItem').value = a.item || '';
+  if ($('assetEditDate')) $('assetEditDate').value = a.date || today();
+  if ($('assetEditNote')) $('assetEditNote').value = a.note || '';
+  if ($('assetEditReturned')) $('assetEditReturned').checked = !!a.returned;
+  if ($('assetEditModal')) {
+    $('assetEditModal').classList.add('open');
+    $('assetEditModal').removeAttribute('hidden');
+  }
 };
+
+function saveAssetEdit() {
+  if (!requireMgmt('Assets')) return;
+  if (!assetEditCtx) return;
+  const e = empById(assetEditCtx.empId);
+  if (!e || !e.assets || !e.assets[assetEditCtx.idx]) return;
+  const a = e.assets[assetEditCtx.idx];
+  const item = ($('assetEditItem') && $('assetEditItem').value || '').trim();
+  if (!item) return toast('Item name required');
+  a.item = item;
+  a.date = ($('assetEditDate') && $('assetEditDate').value) || a.date || today();
+  a.note = ($('assetEditNote') && $('assetEditNote').value || '').trim();
+  const wantReturned = !!( $('assetEditReturned') && $('assetEditReturned').checked );
+  if (wantReturned && !a.returned) a.returned = today();
+  if (!wantReturned) a.returned = '';
+  save();
+  renderEmpAssets(e);
+  if ($('assetEditModal')) $('assetEditModal').classList.remove('open');
+  assetEditCtx = null;
+  toast('Asset saved');
+}
+
+function cancelAssetEdit() {
+  assetEditCtx = null;
+  if ($('assetEditModal')) $('assetEditModal').classList.remove('open');
+}
 
 window.deleteEmpAsset = function (empId, idx) {
   if (!requireMgmt('Assets')) return;
@@ -16617,9 +16882,11 @@ function addEmpAsset() {
   const item = ($('assetItem') && $('assetItem').value || '').trim();
   if (!item) return toast('Item name required');
   e.assets = e.assets || [];
-  e.assets.unshift({ item, date: ($('assetDate') && $('assetDate').value) || today(), returned: '', note: '' });
+  const note = ($('assetNote') && $('assetNote').value || '').trim();
+  e.assets.unshift({ item, date: ($('assetDate') && $('assetDate').value) || today(), returned: '', note });
   if ($('assetItem')) $('assetItem').value = '';
-  pushEmpLog(e, { type: 'note', summary: 'Asset issued: ' + item, detail: 'Uniform / equipment' });
+  if ($('assetNote')) $('assetNote').value = '';
+  pushEmpLog(e, { type: 'note', summary: 'Asset issued: ' + item, detail: note || 'Uniform / equipment' });
   save(); renderEmpAssets(e); toast('Asset added');
 }
 
@@ -16893,8 +17160,11 @@ function printTipSettlement() {
 function redactPasswordsInState(raw) {
   const clone = JSON.parse(JSON.stringify(raw));
   (clone.employees || []).forEach(e => { if (e && 'loginPassword' in e) e.loginPassword = ''; });
-  if (clone.settings && clone.settings.discordWebhooks) {
-    clone.settings.discordWebhooks = { payroll: '', hiring: '', coverage: '', hrLog: '', announcements: '' };
+  if (clone.settings) {
+    if ('housePassword' in clone.settings) clone.settings.housePassword = '';
+    if (clone.settings.discordWebhooks) {
+      clone.settings.discordWebhooks = { payroll: '', hiring: '', coverage: '', hrLog: '', announcements: '' };
+    }
   }
   return clone;
 }
@@ -16914,6 +17184,56 @@ function setSharedDeskLiveStatus(msg) {
   if ($('sharedDeskLiveStatus')) $('sharedDeskLiveStatus').textContent = msg || '';
 }
 
+function showSharedPublishChecklist(opts) {
+  opts = opts || {};
+  const box = $('sharedPublishChecklist');
+  if (!box) return;
+  const url = ((s.settings && s.settings.sharedDeskUrl) || '').trim();
+  const name = opts.filename || ('frenchies-shared-desk-r' + (s.meta.rev || 0) + '.json');
+  box.style.display = '';
+  box.innerHTML =
+    '<h3 style="margin:0 0 8px">Tiiny Host publish checklist</h3>' +
+    '<div class="history"><b>1.</b> Pack file: <code>' + esc(name) + '</code> ' +
+      '<button type="button" class="btn tiny soft" id="copySharedFilenameBtn">Copy filename</button></div>' +
+    '<div class="history"><b>2.</b> Upload that file to Tiiny Host (replace the JSON at your raw URL).</div>' +
+    '<div class="history"><b>3.</b> Raw URL: ' + (url ? ('<code>' + esc(url) + '</code> ') : '<span class="pill warn">not set</span> ') +
+      (url ? '<button type="button" class="btn tiny soft" id="copySharedUrlBtn">Copy URL</button>' : '') + '</div>' +
+    '<div class="history"><b>4.</b> On the other PC: Pull shared desk → Compare &amp; pull → Take theirs if rev is ahead.</div>' +
+    '<div class="history"><b>5.</b> Optional: Check if shared ahead (button below) after upload.</div>' +
+    (opts.note ? '<p class="ui-hint" style="margin:8px 0 0">' + esc(opts.note) + '</p>' : '');
+  if ($('copySharedFilenameBtn')) $('copySharedFilenameBtn').onclick = () => copyText(name, 'Filename copied');
+  if ($('copySharedUrlBtn')) $('copySharedUrlBtn').onclick = () => copyText(url, 'Shared URL copied');
+}
+
+async function probeSharedDeskAhead() {
+  if (!canEditHours() && !canMutateDesk()) return toast('Leads and management only');
+  ensureMeta();
+  const url = ((s.settings && s.settings.sharedDeskUrl) || ($('sharedDeskUrlSetting') && $('sharedDeskUrlSetting').value) || '').trim();
+  if (!url) return toast('Set the shared raw URL first');
+  setSharedDeskLiveStatus('Checking shared desk at ' + url + '…');
+  try {
+    const res = await fetch(url, { cache: 'no-store' });
+    if (!res.ok) throw new Error('HTTP ' + res.status);
+    const text = await res.text();
+    const parsed = JSON.parse(text);
+    const migrated = migrate(parsed);
+    if (!migrated || !migrated.employees) throw new Error('Not a desk pack');
+    const remoteRev = Number((migrated.meta && migrated.meta.rev) || 0);
+    const localRev = Number((s.meta && s.meta.rev) || 0);
+    const remoteAt = (migrated.meta && migrated.meta.updatedAt) || (migrated.meta && migrated.meta.sharedAt) || '';
+    let verdict;
+    if (remoteRev > localRev) verdict = 'Shared is ahead (rev ' + remoteRev + ' > local ' + localRev + ') — Pull when ready.';
+    else if (remoteRev < localRev) verdict = 'Local is ahead (rev ' + localRev + ' > shared ' + remoteRev + ') — Publish/upload when ready.';
+    else verdict = 'Same rev ' + localRev + (remoteAt ? ' · shared stamp ' + remoteAt : '') + '.';
+    setSharedDeskLiveStatus(verdict);
+    toast(verdict);
+  } catch (err) {
+    const msg = 'Shared check failed — ' + (err && err.message ? err.message : 'bad URL/JSON');
+    setSharedDeskLiveStatus(msg);
+    toast(msg);
+  }
+}
+
 function downloadSharedPackOnly() {
   if (!requireMgmt('Download shared pack')) return;
   ensureMeta();
@@ -16923,7 +17243,8 @@ function downloadSharedPackOnly() {
   downloadFile(text, name, 'application/json');
   copyText(text, 'Pack downloaded · JSON copied (passwords redacted)');
   markExported();
-  setSharedDeskLiveStatus('Downloaded ' + name + ' · upload this file to your Tiiny Host raw URL, then Pull on other PCs.');
+  setSharedDeskLiveStatus('Downloaded ' + name + ' · follow the Tiiny checklist, then Pull on other PCs.');
+  showSharedPublishChecklist({ filename: name, note: 'Download-only — upload this file to Tiiny Host.' });
   log('Shared pack downloaded (rev ' + (s.meta.rev || 0) + ')');
 }
 
@@ -16974,20 +17295,26 @@ async function publishSharedPack() {
       s.meta.lastSharedPublishUrl = url;
       save({ quiet: true });
       setSharedDeskLiveStatus('Published to domain via ' + result.method + ' · rev ' + (s.meta.rev || 0) + ' · ' + (s.meta.lastSharedPublishAt || ''));
+      if ($('sharedPublishChecklist')) {
+        $('sharedPublishChecklist').style.display = '';
+        $('sharedPublishChecklist').innerHTML = '<h3 style="margin:0 0 8px">Published live</h3><p class="ui-hint">Other PCs can Pull now. Use Check if shared ahead to confirm.</p>';
+      }
       log('Shared desk published to URL (rev ' + (s.meta.rev || 0) + ')');
       toast('Published shared desk to your domain');
       copyText(text, 'JSON also copied (passwords redacted)');
       return;
     }
-    setSharedDeskLiveStatus('Live PUT blocked (' + result.error + '). Downloaded ' + name + ' — upload it to Tiiny Host at your raw URL, then Pull on other PCs.');
+    setSharedDeskLiveStatus('Live PUT blocked (' + result.error + '). Downloaded ' + name + ' — follow the Tiiny checklist.');
     downloadFile(text, name, 'application/json');
     copyText(text, 'Host blocked live write · pack downloaded & copied — upload to Tiiny Host');
+    showSharedPublishChecklist({ filename: name, note: 'Live write blocked (' + result.error + '). Upload the downloaded file manually.' });
     log('Shared publish fell back to download (' + result.error + ')');
     return;
   }
   downloadFile(text, name, 'application/json');
   copyText(text, 'No shared URL set · pack downloaded & copied. Set the raw URL, then Publish again.');
-  setSharedDeskLiveStatus('No shared raw URL in Settings/Backup. Pack downloaded — set the URL, upload to Tiiny Host, then Pull on other PCs.');
+  setSharedDeskLiveStatus('No shared raw URL set. Pack downloaded — set URL, upload to Tiiny Host, then Pull.');
+  showSharedPublishChecklist({ filename: name, note: 'Set the shared raw URL in Backup/Settings so other PCs can Pull.' });
   log('Shared pack downloaded without URL (rev ' + (s.meta.rev || 0) + ')');
 }
 
@@ -17005,6 +17332,9 @@ function mergeLocalSecretsIntoShared(migrated, localState) {
     });
   }
   if (!migrated.settings) migrated.settings = {};
+  if (!(migrated.settings.housePassword || '').trim() && localState.settings && localState.settings.housePassword) {
+    migrated.settings.housePassword = localState.settings.housePassword;
+  }
   const lw = (localState.settings && localState.settings.discordWebhooks) || {};
   const mw = migrated.settings.discordWebhooks || {};
   migrated.settings.discordWebhooks = {
