@@ -3067,7 +3067,7 @@ body.session-staff #pullSharedBtn{display:none!important}
 <!-- INCOME -->
 <section class="view" id="view-income" role="region" aria-labelledby="title-income" tabindex="-1">
   <div class="header">
-      <div><div class="eyebrow">Office</div><h1 class="title" id="title-income">Income</h1><div class="subtitle">House cash-in — register drops, tip jars, event proceeds, deposits / treasury, and rebate cash-in. Players use Discord <b>/register</b> (modal with income-type dropdown) or the channel button; this desk auto-pulls from Supabase.</div></div>
+      <div><div class="eyebrow">Office</div><h1 class="title" id="title-income">Income</h1><div class="subtitle">House cash-in — register drops, event proceeds, deposits / treasury, and rebate cash-in. Staff keep 100% of tips (not booked here). Players use Discord <b>/register</b> (Kind, Station, Amount, Source, Date; Logged by = Discord nick); this desk auto-pulls from Supabase.</div></div>
     <div class="actions">
       <button class="btn soft" id="pullSupabaseIncome" type="button">Pull from Supabase</button>
       <button class="btn" id="csvIncomes" type="button">Export CSV</button>
@@ -3078,7 +3078,7 @@ body.session-staff #pullSharedBtn{display:none!important}
       <button class="btn primary" id="addIncome" type="button">Log income</button>
     </div>
   </div>
-  <p class="ui-hint" id="incSupabaseHint" style="margin:0 0 10px">Supabase income feed — set URL + anon key in Settings. Players: Discord <code>/register</code> (Register, Tip jar, Deposit / Treasury, etc.).</p>
+  <p class="ui-hint" id="incSupabaseHint" style="margin:0 0 10px">Supabase income feed — set URL + anon key in Settings. Players: Discord <code>/register</code> (Register, Deposit / Treasury, Event, etc.). Staff keep 100% of tips — tip jar is not house income.</p>
   <div class="toolbar" style="margin:0 0 10px;gap:8px;align-items:center;flex-wrap:wrap">
     <span class="pill gray" id="incSupabaseChip">Supabase · off</span>
     <span class="mini-note" id="incSupabaseStatus">Not configured</span>
@@ -3095,9 +3095,9 @@ body.session-staff #pullSharedBtn{display:none!important}
     <select id="incKind"><option value="">All kinds</option></select>
     <input class="search" id="incSearch" placeholder="Search source, notes, who">
     <button class="btn tiny soft" type="button" id="incQuickRegister">+$1,000 bar register</button>
-    <button class="btn tiny soft" type="button" id="incQuickTipJar">Log tip jar</button>
+    <button class="btn tiny soft" type="button" id="incQuickTipJar" hidden title="Staff keep 100% of tips — tip jar is not booked as house income">Log tip jar</button>
     <button class="btn tiny soft" type="button" id="incQuickDeposit">Log deposit</button>
-    <button class="btn tiny soft" type="button" id="incApplyTipJar">Apply tip jar to pool</button>
+    <button class="btn tiny soft" type="button" id="incApplyTipJar" hidden title="Staff keep 100% of tips — tip pool from jar is unused">Apply tip jar to pool</button>
     <span class="pill gray" id="incFilterLabel">Showing all</span>
   </div>
   <div class="card"><div class="card-head"><b>Income log</b><span class="pill gray" id="incTableCount">0</span></div>
@@ -3931,9 +3931,9 @@ body.session-staff #pullSharedBtn{display:none!important}
   </div>
   <div class="field-row">
     <div class="field"><label>Amount ($)</label><input id="incAmount" type="number" min="0" step="1" placeholder="0"></div>
-    <div class="field"><label>Tips → pool ($)</label><input id="incTipsToPool" type="number" min="0" step="1" placeholder="0" title="For tip jar only — portion pushed into tip pool"></div>
+    <div class="field"><label>Tips → pool ($)</label><input id="incTipsToPool" type="number" min="0" step="1" placeholder="0" disabled title="Unused — staff keep 100% of tips; not house income"></div>
   </div>
-  <div class="field"><label>Source</label><input id="incSource" placeholder="e.g. Bar register, Friday tip jar, City rebate"></div>
+    <div class="field"><label>What was sold / notes</label><input id="incSource" placeholder="Food & drinks sold, or notes for deposit / treasury"></div>
   <div class="field-row">
     <div class="field"><label>Station</label><select id="incStation"></select></div>
     <div class="field"><label>Logged by</label><input id="incPaidBy" placeholder="Who logged / player name"></div>
@@ -4322,7 +4322,7 @@ const LOG_TYPES = {
 };
 const TIP_ROLES_DEFAULT = ['Waiter', 'Hostess', 'Cook'];
 const TIP_ROLES = TIP_ROLES_DEFAULT; /* legacy alias — use tipRoles() */
-const DESK_BUILD = 'v41';
+const DESK_BUILD = 'v44';
 const HOUSE_LOGIN_PASSWORD = 'frenchies636'; /* fallback seed — prefer settings.housePassword */
 const SESSION_KEY = 'frenchies_desk_session';
 const SESSION_DURABLE_KEY = 'frenchies_desk_session_durable';
@@ -4401,12 +4401,14 @@ const EXPENSE_CATS = {
 };
 const INCOME_KINDS = {
   register: 'Register',
-  tips: 'Tip jar',
+  tips: 'Tip jar (legacy)',
   event: 'Event proceeds',
   deposit: 'Deposit / Treasury',
   rebate: 'Rebate cash-in',
   other: 'Other'
 };
+/** Kinds offered when logging new house income — tip jar omitted (staff keep 100% of tips). */
+const INCOME_KINDS_LOG = ['register', 'event', 'deposit', 'rebate', 'other'];
 const INCOME_STATIONS = ['', 'Bar', 'Floor', 'Door', 'Kitchen', 'Other'];
 const STATIONS = ['Off', 'Bar', 'Kitchen', 'Floor', 'Host'];
 const DAY_NAMES = ['Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat', 'Sun'];
@@ -7635,7 +7637,6 @@ function cmdCommands() {
   cmds.push({ label: 'Publish shared desk', hint: 'Backup', run: () => publishSharedPack() });
   cmds.push({ label: 'Announce payday', hint: 'Discord', run: () => postPaydayAnnouncement() });
   cmds.push({ label: 'Log register drop', hint: 'Income', run: () => { goView('income'); setTimeout(() => openIncomeForm(null, { kind: 'register', amount: 1000, station: 'Bar', source: 'Bar register' }), 40); } });
-  cmds.push({ label: 'Log tip jar', hint: 'Income', run: () => { goView('income'); setTimeout(() => openIncomeForm(null, { kind: 'tips', source: 'Tip jar' }), 40); } });
   cmds.push({ label: 'Log deposit', hint: 'Income', run: () => { goView('income'); setTimeout(() => openIncomeForm(null, { kind: 'deposit', source: 'House deposit' }), 40); } });
   cmds.push({ label: 'Import Discord register lines', hint: 'Income', run: () => { goView('income'); setTimeout(() => openImportIncomeModal(), 40); } });
   cmds.push({ label: 'Pull Discord income from Supabase', hint: 'Income', run: () => { goView('income'); setTimeout(() => pullRegisterSalesFromSupabase({ quiet: false }), 40); } });
@@ -7755,6 +7756,9 @@ function openChangelog() {
   const grid = $('upgradeGrid');
   if (grid) {
     const recent = [
+      ['v44', 'Discord field: What was sold / notes (replaces Source label — Kind already covers type)'],
+      ['v43', 'No tip jar on Discord/desk logs — staff keep 100% tips · Discord modal: Kind, Station, Amount, Source, Date'],
+      ['v42', 'Discord Log income modal mirrors desk — Kind, Station, Amount, Source · Logged by = Discord nick · auto receipt/ref'],
       ['v41', 'Discord /register dropdowns — income type (register, tips, event, deposit/treasury, rebate) + station · pull books correct kind'],
       ['v40', 'Discord /register modal → Supabase → Income auto-pull · Log register drop button · pending feed chip'],
       ['v39', 'House Income desk — register/tip jar/event/deposit/rebate · #hr-income-reports · #register-sales import · net house P&L'],
@@ -9424,8 +9428,10 @@ function fillIncomeFilters() {
 
 function fillIncomeKindSelect(sel, val) {
   if (!sel) return;
-  sel.innerHTML = Object.entries(INCOME_KINDS).map(([k, lab]) =>
-    '<option value="' + k + '"' + (k === val ? ' selected' : '') + '>' + esc(lab) + '</option>'
+  const keys = INCOME_KINDS_LOG.slice();
+  if (val && keys.indexOf(val) < 0 && INCOME_KINDS[val]) keys.push(val);
+  sel.innerHTML = keys.map(k =>
+    '<option value="' + k + '"' + (k === val ? ' selected' : '') + '>' + esc(INCOME_KINDS[k] || k) + '</option>'
   ).join('');
 }
 
@@ -9447,11 +9453,14 @@ function fillIncomeEventSelect(sel, val) {
 function updateIncomeKindUi() {
   const kind = $('incKindForm') ? $('incKindForm').value : 'register';
   const tipField = $('incTipsToPool');
-  if (tipField) tipField.disabled = kind !== 'tips';
+  if (tipField) {
+    tipField.disabled = true;
+    if (kind !== 'tips') tipField.value = '0';
+  }
   if ($('incEventWrap')) $('incEventWrap').style.display = kind === 'event' ? '' : 'none';
   const hints = {
-    register: 'Register drops book customer payments for food, drinks, or service.',
-    tips: 'Tip jar — set Tips → pool to push into the open period tip pool on save (or use Apply tip jar).',
+    register: 'Register drops book customer payments for food, drinks, or service. Staff tips are kept by the employee — not logged here.',
+    tips: 'Legacy tip jar only. Frenchie\'s staff keep 100% of tips — do not book new tip jars as house income.',
     event: 'Event proceeds — usually linked from an event House take; pick the event if logging manually.',
     deposit: 'Owner or house deposit into the till / bank.',
     rebate: 'Cash back when a reimbursable expense is marked reimbursed.',
@@ -10009,6 +10018,8 @@ async function pullRegisterSalesFromSupabase(opts) {
       station = hit || (station ? 'Other' : '');
       let kind = String(row.kind || 'register').trim().toLowerCase();
       if (!INCOME_KINDS[kind]) kind = 'register';
+      const tipPool = Math.max(0, Math.round(Number(row.tips_to_pool || 0)));
+      const extraNotes = String(row.notes || '').trim();
       const data = normalizeIncome({
         id: s.nextIncomeId++,
         date: row.sale_date || today(),
@@ -10016,10 +10027,13 @@ async function pullRegisterSalesFromSupabase(opts) {
         kind: kind,
         source: row.source || (kind === 'deposit' ? 'House deposit' : incomeKindLabel(kind)),
         amount: Math.round(Number(row.amount || 0)),
+        tipsToPool: tipPool,
         station: station,
         paidBy: row.paid_by || '',
         discordRef: ref,
-        notes: 'Discord /register · ' + incomeKindLabel(kind) + (row.discord_user_id ? ' · uid ' + row.discord_user_id : ''),
+        notes: (extraNotes ? extraNotes + ' · ' : '') +
+          'Discord /register · ' + incomeKindLabel(kind) +
+          (row.discord_user_id ? ' · uid ' + row.discord_user_id : ''),
         receipt: row.discord_msg_id ? ('msg:' + row.discord_msg_id) : ''
       });
       if (!data.amount) continue;

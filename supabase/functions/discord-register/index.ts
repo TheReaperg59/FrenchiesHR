@@ -2,6 +2,9 @@
  * Discord Interactions endpoint for Frenchie's /register modal.
  * Deploy: supabase functions deploy discord-register --no-verify-jwt
  *
+ * Modal mirrors the desk "Log income" form (Discord allows max 5 fields).
+ * Auto-filled: date (today), logged by (server nick), receipt (message id), discord ref (sb:uuid).
+ *
  * Secrets:
  *   DISCORD_PUBLIC_KEY
  *   DISCORD_BOT_TOKEN
@@ -13,9 +16,9 @@ import { createClient } from 'https://esm.sh/@supabase/supabase-js@2.49.1';
 
 const STATIONS = ['Bar', 'Floor', 'Door', 'Kitchen', 'Other'] as const;
 
+/** House income kinds — tip jar omitted (staff keep 100% of tips). */
 const INCOME_KINDS: Record<string, string> = {
   register: 'Register',
-  tips: 'Tip jar',
   event: 'Event proceeds',
   deposit: 'Deposit / Treasury',
   rebate: 'Rebate cash-in',
@@ -42,7 +45,10 @@ type DiscordInteraction = {
     custom_id?: string;
     components?: DiscordComponent[];
   };
-  member?: { user?: { id?: string; username?: string; global_name?: string } };
+  member?: {
+    nick?: string | null;
+    user?: { id?: string; username?: string; global_name?: string };
+  };
   user?: { id?: string; username?: string; global_name?: string };
 };
 
@@ -119,9 +125,11 @@ async function verifyDiscordSignature(
   }
 }
 
+/** Prefer server nickname (IC name) → global name → username */
 function actorName(interaction: DiscordInteraction): { id: string; name: string } {
   const u = interaction.member?.user || interaction.user || {};
-  const name = (u.global_name || u.username || 'Player').trim();
+  const nick = String(interaction.member?.nick || '').trim();
+  const name = (nick || u.global_name || u.username || 'Player').trim();
   return { id: String(u.id || ''), name };
 }
 
@@ -134,35 +142,40 @@ function labelText(label: string, description: string | undefined, component: Re
   };
 }
 
+/**
+ * Desk "Log income" fields that fit Discord's 5-slot modal:
+ * Kind, Station, Amount, What was sold / notes, Date.
+ * No tip jar — staff keep 100% of tips (not house income).
+ * Auto: Logged by=Discord nick, Receipt=msg id, Discord ref on pull.
+ */
 function registerModal() {
-  const today = new Date().toISOString().slice(0, 10);
+  const today = todayIso();
   return {
     type: ResponseType.MODAL,
     data: {
       custom_id: 'register_modal',
-      title: 'Log house income',
+      title: 'Log income',
       components: [
-        labelText('Income type', 'Matches the Income desk kinds', {
+        labelText('Kind', 'House income only — tips stay with staff', {
           type: ComponentType.STRING_SELECT,
           custom_id: 'kind',
           required: true,
-          placeholder: 'Choose type…',
+          placeholder: 'Choose kind…',
           options: [
             { label: 'Register', value: 'register', description: 'Till / register drop' },
-            { label: 'Tip jar', value: 'tips', description: 'Tip jar into the house' },
             { label: 'Event proceeds', value: 'event', description: 'Event cash-in' },
             { label: 'Deposit / Treasury', value: 'deposit', description: 'House deposit / treasury' },
             { label: 'Rebate cash-in', value: 'rebate', description: 'Rebate returned to house' },
             { label: 'Other', value: 'other', description: 'Other house income' },
           ],
         }),
-        labelText('Station', 'Optional for deposit / tip jar / rebate', {
+        labelText('Station', '— / House when not station-specific', {
           type: ComponentType.STRING_SELECT,
           custom_id: 'station',
           required: true,
           placeholder: 'Choose station…',
           options: [
-            { label: 'None / House', value: 'none', description: 'No specific station' },
+            { label: '—', value: 'none', description: 'No specific station / house' },
             ...STATIONS.map((s) => ({ label: s, value: s })),
           ],
         }),
@@ -175,16 +188,16 @@ function registerModal() {
           placeholder: '1000',
           required: true,
         }),
-        labelText('Source / notes', 'What was sold, or why the deposit', {
+        labelText('What was sold / notes', 'Food & drinks sold, or deposit/treasury notes', {
           type: ComponentType.TEXT_INPUT,
           custom_id: 'source',
           style: 2,
           min_length: 1,
           max_length: 200,
-          placeholder: 'Food & drinks · House deposit · Tip jar',
+          placeholder: 'Food & drinks · Weekly house deposit · City rebate note',
           required: true,
         }),
-        labelText('Date (YYYY-MM-DD)', undefined, {
+        labelText('Date (YYYY-MM-DD)', 'Defaults to today', {
           type: ComponentType.TEXT_INPUT,
           custom_id: 'sale_date',
           style: 1,
@@ -232,7 +245,7 @@ function normalizeKind(raw: string): string | null {
 
 function normalizeStation(raw: string): string | null {
   const t = (raw || '').trim();
-  if (!t || t.toLowerCase() === 'none' || t.toLowerCase() === 'house') return '';
+  if (!t || t.toLowerCase() === 'none' || t.toLowerCase() === 'house' || t === '—') return '';
   const hit = STATIONS.find((s) => s.toLowerCase() === t.toLowerCase());
   return hit || null;
 }
@@ -248,7 +261,6 @@ function todayIso(): string {
 
 function defaultSource(kind: string): string {
   if (kind === 'deposit') return 'House deposit';
-  if (kind === 'tips') return 'Tip jar';
   if (kind === 'event') return 'Event proceeds';
   if (kind === 'rebate') return 'Rebate cash-in';
   if (kind === 'register') return 'Register';
@@ -271,6 +283,14 @@ async function postChannelEmbed(opts: {
     maximumFractionDigits: 0,
   });
   const kindLabel = INCOME_KINDS[opts.kind] || opts.kind;
+  const fields = [
+    { name: 'Kind', value: kindLabel, inline: true },
+    { name: 'Amount', value: money, inline: true },
+    { name: 'Station', value: opts.station || '—', inline: true },
+    { name: 'Date', value: opts.saleDate, inline: true },
+    { name: 'Logged by', value: opts.paidBy.slice(0, 256), inline: true },
+    { name: 'What was sold / notes', value: opts.source.slice(0, 1024), inline: false },
+  ];
   const res = await fetch(`https://discord.com/api/v10/channels/${opts.channelId}/messages`, {
     method: 'POST',
     headers: {
@@ -281,14 +301,7 @@ async function postChannelEmbed(opts: {
       embeds: [{
         title: `${kindLabel} logged`,
         color: opts.kind === 'deposit' ? 0xc4a35a : 0x3f7a56,
-        fields: [
-          { name: 'Type', value: kindLabel, inline: true },
-          { name: 'Amount', value: money, inline: true },
-          { name: 'Station', value: opts.station || 'House', inline: true },
-          { name: 'Date', value: opts.saleDate, inline: true },
-          { name: 'Source', value: opts.source.slice(0, 1024), inline: false },
-          { name: 'Logged by', value: opts.paidBy.slice(0, 256), inline: true },
-        ],
+        fields,
         footer: { text: "Frenchie's HR · /register · syncs to Income desk" },
         timestamp: new Date().toISOString(),
       }],
@@ -372,7 +385,7 @@ Deno.serve(async (req) => {
       return json({
         type: ResponseType.CHANNEL_MESSAGE_WITH_SOURCE,
         data: {
-          content: 'Pick an income type: Register, Tip jar, Event, Deposit / Treasury, Rebate, or Other.',
+          content: 'Pick a kind: Register, Event, Deposit / Treasury, Rebate, or Other. (Tips stay with staff — not house income.)',
           flags: 64,
         },
       });
@@ -387,11 +400,12 @@ Deno.serve(async (req) => {
       return json({
         type: ResponseType.CHANNEL_MESSAGE_WITH_SOURCE,
         data: {
-          content: 'Station must be None/House, Bar, Floor, Door, Kitchen, or Other.',
+          content: 'Station must be —, Bar, Floor, Door, Kitchen, or Other.',
           flags: 64,
         },
       });
     }
+
     if (!supabaseUrl || !serviceKey) {
       return json({
         type: ResponseType.CHANNEL_MESSAGE_WITH_SOURCE,
@@ -401,6 +415,7 @@ Deno.serve(async (req) => {
 
     const station = stationNorm;
     const kindLabel = INCOME_KINDS[kind] || kind;
+    const notes = 'Staff keep 100% of tips — not booked as house income.';
 
     const sb = createClient(supabaseUrl, serviceKey, {
       auth: { persistSession: false, autoRefreshToken: false },
@@ -413,7 +428,9 @@ Deno.serve(async (req) => {
         kind,
         station,
         amount,
+        tips_to_pool: 0,
         source,
+        notes,
         paid_by: who.name,
         discord_user_id: who.id || null,
         interaction_id: interaction.id,
@@ -427,7 +444,7 @@ Deno.serve(async (req) => {
         return json({
           type: ResponseType.CHANNEL_MESSAGE_WITH_SOURCE,
           data: {
-            content: `Already booked — **${kindLabel}** · **$${amount.toLocaleString()}**${station ? ` at **${station}**` : ''}. Managers will see it on the Income desk.`,
+            content: `Already booked — **${kindLabel}** · **$${amount.toLocaleString()}** · logged by **${who.name}**.`,
             flags: 64,
           },
         });
@@ -437,7 +454,7 @@ Deno.serve(async (req) => {
         type: ResponseType.CHANNEL_MESSAGE_WITH_SOURCE,
         data: {
           content:
-            'Could not save income row. If you just added kinds, run the kind migration in Supabase SQL Editor, then try again.',
+            'Could not save income row. Run the tips_to_pool SQL migration in Supabase if you have not yet, then try again.',
           flags: 64,
         },
       });
@@ -466,10 +483,10 @@ Deno.serve(async (req) => {
       data: {
         content:
           `${kindLabel} saved — **$${money}**` +
-          (station ? ` · **${station}**` : ' · House') +
-          ` · ${saleDate}` +
+          (station ? ` · **${station}**` : '') +
+          ` · **${who.name}** · ${saleDate}` +
           (msgId
-            ? '\nPosted in #register-sales. It will appear on the Income desk when management pulls.'
+            ? '\nPosted in #register-sales. Income desk pulls Kind, Amount, Station, notes, Date, and Logged by.'
             : '\nSaved to Supabase for the Income desk.'),
         flags: 64,
       },
