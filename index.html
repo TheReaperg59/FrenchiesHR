@@ -2521,6 +2521,7 @@ body.session-staff #pullSharedBtn{display:none!important}
     <div class="nav">
       <button type="button" data-view="compliance" data-label="Compliance" data-keys="c"><span class="nav-label">Compliance</span><span class="nav-hint" aria-hidden="true">C</span></button>
       <button type="button" data-view="expenses" data-label="Expenses" data-keys="x"><span class="nav-label">Expenses</span><span class="nav-hint" aria-hidden="true">X</span></button>
+      <button type="button" data-view="income" data-label="Income" data-keys="i"><span class="nav-label">Income</span><span class="nav-hint" aria-hidden="true">I</span></button>
       <button type="button" data-view="reports" data-label="Reports" data-keys="y"><span class="nav-label">Reports</span><span class="nav-hint" aria-hidden="true">Y</span></button>
       <button type="button" data-view="backup" data-label="Backup" data-keys="b"><span class="nav-label">Backup</span><span class="nav-hint" aria-hidden="true">B</span></button>
     </div>
@@ -2584,6 +2585,7 @@ body.session-staff #pullSharedBtn{display:none!important}
             <option value="shifts">Shifts</option>
             <option value="compliance">Compliance</option>
             <option value="expenses">Expenses</option>
+            <option value="income">Income</option>
             <option value="reports">Reports</option>
             <option value="backup">Backup</option>
           </select>
@@ -2695,6 +2697,7 @@ body.session-staff #pullSharedBtn{display:none!important}
           <button class="btn" type="button" id="addEmployee">Add employee</button>
           <button class="btn soft" type="button" id="ovGotoUnpaidStubs">Unpaid stubs</button>
           <button class="btn soft" type="button" id="ovGotoExpenses">Expenses</button>
+          <button class="btn soft" type="button" id="ovGotoIncome">Income</button>
           <button class="btn soft" type="button" id="ovGotoReports">Reports</button>
           <button class="btn soft" type="button" id="exportTodosBtn">Export to-dos</button>
         </div>
@@ -2709,6 +2712,7 @@ body.session-staff #pullSharedBtn{display:none!important}
     <div class="metric"><label>Hours logged</label><strong id="hours">0.00</strong><span>Across the roster</span></div>
     <div class="metric"><label>Still unpaid</label><strong id="owedCount">0</strong><span id="owedSub">Ready for Sunday</span></div>
     <div class="metric"><label>Paid out</label><strong id="paidOutMetric">$0</strong><span>Marked paid this period</span></div>
+    <div class="metric"><label>House in</label><strong id="ovHouseIn">$0</strong><span id="ovHouseNetSub">Net this period</span></div>
   </div>
 
   <div class="grid desk-split">
@@ -3060,6 +3064,49 @@ body.session-staff #pullSharedBtn{display:none!important}
   </details>
 </section>
 
+<!-- INCOME -->
+<section class="view" id="view-income" role="region" aria-labelledby="title-income" tabindex="-1">
+  <div class="header">
+    <div><div class="eyebrow">Office</div><h1 class="title" id="title-income">Income</h1><div class="subtitle">House cash-in — register drops, tip jars, event proceeds, deposits, and rebate cash-in. Players post register lines in Discord <b>#register-sales</b>; import them here.</div></div>
+    <div class="actions">
+      <button class="btn" id="csvIncomes" type="button">Export CSV</button>
+      <button class="btn soft" id="pdfIncomes" type="button">Print week sheet</button>
+      <button class="btn soft" id="postIncomeWeekDiscord" type="button">Post week to Discord</button>
+      <button class="btn soft" id="importDiscordIncome" type="button">Import Discord lines</button>
+      <button class="btn soft" id="copyRegisterTemplate" type="button">Copy register template</button>
+      <button class="btn primary" id="addIncome" type="button">Log income</button>
+    </div>
+  </div>
+  <div class="metrics" id="incomeWeekStrip">
+    <div class="metric"><label>House in</label><strong id="incHouseIn">$0</strong><span id="incWeekLabel">Selected week</span></div>
+    <div class="metric"><label>Tip pool</label><strong id="incTipPool">$0</strong><span>Open period pool</span></div>
+    <div class="metric"><label>Payroll owed</label><strong id="incPayrollOwed">$0</strong><span>Unpaid gross</span></div>
+    <div class="metric"><label>Expenses</label><strong id="incExpenses">$0</strong><span>Week window</span></div>
+    <div class="metric"><label>Net house</label><strong id="incNetHouse">$0</strong><span>In − payroll − expenses</span></div>
+  </div>
+  <div class="toolbar filter-rail">
+    <select id="incPeriod"><option value="open">Open period</option></select>
+    <select id="incKind"><option value="">All kinds</option></select>
+    <input class="search" id="incSearch" placeholder="Search source, notes, who">
+    <button class="btn tiny soft" type="button" id="incQuickRegister">+$1,000 bar register</button>
+    <button class="btn tiny soft" type="button" id="incQuickTipJar">Log tip jar</button>
+    <button class="btn tiny soft" type="button" id="incQuickDeposit">Log deposit</button>
+    <button class="btn tiny soft" type="button" id="incApplyTipJar">Apply tip jar to pool</button>
+    <span class="pill gray" id="incFilterLabel">Showing all</span>
+  </div>
+  <div class="card"><div class="card-head"><b>Income log</b><span class="pill gray" id="incTableCount">0</span></div>
+    <div class="table-scroll"><table><thead><tr><th>Date</th><th>Kind</th><th>Source</th><th>Station</th><th class="r">Amount</th><th class="r">Tips→pool</th><th>Logged by</th><th>Notes</th><th class="r">Action</th></tr></thead><tbody id="incomes"></tbody></table></div>
+  </div>
+  <div class="grid-2" style="margin-top:12px">
+    <div class="card"><div class="card-head"><b>By kind</b><span class="pill gray" id="incByKindLabel">Shown</span></div>
+      <table><thead><tr><th>Kind</th><th class="r">Entries</th><th class="r">Total</th><th class="r">Tips→pool</th></tr></thead><tbody id="incByKind"></tbody></table>
+    </div>
+    <div class="card"><div class="card-head"><b>Register stations</b><span class="pill gray">Shown</span></div>
+      <table><thead><tr><th>Station</th><th class="r">Entries</th><th class="r">Total</th></tr></thead><tbody id="incByStation"></tbody></table>
+    </div>
+  </div>
+</section>
+
 <!-- PAY STUBS -->
 <section class="view" id="view-paystubs" role="region" aria-labelledby="title-paystubs" tabindex="-1">
   <div class="header">
@@ -3252,7 +3299,11 @@ body.session-staff #pullSharedBtn{display:none!important}
     </div>
     <div class="metrics metrics-dense">
       <div class="metric"><label>House spend</label><strong id="houseSpend">$0</strong><span>Payroll + expenses</span></div>
+      <div class="metric"><label>House income</label><strong id="yearIncome">$0</strong><span id="yearIncomeSub">Cash-in</span></div>
+      <div class="metric"><label>Net house</label><strong id="yearNetHouse">$0</strong><span>Income − payroll − expenses</span></div>
       <div class="metric"><label>Expenses</label><strong id="yearExpenses">$0</strong><span id="yearExpReimb">Reimbursable</span></div>
+    </div>
+    <div class="metrics metrics-dense">
       <div class="metric"><label>Headcount</label><strong id="yearHeadcount">0</strong><span id="yearHeadSub">Active / probation / suspended</span></div>
       <div class="metric"><label>Periods</label><strong id="yearPeriodSnap">0</strong><span id="yearPeriodSub">Open vs closed</span></div>
     </div>
@@ -3333,7 +3384,7 @@ body.session-staff #pullSharedBtn{display:none!important}
   <details class="fold quiet"><summary>About backups</summary><div class="fold-body"><p class="ui-hint">Autosave keeps the office file in this browser. Export JSON after busy days — that copy survives a cleared browser.</p></div></details>
   <div class="grid-2 backup-actions">
     <div class="card"><div class="card-head"><b>Export</b></div><div class="card-body">
-      <p class="subtitle" style="margin-bottom:14px">Download a full backup of employees, applications, periods, events, expenses, relations, shifts, licenses, pay log, and activity.</p>
+      <p class="subtitle" style="margin-bottom:14px">Download a full backup of employees, applications, periods, events, expenses, incomes, relations, shifts, licenses, pay log, and activity.</p>
       <div class="actions">
         <button class="btn primary" id="exportJson">Download JSON backup</button>
         <button class="btn" id="exportActivity">Download activity log</button>
@@ -3792,6 +3843,10 @@ body.session-staff #pullSharedBtn{display:none!important}
       <div class="field"><label>Type</label><select id="evType"><option value="raffle">Raffle night</option><option value="adult-ent">Adult entertainment</option><option value="special">Special / other</option></select></div>
     </div>
     <div class="field"><label>Event name</label><input id="evName" placeholder="e.g. Friday raffle"></div>
+    <div class="field-row">
+      <div class="field"><label>House take ($)</label><input id="evHouseTake" type="number" min="0" step="1" placeholder="0" title="House proceeds from this event — books to Income"></div>
+      <div class="field"><label>&nbsp;</label><p class="ui-hint" style="margin:8px 0 0">Logged as Income · Event proceeds when saved.</p></div>
+    </div>
     <div class="field"><label>Notes</label><textarea id="evNotes" rows="3" placeholder="Optional — what ran, guest notes, house callouts"></textarea></div>
 
     <div class="ev-section">
@@ -3857,6 +3912,56 @@ body.session-staff #pullSharedBtn{display:none!important}
     <button class="btn danger" id="deleteExpense" style="margin-right:auto;display:none">Delete</button>
     <button class="btn" id="cancelExpense">Cancel</button>
     <button class="btn primary" id="saveExpense">Save expense</button>
+  </div>
+</div></div>
+
+<!-- Income modal -->
+<div class="modal" id="incomeModal" role="dialog" aria-modal="true" aria-labelledby="incomeTitle" hidden><div class="dialog wide" role="document" tabindex="-1">
+  <h2 id="incomeTitle">Log income</h2>
+  <div class="dialog-scroll">
+  <div class="field-row">
+    <div class="field"><label>Date</label><input id="incDate" type="date"></div>
+    <div class="field"><label>Kind</label><select id="incKindForm"></select></div>
+  </div>
+  <div class="field-row">
+    <div class="field"><label>Amount ($)</label><input id="incAmount" type="number" min="0" step="1" placeholder="0"></div>
+    <div class="field"><label>Tips → pool ($)</label><input id="incTipsToPool" type="number" min="0" step="1" placeholder="0" title="For tip jar only — portion pushed into tip pool"></div>
+  </div>
+  <div class="field"><label>Source</label><input id="incSource" placeholder="e.g. Bar register, Friday tip jar, City rebate"></div>
+  <div class="field-row">
+    <div class="field"><label>Station</label><select id="incStation"></select></div>
+    <div class="field"><label>Logged by</label><input id="incPaidBy" placeholder="Who logged / player name"></div>
+  </div>
+  <div class="field" id="incEventWrap" style="display:none"><label>Linked event</label><select id="incEventId"><option value="">—</option></select></div>
+  <div class="field-row">
+    <div class="field"><label>Receipt / reference</label><input id="incReceipt" placeholder="Optional"></div>
+    <div class="field"><label>Discord ref</label><input id="incDiscordRef" placeholder="Optional import batch / message note"></div>
+  </div>
+  <div class="field"><label>Notes</label><textarea id="incNotes" placeholder="Optional"></textarea></div>
+  <p class="ui-hint" id="incKindHint">Register drops book customer payments for food, drinks, or service.</p>
+  </div>
+  <div class="dialog-foot">
+    <button class="btn danger" id="deleteIncome" style="margin-right:auto;display:none">Delete</button>
+    <button class="btn soft" id="postIncomeDiscord" type="button">Post to Discord</button>
+    <button class="btn" id="cancelIncome">Cancel</button>
+    <button class="btn primary" id="saveIncome">Save income</button>
+  </div>
+</div></div>
+
+<!-- Import Discord register lines -->
+<div class="modal" id="importIncomeModal" role="dialog" aria-modal="true" aria-labelledby="importIncomeTitle" hidden><div class="dialog wide" role="document" tabindex="-1">
+  <h2 id="importIncomeTitle">Import Discord lines</h2>
+  <div class="dialog-scroll">
+    <p class="ui-hint">Paste lines from <b>#register-sales</b>. Preferred format:<br>
+    <code>REGISTER | 2026-08-01 | Bar | 1000 | Food &amp; drinks till drop | @Alex</code></p>
+    <div class="field"><label>Paste</label><textarea id="importIncomeText" rows="10" placeholder="REGISTER | YYYY-MM-DD | Station | Amount | Source | Who"></textarea></div>
+    <div class="panel-note" id="importIncomePreviewNote">Preview appears after Parse.</div>
+    <div class="table-scroll" style="max-height:240px"><table><thead><tr><th>Date</th><th>Station</th><th class="r">Amount</th><th>Source</th><th>Who</th><th>Status</th></tr></thead><tbody id="importIncomePreview"></tbody></table></div>
+  </div>
+  <div class="dialog-foot">
+    <button class="btn" id="cancelImportIncome">Cancel</button>
+    <button class="btn soft" id="parseImportIncome">Parse</button>
+    <button class="btn primary" id="confirmImportIncome">Add register incomes</button>
   </div>
 </div></div>
 
@@ -4140,6 +4245,7 @@ body.session-staff #pullSharedBtn{display:none!important}
     <div class="field"><label>Coverage / call-offs webhook</label><input id="setWhCoverage" placeholder="https://discord.com/api/webhooks/…" autocomplete="off"></div>
     <div class="field"><label>HR desk log webhook</label><input id="setWhHrLog" placeholder="https://discord.com/api/webhooks/…" autocomplete="off"></div>
     <div class="field"><label>Announcements webhook</label><input id="setWhAnnounce" placeholder="https://discord.com/api/webhooks/…" autocomplete="off"></div>
+    <div class="field"><label>Income reports webhook (#hr-income-reports)</label><input id="setWhIncomeReports" placeholder="https://discord.com/api/webhooks/…" autocomplete="off"></div>
     <label class="checkline"><input type="checkbox" id="setQuietMode"><span>Quiet mode (less motion / hover)</span></label>
     <label class="checkline"><input type="checkbox" id="setRequireNotes"><span>Warn if closing period without notes</span></label>
     <label class="checkline"><input type="checkbox" id="setCompactTodos"><span>Compact to-do rows by default</span></label>
@@ -4205,7 +4311,7 @@ const LOG_TYPES = {
 };
 const TIP_ROLES_DEFAULT = ['Waiter', 'Hostess', 'Cook'];
 const TIP_ROLES = TIP_ROLES_DEFAULT; /* legacy alias — use tipRoles() */
-const DESK_BUILD = 'v38';
+const DESK_BUILD = 'v39';
 const HOUSE_LOGIN_PASSWORD = 'frenchies636'; /* fallback seed — prefer settings.housePassword */
 const SESSION_KEY = 'frenchies_desk_session';
 const SESSION_DURABLE_KEY = 'frenchies_desk_session_durable';
@@ -4282,6 +4388,15 @@ const EXPENSE_CATS = {
   utilities: 'Utilities',
   other: 'Other'
 };
+const INCOME_KINDS = {
+  register: 'Register',
+  tips: 'Tip jar',
+  event: 'Event proceeds',
+  deposit: 'Deposit',
+  rebate: 'Rebate cash-in',
+  other: 'Other'
+};
+const INCOME_STATIONS = ['', 'Bar', 'Floor', 'Door', 'Kitchen', 'Other'];
 const STATIONS = ['Off', 'Bar', 'Kitchen', 'Floor', 'Host'];
 const DAY_NAMES = ['Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat', 'Sun'];
 
@@ -4451,6 +4566,7 @@ function seedState() {
     }],
     events: [],
     expenses: [],
+    incomes: [],
     relations: [],
     shifts: {},
     payLog: [],
@@ -4464,7 +4580,7 @@ function seedState() {
     meta: { lastSaved: '', lastExport: '', saveCount: 0, rev: 0, updatedAt: '', clientId: '' },
     todos: [],
     todoDismissed: {},
-    nextId: 7, nextAppId: 1, nextEventId: 1, nextLicId: 4, nextRelId: 1, nextDocId: 1, nextPacketId: 1, nextExpenseId: 1, nextPeriodId: 2, nextTodoId: 1
+    nextId: 7, nextAppId: 1, nextEventId: 1, nextLicId: 4, nextRelId: 1, nextDocId: 1, nextPacketId: 1, nextExpenseId: 1, nextIncomeId: 1, nextPeriodId: 2, nextTodoId: 1
   };
 }
 
@@ -4623,6 +4739,7 @@ function migrate(raw) {
     periods: [],
     events: raw.events || [],
     expenses: Array.isArray(raw.expenses) ? raw.expenses : [],
+    incomes: Array.isArray(raw.incomes) ? raw.incomes : [],
     relations: raw.relations || [],
     shifts: raw.shifts || {},
     payLog: raw.payLog || [],
@@ -4638,6 +4755,7 @@ function migrate(raw) {
     nextDocId: raw.nextDocId || 1,
     nextPacketId: raw.nextPacketId || 1,
     nextExpenseId: raw.nextExpenseId || 1,
+    nextIncomeId: raw.nextIncomeId || 1,
     nextPeriodId: raw.nextPeriodId || 1,
     nextTodoId: raw.nextTodoId || 1
   };
@@ -4688,8 +4806,11 @@ function migrate(raw) {
   out.events.forEach(ev => {
     ev.staff = ev.staff || [];
     if (!('appliedToPeriodId' in ev)) ev.appliedToPeriodId = null;
+    if (!('houseTake' in ev)) ev.houseTake = Number(ev.houseTake || 0) || 0;
+    else ev.houseTake = Math.max(0, Math.round(Number(ev.houseTake || 0) || 0));
   });
   out.expenses = (out.expenses || []).map(normalizeExpense).filter(Boolean);
+  out.incomes = (out.incomes || []).map(normalizeIncome).filter(Boolean);
   out.relations.forEach(r => { r.resolved = !!r.resolved; });
   out.todos = Array.isArray(raw.todos) ? raw.todos.map(t => ({
     id: t.id != null ? t.id : (out.nextTodoId++),
@@ -4724,6 +4845,7 @@ function migrate(raw) {
   const maxLic = (out.licenses || []).reduce((m, l) => Math.max(m, Number(l.id) || 0), 0);
   const maxRel = out.relations.reduce((m, r) => Math.max(m, Number(r.id) || 0), 0);
   const maxExp = out.expenses.reduce((m, x) => Math.max(m, Number(x.id) || 0), 0);
+  const maxInc = (out.incomes || []).reduce((m, x) => Math.max(m, Number(x.id) || 0), 0);
   const maxPeriod = out.periods.reduce((m, p) => Math.max(m, Number(p.id) || 0), 0);
   const maxTodo = (out.todos || []).reduce((m, t) => Math.max(m, Number(t.id) || 0), 0);
   let maxDoc = 0, maxPacket = 0;
@@ -4748,6 +4870,7 @@ function migrate(raw) {
   out.nextLicId = Math.max(Number(out.nextLicId) || 1, maxLic + 1);
   out.nextRelId = Math.max(Number(out.nextRelId) || 1, maxRel + 1);
   out.nextExpenseId = Math.max(Number(out.nextExpenseId) || 1, maxExp + 1);
+  out.nextIncomeId = Math.max(Number(out.nextIncomeId) || 1, maxInc + 1);
   out.nextDocId = Math.max(Number(out.nextDocId) || 1, maxDoc + 1);
   out.nextPacketId = Math.max(Number(out.nextPacketId) || 1, maxPacket + 1);
   out.nextPeriodId = Math.max(Number(out.nextPeriodId) || 1, maxPeriod + 1);
@@ -4786,6 +4909,44 @@ function rebateStatusPill(st) {
   if (st === 'reimbursed') return 'green';
   if (st === 'submitted') return 'blue';
   return 'warn';
+}
+
+function normalizeIncome(x) {
+  if (!x || typeof x !== 'object') return null;
+  const kind = INCOME_KINDS[x.kind] ? x.kind : 'other';
+  const amount = Math.max(0, Math.round(Number(x.amount || 0)));
+  let tipsToPool = Math.max(0, Math.round(Number(x.tipsToPool || 0)));
+  if (kind !== 'tips') tipsToPool = 0;
+  if (tipsToPool > amount) tipsToPool = amount;
+  let station = String(x.station || '').trim();
+  if (station && INCOME_STATIONS.indexOf(station) < 0) station = 'Other';
+  const periodIndex = x.periodIndex == null || x.periodIndex === '' ? null : Number(x.periodIndex);
+  return {
+    id: Number(x.id) || Date.now(),
+    date: x.date || today(),
+    periodIndex: (periodIndex != null && !isNaN(periodIndex)) ? periodIndex : null,
+    kind,
+    source: String(x.source || '').trim(),
+    amount,
+    tipsToPool,
+    station,
+    eventId: x.eventId == null || x.eventId === '' ? null : (Number(x.eventId) || null),
+    expenseId: x.expenseId == null || x.expenseId === '' ? null : (Number(x.expenseId) || null),
+    paidBy: String(x.paidBy || '').trim(),
+    notes: String(x.notes || '').trim(),
+    receipt: String(x.receipt || '').trim(),
+    discordRef: String(x.discordRef || '').trim(),
+    tipPoolApplied: !!x.tipPoolApplied
+  };
+}
+function incomeKindLabel(k) { return INCOME_KINDS[k] || k || 'Other'; }
+function incomeKindPill(k) {
+  if (k === 'register') return 'green';
+  if (k === 'tips') return 'warn';
+  if (k === 'event') return 'blue';
+  if (k === 'rebate') return 'blue';
+  if (k === 'deposit') return 'gray';
+  return 'gray';
 }
 
 function loadState() {
@@ -4839,6 +5000,8 @@ function ensureMeta() {
   if (!s.todoSnoozed || typeof s.todoSnoozed !== 'object') s.todoSnoozed = {};
   if (!Array.isArray(s.expenses)) s.expenses = [];
   if (!s.nextExpenseId) s.nextExpenseId = 1;
+  if (!Array.isArray(s.incomes)) s.incomes = [];
+  if (!s.nextIncomeId) s.nextIncomeId = 1;
   if (!Array.isArray(s.disputes)) s.disputes = [];
   if (!Array.isArray(s.timeOff)) s.timeOff = [];
   if (!Array.isArray(s.clockLog)) s.clockLog = [];
@@ -4854,10 +5017,10 @@ function ensureMeta() {
   if (!('housePassword' in s.settings)) s.settings.housePassword = HOUSE_LOGIN_PASSWORD;
   if (!(s.settings.housePassword || '').trim()) s.settings.housePassword = HOUSE_LOGIN_PASSWORD;
   if (!s.settings.discordWebhooks || typeof s.settings.discordWebhooks !== 'object') {
-    s.settings.discordWebhooks = { payroll: '', hiring: '', coverage: '', hrLog: '', announcements: '' };
+    s.settings.discordWebhooks = { payroll: '', hiring: '', coverage: '', hrLog: '', announcements: '', incomeReports: '' };
   } else {
     const dw = s.settings.discordWebhooks;
-    ['payroll','hiring','coverage','hrLog','announcements'].forEach(k => { if (!(k in dw)) dw[k] = ''; });
+    ['payroll','hiring','coverage','hrLog','announcements','incomeReports'].forEach(k => { if (!(k in dw)) dw[k] = ''; });
   }
   if (!s.shiftTimes || typeof s.shiftTimes !== 'object') s.shiftTimes = {};
   if (!s.settings || typeof s.settings !== 'object') s.settings = {};
@@ -5247,6 +5410,11 @@ function requireHire(actionLabel) {
 function requireExpenseEdit(actionLabel) {
   if (canEditExpenses()) return true;
   toast((actionLabel || 'Expenses') + ' — management only');
+  return false;
+}
+function requireIncomeEdit(actionLabel) {
+  if (canEditIncomes()) return true;
+  toast((actionLabel || 'Income') + ' — management only');
   return false;
 }
 function requireEventEdit(actionLabel) {
@@ -6112,6 +6280,9 @@ function canEditLicenses() {
   return canMutateDesk();
 }
 function canEditExpenses() {
+  return canMutateDesk();
+}
+function canEditIncomes() {
   return canMutateDesk();
 }
 function canHire() {
@@ -7448,6 +7619,11 @@ function cmdCommands() {
   cmds.push({ label: 'Sunday checklist', hint: 'Payroll', run: () => openSundayRunPreview() });
   cmds.push({ label: 'Publish shared desk', hint: 'Backup', run: () => publishSharedPack() });
   cmds.push({ label: 'Announce payday', hint: 'Discord', run: () => postPaydayAnnouncement() });
+  cmds.push({ label: 'Log register drop', hint: 'Income', run: () => { goView('income'); setTimeout(() => openIncomeForm(null, { kind: 'register', amount: 1000, station: 'Bar', source: 'Bar register' }), 40); } });
+  cmds.push({ label: 'Log tip jar', hint: 'Income', run: () => { goView('income'); setTimeout(() => openIncomeForm(null, { kind: 'tips', source: 'Tip jar' }), 40); } });
+  cmds.push({ label: 'Log deposit', hint: 'Income', run: () => { goView('income'); setTimeout(() => openIncomeForm(null, { kind: 'deposit', source: 'House deposit' }), 40); } });
+  cmds.push({ label: 'Import Discord register lines', hint: 'Income', run: () => { goView('income'); setTimeout(() => openImportIncomeModal(), 40); } });
+  cmds.push({ label: 'Post income week report', hint: 'Discord', run: () => { goView('income'); setTimeout(() => postDiscord('incomeReports', incomeWeekDiscordCard(), { label: 'Income week' }), 40); } });
   cmds.push({ label: 'Open settings', hint: 'Desk', run: () => openSettings() });
   cmds.push({ label: 'Export to-dos', hint: 'Todos', run: () => copyTextSafe(exportTodosText(), 'To-dos copied') });
   cmds.push({ label: 'New application', hint: 'Hiring', run: () => { goView('hiring'); setTimeout(() => $('addApp') && $('addApp').click(), 40); } });
@@ -7512,6 +7688,7 @@ function openSettings() {
   if ($('setWhCoverage')) $('setWhCoverage').value = dw.coverage || '';
   if ($('setWhHrLog')) $('setWhHrLog').value = dw.hrLog || '';
   if ($('setWhAnnounce')) $('setWhAnnounce').value = dw.announcements || '';
+  if ($('setWhIncomeReports')) $('setWhIncomeReports').value = dw.incomeReports || '';
   d.classList.add('open'); d.removeAttribute('hidden');
 }
 function closeSettings() {
@@ -7546,7 +7723,8 @@ function saveSettings() {
     hiring: ($('setWhHiring') && $('setWhHiring').value || '').trim(),
     coverage: ($('setWhCoverage') && $('setWhCoverage').value || '').trim(),
     hrLog: ($('setWhHrLog') && $('setWhHrLog').value || '').trim(),
-    announcements: ($('setWhAnnounce') && $('setWhAnnounce').value || '').trim()
+    announcements: ($('setWhAnnounce') && $('setWhAnnounce').value || '').trim(),
+    incomeReports: ($('setWhIncomeReports') && $('setWhIncomeReports').value || '').trim()
   };
   save(); applyUiSettings(); closeSettings(); render(); toast('Settings saved');
 }
@@ -7555,6 +7733,7 @@ function openChangelog() {
   const grid = $('upgradeGrid');
   if (grid) {
     const recent = [
+      ['v39', 'House Income desk — register/tip jar/event/deposit/rebate · #hr-income-reports · #register-sales import · net house P&L'],
       ['v38', 'Tiiny publish checklist · shared-ahead probe · house password off login · handbook URL + assets modal'],
       ['v37', 'Storage survival — activity/clock caps, lighter mirror, near-quota export & trim'],
       ['v36', 'Clock hours safety — no silent 1h defaults · missing-times filter · OVERRIDE to force'],
@@ -8031,6 +8210,7 @@ function render() {
   renderEmployees();
   renderEvents();
   renderExpenses();
+  renderIncomes();
   renderRelations();
   renderShifts();
   renderLicenses();
@@ -8761,7 +8941,9 @@ function renderEvents() {
     return '<tr>' +
       '<td>' + esc(ev.date) + '</td>' +
       '<td><span class="pill gray">' + esc(ev.type) + '</span></td>' +
-      '<td class="name">' + esc(ev.name) + '</td>' +
+      '<td class="name">' + esc(ev.name) +
+      (Number(ev.houseTake || 0) ? '<div class="history">House take ' + money(ev.houseTake) + '</div>' : '') +
+      '</td>' +
       '<td class="r">' + (ev.staff ? ev.staff.length : 0) + '</td>' +
       '<td class="r mono">' + money(tot) + '</td>' +
       '<td>' + applied + '</td>' +
@@ -9107,6 +9289,548 @@ function exportExpensesCsv() {
   toast('Expenses CSV downloaded');
 }
 
+/* ---------------- income ---------------- */
+let incomeId = null;
+let __importIncomeRows = [];
+
+function incomePeriodWindow(periodSel) {
+  ensureMeta();
+  const sel = periodSel != null ? periodSel : ($('incPeriod') ? $('incPeriod').value : 'open');
+  if (sel === 'all' || sel === '') return { from: '', to: '', p: null, label: 'All periods', index: null };
+  let p = null;
+  let index = null;
+  if (sel === 'open') {
+    p = workingPeriod();
+    index = p ? s.periods.indexOf(p) : -1;
+  } else {
+    index = Number(sel);
+    if (!isNaN(index) && s.periods[index]) p = s.periods[index];
+  }
+  if (!p) return { from: '', to: '', p: null, label: 'All periods', index: null };
+  return { from: p.start || '', to: p.end || '', p, label: shortLabel(p), index: index >= 0 ? index : null };
+}
+
+function incomeInWindow(x, win) {
+  if (!win || (!win.from && !win.to)) return true;
+  const d = String(x.date || '');
+  if (win.from && d < String(win.from)) return false;
+  if (win.to && d > String(win.to)) return false;
+  return true;
+}
+
+function filteredIncomes(opts) {
+  opts = opts || {};
+  ensureMeta();
+  const win = opts.win || incomePeriodWindow(opts.period);
+  const kind = opts.kind != null ? opts.kind : ($('incKind') ? $('incKind').value : '');
+  const q = (opts.q != null ? opts.q : ($('incSearch') ? $('incSearch').value : '')).trim().toLowerCase();
+  return (s.incomes || []).filter(x => {
+    if (!incomeInWindow(x, win)) return false;
+    if (kind && x.kind !== kind) return false;
+    if (q) {
+      const hay = [x.source, x.notes, x.paidBy, x.station, x.receipt, x.discordRef, incomeKindLabel(x.kind)].join(' ').toLowerCase();
+      if (!hay.includes(q)) return false;
+    }
+    return true;
+  }).slice().sort((a, b) => String(b.date).localeCompare(String(a.date)) || (b.id - a.id));
+}
+
+function houseIncomeTotal(list) {
+  return (list || []).reduce((a, x) => a + Number(x.amount || 0), 0);
+}
+
+function tipJarCollectedTotal(list) {
+  return (list || []).filter(x => x.kind === 'tips').reduce((a, x) => a + Number(x.tipsToPool || x.amount || 0), 0);
+}
+
+function periodPayrollGross(p) {
+  if (!p) return 0;
+  let g = 0;
+  payableEmployees().forEach(e => {
+    const x = entry(p, e.id);
+    g += lineGross(e, x);
+  });
+  return g;
+}
+
+function periodPayrollOwed(p) {
+  if (!p) return 0;
+  let g = 0;
+  unpaidPayable(p).forEach(e => {
+    const x = entry(p, e.id);
+    g += lineGross(e, x);
+  });
+  return g;
+}
+
+function expensesInWindow(win) {
+  ensureMeta();
+  return (s.expenses || []).filter(x => incomeInWindow(x, win));
+}
+
+function houseNetForPeriod(opts) {
+  opts = opts || {};
+  const win = opts.win || incomePeriodWindow(opts.period);
+  const incomes = filteredIncomes({ win, kind: '', q: '' });
+  const incomeTot = houseIncomeTotal(incomes);
+  const p = win.p || workingPeriod();
+  const payroll = opts.useOwed ? periodPayrollOwed(p) : periodPayrollGross(p);
+  const expTot = expensesInWindow(win).reduce((a, x) => a + Number(x.amount || 0), 0);
+  return { income: incomeTot, payroll, expenses: expTot, net: incomeTot - payroll - expTot, win, incomes, tipJar: tipJarCollectedTotal(incomes) };
+}
+
+function fillIncomeFilters() {
+  if (!$('incPeriod')) return;
+  const cur = $('incPeriod').value || 'open';
+  let html = '<option value="open">Open period</option><option value="all">All periods</option>';
+  s.periods.forEach((p, i) => {
+    html += '<option value="' + i + '">' + esc(shortLabel(p)) + (p.status === 'open' ? ' · open' : '') + '</option>';
+  });
+  $('incPeriod').innerHTML = html;
+  if ([...$('incPeriod').options].some(o => o.value === cur)) $('incPeriod').value = cur;
+  else $('incPeriod').value = 'open';
+
+  if ($('incKind')) {
+    const curK = $('incKind').value;
+    $('incKind').innerHTML = '<option value="">All kinds</option>' + Object.entries(INCOME_KINDS).map(([k, lab]) =>
+      '<option value="' + k + '"' + (k === curK ? ' selected' : '') + '>' + esc(lab) + '</option>'
+    ).join('');
+  }
+}
+
+function fillIncomeKindSelect(sel, val) {
+  if (!sel) return;
+  sel.innerHTML = Object.entries(INCOME_KINDS).map(([k, lab]) =>
+    '<option value="' + k + '"' + (k === val ? ' selected' : '') + '>' + esc(lab) + '</option>'
+  ).join('');
+}
+
+function fillIncomeStationSelect(sel, val) {
+  if (!sel) return;
+  sel.innerHTML = INCOME_STATIONS.map(st =>
+    '<option value="' + esc(st) + '"' + (st === (val || '') ? ' selected' : '') + '>' + esc(st || '—') + '</option>'
+  ).join('');
+}
+
+function fillIncomeEventSelect(sel, val) {
+  if (!sel) return;
+  const cur = val == null ? '' : String(val);
+  sel.innerHTML = '<option value="">—</option>' + (s.events || []).map(ev =>
+    '<option value="' + ev.id + '"' + (String(ev.id) === cur ? ' selected' : '') + '>' + esc(ev.date + ' · ' + ev.name) + '</option>'
+  ).join('');
+}
+
+function updateIncomeKindUi() {
+  const kind = $('incKindForm') ? $('incKindForm').value : 'register';
+  const tipField = $('incTipsToPool');
+  if (tipField) tipField.disabled = kind !== 'tips';
+  if ($('incEventWrap')) $('incEventWrap').style.display = kind === 'event' ? '' : 'none';
+  const hints = {
+    register: 'Register drops book customer payments for food, drinks, or service.',
+    tips: 'Tip jar — set Tips → pool to push into the open period tip pool on save (or use Apply tip jar).',
+    event: 'Event proceeds — usually linked from an event House take; pick the event if logging manually.',
+    deposit: 'Owner or house deposit into the till / bank.',
+    rebate: 'Cash back when a reimbursable expense is marked reimbursed.',
+    other: 'Other house cash-in.'
+  };
+  if ($('incKindHint')) $('incKindHint').textContent = hints[kind] || hints.other;
+}
+
+function renderIncomes() {
+  if (!$('incomes')) return;
+  ensureMeta();
+  fillIncomeFilters();
+  const win = incomePeriodWindow();
+  const list = filteredIncomes({ win });
+  const net = houseNetForPeriod({ win, useOwed: true });
+  const pOpen = workingPeriod();
+
+  if ($('incHouseIn')) $('incHouseIn').textContent = money(net.income);
+  if ($('incWeekLabel')) $('incWeekLabel').textContent = win.label || 'Selected week';
+  if ($('incTipPool')) $('incTipPool').textContent = money(pOpen ? Number(pOpen.tipPool || 0) : 0);
+  if ($('incPayrollOwed')) $('incPayrollOwed').textContent = money(net.payroll);
+  if ($('incExpenses')) $('incExpenses').textContent = money(net.expenses);
+  if ($('incNetHouse')) $('incNetHouse').textContent = money(net.net);
+  if ($('incTableCount')) $('incTableCount').textContent = list.length + ' shown';
+
+  const bits = [];
+  if (win.label && $('incPeriod') && $('incPeriod').value !== 'all') bits.push(win.label);
+  if ($('incKind') && $('incKind').value) bits.push(incomeKindLabel($('incKind').value));
+  if ($('incSearch') && $('incSearch').value.trim()) bits.push('search');
+  if ($('incFilterLabel')) $('incFilterLabel').textContent = bits.length ? bits.join(' · ') : 'Showing all';
+
+  if ($('ovHouseIn')) {
+    const ovWin = incomePeriodWindow('open');
+    const ovNet = houseNetForPeriod({ win: ovWin, useOwed: false });
+    $('ovHouseIn').textContent = money(ovNet.income);
+    if ($('ovHouseNetSub')) $('ovHouseNetSub').textContent = 'Net ' + money(ovNet.net);
+  }
+
+  const byKind = {};
+  const byStation = {};
+  list.forEach(x => {
+    if (!byKind[x.kind]) byKind[x.kind] = { n: 0, t: 0, tips: 0 };
+    byKind[x.kind].n++;
+    byKind[x.kind].t += Number(x.amount || 0);
+    byKind[x.kind].tips += Number(x.tipsToPool || 0);
+    if (x.kind === 'register') {
+      const st = x.station || '—';
+      if (!byStation[st]) byStation[st] = { n: 0, t: 0 };
+      byStation[st].n++;
+      byStation[st].t += Number(x.amount || 0);
+    }
+  });
+
+  $('incomes').innerHTML = list.length ? list.map(x =>
+    '<tr>' +
+    '<td>' + esc(x.date) + '</td>' +
+    '<td><span class="pill ' + incomeKindPill(x.kind) + '">' + esc(incomeKindLabel(x.kind)) + '</span></td>' +
+    '<td class="name">' + esc(x.source || '—') +
+    (x.discordRef ? '<div class="history">Discord: ' + esc(x.discordRef) + '</div>' : '') +
+    '</td>' +
+    '<td>' + esc(x.station || '—') + '</td>' +
+    '<td class="r mono">' + money(x.amount) + '</td>' +
+    '<td class="r mono">' + (x.kind === 'tips' ? money(x.tipsToPool || 0) : '—') + '</td>' +
+    '<td>' + esc(x.paidBy || '—') + '</td>' +
+    '<td>' + esc((x.notes || '').slice(0, 80) || '—') + '</td>' +
+    '<td class="r"><button class="btn tiny" onclick="editIncome(' + x.id + ')">Edit</button> ' +
+    '<button class="btn tiny soft" onclick="postIncomeLineDiscord(' + x.id + ')">Post</button> ' +
+    '<button class="btn tiny danger" onclick="delIncome(' + x.id + ')">Delete</button></td>' +
+    '</tr>'
+  ).join('') : emptyState('No income logged.', 'Log register drops, tip jars, or import #register-sales lines.');
+
+  if ($('incByKind')) {
+    const keys = Object.keys(INCOME_KINDS).filter(k => byKind[k]).concat(Object.keys(byKind).filter(k => !INCOME_KINDS[k]));
+    const tipSum = list.reduce((a, x) => a + Number(x.tipsToPool || 0), 0);
+    $('incByKind').innerHTML = keys.length
+      ? keys.map(k => {
+        const c = byKind[k];
+        return '<tr><td class="name">' + esc(incomeKindLabel(k)) + '</td><td class="r">' + c.n + '</td><td class="r mono">' + money(c.t) + '</td><td class="r mono">' + money(c.tips) + '</td></tr>';
+      }).join('') +
+      '<tr class="total"><td>Total</td><td class="r">' + list.length + '</td><td class="r mono">' + money(houseIncomeTotal(list)) + '</td><td class="r mono">' + money(tipSum) + '</td></tr>'
+      : emptyState('Nothing to summarize yet.');
+    if ($('incByKindLabel')) $('incByKindLabel').textContent = list.length ? money(houseIncomeTotal(list)) : 'No rows';
+  }
+  if ($('incByStation')) {
+    const keys = Object.keys(byStation).sort((a, b) => byStation[b].t - byStation[a].t);
+    $('incByStation').innerHTML = keys.length
+      ? keys.map(k => '<tr><td class="name">' + esc(k) + '</td><td class="r">' + byStation[k].n + '</td><td class="r mono">' + money(byStation[k].t) + '</td></tr>').join('')
+      : emptyState('No register rows in filter.');
+  }
+}
+
+function openIncomeForm(id, preset) {
+  if (!requireIncomeEdit('Income')) return;
+  incomeId = id || null;
+  preset = preset || {};
+  fillIncomeKindSelect($('incKindForm'), preset.kind || 'register');
+  fillIncomeStationSelect($('incStation'), preset.station || '');
+  fillIncomeEventSelect($('incEventId'), preset.eventId || '');
+  if (id) {
+    const x = (s.incomes || []).find(e => e.id === id);
+    if (!x) return;
+    $('incomeTitle').textContent = 'Edit income';
+    fillIncomeKindSelect($('incKindForm'), x.kind);
+    fillIncomeStationSelect($('incStation'), x.station || '');
+    fillIncomeEventSelect($('incEventId'), x.eventId);
+    $('incDate').value = x.date || today();
+    $('incAmount').value = x.amount || 0;
+    $('incTipsToPool').value = x.tipsToPool || 0;
+    $('incSource').value = x.source || '';
+    $('incPaidBy').value = x.paidBy || '';
+    $('incReceipt').value = x.receipt || '';
+    $('incDiscordRef').value = x.discordRef || '';
+    $('incNotes').value = x.notes || '';
+    $('deleteIncome').style.display = 'inline-block';
+  } else {
+    $('incomeTitle').textContent = 'Log income';
+    $('incDate').value = preset.date || today();
+    $('incAmount').value = preset.amount != null ? preset.amount : '';
+    $('incTipsToPool').value = preset.tipsToPool != null ? preset.tipsToPool : '';
+    $('incSource').value = preset.source || (preset.kind === 'register' ? 'Bar register' : (preset.kind === 'tips' ? 'Tip jar' : (preset.kind === 'deposit' ? 'House deposit' : '')));
+    $('incPaidBy').value = preset.paidBy || (sessionUser && sessionUser.name) || 'Samael Hesperus';
+    $('incReceipt').value = preset.receipt || '';
+    $('incDiscordRef').value = preset.discordRef || '';
+    $('incNotes').value = preset.notes || '';
+    if (preset.station) fillIncomeStationSelect($('incStation'), preset.station);
+    if (preset.kind) fillIncomeKindSelect($('incKindForm'), preset.kind);
+    $('deleteIncome').style.display = 'none';
+  }
+  updateIncomeKindUi();
+  $('incomeModal').classList.add('open');
+  $('incomeModal').removeAttribute('hidden');
+  setTimeout(() => { const f = $('incAmount') || $('incSource'); if (f) f.focus(); }, 30);
+}
+
+window.editIncome = function (id) { openIncomeForm(id); };
+
+window.delIncome = function (id) {
+  if (!requireIncomeEdit('Income')) return;
+  const x = (s.incomes || []).find(e => e.id === id);
+  if (!x) return;
+  if (!confirmDanger('Delete this income — ' + money(x.amount) + ' · ' + (x.source || incomeKindLabel(x.kind)) + '?', 'It will leave the income log.')) return;
+  const before = JSON.parse(JSON.stringify(s.incomes || []));
+  const p = workingPeriod();
+  const tipBefore = p ? JSON.parse(JSON.stringify(p.entries || {})) : null;
+  const tipPoolBefore = p ? Number(p.tipPool || 0) : null;
+  s.incomes = s.incomes.filter(e => e.id !== id);
+  pushUndo({
+    label: 'delete income',
+    restore: () => {
+      s.incomes = before;
+      const wp = workingPeriod();
+      if (wp && tipBefore) { wp.entries = tipBefore; wp.tipPool = tipPoolBefore; }
+    }
+  });
+  log('Deleted income: ' + (x.source || incomeKindLabel(x.kind)) + ' · ' + money(x.amount));
+  save(); render(); toast('Income deleted');
+};
+
+function applyTipJarToPool(incomeRow, opts) {
+  opts = opts || {};
+  const p = workingPeriod();
+  if (!p || p.status !== 'open') {
+    if (!opts.quiet) toast('Open period required to apply tip jar');
+    return { ok: false };
+  }
+  const amt = Math.max(0, Math.round(Number(incomeRow.tipsToPool != null ? incomeRow.tipsToPool : incomeRow.amount) || 0));
+  if (!amt) {
+    if (!opts.quiet) toast('Tips → pool amount is 0');
+    return { ok: false };
+  }
+  if (incomeRow.tipPoolApplied && !opts.force) {
+    if (!opts.quiet) toast('Already applied to tip pool');
+    return { ok: false, already: true };
+  }
+  const beforePool = Number(p.tipPool || 0);
+  const beforeEntries = JSON.parse(JSON.stringify(p.entries || {}));
+  p.tipPool = beforePool + amt;
+  incomeRow.tipPoolApplied = true;
+  distributeTips(p);
+  if (!opts.skipUndo) {
+    pushUndo({
+      label: 'apply tip jar',
+      restore: () => {
+        p.tipPool = beforePool;
+        p.entries = beforeEntries;
+        incomeRow.tipPoolApplied = false;
+      }
+    });
+  }
+  log('Tip jar ' + money(amt) + ' applied to pool (' + shortLabel(p) + ')');
+  return { ok: true, amount: amt, p };
+}
+
+function upsertEventHouseIncome(ev) {
+  ensureMeta();
+  if (!ev) return null;
+  const take = Math.max(0, Math.round(Number(ev.houseTake || 0)));
+  const existing = (s.incomes || []).find(x => x.kind === 'event' && String(x.eventId) === String(ev.id));
+  if (take <= 0) {
+    if (existing) {
+      s.incomes = s.incomes.filter(x => x.id !== existing.id);
+      log('Removed event house take income for ' + ev.name);
+    }
+    return null;
+  }
+  const win = incomePeriodWindow('open');
+  const data = normalizeIncome({
+    id: existing ? existing.id : s.nextIncomeId++,
+    date: ev.date || today(),
+    periodIndex: win.index,
+    kind: 'event',
+    source: ev.name || 'Event proceeds',
+    amount: take,
+    tipsToPool: 0,
+    station: '',
+    eventId: ev.id,
+    paidBy: (sessionUser && sessionUser.name) || 'Samael Hesperus',
+    notes: ev.notes || '',
+    tipPoolApplied: existing ? !!existing.tipPoolApplied : false,
+    discordRef: existing ? existing.discordRef : '',
+    receipt: existing ? existing.receipt : ''
+  });
+  if (existing) {
+    const i = s.incomes.findIndex(x => x.id === existing.id);
+    s.incomes[i] = data;
+  } else {
+    s.incomes.unshift(data);
+    log('Event house take: ' + ev.name + ' · ' + money(take));
+  }
+  return data;
+}
+
+function ensureRebateIncome(expense) {
+  ensureMeta();
+  if (!expense || !expense.reimbursable) return null;
+  if ((expense.rebateStatus || '') !== 'reimbursed') return null;
+  const existing = (s.incomes || []).find(x => x.kind === 'rebate' && String(x.expenseId) === String(expense.id));
+  if (existing) return existing;
+  const win = incomePeriodWindow('open');
+  const data = normalizeIncome({
+    id: s.nextIncomeId++,
+    date: today(),
+    periodIndex: win.index,
+    kind: 'rebate',
+    source: (expense.vendor || 'Rebate') + ' cash-in',
+    amount: Math.round(Number(expense.amount || 0)),
+    expenseId: expense.id,
+    paidBy: expense.paidBy || (sessionUser && sessionUser.name) || '',
+    notes: 'From reimbursed expense #' + expense.id,
+    receipt: expense.receipt || ''
+  });
+  if (!data.amount) return null;
+  s.incomes.unshift(data);
+  log('Rebate cash-in: ' + data.source + ' · ' + money(data.amount));
+  return data;
+}
+
+function registerTemplateText() {
+  return [
+    "Frenchie's #register-sales — one line per drop",
+    'Format: REGISTER | YYYY-MM-DD | Station | Amount | Source/notes | @Who',
+    'Example: REGISTER | ' + today() + ' | Bar | 1000 | Food & drinks till drop | @Alex',
+    'Stations: Bar · Floor · Door · Kitchen · Other',
+    'Managers import these lines on the Income tab.'
+  ].join('\n');
+}
+
+function parseRegisterDiscordLines(text) {
+  const rows = [];
+  const seen = new Set();
+  String(text || '').split(/\r?\n/).forEach((line, idx) => {
+    const raw = line.trim();
+    if (!raw) return;
+    if (/^frenchie/i.test(raw) || /^format:/i.test(raw) || /^example:/i.test(raw) || /^stations:/i.test(raw) || /^managers /i.test(raw)) {
+      return;
+    }
+    let date = '', station = '', amount = 0, source = '', paidBy = '';
+    let ok = false;
+    const pipe = raw.split('|').map(p => p.trim());
+    if (/^register\b/i.test(pipe[0] || '') && pipe.length >= 5 && /^\d{4}-\d{2}-\d{2}$/.test(pipe[1])) {
+      date = pipe[1];
+      station = pipe[2] || '';
+      amount = Math.round(Number(String(pipe[3]).replace(/[$,]/g, '')) || 0);
+      source = pipe[4] || 'Register';
+      paidBy = (pipe[5] || '').replace(/^@/, '');
+      ok = amount > 0;
+    }
+    if (!ok) {
+      const m = raw.match(/^register\s+\$?([\d,]+)\s+([A-Za-z]+)?\s*[—\-:]\s*(.+?)(?:\s*[—\-]\s*@?([\w .'-]+))?\s*$/i);
+      if (m) {
+        amount = Math.round(Number(String(m[1]).replace(/,/g, '')) || 0);
+        station = (m[2] || '').trim();
+        source = (m[3] || 'Register').trim();
+        paidBy = (m[4] || '').trim();
+        date = today();
+        ok = amount > 0;
+      }
+    }
+    if (!ok) {
+      const m2 = raw.match(/^register\b/i);
+      rows.push({ ok: false, raw: raw, reason: m2 ? 'Could not parse amounts' : 'Not a REGISTER line', line: idx + 1 });
+      return;
+    }
+    if (station) {
+      const hit = INCOME_STATIONS.find(st => st && st.toLowerCase() === station.toLowerCase());
+      station = hit || 'Other';
+    }
+    const key = [date, station, amount, source, paidBy].join('|').toLowerCase();
+    if (seen.has(key)) {
+      rows.push({ ok: false, raw: raw, reason: 'Duplicate in paste', line: idx + 1, date: date, station: station, amount: amount, source: source, paidBy: paidBy });
+      return;
+    }
+    seen.add(key);
+    rows.push({ ok: true, raw: raw, date: date, station: station, amount: amount, source: source, paidBy: paidBy, line: idx + 1 });
+  });
+  return rows;
+}
+
+function exportIncomesCsv() {
+  const list = filteredIncomes();
+  if (!list.length) return toast('Nothing to export');
+  const rows = [['date', 'kind', 'source', 'station', 'amount', 'tips_to_pool', 'paid_by', 'notes', 'receipt', 'discord_ref', 'event_id', 'expense_id']];
+  list.forEach(x => rows.push([x.date, x.kind, x.source, x.station, x.amount, x.tipsToPool || 0, x.paidBy, x.notes, x.receipt, x.discordRef, x.eventId || '', x.expenseId || '']));
+  const blob = new Blob([rows.map(r => r.map(v => '"' + String(v).split('"').join('""') + '"').join(',')).join('\r\n')], { type: 'text/csv' });
+  const a = document.createElement('a');
+  a.href = URL.createObjectURL(blob);
+  a.download = 'frenchies-income-' + today() + '.csv';
+  a.click();
+  toast('Income CSV downloaded');
+}
+
+function buildIncomeWeekHtml(list, win) {
+  list = list || filteredIncomes();
+  win = win || incomePeriodWindow();
+  const net = houseNetForPeriod({ win: win, useOwed: false });
+  const lines = '<table><tr><th>Date</th><th>Kind</th><th>Source</th><th>Station</th><th>Amount</th><th>Tips→pool</th><th>Logged by</th></tr>' +
+    list.map(x => '<tr><td>' + esc(x.date) + '</td><td>' + esc(incomeKindLabel(x.kind)) + '</td><td>' + esc(x.source || '—') + '</td><td>' + esc(x.station || '—') +
+      '</td><td>' + money(x.amount) + '</td><td>' + (x.kind === 'tips' ? money(x.tipsToPool || 0) : '—') + '</td><td>' + esc(x.paidBy || '—') + '</td></tr>').join('') +
+    '</table>';
+  return '<div style="margin:0 0 18px;padding:14px 16px;border:1px solid #ddd;border-radius:8px;background:#faf8f3">' +
+    '<div style="font:700 11px Arial,sans-serif;text-transform:uppercase;letter-spacing:.08em;color:#666;margin-bottom:6px">Income week sheet</div>' +
+    '<div style="font:700 20px Georgia,serif;margin-bottom:4px">Frenchie\'s Restaurant — House income</div>' +
+    '<div style="color:#555;font-size:12px;line-height:1.55">Week: <b>' + esc(win.label || 'All') + '</b><br>' +
+    'House in ' + money(net.income) + ' · Payroll ' + money(net.payroll) + ' · Expenses ' + money(net.expenses) + ' · Net ' + money(net.net) + '<br>' +
+    'Printed ' + esc(today()) + '</div></div>' + lines;
+}
+
+function printIncomeWeekSheet() {
+  const win = incomePeriodWindow();
+  const list = filteredIncomes({ win: win });
+  if (!list.length) return toast('Nothing to print — log income or clear filters');
+  printOfficeHtml('Income week sheet', buildIncomeWeekHtml(list, win));
+}
+
+function incomeWeekDiscordCard() {
+  const win = incomePeriodWindow();
+  const list = filteredIncomes({ win: win, kind: '', q: '' });
+  const net = houseNetForPeriod({ win: win, useOwed: false });
+  const byKind = {};
+  list.forEach(x => { byKind[x.kind] = (byKind[x.kind] || 0) + Number(x.amount || 0); });
+  const kindLines = Object.keys(INCOME_KINDS).filter(k => byKind[k]).map(k => '• **' + incomeKindLabel(k) + '** — ' + money(byKind[k])).join('\n') || '_No income rows._';
+  const top = list.filter(x => x.kind === 'register').slice(0, 8).map(x =>
+    '• ' + x.date + ' · ' + (x.station || '—') + ' · ' + money(x.amount) + (x.source ? ' — ' + x.source : '')
+  ).join('\n');
+  const fields = [
+    discordField('Week', win.label || 'All', true),
+    discordField('House in', money(net.income), true),
+    discordField('Net house', money(net.net), true),
+    discordField('Tip jar → pool', money(net.tipJar), true),
+    discordField('Payroll', money(net.payroll), true),
+    discordField('Expenses', money(net.expenses), true),
+    discordField('By kind', kindLines || '—', false)
+  ];
+  if (top) fields.push(discordField('Register lines', top, false));
+  return discordCard('incomeReports', {
+    title: 'House income report',
+    description: 'Week strip for ' + (win.label || 'all periods') + ' · ' + list.length + ' entries',
+    fields: fields
+  });
+}
+
+function incomeLineDiscordCard(x) {
+  return discordCard('incomeReports', {
+    title: 'Income · ' + incomeKindLabel(x.kind),
+    fields: [
+      discordField('Date', x.date || '—', true),
+      discordField('Amount', money(x.amount), true),
+      discordField('Station', x.station || '—', true),
+      discordField('Source', x.source || '—', false),
+      discordField('Logged by', x.paidBy || '—', true),
+      discordField('Tips→pool', x.kind === 'tips' ? money(x.tipsToPool || 0) : '—', true),
+      discordField('Notes', x.notes || '—', false)
+    ]
+  });
+}
+
+window.postIncomeLineDiscord = function (id) {
+  const x = (s.incomes || []).find(e => e.id === id);
+  if (!x) return;
+  return postDiscord('incomeReports', incomeLineDiscordCard(x), { label: 'Income · ' + money(x.amount) });
+};
+
+
 function renderRelations() {
   const t = today();
   $('mFollow').textContent = s.relations.filter(r => r.followUp && !r.resolved).length;
@@ -9353,9 +10077,14 @@ function renderMonthly() {
   const yearExp = (s.expenses || []).filter(x => String(x.date || '').startsWith(String(year)));
   const expTotal = yearExp.reduce((a, x) => a + Number(x.amount || 0), 0);
   const expReimb = yearExp.filter(x => x.reimbursable).reduce((a, x) => a + Number(x.amount || 0), 0);
+  const yearInc = (s.incomes || []).filter(x => String(x.date || '').startsWith(String(year)));
+  const incTotal = yearInc.reduce((a, x) => a + Number(x.amount || 0), 0);
   if ($('yearExpenses')) $('yearExpenses').textContent = money(expTotal);
   if ($('yearExpReimb')) $('yearExpReimb').textContent = 'Reimbursable ' + money(expReimb);
   if ($('houseSpend')) $('houseSpend').textContent = money(row.g + expTotal);
+  if ($('yearIncome')) $('yearIncome').textContent = money(incTotal);
+  if ($('yearIncomeSub')) $('yearIncomeSub').textContent = yearInc.length + ' entries · ' + year;
+  if ($('yearNetHouse')) $('yearNetHouse').textContent = money(incTotal - row.g - expTotal);
 
   const activeN = s.employees.filter(e => e.status === 'active').length;
   const probN = s.employees.filter(e => e.status === 'probation').length;
@@ -9820,14 +10549,15 @@ function copyText(text, msg) {
   } else { fallbackCopy(text); toast(msg); }
 }
 
-const DISCORD_CHANNEL_KEYS = ['payroll', 'hiring', 'coverage', 'hrLog', 'announcements'];
+const DISCORD_CHANNEL_KEYS = ['payroll', 'hiring', 'coverage', 'hrLog', 'announcements', 'incomeReports'];
 /* Discord embed brand — navy / gold / warn / sage integer colors */
 const DISCORD_EMBED_COLORS = {
   payroll: 0x1a3329,
   hiring: 0xb18a3e,
   coverage: 0xc45c26,
   hrLog: 0x2f5d50,
-  announcements: 0x1a3329
+  announcements: 0x1a3329,
+  incomeReports: 0x3f7a56
 };
 const DISCORD_FOOTER = "Frenchie's HR · 8 Elgin Ave";
 const DISCORD_USERNAME = "Frenchie's HR desk";
@@ -12718,6 +13448,7 @@ window.editEvent = function (id) {
   $('evDate').value = ev.date;
   $('evType').value = ev.type;
   $('evName').value = ev.name;
+  if ($('evHouseTake')) $('evHouseTake').value = Number(ev.houseTake || 0) || '';
   $('evNotes').value = ev.notes || '';
   $('evApplyPeriod').checked = false;
   buildEvStaff(ev.staff || []);
@@ -12738,6 +13469,7 @@ window.delEvent = function (id) {
   if (!ev) return;
   if (!confirm('Delete "' + ev.name + '"?')) return;
   s.events = s.events.filter(x => x.id !== id);
+  s.incomes = (s.incomes || []).filter(x => !(x.kind === 'event' && String(x.eventId) === String(id)));
   log('Deleted event: ' + ev.name);
   save(); render(); toast('Event deleted');
 };
@@ -15187,6 +15919,7 @@ $('addEvent').onclick = () => {
   $('evDate').value = today();
   $('evType').value = 'raffle';
   $('evName').value = '';
+  if ($('evHouseTake')) $('evHouseTake').value = '';
   $('evNotes').value = '';
   $('evApplyPeriod').checked = true;
   buildEvStaff([]);
@@ -15214,7 +15947,8 @@ $('saveEvent').onclick = () => {
   const staff = [];
   $('evStaff').querySelectorAll('input[data-staff]').forEach(inp => { if (inp.checked) staff.push(Number(inp.dataset.staff)); });
 
-  const data = { date: $('evDate').value || today(), type: $('evType').value, name, notes: $('evNotes').value, bonuses, staff };
+  const houseTake = Math.max(0, Math.round(Number(($('evHouseTake') && $('evHouseTake').value) || 0) || 0));
+  const data = { date: $('evDate').value || today(), type: $('evType').value, name, notes: $('evNotes').value, bonuses, staff, houseTake };
   let ev;
   if (eventId) {
     ev = s.events.find(x => x.id === eventId);
@@ -15225,6 +15959,7 @@ $('saveEvent').onclick = () => {
     s.events.unshift(ev);
     log('Logged event: ' + name + (staff.length ? ' — ' + staff.length + ' on shift' : ''));
   }
+  try { upsertEventHouseIncome(ev); } catch (incErr) { console.warn(incErr); }
 
   if ($('evApplyPeriod').checked) {
     const p = workingPeriod();
@@ -15307,20 +16042,26 @@ $('saveExpense').onclick = () => {
     rebateStatus: ($('exRebateStatus') && $('exRebateStatus').value) || 'pending',
     notes: $('exNotes').value.trim()
   });
+  let msg = '';
   if (expenseId) {
     const i = s.expenses.findIndex(x => x.id === expenseId);
     if (i < 0) return toast('Expense not found');
     s.expenses[i] = data;
     log('Updated expense: ' + data.vendor + ' · ' + money(data.amount));
-    toast('Expense updated');
+    msg = 'Expense updated';
   } else {
     s.expenses.unshift(data);
     log('Logged expense: ' + data.vendor + ' · ' + money(data.amount) + ' (' + expenseCatLabel(data.category) + ')');
-    toast('Expense logged — ' + money(data.amount));
+    msg = 'Expense logged — ' + money(data.amount);
   }
+  try {
+    const reb = ensureRebateIncome(data);
+    if (reb && data.rebateStatus === 'reimbursed') msg += ' · rebate cash-in booked';
+  } catch (rebErr) { console.warn(rebErr); }
   save();
   $('expenseModal').classList.remove('open');
   render();
+  toast(msg);
 };
 $('pdfExpenses').onclick = () => printExpenseReport();
 if ($('pdfExpensesReimb')) $('pdfExpensesReimb').onclick = () => printReimbursablePack();
@@ -15329,6 +16070,190 @@ if ($('csvExpenses')) $('csvExpenses').onclick = () => exportExpensesCsv();
   if ($(id)) $(id).onchange = () => renderExpenses();
 });
 if ($('expSearch')) $('expSearch').oninput = () => renderExpenses();
+
+/* ---------- income ---------- */
+function openImportIncomeModal() {
+  if (!requireIncomeEdit('Import income')) return;
+  __importIncomeRows = [];
+  if ($('importIncomeText')) $('importIncomeText').value = '';
+  if ($('importIncomePreview')) $('importIncomePreview').innerHTML = '';
+  if ($('importIncomePreviewNote')) $('importIncomePreviewNote').textContent = 'Preview appears after Parse.';
+  $('importIncomeModal').classList.add('open');
+  $('importIncomeModal').removeAttribute('hidden');
+  setTimeout(() => $('importIncomeText') && $('importIncomeText').focus(), 30);
+}
+function renderImportIncomePreview() {
+  const rows = __importIncomeRows || [];
+  const okN = rows.filter(r => r.ok).length;
+  if ($('importIncomePreviewNote')) {
+    $('importIncomePreviewNote').textContent = rows.length
+      ? (okN + ' ready · ' + (rows.length - okN) + ' skipped')
+      : 'No lines parsed yet.';
+  }
+  if ($('importIncomePreview')) {
+    $('importIncomePreview').innerHTML = rows.length ? rows.map(r =>
+      '<tr class="' + (r.ok ? '' : 'dupe-row') + '">' +
+      '<td>' + esc(r.date || '—') + '</td><td>' + esc(r.station || '—') + '</td>' +
+      '<td class="r mono">' + (r.amount ? money(r.amount) : '—') + '</td>' +
+      '<td>' + esc(r.source || r.raw || '—') + '</td><td>' + esc(r.paidBy || '—') + '</td>' +
+      '<td>' + (r.ok ? '<span class="pill green">ok</span>' : '<span class="pill warn">' + esc(r.reason || 'skip') + '</span>') + '</td></tr>'
+    ).join('') : emptyState('Paste REGISTER lines, then Parse.', '', 6);
+  }
+}
+if ($('addIncome')) $('addIncome').onclick = () => openIncomeForm(null);
+if ($('cancelIncome')) $('cancelIncome').onclick = () => { $('incomeModal').classList.remove('open'); $('incomeModal').setAttribute('hidden', ''); };
+if ($('deleteIncome')) $('deleteIncome').onclick = () => {
+  if (!requireIncomeEdit('Delete income')) return;
+  if (incomeId == null) return;
+  delIncome(incomeId);
+  $('incomeModal').classList.remove('open');
+  $('incomeModal').setAttribute('hidden', '');
+};
+if ($('incKindForm')) $('incKindForm').onchange = () => updateIncomeKindUi();
+if ($('saveIncome')) $('saveIncome').onclick = () => {
+  if (!requireIncomeEdit('Save income')) return;
+  ensureMeta();
+  const kind = ($('incKindForm') && $('incKindForm').value) || 'register';
+  const amount = Math.round(Number($('incAmount').value) || 0);
+  const source = ($('incSource') && $('incSource').value || '').trim();
+  let tipsToPool = Math.round(Number(($('incTipsToPool') && $('incTipsToPool').value) || 0) || 0);
+  if (kind !== 'tips') tipsToPool = 0;
+  if (!amount) return toast('Enter an amount');
+  if (amount < 0) return toast('Amount must be positive');
+  if (tipsToPool > amount) return toast('Tips → pool cannot exceed amount');
+  if (!source) return toast('Enter a source');
+  const win = incomePeriodWindow('open');
+  const prev = incomeId != null ? (s.incomes || []).find(x => x.id === incomeId) : null;
+  const data = normalizeIncome({
+    id: incomeId || s.nextIncomeId++,
+    date: ($('incDate') && $('incDate').value) || today(),
+    periodIndex: prev && prev.periodIndex != null ? prev.periodIndex : win.index,
+    kind,
+    source,
+    amount,
+    tipsToPool: kind === 'tips' ? (tipsToPool || amount) : 0,
+    station: ($('incStation') && $('incStation').value) || '',
+    eventId: ($('incEventId') && $('incEventId').value) ? Number($('incEventId').value) : null,
+    expenseId: prev ? prev.expenseId : null,
+    paidBy: ($('incPaidBy') && $('incPaidBy').value || '').trim(),
+    notes: ($('incNotes') && $('incNotes').value || '').trim(),
+    receipt: ($('incReceipt') && $('incReceipt').value || '').trim(),
+    discordRef: ($('incDiscordRef') && $('incDiscordRef').value || '').trim(),
+    tipPoolApplied: prev ? !!prev.tipPoolApplied : false
+  });
+  const before = JSON.parse(JSON.stringify(s.incomes || []));
+  const pTip = workingPeriod();
+  const beforePool = pTip ? Number(pTip.tipPool || 0) : 0;
+  const beforeEntries = pTip ? JSON.parse(JSON.stringify(pTip.entries || {})) : null;
+  if (incomeId) {
+    const i = s.incomes.findIndex(x => x.id === incomeId);
+    if (i < 0) return toast('Income not found');
+    s.incomes[i] = data;
+    log('Updated income: ' + data.source + ' · ' + money(data.amount));
+  } else {
+    s.incomes.unshift(data);
+    log('Logged income: ' + data.source + ' · ' + money(data.amount) + ' (' + incomeKindLabel(data.kind) + ')');
+  }
+  let tipMsg = '';
+  if (data.kind === 'tips' && data.tipsToPool > 0 && !data.tipPoolApplied) {
+    const res = applyTipJarToPool(data, { skipUndo: true, quiet: true });
+    if (res && res.ok) tipMsg = ' · tip pool +' + money(res.amount);
+  }
+  pushUndo({
+    label: incomeId ? 'edit income' : 'log income',
+    restore: () => {
+      s.incomes = before;
+      if (pTip && beforeEntries) { pTip.tipPool = beforePool; pTip.entries = beforeEntries; }
+    }
+  });
+  save();
+  $('incomeModal').classList.remove('open');
+  $('incomeModal').setAttribute('hidden', '');
+  render();
+  toast((incomeId ? 'Income updated' : 'Income logged') + tipMsg);
+};
+if ($('postIncomeDiscord')) $('postIncomeDiscord').onclick = () => {
+  if (incomeId == null) return toast('Save the income first, or use Post on a row');
+  postIncomeLineDiscord(incomeId);
+};
+if ($('csvIncomes')) $('csvIncomes').onclick = () => exportIncomesCsv();
+if ($('pdfIncomes')) $('pdfIncomes').onclick = () => printIncomeWeekSheet();
+if ($('postIncomeWeekDiscord')) $('postIncomeWeekDiscord').onclick = () => postDiscord('incomeReports', incomeWeekDiscordCard(), { label: 'Income week' });
+if ($('copyRegisterTemplate')) $('copyRegisterTemplate').onclick = () => copyText(registerTemplateText(), 'Register template copied — pin in #register-sales');
+if ($('importDiscordIncome')) $('importDiscordIncome').onclick = () => openImportIncomeModal();
+if ($('cancelImportIncome')) $('cancelImportIncome').onclick = () => { $('importIncomeModal').classList.remove('open'); $('importIncomeModal').setAttribute('hidden', ''); };
+if ($('parseImportIncome')) $('parseImportIncome').onclick = () => {
+  __importIncomeRows = parseRegisterDiscordLines(($('importIncomeText') && $('importIncomeText').value) || '');
+  renderImportIncomePreview();
+  toast(__importIncomeRows.filter(r => r.ok).length + ' lines ready');
+};
+if ($('confirmImportIncome')) $('confirmImportIncome').onclick = () => {
+  if (!requireIncomeEdit('Import income')) return;
+  ensureMeta();
+  if (!$('importIncomePreview') || !__importIncomeRows.length) {
+    __importIncomeRows = parseRegisterDiscordLines(($('importIncomeText') && $('importIncomeText').value) || '');
+    renderImportIncomePreview();
+  }
+  const ready = __importIncomeRows.filter(r => r.ok);
+  if (!ready.length) return toast('No valid REGISTER lines to import');
+  const before = JSON.parse(JSON.stringify(s.incomes || []));
+  const batch = 'import-' + today() + '-' + String(Date.now()).slice(-6);
+  const win = incomePeriodWindow('open');
+  ready.forEach(r => {
+    const data = normalizeIncome({
+      id: s.nextIncomeId++,
+      date: r.date || today(),
+      periodIndex: win.index,
+      kind: 'register',
+      source: r.source || 'Register',
+      amount: r.amount,
+      station: r.station || '',
+      paidBy: r.paidBy || (sessionUser && sessionUser.name) || '',
+      discordRef: batch,
+      notes: 'Imported from #register-sales'
+    });
+    s.incomes.unshift(data);
+  });
+  pushUndo({ label: 'import register lines', restore: () => { s.incomes = before; } });
+  log('Imported ' + ready.length + ' register line' + (ready.length === 1 ? '' : 's') + ' from Discord (' + batch + ')');
+  save();
+  $('importIncomeModal').classList.remove('open');
+  $('importIncomeModal').setAttribute('hidden', '');
+  render();
+  toast('Added ' + ready.length + ' register income' + (ready.length === 1 ? '' : 's'));
+};
+if ($('incQuickRegister')) $('incQuickRegister').onclick = () => openIncomeForm(null, { kind: 'register', amount: 1000, station: 'Bar', source: 'Bar register' });
+if ($('incQuickTipJar')) $('incQuickTipJar').onclick = () => openIncomeForm(null, { kind: 'tips', source: 'Tip jar' });
+if ($('incQuickDeposit')) $('incQuickDeposit').onclick = () => openIncomeForm(null, { kind: 'deposit', source: 'House deposit' });
+if ($('incApplyTipJar')) $('incApplyTipJar').onclick = () => {
+  if (!requireIncomeEdit('Apply tip jar')) return;
+  const win = incomePeriodWindow();
+  const pending = filteredIncomes({ win: win, kind: 'tips', q: '' }).filter(x => !x.tipPoolApplied && Number(x.tipsToPool || x.amount || 0) > 0);
+  if (!pending.length) return toast('No unapplied tip jar rows in this filter');
+  const beforeIncomes = JSON.parse(JSON.stringify(s.incomes || []));
+  const p = workingPeriod();
+  const beforePool = p ? Number(p.tipPool || 0) : 0;
+  const beforeEntries = p ? JSON.parse(JSON.stringify(p.entries || {})) : null;
+  let applied = 0;
+  pending.forEach(row => {
+    const res = applyTipJarToPool(row, { skipUndo: true, quiet: true });
+    if (res && res.ok) applied += res.amount;
+  });
+  if (!applied) return toast('Nothing applied');
+  pushUndo({
+    label: 'apply tip jars',
+    restore: () => {
+      s.incomes = beforeIncomes;
+      if (p && beforeEntries) { p.tipPool = beforePool; p.entries = beforeEntries; }
+    }
+  });
+  save(); render();
+  toast('Applied ' + money(applied) + ' to tip pool');
+};
+['incPeriod', 'incKind'].forEach(id => { if ($(id)) $(id).onchange = () => renderIncomes(); });
+if ($('incSearch')) $('incSearch').oninput = () => renderIncomes();
+if ($('ovGotoIncome')) $('ovGotoIncome').onclick = () => goView('income');
+
 
 /* ---------- relations ---------- */
 $('addRelation').onclick = () => {
@@ -17091,8 +18016,10 @@ function openTipSettlement() {
   const root = $('tipSettleBody');
   if (!root) return;
   const staffView = isStaffSession() && !canEditHours();
+  const tipJarWin = data.p ? { from: data.p.start || '', to: data.p.end || '', p: data.p, label: shortLabel(data.p) } : incomePeriodWindow('open');
+  const tipJarCollected = tipJarCollectedTotal(filteredIncomes({ win: tipJarWin, kind: 'tips', q: '' }));
   root.innerHTML =
-    '<p class="ui-hint">Period <b>' + esc(label(data.p)) + '</b> · Pool <b>' + money(data.pool) + '</b> · Split <b>' + esc(data.mode) + '</b>' +
+    '<p class="ui-hint">Period <b>' + esc(label(data.p)) + '</b> · Pool <b>' + money(data.pool) + '</b> · Tip jar collected <b>' + money(tipJarCollected) + '</b> · Split <b>' + esc(data.mode) + '</b>' +
     (staffView ? ' · your line only' : '') + '</p>' +
     '<div class="table-scroll"><table><thead><tr><th>Staff</th><th class="r">Hours</th><th class="r">Tips</th><th class="r">Wage</th><th class="r">Bonus</th><th class="r">Gross</th><th>Paid</th></tr></thead><tbody>' +
     (data.lines.map(r => '<tr><td>' + esc(r.e.name) + '<div class="history">' + esc(r.e.role) + '</div></td>' +
@@ -17130,9 +18057,12 @@ function tipSettlementDiscordCard() {
       '• **' + r.e.name + '** — tips ' + money(r.tips) + ' · gross ' + money(r.gross) + (r.paid ? ' · PAID' : ' · owed')
     ).join('\n')
     : '_No tip-eligible lines._';
+  const tipJarWinD = data.p ? { from: data.p.start || '', to: data.p.end || '', p: data.p, label: shortLabel(data.p) } : incomePeriodWindow('open');
+  const tipJarCollectedD = tipJarCollectedTotal(filteredIncomes({ win: tipJarWinD, kind: 'tips', q: '' }));
   const fields = [
     discordField('Period', label(data.p), true),
     discordField('Pool', money(data.pool), true),
+    discordField('Tip jar collected', money(tipJarCollectedD), true),
     discordField('Split', data.mode, true)
   ];
   if (data.excluded.length) fields.push(discordField('Excluded', data.excluded.join(', '), false));
@@ -17163,7 +18093,7 @@ function redactPasswordsInState(raw) {
   if (clone.settings) {
     if ('housePassword' in clone.settings) clone.settings.housePassword = '';
     if (clone.settings.discordWebhooks) {
-      clone.settings.discordWebhooks = { payroll: '', hiring: '', coverage: '', hrLog: '', announcements: '' };
+      clone.settings.discordWebhooks = { payroll: '', hiring: '', coverage: '', hrLog: '', announcements: '', incomeReports: '' };
     }
   }
   return clone;
