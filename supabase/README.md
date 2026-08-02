@@ -2,7 +2,7 @@
 
 ## Shared desk sync (multi-PC)
 
-After the income feed is working, run [`migrations/20260801_desk_shared_state.sql`](migrations/20260801_desk_shared_state.sql) in the SQL Editor. Desk **Backup → Publish shared desk** writes a PIN-redacted pack to `desk_shared_state` (id `frenchies`). Other PCs with the same Supabase URL + anon key use **Pull shared desk**. Tiiny raw URL remains a fallback.
+After the income feed is working, run [`migrations/20260801_desk_shared_state.sql`](migrations/20260801_desk_shared_state.sql) in the SQL Editor. Desk **Backup → Publish shared desk** writes a PIN-redacted pack to `desk_shared_state` (id `frenchies`). Other PCs with the same Supabase URL + anon key use **Pull shared desk**. Publish refuses to silently overwrite a newer remote rev (confirm to force). Tiiny raw URL remains a fallback (edited under Backup, not Settings).
 
 ---
 
@@ -569,7 +569,7 @@ If button post fails with **Missing Access**, `/register` still works — fix ch
 | ☐ | SQL: `kind` + `tips_to_pool` + `desk_shared_state` migrations |
 | ☐ | `supabase functions deploy discord-register --no-verify-jwt` |
 | ☐ | Re-run `register-discord-commands.mjs` |
-| ☐ | Upload desk `index.html` with **v46** |
+| ☐ | Upload desk `index.html` with **v47** |
 | ☐ | Test Deposit / Register → desk Pull shows Logged by |
 | ☐ | Publish shared desk to Supabase → Pull on another PC |
 

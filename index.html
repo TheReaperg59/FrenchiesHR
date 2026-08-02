@@ -1090,17 +1090,25 @@ td .btn.tiny{white-space:nowrap}
 /* Sunday closeout padding */
 .closeout-body{padding:8px 16px 14px}
 
+.metrics.metrics-five{grid-template-columns:repeat(5,minmax(0,1fr))}
+.header-actions-primary{display:flex;flex-wrap:wrap;gap:8px;align-items:flex-start}
+.header-more summary.btn{display:inline-flex}
+.header-more[open] .header-more-body{min-width:min(100%,320px)}
+.top-status-compact{display:none}
 /* Responsive layout */
 @media(max-width:1200px){
   .grid,.split-desk,.stub-desk{grid-template-columns:1fr}
   .metrics{grid-template-columns:repeat(2,minmax(0,1fr))}
+  .metrics.metrics-five{grid-template-columns:repeat(3,minmax(0,1fr))}
 }
 @media(max-width:1000px){
   .shell{grid-template-columns:1fr}
   .content{padding:22px 16px 64px}
   .header{align-items:stretch}
-  .header .actions{width:100%;justify-content:stretch}
-  .header .actions .btn{flex:1 1 auto}
+  .header .actions{width:100%;justify-content:flex-start}
+  .header .actions > .btn.primary,
+  .header .actions > .btn.soft:first-of-type{flex:1 1 auto}
+  .header .actions .header-more{flex:0 0 auto}
 }
 @media(max-width:720px){
   .metrics,.emp-metrics{grid-template-columns:1fr 1fr}
@@ -2027,7 +2035,14 @@ body.view-is-overview .quick-jump{display:none!important}
   .top{padding:10px 14px;gap:10px}
   .top-kicker{display:none}
   .top-page{font-size:1.05rem}
-  .top-status{display:none}
+  .top-status{
+    display:inline-flex;align-items:center;gap:6px;max-width:42vw;
+    font-size:.68rem;padding:4px 8px;border-radius:999px;border:1px solid var(--line);
+    background:oklch(98% .005 84);
+  }
+  .top-status-sep{display:none}
+  .top-status #saveBadge{font-size:.68rem;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;max-width:18vw}
+  .top-status #syncChip{font-size:.62rem;padding:2px 6px}
   .top-account-text{display:none}
   .top-account-btn{padding:4px;border-radius:50%}
   .top-account-caret{display:none}
@@ -2448,21 +2463,21 @@ body.session-staff #pullSharedBtn{display:none!important}
   <div class="login-card">
     <form class="login-panel" id="loginSignInPanel" autocomplete="on">
       <div class="brand" id="loginTitle">Frenchie's desk</div>
-      <p class="sub">Staff login · Username is Firstname_Lastname · First sign-in uses the house PIN, then you create your own 6+ digit PIN (ECRP)</p>
+      <p class="sub">Username is Firstname_Lastname · 6+ digit PIN (ECRP)</p>
       <div class="field">
         <label for="loginUser">Username</label>
         <input id="loginUser" name="username" placeholder="Kenzie_Long" autocomplete="username" required>
       </div>
       <div class="field">
         <label for="loginPass">PIN</label>
-        <input id="loginPass" name="password" type="password" placeholder="House or personal PIN · Owner may use master password" autocomplete="current-password" required>
+        <input id="loginPass" name="password" type="password" inputmode="numeric" placeholder="Personal or house PIN" autocomplete="current-password" required>
+        <p class="ui-hint" style="margin:6px 0 0">First sign-in: house PIN from your hire paper (or ask HR), then set your own. Owner may use a master password.</p>
       </div>
       <label class="checkline" style="margin:4px 0 10px"><input type="checkbox" id="loginStay" checked><span>Stay logged in on this device</span></label>
       <div class="login-err" id="loginErr" role="status"></div>
       <div class="actions">
         <button type="submit" class="btn primary" id="loginSubmit">Sign in</button>
       </div>
-      <p class="sub" style="margin:14px 0 0">Access is granted only after your <b>Account login information</b> paper is signed and filed by HR. First time: use the house PIN from that paper (or ask HR), then set your own PIN. Owner may use a master password instead of a PIN.</p>
     </form>
     <form class="login-panel" id="loginSetupPanel" autocomplete="off">
       <div class="brand">Create your PIN</div>
@@ -2541,7 +2556,7 @@ body.session-staff #pullSharedBtn{display:none!important}
     <div class="top-status" aria-label="Desk status">
       <span id="saveBadge" class="top-save rel" title="Autosave status">Saved</span>
       <span class="top-status-sep" aria-hidden="true"></span>
-      <span class="sync-chip live" id="syncChip" title="Realtime sync across tabs in this browser">Live</span>
+      <span class="sync-chip live" id="syncChip" title="Same-browser tabs only — use Pull shared desk for other PCs">Live</span>
     </div>
     <button type="button" class="top-iconbtn" id="openCmdBtn" title="Search desk (Ctrl+K)" aria-label="Search desk">
       <svg width="16" height="16" viewBox="0 0 24 24" fill="none" aria-hidden="true"><circle cx="11" cy="11" r="6.5" stroke="currentColor" stroke-width="1.8"/><path d="M16.5 16.5L21 21" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"/></svg>
@@ -2564,14 +2579,14 @@ body.session-staff #pullSharedBtn{display:none!important}
         <button type="button" class="top-account-item" id="handbookBtn" role="menuitem">Handbook</button>
         <button type="button" class="top-account-item" id="hoursDisputeBtn" role="menuitem">Hours dispute</button>
         <button type="button" class="top-account-item" id="callOffBtn" role="menuitem">Call-off / time-off</button>
-        <button type="button" class="top-account-item" id="syncNowBtn" role="menuitem">Sync this browser</button>
-        <button type="button" class="top-account-item" id="pullSharedBtn" role="menuitem">Pull shared desk (other PC)</button>
+        <button type="button" class="top-account-item" id="syncNowBtn" role="menuitem">Refresh this browser</button>
+        <button type="button" class="top-account-item" id="pullSharedBtn" role="menuitem">Pull shared desk</button>
         <button type="button" class="top-account-item" id="openSettingsBtn" role="menuitem" data-mgmt-only>Settings</button>
         <button type="button" class="top-account-item" id="helpShortcuts" role="menuitem" aria-haspopup="dialog" aria-controls="shortcutSheet">Keyboard shortcuts</button>
         <button type="button" class="top-account-item danger" id="logoutBtn" role="menuitem">Sign out</button>
         <button type="button" class="top-account-item" id="logoutAllBtn" role="menuitem">Sign out all remembered</button>
         <div class="top-account-foot">
-          <span class="build-chip" id="deskBuildChip" title="Desk build">v38</span>
+          <span class="build-chip" id="deskBuildChip" title="Desk build">v47</span>
           <label class="top-jump-label" for="quickJump">Jump to</label>
           <select class="top-jump" id="quickJump" title="Jump to any tab">
             <option value="overview">Overview</option>
@@ -2619,13 +2634,16 @@ body.session-staff #pullSharedBtn{display:none!important}
         </div>
         <div class="ov-cta-row">
           <button class="btn soft" type="button" id="tipSettlementBtn">Tip settlement</button>
-          <button class="btn soft" type="button" id="clockLogBtn">Clock / radio</button>
-          <button class="btn soft" type="button" id="previewSundayRun">Preview</button>
-          <button class="btn" type="button" id="closePeriod">Close &amp; roll</button>
         </div>
-        <div class="ov-meta">
-          <button type="button" class="btn tiny soft" id="openChangelogBtn">What&apos;s new</button>
-        </div>
+        <details class="fold quiet ov-hero-more" style="margin:10px 0 0;border:0;background:transparent">
+          <summary style="padding:6px 0">More</summary>
+          <div class="fold-body" style="padding:0;display:flex;flex-wrap:wrap;gap:8px">
+            <button class="btn soft" type="button" id="clockLogBtn">Clock / radio</button>
+            <button class="btn soft" type="button" id="previewSundayRun">Preview</button>
+            <button class="btn" type="button" id="closePeriod">Close &amp; roll</button>
+            <button type="button" class="btn tiny soft" id="openChangelogBtn">What&apos;s new</button>
+          </div>
+        </details>
       </div>
     </div>
     <div class="ov-next nba-card" id="nbaCard">
@@ -2707,7 +2725,7 @@ body.session-staff #pullSharedBtn{display:none!important}
 
   <div class="tip-warn" id="tipWarn" role="status">Tip pool is set, but no Waiter / Hostess / Cook with hours can share it yet.</div>
 
-  <div class="metrics ov-metrics">
+  <div class="metrics ov-metrics metrics-five">
     <div class="metric"><label>Gross payroll</label><strong id="gross">$0</strong><span id="periodHealthSub">This period</span></div>
     <div class="metric"><label>Hours logged</label><strong id="hours">0.00</strong><span>Across the roster</span></div>
     <div class="metric"><label>Still unpaid</label><strong id="owedCount">0</strong><span id="owedSub">Ready for Sunday</span></div>
@@ -3067,25 +3085,30 @@ body.session-staff #pullSharedBtn{display:none!important}
 <!-- INCOME -->
 <section class="view" id="view-income" role="region" aria-labelledby="title-income" tabindex="-1">
   <div class="header">
-      <div><div class="eyebrow">Office</div><h1 class="title" id="title-income">Income</h1><div class="subtitle">House cash-in — register drops, event proceeds, deposits / treasury, and rebate cash-in. Staff keep 100% of tips (not booked here). Players use Discord <b>/register</b> (Kind, Station, Amount, Source, Date; Logged by = Discord nick); this desk auto-pulls from Supabase.</div></div>
-    <div class="actions">
+      <div><div class="eyebrow">Office</div><h1 class="title" id="title-income">Income</h1><div class="subtitle">House cash-in from registers, events, deposits, and rebates. Staff keep 100% of tips. Discord <b>/register</b> auto-pulls here.</div></div>
+    <div class="actions header-actions-primary">
       <button class="btn soft" id="pullSupabaseIncome" type="button">Pull from Supabase</button>
-      <button class="btn" id="csvIncomes" type="button">Export CSV</button>
-      <button class="btn soft" id="pdfIncomes" type="button">Print week sheet</button>
-      <button class="btn soft" id="postIncomeWeekDiscord" type="button">Post week to Discord</button>
-      <button class="btn soft" id="importDiscordIncome" type="button">Import Discord lines</button>
-      <button class="btn soft" id="copyRegisterTemplate" type="button">Copy register template</button>
       <button class="btn primary" id="addIncome" type="button">Log income</button>
+      <details class="fold quiet header-more" style="margin:0;border:0;background:transparent">
+        <summary class="btn soft" style="list-style:none;cursor:pointer">More</summary>
+        <div class="fold-body header-more-body" style="padding:8px 0 0;display:flex;flex-wrap:wrap;gap:8px">
+          <button class="btn soft" id="csvIncomes" type="button">Export CSV</button>
+          <button class="btn soft" id="pdfIncomes" type="button">Print week sheet</button>
+          <button class="btn soft" id="postIncomeWeekDiscord" type="button">Post week to Discord</button>
+          <button class="btn soft" id="importDiscordIncome" type="button">Import Discord lines</button>
+          <button class="btn soft" id="copyRegisterTemplate" type="button">Copy register template</button>
+        </div>
+      </details>
     </div>
   </div>
-  <p class="ui-hint" id="incSupabaseHint" style="margin:0 0 10px">Supabase income feed — set URL + anon key in Settings. Players: Discord <code>/register</code> (Register, Deposit / Treasury, Event, etc.). Staff keep 100% of tips — tip jar is not house income.</p>
+  <p class="ui-hint" id="incSupabaseHint" style="margin:0 0 10px">Supabase income feed — set URL + anon key in Settings. Players use Discord <code>/register</code>. Staff keep 100% of tips (not house income).</p>
   <div class="toolbar" style="margin:0 0 10px;gap:8px;align-items:center;flex-wrap:wrap">
     <span class="pill gray" id="incSupabaseChip">Supabase · off</span>
     <span class="mini-note" id="incSupabaseStatus">Not configured</span>
   </div>
-  <div class="metrics" id="incomeWeekStrip">
+  <div class="metrics metrics-five" id="incomeWeekStrip">
     <div class="metric"><label>House in</label><strong id="incHouseIn">$0</strong><span id="incWeekLabel">Selected week</span></div>
-    <div class="metric"><label>Tip pool</label><strong id="incTipPool">$0</strong><span>Open period pool</span></div>
+    <div class="metric" id="incTipPoolMetric" style="display:none"><label>Period tip pool</label><strong id="incTipPool">$0</strong><span>HR-entered pool only</span></div>
     <div class="metric"><label>Payroll owed</label><strong id="incPayrollOwed">$0</strong><span>Unpaid gross</span></div>
     <div class="metric"><label>Expenses</label><strong id="incExpenses">$0</strong><span>Week window</span></div>
     <div class="metric"><label>Net house</label><strong id="incNetHouse">$0</strong><span>In − payroll − expenses</span></div>
@@ -3385,7 +3408,7 @@ body.session-staff #pullSharedBtn{display:none!important}
   </div>
   <div class="card" style="margin-top:12px"><div class="card-head"><b>Local snapshots</b><span class="pill gray" id="snapshotCount">0</span></div>
     <div class="card-body">
-      <p class="ui-hint">Automatic safety copies kept in this browser (last 5). Use after a bad edit or sync conflict.</p>
+      <p class="ui-hint">Automatic safety copies kept in this browser (last 3). Use after a bad edit or sync conflict.</p>
       <div id="snapshotList"></div>
     </div>
   </div>
@@ -3404,7 +3427,7 @@ body.session-staff #pullSharedBtn{display:none!important}
       <button class="btn" id="importJson">Import JSON</button>
     </div></div>
   </div>
-  <div class="card mgmt-only" style="margin-top:12px" data-mgmt-only><div class="card-head"><b>Shared desk sync</b><span class="pill gray" id="sharedDeskBuildPill">v46</span></div>
+  <div class="card mgmt-only" style="margin-top:12px" data-mgmt-only><div class="card-head"><b>Shared desk sync</b><span class="pill gray" id="sharedDeskBuildPill">v47</span></div>
     <div class="card-body">
       <p class="ui-hint"><b>Preferred:</b> Publish / Pull via <b>Supabase</b> (same URL + anon key as Income). Pack is PIN-redacted; each browser keeps local hashed PINs. <b>Fallback:</b> Tiiny raw URL PUT / download checklist below.</p>
       <div class="field"><label>Shared raw URL (Tiiny fallback — optional if Supabase is set)</label><input id="sharedDeskUrlSetting" placeholder="https://yourdomain/…/frenchies-shared-desk.json"></div>
@@ -3832,16 +3855,6 @@ body.session-staff #pullSharedBtn{display:none!important}
   <div class="dialog-foot"><button class="btn" id="closeHandbook">Close</button></div>
 </div></div>
 
-<!-- Shared conflict resolve (kept for API; also inline in pull modal) -->
-<div class="modal" id="sharedConflictModal" role="dialog" aria-modal="true" hidden><div class="dialog" role="document" tabindex="-1">
-  <h2>Desk conflict</h2>
-  <div class="dialog-scroll"><p class="ui-hint" id="sharedConflictModalText"></p></div>
-  <div class="dialog-foot">
-    <button class="btn soft" id="conflictKeepMine">Keep mine</button>
-    <button class="btn primary" id="conflictTakeTheirs">Take theirs</button>
-  </div>
-</div></div>
-
 <!-- Event modal -->
 <div class="modal" id="eventModal" role="dialog" aria-modal="true" aria-labelledby="eventTitle" hidden><div class="dialog wide event-dialog" role="document" tabindex="-1">
   <h2 id="eventTitle">Log event</h2>
@@ -4232,18 +4245,19 @@ body.session-staff #pullSharedBtn{display:none!important}
 <div class="settings-drawer" id="settingsDrawer" hidden>
   <div class="settings-panel" role="dialog" aria-modal="true" aria-labelledby="settingsTitle">
     <h2 id="settingsTitle" style="font:600 1.2rem 'Playfair Display',serif;margin:0 0 12px">Desk settings</h2>
+    <h3 style="margin:0 0 8px;font:700 .72rem 'DM Sans',sans-serif;letter-spacing:.08em;text-transform:uppercase;color:var(--muted)">Sign-in</h3>
+    <div class="field"><label>Stay-logged-in days</label><select id="setSessionDays"><option value="1">1</option><option value="7">7</option><option value="14" selected>14</option><option value="30">30</option></select></div>
+    <div class="field"><label>House PIN (first sign-in)</label><input id="setHousePass" type="password" inputmode="numeric" pattern="[0-9]*" placeholder="Leave blank to keep current · 6+ digits" autocomplete="new-password"></div>
+    <p class="ui-hint" style="margin:-6px 0 10px">6+ digit PIN, stored hashed. After hashing, hire papers say “ask HR” — share the PIN privately. Owner may keep a personal master password.</p>
+    <div class="field"><label>Handbook Google Doc URL</label><input id="setHandbookUrl" placeholder="https://docs.google.com/document/d/…"></div>
+    <h3 style="margin:16px 0 8px;font:700 .72rem 'DM Sans',sans-serif;letter-spacing:.08em;text-transform:uppercase;color:var(--muted)">Payroll tips</h3>
     <div class="field"><label>Payday label</label><input id="setPaydayLabel" placeholder="Sunday, 9:00 AM"></div>
     <div class="field"><label>Tip split mode</label>
       <select id="setTipMode"><option value="equal">Equal share</option><option value="hours">Weighted by hours</option></select>
     </div>
     <div class="field"><label>Tip-eligible roles (comma-separated)</label><input id="setTipRoles" placeholder="Waiter, Hostess, Cook"></div>
     <div class="field"><label>High-hours warning threshold</label><input id="setOtHours" type="number" min="1" step="0.5" value="40"></div>
-    <div class="field"><label>Stay-logged-in days</label><select id="setSessionDays"><option value="1">1</option><option value="7">7</option><option value="14" selected>14</option><option value="30">30</option></select></div>
-    <div class="field"><label>House PIN (first sign-in)</label><input id="setHousePass" type="password" inputmode="numeric" pattern="[0-9]*" placeholder="Leave blank to keep current · 6+ digits" autocomplete="new-password"></div>
-    <p class="ui-hint" style="margin:-6px 0 10px">ECRP: 6+ digit PIN, stored hashed. After hashing, hire papers say “ask HR” instead of printing it — share the PIN privately. Staff then create their own hashed PIN. Owner may keep a personal master password (letters OK).</p>
-    <div class="field"><label>Shared desk raw URL</label><input id="setSharedUrl" placeholder="https://…/frenchies-shared-desk.json"></div>
-    <label class="checkline"><input type="checkbox" id="setSharedAutoPull"><span>Auto-pull shared desk on login / tab focus (mgmt &amp; leads)</span></label>
-    <div class="field"><label>Handbook Google Doc URL</label><input id="setHandbookUrl" placeholder="https://docs.google.com/document/d/…"></div>
+    <p class="ui-hint" style="margin:-6px 0 10px">Period tip pool is only what HR enters for Sunday settlement. Staff keep 100% of tips they earn — not house income.</p>
     <h3 style="margin:16px 0 8px;font:700 .72rem 'DM Sans',sans-serif;letter-spacing:.08em;text-transform:uppercase;color:var(--muted)">Discord webhooks</h3>
     <p class="ui-hint" style="margin:0 0 10px">Paste Incoming Webhook URLs from Discord (channel → Integrations → Webhooks). Secrets — not shared in Publish shared pack. Leave blank to keep Copy-only.</p>
     <div class="field"><label>Payroll webhook</label><input id="setWhPayroll" placeholder="https://discord.com/api/webhooks/…" autocomplete="off"></div>
@@ -4252,12 +4266,14 @@ body.session-staff #pullSharedBtn{display:none!important}
     <div class="field"><label>HR desk log webhook</label><input id="setWhHrLog" placeholder="https://discord.com/api/webhooks/…" autocomplete="off"></div>
     <div class="field"><label>Announcements webhook</label><input id="setWhAnnounce" placeholder="https://discord.com/api/webhooks/…" autocomplete="off"></div>
     <div class="field"><label>Income reports webhook (#hr-income-reports)</label><input id="setWhIncomeReports" placeholder="https://discord.com/api/webhooks/…" autocomplete="off"></div>
-    <h3 style="margin:16px 0 8px;font:700 .72rem 'DM Sans',sans-serif;letter-spacing:.08em;text-transform:uppercase;color:var(--muted)">Supabase (income + shared desk)</h3>
-    <p class="ui-hint" style="margin:0 0 10px">Same project for Discord income pull and multi-PC shared desk Publish/Pull. Run <code>desk_shared_state</code> SQL migration. Anon key is redacted from shared packs. See <code>supabase/README.md</code>.</p>
+    <h3 style="margin:16px 0 8px;font:700 .72rem 'DM Sans',sans-serif;letter-spacing:.08em;text-transform:uppercase;color:var(--muted)">Supabase / shared desk</h3>
+    <p class="ui-hint" style="margin:0 0 10px">Same project for Discord income pull and multi-PC Publish/Pull. Tiiny raw URL is edited under <b>Backup → Shared desk sync</b> (fallback only).</p>
     <div class="field"><label>Supabase URL</label><input id="setSupabaseUrl" placeholder="https://xxxx.supabase.co" autocomplete="off"></div>
     <div class="field"><label>Supabase anon key</label><input id="setSupabaseAnon" placeholder="eyJ…" autocomplete="off"></div>
     <label class="checkline"><input type="checkbox" id="setRegisterAutoPull" checked><span>Auto-pull register sales on login / focus / Income tab</span></label>
     <label class="checkline"><input type="checkbox" id="setSharedPreferSupabase" checked><span>Prefer Supabase for shared desk Publish / Pull (fallback to Tiiny URL)</span></label>
+    <label class="checkline"><input type="checkbox" id="setSharedAutoPull"><span>Auto-pull shared desk on login / tab focus (mgmt &amp; leads)</span></label>
+    <h3 style="margin:16px 0 8px;font:700 .72rem 'DM Sans',sans-serif;letter-spacing:.08em;text-transform:uppercase;color:var(--muted)">Desk prefs</h3>
     <label class="checkline"><input type="checkbox" id="setQuietMode"><span>Quiet mode (less motion / hover)</span></label>
     <label class="checkline"><input type="checkbox" id="setRequireNotes"><span>Warn if closing period without notes</span></label>
     <label class="checkline"><input type="checkbox" id="setCompactTodos"><span>Compact to-do rows by default</span></label>
@@ -4323,7 +4339,7 @@ const LOG_TYPES = {
 };
 const TIP_ROLES_DEFAULT = ['Waiter', 'Hostess', 'Cook'];
 const TIP_ROLES = TIP_ROLES_DEFAULT; /* legacy alias — use tipRoles() */
-const DESK_BUILD = 'v46';
+const DESK_BUILD = 'v47';
 /** ECRP: house first-sign-in secret is a 6+ digit PIN (override in Settings). Stored hashed after first use/set. */
 const HOUSE_LOGIN_PIN = '86368636';
 const HOUSE_LOGIN_PASSWORD = HOUSE_LOGIN_PIN; /* legacy alias — prefer settings.housePassword */
@@ -4370,7 +4386,7 @@ let lastRemoteToast = 0;
 let syncChannel = null;
 let remoteRenderTimer = null;
 const V11_IMPROVEMENTS = [
-  'Realtime cross-tab sync','Revision stamps + stale write guard','Local snapshot ring (5)','Sync status chip','Force Sync button',
+  'Realtime cross-tab sync','Revision stamps + stale write guard','Local snapshot ring (3)','Sync status chip','Refresh this browser',
   'Relative saved time','Overview tip-mode control','Auto-collapse empty hire panels','NBA quiet when clear','Remember employee folds',
   'Period notes auto-open when empty','Cmd palette Sync/Restore','Ctrl+Shift+S pull','Snapshot restore on Backup','Hiring denser columns',
   'Mobile top-bar trim','Sync flash on apply','Debounced remote render','Export carries rev','Build v11 banner'
@@ -5280,9 +5296,15 @@ function save(opts) {
     }
     s.meta.lastSaved = new Date().toISOString();
     s.meta.saveCount = Number(s.meta.saveCount || 0) + 1;
-    trimActivityInPlace(ACTIVITY_CAP);
-    trimClockLogInPlace();
+    const trimmedActivity = trimActivityInPlace(ACTIVITY_CAP);
+    const trimmedClock = trimClockLogInPlace();
     if (s.payLog && s.payLog.length > PAYLOG_CAP) s.payLog.length = PAYLOG_CAP;
+    if (!quiet && (trimmedActivity || trimmedClock)) {
+      const bits = [];
+      if (trimmedActivity) bits.push(trimmedActivity + ' activity');
+      if (trimmedClock) bits.push(trimmedClock + ' old clock');
+      toast('Trimmed ' + bits.join(' · ') + ' to stay under storage caps');
+    }
     const json = JSON.stringify(s);
     localStorage.setItem(STORAGE, json);
     /* Light integrity mirror — not a second full copy */
@@ -7878,7 +7900,7 @@ function cmdCommands() {
   cmds.push({ label: 'New application', hint: 'Hiring', run: () => { goView('hiring'); setTimeout(() => $('addApp') && $('addApp').click(), 40); } });
   cmds.push({ label: 'Add employee', hint: 'People', run: () => openAddEmployee() });
   cmds.push({ label: 'Undo last action', hint: 'Desk', run: () => runUndo() });
-  cmds.push({ label: 'Sync now', hint: 'Realtime', run: () => { pullRemote({ force: true, reason: 'manual' }); toast('Sync pulled'); } });
+  cmds.push({ label: 'Refresh this browser', hint: 'Local tabs', run: () => { pullRemote({ force: true, reason: 'manual' }); toast('Browser copy refreshed'); } });
   cmds.push({ label: 'Save snapshot', hint: 'Backup', run: () => { pushSnapshot('manual'); toast('Snapshot saved'); } });
   cmds.push({ label: 'Open snapshots', hint: 'Backup', run: () => { goView('backup'); setTimeout(() => $('snapshotList') && $('snapshotList').scrollIntoView({ behavior: 'smooth', block: 'center' }), 40); } });
   activeEmployees().forEach(e => {
@@ -7927,7 +7949,6 @@ function openSettings() {
   $('setRequireNotes').checked = !!s.settings.requireNotesOnClose;
   $('setCompactTodos').checked = !!s.settings.compactTodos;
   if ($('setSessionDays')) $('setSessionDays').value = String(s.settings.sessionDays || 14);
-  if ($('setSharedUrl')) $('setSharedUrl').value = s.settings.sharedDeskUrl || '';
   if ($('setSharedAutoPull')) $('setSharedAutoPull').checked = !!s.settings.sharedAutoPull;
   if ($('setSharedPreferSupabase')) $('setSharedPreferSupabase').checked = s.settings.sharedPreferSupabase !== false;
   if ($('setHandbookUrl')) $('setHandbookUrl').value = handbookUrl();
@@ -7961,7 +7982,6 @@ async function saveSettings() {
   s.settings.requireNotesOnClose = !!$('setRequireNotes').checked;
   s.settings.compactTodos = !!$('setCompactTodos').checked;
   if ($('setSessionDays')) s.settings.sessionDays = Number($('setSessionDays').value) || 14;
-  if ($('setSharedUrl')) s.settings.sharedDeskUrl = ($('setSharedUrl').value || '').trim();
   if ($('setSharedAutoPull')) s.settings.sharedAutoPull = !!$('setSharedAutoPull').checked;
   if ($('setSharedPreferSupabase')) s.settings.sharedPreferSupabase = !!$('setSharedPreferSupabase').checked;
   if ($('setSupabaseUrl')) s.settings.supabaseUrl = ($('setSupabaseUrl').value || '').trim();
@@ -7998,6 +8018,7 @@ function openChangelog() {
   const grid = $('upgradeGrid');
   if (grid) {
     const recent = [
+      ['v47', 'Publish rev guard · keep Income Reports webhook on pull · tip-jar out of house P&L · Overview/Income/Settings declutter · honest Sync vs Pull'],
       ['v46', 'Hashed PINs (PBKDF2) · Supabase shared desk sync · tip-jar cleanup · house P&L by month on Reports'],
       ['v45', 'ECRP PIN login — staff 6+ digit PIN · house PIN on hire papers · Owner may keep master password · weak-PIN block + lockout'],
       ['v44', 'Discord field: What was sold / notes (replaces Source label — Kind already covers type)'],
@@ -9608,11 +9629,16 @@ function filteredIncomes(opts) {
 }
 
 function houseIncomeTotal(list) {
-  return (list || []).reduce((a, x) => a + Number(x.amount || 0), 0);
+  /* Tip-jar rows are legacy memo only — staff keep 100% tips, not house income */
+  return (list || []).reduce((a, x) => a + (x && x.kind === 'tips' ? 0 : Number(x.amount || 0)), 0);
 }
 
 function tipJarCollectedTotal(list) {
   return (list || []).filter(x => x.kind === 'tips').reduce((a, x) => a + Number(x.tipsToPool || x.amount || 0), 0);
+}
+
+function hasLegacyTipJarRows(list) {
+  return (list || []).some(x => x && x.kind === 'tips');
 }
 
 function periodPayrollGross(p) {
@@ -9724,7 +9750,10 @@ function renderIncomes() {
 
   if ($('incHouseIn')) $('incHouseIn').textContent = money(net.income);
   if ($('incWeekLabel')) $('incWeekLabel').textContent = win.label || 'Selected week';
-  if ($('incTipPool')) $('incTipPool').textContent = money(pOpen ? Number(pOpen.tipPool || 0) : 0);
+  const tipPoolAmt = pOpen ? Number(pOpen.tipPool || 0) : 0;
+  const showTipPoolTile = tipPoolAmt > 0 || hasLegacyTipJarRows(s.incomes || []) || hasLegacyTipJarRows(list);
+  if ($('incTipPoolMetric')) $('incTipPoolMetric').style.display = showTipPoolTile ? '' : 'none';
+  if ($('incTipPool')) $('incTipPool').textContent = money(tipPoolAmt);
   if ($('incPayrollOwed')) $('incPayrollOwed').textContent = money(net.payroll);
   if ($('incExpenses')) $('incExpenses').textContent = money(net.expenses);
   if ($('incNetHouse')) $('incNetHouse').textContent = money(net.net);
@@ -9870,12 +9899,16 @@ function applyTipJarToPool(incomeRow, opts) {
   opts = opts || {};
   const p = workingPeriod();
   if (!p || p.status !== 'open') {
-    if (!opts.quiet) toast('Open period required to apply tip jar');
+    if (!opts.quiet) toast('Open period required');
+    return { ok: false };
+  }
+  if (!incomeRow || incomeRow.kind !== 'tips') {
+    if (!opts.quiet) toast('Only legacy tip-jar rows can add to the period tip pool');
     return { ok: false };
   }
   const amt = Math.max(0, Math.round(Number(incomeRow.tipsToPool != null ? incomeRow.tipsToPool : incomeRow.amount) || 0));
   if (!amt) {
-    if (!opts.quiet) toast('Tips → pool amount is 0');
+    if (!opts.quiet) toast('Legacy tip-jar amount is 0');
     return { ok: false };
   }
   if (incomeRow.tipPoolApplied && !opts.force) {
@@ -9889,7 +9922,7 @@ function applyTipJarToPool(incomeRow, opts) {
   distributeTips(p);
   if (!opts.skipUndo) {
     pushUndo({
-      label: 'apply tip jar',
+      label: 'apply legacy tip jar',
       restore: () => {
         p.tipPool = beforePool;
         p.entries = beforeEntries;
@@ -9897,7 +9930,7 @@ function applyTipJarToPool(incomeRow, opts) {
       }
     });
   }
-  log('Tip jar ' + money(amt) + ' applied to pool (' + shortLabel(p) + ')');
+  log('Legacy tip jar ' + money(amt) + ' applied to pool (' + shortLabel(p) + ')');
   return { ok: true, amount: amt, p };
 }
 
@@ -10079,31 +10112,32 @@ function incomeWeekDiscordCard() {
     discordField('Week', win.label || 'All', true),
     discordField('House in', money(net.income), true),
     discordField('Net house', money(net.net), true),
-    discordField('Tip jar → pool', money(net.tipJar), true),
     discordField('Payroll', money(net.payroll), true),
     discordField('Expenses', money(net.expenses), true),
     discordField('By kind', kindLines || '—', false)
   ];
+  if (net.tipJar > 0) fields.splice(3, 0, discordField('Legacy tip rows', money(net.tipJar) + ' (not house)', true));
   if (top) fields.push(discordField('Register lines', top, false));
   return discordCard('incomeReports', {
     title: 'House income report',
-    description: 'Week strip for ' + (win.label || 'all periods') + ' · ' + list.length + ' entries',
+    description: 'Week strip for ' + (win.label || 'all periods') + ' · ' + list.length + ' entries · staff keep 100% tips',
     fields: fields
   });
 }
 
 function incomeLineDiscordCard(x) {
+  const fields = [
+    discordField('Date', x.date || '—', true),
+    discordField('Amount', money(x.amount), true),
+    discordField('Station', x.station || '—', true),
+    discordField('What was sold / notes', x.source || '—', false),
+    discordField('Logged by', x.paidBy || '—', true),
+    discordField('Notes', x.notes || '—', false)
+  ];
+  if (x.kind === 'tips') fields.splice(5, 0, discordField('Legacy tip jar', money(x.tipsToPool || x.amount || 0), true));
   return discordCard('incomeReports', {
     title: 'Income · ' + incomeKindLabel(x.kind),
-    fields: [
-      discordField('Date', x.date || '—', true),
-      discordField('Amount', money(x.amount), true),
-      discordField('Station', x.station || '—', true),
-      discordField('Source', x.source || '—', false),
-      discordField('Logged by', x.paidBy || '—', true),
-      discordField('Tips→pool', x.kind === 'tips' ? money(x.tipsToPool || 0) : '—', true),
-      discordField('Notes', x.notes || '—', false)
-    ]
+    fields: fields
   });
 }
 
@@ -10176,16 +10210,39 @@ async function fetchSupabaseSharedDeskRow() {
   return { ok: true, row: row, status: res.status };
 }
 
-async function publishSharedDeskToSupabase(text, rev) {
+async function publishSharedDeskToSupabase(text, rev, opts) {
+  opts = opts || {};
   ensureMeta();
   let packObj;
   try { packObj = JSON.parse(text); } catch (err) {
     return { ok: false, error: 'pack json invalid' };
   }
+  const localRev = Number(rev) || 0;
+  if (!opts.forceOverwrite) {
+    const fetched = await fetchSupabaseSharedDeskRow();
+    if (fetched.ok && fetched.row) {
+      const remoteRev = Number(fetched.row.rev || 0);
+      const remoteAt = fetched.row.shared_at || '';
+      const lastPub = (s.meta && s.meta.lastSharedPublishAt) || '';
+      const remoteAhead = remoteRev > localRev ||
+        (remoteRev === localRev && remoteAt && remoteAt !== lastPub);
+      if (remoteAhead) {
+        return {
+          ok: false,
+          error: 'remote-ahead',
+          remoteRev: remoteRev,
+          localRev: localRev,
+          remoteAt: remoteAt,
+          updatedBy: fetched.row.updated_by || '',
+          status: fetched.status
+        };
+      }
+    }
+  }
   const who = (sessionUser && (sessionUser.name || sessionUser.username)) || 'desk';
   const body = {
     id: 'frenchies',
-    rev: Number(rev) || 0,
+    rev: localRev,
     pack: packObj,
     shared_at: new Date().toISOString(),
     build: DESK_BUILD,
@@ -10311,6 +10368,14 @@ async function pullRegisterSalesFromSupabase(opts) {
       station = hit || (station ? 'Other' : '');
       let kind = String(row.kind || 'register').trim().toLowerCase();
       if (!INCOME_KINDS[kind]) kind = 'register';
+      if (kind === 'tips') {
+        /* Staff keep 100% tips — do not book tip-jar rows as house income */
+        await supabaseFetch('/rest/v1/rpc/book_register_sale', {
+          method: 'POST',
+          body: { p_id: row.id, p_desk_income_id: null }
+        });
+        continue;
+      }
       const tipPool = Math.max(0, Math.round(Number(row.tips_to_pool || 0)));
       const extraNotes = String(row.notes || '').trim();
       const data = normalizeIncome({
@@ -10336,7 +10401,10 @@ async function pullRegisterSalesFromSupabase(opts) {
         body: { p_id: row.id, p_desk_income_id: data.id }
       });
       if (!book.ok) {
+        s.incomes = s.incomes.filter(x => x.id !== data.id);
         console.warn('book_register_sale failed', book.error);
+        if (!opts.quiet) toast('Could not book Discord row — desk left unchanged for that line');
+        continue;
       }
       booked.push(data);
       added++;
@@ -10616,19 +10684,19 @@ function renderMonthly() {
   const expTotal = yearExp.reduce((a, x) => a + Number(x.amount || 0), 0);
   const expReimb = yearExp.filter(x => x.reimbursable).reduce((a, x) => a + Number(x.amount || 0), 0);
   const yearInc = (s.incomes || []).filter(x => String(x.date || '').startsWith(String(year)));
-  const incTotal = yearInc.reduce((a, x) => a + Number(x.amount || 0), 0);
+  const incTotal = houseIncomeTotal(yearInc);
   if ($('yearExpenses')) $('yearExpenses').textContent = money(expTotal);
   if ($('yearExpReimb')) $('yearExpReimb').textContent = 'Reimbursable ' + money(expReimb);
   if ($('houseSpend')) $('houseSpend').textContent = money(row.g + expTotal);
   if ($('yearIncome')) $('yearIncome').textContent = money(incTotal);
-  if ($('yearIncomeSub')) $('yearIncomeSub').textContent = yearInc.length + ' entries · ' + year;
+  if ($('yearIncomeSub')) $('yearIncomeSub').textContent = yearInc.filter(x => x.kind !== 'tips').length + ' house entries · ' + year;
   if ($('yearNetHouse')) $('yearNetHouse').textContent = money(incTotal - row.g - expTotal);
 
   if ($('housePnlYearLabel')) $('housePnlYearLabel').textContent = String(year);
   if ($('housePnlMonthly')) {
     const pnlRows = ms.map((lab, i) => {
       const ym = year + '-' + String(i + 1).padStart(2, '0');
-      const incM = yearInc.filter(x => String(x.date || '').slice(0, 7) === ym).reduce((a, x) => a + Number(x.amount || 0), 0);
+      const incM = houseIncomeTotal(yearInc.filter(x => String(x.date || '').slice(0, 7) === ym));
       const expM = yearExp.filter(x => String(x.date || '').slice(0, 7) === ym).reduce((a, x) => a + Number(x.amount || 0), 0);
       const payM = Number((months[i] && months[i].g) || 0);
       const netM = incM - payM - expM;
@@ -11109,9 +11177,19 @@ function fallbackCopy(text) {
   document.body.removeChild(ta);
 }
 function copyText(text, msg) {
-  if (navigator.clipboard && navigator.clipboard.writeText) {
-    navigator.clipboard.writeText(text).then(() => toast(msg)).catch(() => { fallbackCopy(text); toast(msg); });
-  } else { fallbackCopy(text); toast(msg); }
+  return new Promise(function (resolve) {
+    const done = function (ok) {
+      if (msg) toast(ok ? msg : ('Could not copy' + (msg ? ' — ' + msg : '')));
+      resolve(!!ok);
+    };
+    if (navigator.clipboard && navigator.clipboard.writeText) {
+      navigator.clipboard.writeText(text).then(function () { done(true); }).catch(function () {
+        try { fallbackCopy(text); done(true); } catch (err) { done(false); }
+      });
+    } else {
+      try { fallbackCopy(text); done(true); } catch (err) { done(false); }
+    }
+  });
 }
 
 const DISCORD_CHANNEL_KEYS = ['payroll', 'hiring', 'coverage', 'hrLog', 'announcements', 'incomeReports'];
@@ -11220,11 +11298,16 @@ async function postDiscord(channelKey, payload, opts) {
     return { ok: false, msg: 'empty' };
   }
   if (!discordWebhookConfigured(channelKey)) {
-    if (opts.fallbackCopy !== false) copyText(text, 'No webhook for ' + channelKey + ' — copied instead. Add URL in Settings.');
-    else toast('Set the ' + channelKey + ' webhook in Settings first');
+    if (opts.fallbackCopy !== false) {
+      const copied = await copyText(text, '');
+      toast(copied
+        ? ('No webhook for ' + channelKey + ' — copied instead. Add URL in Settings.')
+        : ('No webhook for ' + channelKey + ' — copy failed. Add URL in Settings.'));
+    } else toast('Set the ' + channelKey + ' webhook in Settings first');
     return { ok: false, msg: 'missing-webhook' };
   }
   const url = discordWebhookUrl(channelKey);
+  let postedChunks = 0;
   try {
     if (norm.embeds && norm.embeds.length) {
       /* One message with embed(s); optional short content above the card */
@@ -11243,6 +11326,7 @@ async function postDiscord(channelKey, payload, opts) {
         const detail = await res.text().catch(() => '');
         throw new Error('Discord ' + res.status + (detail ? ': ' + detail.slice(0, 120) : ''));
       }
+      postedChunks = 1;
     } else {
       const chunks = splitDiscordContent(text);
       for (let i = 0; i < chunks.length; i++) {
@@ -11258,8 +11342,10 @@ async function postDiscord(channelKey, payload, opts) {
         });
         if (!res.ok) {
           const detail = await res.text().catch(() => '');
-          throw new Error('Discord ' + res.status + (detail ? ': ' + detail.slice(0, 120) : ''));
+          throw new Error('Discord ' + res.status + (detail ? ': ' + detail.slice(0, 120) : '') +
+            (postedChunks ? ' (after ' + postedChunks + ' chunk' + (postedChunks === 1 ? '' : 's') + ' posted)' : ''));
         }
+        postedChunks++;
       }
     }
     log('Discord → ' + channelKey + (opts.label ? ' · ' + opts.label : ''));
@@ -11268,8 +11354,12 @@ async function postDiscord(channelKey, payload, opts) {
     return { ok: true };
   } catch (err) {
     const msg = (err && err.message) ? err.message : 'post failed';
-    if (opts.fallbackCopy !== false) copyText(text, 'Discord post failed — copied instead');
-    else toast('Discord post failed — ' + msg);
+    if (opts.fallbackCopy !== false) {
+      const copied = await copyText(text, '');
+      toast(copied
+        ? ('Discord post failed (' + msg + ') — copied instead' + (postedChunks ? ' · ' + postedChunks + ' chunk(s) may already be in channel' : ''))
+        : ('Discord post failed (' + msg + ') — copy also failed'));
+    } else toast('Discord post failed — ' + msg);
     return { ok: false, msg };
   }
 }
@@ -15653,7 +15743,7 @@ bindClick('openCmdBtn', openCmdPalette);
 bindClick('openChangelogBtn', openChangelog);
 bindClick('closeChangelog', () => { if ($('changelogModal')) $('changelogModal').classList.remove('open'); });
 bindClick('undoBtn', runUndo);
-bindClick('syncNowBtn', () => { pullRemote({ force: true, reason: 'button' }); broadcastSync({ type: 'request', clientId: CLIENT_ID }); toast('Sync pulled'); });
+bindClick('syncNowBtn', () => { pullRemote({ force: true, reason: 'button' }); broadcastSync({ type: 'request', clientId: CLIENT_ID }); toast('Browser copy refreshed'); });
 bindClick('pushSnapshotBtn', () => { if (!requireMgmt('Snapshot')) return; if (pushSnapshot('manual')) toast('Snapshot saved'); else toast('Could not snapshot'); });
 if ($('ovTipMode')) {
   $('ovTipMode').onchange = () => {
@@ -16725,11 +16815,7 @@ if ($('saveIncome')) $('saveIncome').onclick = () => {
     s.incomes.unshift(data);
     log('Logged income: ' + data.source + ' · ' + money(data.amount) + ' (' + incomeKindLabel(data.kind) + ')');
   }
-  let tipMsg = '';
-  if (data.kind === 'tips' && data.tipsToPool > 0 && !data.tipPoolApplied) {
-    const res = applyTipJarToPool(data, { skipUndo: true, quiet: true });
-    if (res && res.ok) tipMsg = ' · tip pool +' + money(res.amount);
-  }
+  /* Do not auto-apply tip jar → pool; staff keep 100% tips. Manual applyTipJarToPool remains for rare legacy rows. */
   pushUndo({
     label: incomeId ? 'edit income' : 'log income',
     restore: () => {
@@ -16741,7 +16827,7 @@ if ($('saveIncome')) $('saveIncome').onclick = () => {
   $('incomeModal').classList.remove('open');
   $('incomeModal').setAttribute('hidden', '');
   render();
-  toast((incomeId ? 'Income updated' : 'Income logged') + tipMsg);
+  toast(incomeId ? 'Income updated' : 'Income logged');
 };
 if ($('postIncomeDiscord')) $('postIncomeDiscord').onclick = () => {
   if (incomeId == null) return toast('Save the income first, or use Post on a row');
@@ -17270,8 +17356,6 @@ if ($('cancelSharedPull')) $('cancelSharedPull').onclick = () => { pendingShared
 if ($('confirmSharedPull')) $('confirmSharedPull').onclick = () => confirmSharedPull();
 if ($('sharedKeepMine')) $('sharedKeepMine').onclick = () => sharedKeepMine();
 if ($('sharedTakeTheirs')) $('sharedTakeTheirs').onclick = () => sharedTakeTheirs();
-if ($('conflictKeepMine')) $('conflictKeepMine').onclick = () => sharedKeepMine();
-if ($('conflictTakeTheirs')) $('conflictTakeTheirs').onclick = () => sharedTakeTheirs();
 if ($('closeHandbook')) $('closeHandbook').onclick = () => $('handbookModal').classList.remove('open');
 if ($('handbookAckBtn')) $('handbookAckBtn').onclick = () => ackHandbook();
 if ($('handbookSearch')) $('handbookSearch').oninput = () => renderHandbookResults($('handbookSearch').value);
@@ -18148,10 +18232,11 @@ function applyClockHoursToPeriod(opts) {
   if (!canEditHours()) return toast('Leads and management only');
   const p = workingPeriod();
   if (!p || p.status !== 'open') return toast('No open period');
-  const win = opts.sincePayday ? openPeriodClockWindow(p) : (opts.window || {});
+  /* Default to open-period window — never silently dump all historical unapplied pairs */
+  const win = opts.window || openPeriodClockWindow(p);
   const preview = previewClockPairs(false, win);
   if (!preview || !preview.totalP) return toast('No unapplied 10-1/10-2 pairs' + (preview && preview.scope ? preview.scope : ''));
-  const label = opts.sincePayday ? ('since payday window for ' + shortLabel(p)) : shortLabel(p);
+  const label = (win && win.label) ? win.label : shortLabel(p);
   const defaultRows = (preview.defaultRows || []).slice();
   let allowDefaults = !!opts.allowDefaults;
   let cleanOnly = !!opts.cleanOnly;
@@ -18214,7 +18299,13 @@ function applyClockHoursToPeriod(opts) {
 }
 
 function applyClockHoursSincePayday() {
-  return applyClockHoursToPeriod({ sincePayday: true });
+  const p = workingPeriod();
+  const since = lastPaydayCutoff();
+  const until = p && p.end ? p.end : null;
+  return applyClockHoursToPeriod({
+    window: { since: since || (p && p.start) || null, until: until, label: 'since last payday' },
+    sincePayday: true
+  });
 }
 
 function openPromoteModal(empId) {
@@ -18575,10 +18666,12 @@ function openTipSettlement() {
   if (!root) return;
   const staffView = isStaffSession() && !canEditHours();
   const tipJarWin = data.p ? { from: data.p.start || '', to: data.p.end || '', p: data.p, label: shortLabel(data.p) } : incomePeriodWindow('open');
-  const tipJarCollected = tipJarCollectedTotal(filteredIncomes({ win: tipJarWin, kind: 'tips', q: '' }));
+  const tipJarLegacy = tipJarCollectedTotal(filteredIncomes({ win: tipJarWin, kind: 'tips', q: '' }));
   root.innerHTML =
-    '<p class="ui-hint">Period <b>' + esc(label(data.p)) + '</b> · Pool <b>' + money(data.pool) + '</b> · Tip jar collected <b>' + money(tipJarCollected) + '</b> · Split <b>' + esc(data.mode) + '</b>' +
-    (staffView ? ' · your line only' : '') + '</p>' +
+    '<p class="ui-hint">Period <b>' + esc(label(data.p)) + '</b> · Period tip pool <b>' + money(data.pool) + '</b> · Split <b>' + esc(data.mode) + '</b>' +
+    (tipJarLegacy > 0 ? ' · Legacy tip rows <b>' + money(tipJarLegacy) + '</b> (not house income)' : '') +
+    (staffView ? ' · your line only' : '') +
+    '. Staff keep 100% of their tips; the pool is only what HR entered for this period.</p>' +
     '<div class="table-scroll"><table><thead><tr><th>Staff</th><th class="r">Hours</th><th class="r">Tips</th><th class="r">Wage</th><th class="r">Bonus</th><th class="r">Gross</th><th>Paid</th></tr></thead><tbody>' +
     (data.lines.map(r => '<tr><td>' + esc(r.e.name) + '<div class="history">' + esc(r.e.role) + '</div></td>' +
       '<td class="r mono">' + dec(r.hrs) + '</td><td class="r mono">' + money(r.tips) + '</td><td class="r mono">' + money(r.wage) + '</td>' +
@@ -18616,13 +18709,13 @@ function tipSettlementDiscordCard() {
     ).join('\n')
     : '_No tip-eligible lines._';
   const tipJarWinD = data.p ? { from: data.p.start || '', to: data.p.end || '', p: data.p, label: shortLabel(data.p) } : incomePeriodWindow('open');
-  const tipJarCollectedD = tipJarCollectedTotal(filteredIncomes({ win: tipJarWinD, kind: 'tips', q: '' }));
+  const tipJarLegacyD = tipJarCollectedTotal(filteredIncomes({ win: tipJarWinD, kind: 'tips', q: '' }));
   const fields = [
     discordField('Period', label(data.p), true),
-    discordField('Pool', money(data.pool), true),
-    discordField('Tip jar collected', money(tipJarCollectedD), true),
+    discordField('Period tip pool', money(data.pool), true),
     discordField('Split', data.mode, true)
   ];
+  if (tipJarLegacyD > 0) fields.push(discordField('Legacy tip rows', money(tipJarLegacyD) + ' (not house)', true));
   if (data.excluded.length) fields.push(discordField('Excluded', data.excluded.join(', '), false));
   return discordCard('payroll', {
     title: 'Sunday tip settlement',
@@ -18799,7 +18892,22 @@ async function publishSharedPack() {
 
   if (preferSupabaseSharedDesk()) {
     setSharedDeskLiveStatus('Publishing to Supabase…');
-    const sb = await publishSharedDeskToSupabase(text, s.meta.rev || 0);
+    let sb = await publishSharedDeskToSupabase(text, s.meta.rev || 0);
+    if (!sb.ok && sb.error === 'remote-ahead') {
+      const who = sb.updatedBy ? (' by ' + sb.updatedBy) : '';
+      const when = sb.remoteAt ? (' · ' + String(sb.remoteAt).replace('T', ' ').slice(0, 19)) : '';
+      const okOverwrite = confirm(
+        'Shared desk on Supabase is newer (rev ' + sb.remoteRev + who + when +
+        ').\n\nYour local rev is ' + sb.localRev +
+        '.\n\nOverwrite the newer shared desk? Prefer Pull first if you are not sure.'
+      );
+      if (!okOverwrite) {
+        setSharedDeskLiveStatus('Publish cancelled — remote rev ' + sb.remoteRev + ' is ahead. Pull shared desk first.');
+        toast('Publish cancelled — Pull shared desk first');
+        return;
+      }
+      sb = await publishSharedDeskToSupabase(text, s.meta.rev || 0, { forceOverwrite: true });
+    }
     if (sb.ok) {
       s.meta.lastSharedPublishAt = new Date().toISOString();
       s.meta.lastSharedPublishUrl = 'supabase:desk_shared_state';
@@ -18878,7 +18986,8 @@ function mergeLocalSecretsIntoShared(migrated, localState) {
     hiring: mw.hiring || lw.hiring || '',
     coverage: mw.coverage || lw.coverage || '',
     hrLog: mw.hrLog || lw.hrLog || '',
-    announcements: mw.announcements || lw.announcements || ''
+    announcements: mw.announcements || lw.announcements || '',
+    incomeReports: mw.incomeReports || lw.incomeReports || ''
   };
   if (!(migrated.settings.sharedDeskUrl || '').trim() && (localState.settings && localState.settings.sharedDeskUrl)) {
     migrated.settings.sharedDeskUrl = localState.settings.sharedDeskUrl;
@@ -18920,7 +19029,6 @@ function applySharedDesk(migrated, labelText) {
   ensureMeta();
   save({ quiet: false });
   $('sharedPullModal').classList.remove('open');
-  if ($('sharedConflictModal')) $('sharedConflictModal').classList.remove('open');
   pendingSharedPull = null;
   render();
   toast('Shared desk applied · ' + (labelText || ('rev ' + (s.meta.rev || 0))));
@@ -18976,9 +19084,11 @@ async function confirmSharedPull() {
       const msg = $('sharedConflictText');
       if (box) box.style.display = '';
       if (msg) {
-        msg.textContent = 'Local rev ' + localRev + (localAt ? ' (' + localAt + ')' : '') +
-          ' vs shared rev ' + remoteRev + (remoteAt ? ' (' + remoteAt + ')' : '') +
-          '. Keep mine leaves this browser unchanged. Take theirs replaces the desk (snapshot kept). Local hashed PINs are kept either way.';
+        const pub = (migrated.meta && (migrated.meta.sharedBy || migrated.meta.updatedBy || migrated.meta.clientId)) || '';
+        msg.textContent = 'Local rev ' + localRev + (localAt ? ' · updated ' + String(localAt).replace('T', ' ').slice(0, 19) : '') +
+          ' vs shared rev ' + remoteRev + (remoteAt ? ' · shared ' + String(remoteAt).replace('T', ' ').slice(0, 19) : '') +
+          (pub ? ' · from ' + pub : '') +
+          '. Keep mine leaves this browser unchanged. Take theirs replaces the whole desk (snapshot kept first). Local hashed PINs, Supabase keys, and Discord webhooks stay on this browser.';
       }
       toast('Conflict — choose Keep mine or Take theirs');
       return;
@@ -19055,9 +19165,13 @@ async function maybeAutoPullSharedDesk(reason) {
     const msg = $('sharedConflictText');
     if (box) box.style.display = '';
     if (msg) {
+      const pub = (migrated.meta && (migrated.meta.sharedBy || migrated.meta.updatedBy || migrated.meta.clientId)) || '';
       msg.textContent = 'Auto-pull (' + (reason || 'focus') + '): local rev ' + localRev +
-        ' vs shared rev ' + remoteRev + (preferSupabaseSharedDesk() ? ' (Supabase)' : '') +
-        '. Keep mine or Take theirs.';
+        ' vs shared rev ' + remoteRev +
+        (remoteAt ? ' · shared ' + String(remoteAt).replace('T', ' ').slice(0, 19) : '') +
+        (pub ? ' · from ' + pub : '') +
+        (preferSupabaseSharedDesk() ? ' (Supabase)' : '') +
+        '. Keep mine leaves this browser unchanged. Take theirs replaces the desk (snapshot kept). PINs and webhooks stay local.';
     }
     toast('Shared desk update available · choose Keep mine or Take theirs');
   } catch (err) {

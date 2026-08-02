@@ -60,8 +60,8 @@ const main = async () => {
       const msg = await api('POST', `/channels/${channelId}/messages`, {
         content:
           "**House income**\n" +
-          "Tap the button (or type `/register`) to log register drops, tip jars, deposits / treasury, events, or rebates.\n" +
-          "Rows sync to the Frenchie's Income desk via Supabase.",
+          "Tap the button (or type `/register`) to log register drops, deposits / treasury, events, or rebates.\n" +
+          "Staff keep 100% of tips — do not log tips as house income. Rows sync to the Frenchie's Income desk via Supabase.",
         components: [{
           type: 1,
           components: [{
