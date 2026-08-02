@@ -2576,7 +2576,7 @@ body.session-staff #pullSharedBtn{display:none!important}
       <div class="top-account-panel" role="menu">
         <div class="top-account-head">
           <div class="top-account-head-name" id="sessionFullName">Not signed in</div>
-          <div class="top-account-head-meta payday"><span data-payday-label="1">Payday: Sunday, 9:00 AM</span></div>
+          <div class="top-account-head-meta payday"><span data-payday-label="1">Payday: Sunday, 12:00 AM (midnight)</span></div>
         </div>
         <button type="button" class="top-account-item" id="myFileBtn" role="menuitem">My file</button>
         <button type="button" class="top-account-item" id="handbookBtn" role="menuitem">Handbook</button>
@@ -2589,7 +2589,7 @@ body.session-staff #pullSharedBtn{display:none!important}
         <button type="button" class="top-account-item danger" id="logoutBtn" role="menuitem">Sign out</button>
         <button type="button" class="top-account-item" id="logoutAllBtn" role="menuitem">Sign out all remembered</button>
         <div class="top-account-foot">
-          <span class="build-chip" id="deskBuildChip" title="Desk build">v51</span>
+          <span class="build-chip" id="deskBuildChip" title="Desk build">v52</span>
           <label class="top-jump-label" for="quickJump">Jump to</label>
           <select class="top-jump" id="quickJump" title="Jump to any tab">
             <option value="overview">Overview</option>
@@ -2626,7 +2626,7 @@ body.session-staff #pullSharedBtn{display:none!important}
           <span class="ov-sep" aria-hidden="true">·</span>
           <span id="ovPeriodStatus">Open</span>
           <span class="ov-sep" aria-hidden="true">·</span>
-          <span>Payday Sunday 9:00 AM</span>
+          <span>Payday Sunday midnight</span>
         </p>
         <div class="ov-glance" id="heroGlance" aria-live="polite"></div>
       </div>
@@ -3280,10 +3280,10 @@ body.session-staff #pullSharedBtn{display:none!important}
 
         <h4>Bar register</h4>
         <p>The bar register runs a flat $1,000 rate per the handbook. That figure is the counter price the guest pays &mdash; it is not a wage,
-        a payroll rate, or anything that touches your pay stub. Wages are hours &times; your role rate, paid Sunday 9:00 AM at Frenchie's.</p>
+        a payroll rate, or anything that touches your pay stub. Wages are hours &times; your role rate, paid Sunday 12:00 AM (midnight) at Frenchie's.</p>
 
         <h4>Payday</h4>
-        <p>Payroll runs Sunday at 9:00 AM. Come by Frenchie's for pay. Hours are logged by HR through the week &mdash;
+        <p>Payroll runs Sunday at 12:00 AM (midnight). Come by Frenchie's for pay. Hours are logged by HR through the week &mdash;
         if your hours look wrong, raise it before Sunday, not after.</p>
       </div>
     </details>
@@ -3430,7 +3430,7 @@ body.session-staff #pullSharedBtn{display:none!important}
       <button class="btn" id="importJson">Import JSON</button>
     </div></div>
   </div>
-  <div class="card mgmt-only" style="margin-top:12px" data-mgmt-only><div class="card-head"><b>Live office</b><span class="pill gray" id="sharedDeskBuildPill">v51</span></div>
+  <div class="card mgmt-only" style="margin-top:12px" data-mgmt-only><div class="card-head"><b>Live office</b><span class="pill gray" id="sharedDeskBuildPill">v52</span></div>
     <div class="card-body">
       <p class="ui-hint"><b>Automatic:</b> Every save quietly updates other open desks. No Share button — just work. Staff stay signed in. Personal PINs and Discord channel links stay private on each browser. Owner connects cloud office under Settings.</p>
       <div class="field" data-owner-only><label>Host file link (recovery fallback — Owner only)</label><input id="sharedDeskUrlSetting" placeholder="https://yourdomain/…/frenchies-shared-desk.json"></div>
@@ -4253,7 +4253,7 @@ body.session-staff #pullSharedBtn{display:none!important}
     <p class="ui-hint" style="margin:-6px 0 10px">6+ digit PIN, stored hashed. After hashing, hire papers say “ask HR” — share the PIN privately. Owner may keep a personal master password.</p>
     <div class="field"><label>Handbook Google Doc URL</label><input id="setHandbookUrl" placeholder="https://docs.google.com/document/d/…"></div>
     <h3 style="margin:16px 0 8px;font:700 .72rem 'DM Sans',sans-serif;letter-spacing:.08em;text-transform:uppercase;color:var(--muted)">Payroll tips</h3>
-    <div class="field"><label>Payday label</label><input id="setPaydayLabel" placeholder="Sunday, 9:00 AM"></div>
+    <div class="field"><label>Payday label</label><input id="setPaydayLabel" placeholder="Sunday, 12:00 AM (midnight)"></div>
     <div class="field"><label>Tip split mode</label>
       <select id="setTipMode"><option value="equal">Equal share</option><option value="hours">Weighted by hours</option></select>
     </div>
@@ -4343,7 +4343,7 @@ const LOG_TYPES = {
 };
 const TIP_ROLES_DEFAULT = ['Waiter', 'Hostess', 'Cook'];
 const TIP_ROLES = TIP_ROLES_DEFAULT; /* legacy alias — use tipRoles() */
-const DESK_BUILD = 'v51';
+const DESK_BUILD = 'v52';
 /** ECRP: house first-sign-in secret is a 6+ digit PIN (override in Settings). Stored hashed after first use/set. */
 const HOUSE_LOGIN_PIN = '86368636';
 const HOUSE_LOGIN_PASSWORD = HOUSE_LOGIN_PIN; /* legacy alias — prefer settings.housePassword */
@@ -5072,7 +5072,11 @@ function ensureMeta() {
   if (!s.shiftTimes || typeof s.shiftTimes !== 'object') s.shiftTimes = {};
   if (!s.settings || typeof s.settings !== 'object') s.settings = {};
   const set = s.settings;
-  if (!set.paydayLabel) set.paydayLabel = 'Sunday, 9:00 AM';
+  if (!set.paydayLabel) set.paydayLabel = 'Sunday, 12:00 AM (midnight)';
+  /* Migrate old default payday time → Sunday midnight */
+  if (/^Sunday,?\s*9:00\s*AM$/i.test(String(set.paydayLabel || '').trim())) {
+    set.paydayLabel = 'Sunday, 12:00 AM (midnight)';
+  }
   if (!set.tipMode || !['equal','hours'].includes(set.tipMode)) set.tipMode = 'equal';
   if (!Array.isArray(set.tipRoles) || !set.tipRoles.length) set.tipRoles = TIP_ROLES_DEFAULT.slice();
   if (!set.otHours) set.otHours = 40;
@@ -5100,7 +5104,7 @@ function applyUiSettings() {
       label = spans[spans.length - 1];
       if (label && label.id !== 'saveBadge') label.setAttribute('data-payday-label', '1');
     }
-    if (label && label.id !== 'saveBadge') label.textContent = 'Payday: ' + (s.settings.paydayLabel || 'Sunday, 9:00 AM');
+    if (label && label.id !== 'saveBadge') label.textContent = 'Payday: ' + (s.settings.paydayLabel || 'Sunday, 12:00 AM (midnight)');
   }
 }
 
@@ -5803,7 +5807,7 @@ function printOfficeHtml(title, html) {
     '<h1>' + esc(title) + '</h1>' +
     '<div class="print-meta">Printed ' + today() + ' · Kenzie Long, HR Director</div>' +
     html +
-    '<div class="print-meta" style="margin-top:24px;border-top:1px solid #ccc;padding-top:8px">Frenchie\'s office desk · Payday Sunday 9:00 AM at Frenchie\'s</div>';
+    '<div class="print-meta" style="margin-top:24px;border-top:1px solid #ccc;padding-top:8px">Frenchie\'s office desk · Payday Sunday 12:00 AM (midnight) at Frenchie\'s</div>';
   window.print();
 }
 
@@ -7153,8 +7157,8 @@ function buildTodos() {
         tag: dow === 5 ? 'Friday' : 'Saturday',
         title: 'Prep for Sunday payday',
         detail: unpaid
-          ? 'Confirm hours — ' + unpaid + ' unpaid stub' + (unpaid === 1 ? '' : 's') + ' to clear before 9:00 AM.'
-          : 'Confirm hours and tip pool before Sunday 9:00 AM.',
+          ? 'Confirm hours — ' + unpaid + ' unpaid stub' + (unpaid === 1 ? '' : 's') + ' to clear before Sunday midnight.'
+          : 'Confirm hours and tip pool before Sunday midnight.',
         due: '',
         go: { type: 'view', view: 'overview', period: workingPeriodIndex() }
       });
@@ -7777,7 +7781,7 @@ function renderAttention() {
       ? (urgent ? urgent + ' urgent · ' : '') + all.length + ' open' +
         (todoFilter !== 'all' || todoSearch || todoFocusMode ? ' · filtered to ' + shown : '') +
         (todoFocusMode ? ' · focus on' : '')
-      : 'Nothing waiting · payday is Sunday 9:00 AM';
+      : 'Nothing waiting · payday is Sunday midnight';
   }
   document.querySelectorAll('[data-todo-filter]').forEach(btn => {
     const on = btn.getAttribute('data-todo-filter') === todoFilter;
@@ -8281,7 +8285,7 @@ function closeSettings() {
 async function saveSettings() {
   if (!requireMgmt('Settings')) return;
   ensureMeta();
-  s.settings.paydayLabel = ($('setPaydayLabel').value || 'Sunday, 9:00 AM').trim();
+  s.settings.paydayLabel = ($('setPaydayLabel').value || 'Sunday, 12:00 AM (midnight)').trim();
   s.settings.tipMode = $('setTipMode').value === 'hours' ? 'hours' : 'equal';
   s.settings.tipRoles = String($('setTipRoles').value || '').split(',').map(x => x.trim()).filter(Boolean);
   if (!s.settings.tipRoles.length) s.settings.tipRoles = TIP_ROLES_DEFAULT.slice();
@@ -8331,6 +8335,7 @@ function openChangelog() {
   const grid = $('upgradeGrid');
   if (grid) {
     const recent = [
+      ['v52', 'Payday moved to Sunday 12:00 AM (midnight) at Frenchie\'s'],
       ['v51', 'Human voice pass — Frenchie\'s / company wording · Kenzie Discord announcements & hire posts · starter PIN'],
       ['v50', 'Auto live office — every save quietly updates other desks · Share button removed · catch-up if another desk is ahead'],
       ['v49', 'HR immersion labels — Pull from Discord · Share with other desks · cloud office wording · Discord chips'],
@@ -8489,7 +8494,7 @@ function stubDiscordText(empId) {
     'Tips: ' + money(x.tips || 0),
     'Gross: ' + money(g),
     'Status: ' + (x.paidOut ? 'PAID' : 'UNPAID'),
-    'Payday: Sunday 9:00 AM at Frenchie\'s'
+    'Payday: Sunday 12:00 AM (midnight) at Frenchie\'s'
   ].join('\n');
 }
 window.copyStubDiscord = function (empId) {
@@ -8513,7 +8518,7 @@ window.postStubDiscord = function (empId) {
       discordField('Bonus', money(x.bonus || 0), true),
       discordField('Gross', money(g), true),
       discordField('Status', x.paidOut ? 'PAID' : 'UNPAID', true),
-      discordField('Payday', 'Sunday 9:00 AM at Frenchie\'s', false)
+      discordField('Payday', 'Sunday 12:00 AM (midnight) at Frenchie\'s', false)
     ]
   });
   return postDiscord('payroll', card, { label: 'Stub · ' + e.name });
@@ -11294,7 +11299,7 @@ function stub(e, p) {
       '<div style="color:#666;font-size:.72rem">Employee pay statement &middot; 8 Elgin Ave, Legion Square</div></div>' +
       '<div style="text-align:right">' + seal + '<div style="font-size:.72rem;color:#666;margin-top:8px">' + esc(label(p)) + '</div></div></div>' +
       '<div class="empty" style="padding:18px 0">No hours, bonus, or tips logged for ' + esc(e.name) + ' this period.</div>' +
-      '<div class="stub-foot"><span>' + esc(stubRefId(e, p)) + '</span><span>Payday: Sunday 9:00 AM at Frenchie\'s</span></div></article>';
+      '<div class="stub-foot"><span>' + esc(stubRefId(e, p)) + '</span><span>Payday: Sunday 12:00 AM (midnight) at Frenchie\'s</span></div></article>';
   }
   return '<article class="paystub">' +
     '<div class="paystub-head"><div>' + logoSvg() +
@@ -11316,7 +11321,7 @@ function stub(e, p) {
     '</tbody></table>' +
     '<div class="stub-grid" style="margin-top:8px">' +
     '<div>Year to date (through this period)<br><b>' + money(ytd) + '</b></div>' +
-    '<div>Payday<br><b>Sunday 9:00 AM at Frenchie\'s</b></div>' +
+    '<div>Payday<br><b>Sunday 12:00 AM (midnight) at Frenchie\'s</b></div>' +
     '</div>' +
     '<div class="stub-foot"><span>' + esc(stubRefId(e, p)) + '</span><span>' + (paid ? 'Marked paid for Sunday run' : 'Awaiting Sunday payout') + '</span></div>' +
     '</article>';
@@ -11345,7 +11350,7 @@ function stubPlainText(e, p) {
     'Gross: ' + money(gross),
     'YTD: ' + money(employeeYtdGross(e.id, p)),
     'Status: ' + (x.paidOut ? 'PAID' : 'UNPAID'),
-    'Payday: Sunday 9:00 AM at Frenchie\'s'
+    'Payday: Sunday 12:00 AM (midnight) at Frenchie\'s'
   ].join('\n');
 }
 
@@ -11522,7 +11527,7 @@ const DISCORD_EMBED_COLORS = {
   incomeReports: 0x3f7a56
 };
 const DISCORD_FOOTER = "Kenzie Long, HR · Frenchie\'s · 8 Elgin Ave";
-const DISCORD_USERNAME = "Kenzie Long · Frenchie's HR";
+const DISCORD_USERNAME = "Kenzie Long · Frenchie\'s HR";
 
 function discordWebhookUrl(channelKey) {
   ensureMeta();
@@ -11880,7 +11885,7 @@ function wrapLetter(title, innerHtml, metaLine) {
     '<div class="letter-meta">' + esc(metaLine || ('Issued ' + today())) + '</div>' +
     '<div class="letter-body">' + innerHtml + '</div>' +
     '<footer class="letter-sign"><div class="sign-line">Kenzie Long</div>' +
-    '<div class="sign-role">HR Director, Frenchie\'s Restaurant &middot; 636 &middot; Payday Sunday 9:00 AM at Frenchie\'s</div></footer>' +
+    '<div class="sign-role">HR Director, Frenchie\'s Restaurant &middot; 636 &middot; Payday Sunday 12:00 AM (midnight) at Frenchie\'s</div></footer>' +
     '</article>';
 }
 
@@ -12061,7 +12066,7 @@ function letterApplication(a) {
       chk('I am clear of recent felony convictions', false),
       chk('I carry no terrorism charge and no murder of a government employee on my record', false),
       chk('I understand every new hire serves a seven-day probation as a New Hire', false),
-      chk('I understand payday is Sunday at 9:00 AM, paid at Frenchie\'s', false)
+      chk('I understand payday is Sunday at 12:00 AM (midnight), paid at Frenchie\'s', false)
     ]) +
     '<div class="letter-note ooc">(( Eligibility bar: admin violation clear 14 days · no felony convictions within 14 days · terrorism or the murder of a government employee is a hard bar. ))</div>' +
     signGrid('Applicant signature', '', 'Date', '') +
@@ -12109,7 +12114,7 @@ function letterInvite(a) {
     ff('Ask for', 'Kenzie Long, HR Director · 636') +
     '<p>Come as you would come to a shift: presentable and on time. Bring nothing but yourself and straight answers. It runs about twenty minutes and covers the floor, the stations, your availability, and how you carry yourself in a rush.</p>' +
     '<p>If that date does not suit you, send word and we will find another. If we have not heard from you within three days of this letter the application is set aside and the desk moves on.</p>' +
-    '<p>Every hire at Frenchie\'s starts on a seven-day probation as a New Hire, shadowed and trained on a station. Payday is Sunday at 9:00 AM, paid at Frenchie\'s.</p>' +
+    '<p>Every hire at Frenchie\'s starts on a seven-day probation as a New Hire, shadowed and trained on a station. Payday is Sunday at 12:00 AM (midnight), paid at Frenchie\'s.</p>' +
     '<p>We look forward to meeting you.</p>' +
     signGrid('Confirmed by applicant', '', 'Date confirmed', '');
   return wrapLetter('Interview invitation', body, (c.name ? 'To ' + c.name + ' · ' : '') + 'Issued ' + today());
@@ -12159,7 +12164,7 @@ function letterOffer(c) {
     ff('Start date', c.hire) +
     ff('Probation', 'Seven days from start, ending ' + c.probationEnd) +
     ff('Reports to', c.supervisor) +
-    ff('Payday', 'Sunday, 9:00 AM, paid at Frenchie\'s') +
+    ff('Payday', 'Sunday, 12:00 AM (midnight), paid at Frenchie\'s') +
     '<h4>Probation</h4>' +
     '<p>During probation you are shadowed on shift, trained on a station, and reviewed by HR at the end of the week. Pass and you move onto the ladder proper and become eligible for promotion consideration. Fall short and we part ways without prejudice.</p>' +
     '<h4>What we expect</h4>' +
@@ -12178,7 +12183,7 @@ function letterContract(c) {
     ff('Position', c.role) +
     ff('Rate', money(c.rate) + ' per hour on hours logged by HR') +
     ff('Start date', c.hire) +
-    ff('Payday', 'Sunday, 9:00 AM, paid at Frenchie\'s') +
+    ff('Payday', 'Sunday, 12:00 AM (midnight), paid at Frenchie\'s') +
     '<p>Hours are logged by HR through the week. If your hours look wrong, raise it before Sunday, not after.</p>' +
     '<h4>2. Probation</h4>' +
     '<p>The Employee serves a seven-day probation beginning ' + esc(c.hire) + ' and ending ' + esc(c.probationEnd) + '. During probation the Employee is shadowed, trained on a station, and reviewed by HR. Employment may be ended by either party during probation without penalty.</p>' +
@@ -12222,7 +12227,7 @@ function letterPacket(c) {
     '<h4>Radio cheat sheet</h4>' +
     '<ul><li><b>10-1</b> — clocking in</li><li><b>10-2</b> — clocking out</li><li><b>10-4</b> — understood</li><li><b>10-20</b> — your location</li><li><b>10-99</b> — emergency, all hands</li></ul>' +
     '<h4>House notes for week one</h4>' +
-    '<p>Your rate is ' + esc(money(c.rate)) + ' per hour. Hours are logged by HR through the week and payday is Sunday at 9:00 AM, paid out of the house. Raise any problem with your hours before Sunday, not after. The bar register runs a flat $1,000 rate per the handbook — that is the counter price a guest pays, not your wage.</p>' +
+    '<p>Your rate is ' + esc(money(c.rate)) + ' per hour. Hours are logged by HR through the week and payday is Sunday at 12:00 AM (midnight), paid at Frenchie\'s. Raise any problem with your hours before Sunday, not after. The bar register runs a flat $1,000 rate per the handbook — that is the counter price a guest pays, not your wage.</p>' +
     '<div class="letter-note">Full handbook: ' + esc(handbookUrl()) + '</div>' +
     signGrid('Received by ' + (c.name || ''), '', 'Date', '');
   return wrapLetter('New-hire packet', body, (c.name || 'New hire') + ' · ' + c.role + ' · ' + today());
@@ -12944,7 +12949,7 @@ function buildPacketSheet(a, kind, packetId, embed) {
     '<button type="button" class="ghost" id="pkPr">Print this sheet</button>' +
     '<span class="msg" id="pkMsg"></span>' +
     '</div>' +
-    '<div class="foot"><b>Kenzie Long — HR Director</b>Required fields are marked *. Select <b>Download reply</b> and send the completed .html file back to Kenzie / HR at Frenchie\'s Restaurant, 8 Elgin Ave. Payday is Sunday, 9:00 AM, paid at Frenchie\'s.</div>' +
+    '<div class="foot"><b>Kenzie Long — HR Director</b>Required fields are marked *. Select <b>Download reply</b> and send the completed .html file back to Kenzie / HR at Frenchie\'s Restaurant, 8 Elgin Ave. Payday is Sunday, 12:00 AM (midnight), paid at Frenchie\'s.</div>' +
     '</div>';
 }
 
@@ -12990,7 +12995,7 @@ function packetBody(a, kind, c) {
     ['Start date', c.hire],
     ['Probation', 'Seven days, ending ' + c.probationEnd],
     ['Reports to', c.supervisor],
-    ['Payday', 'Sunday, 9:00 AM, paid at Frenchie\'s']
+    ['Payday', 'Sunday, 12:00 AM (midnight), paid at Frenchie\'s']
   ]);
 
   if (kind === 'application') {
@@ -13057,7 +13062,7 @@ function packetBody(a, kind, c) {
         'I am clear of recent felony convictions',
         'I carry no terrorism charge and no murder of a government employee on my record',
         'I understand every new hire serves a seven-day probation as a New Hire',
-        'I understand payday is Sunday at 9:00 AM, paid at Frenchie\'s'
+        'I understand payday is Sunday at 12:00 AM (midnight), paid at Frenchie\'s'
       ], true, true) +
       '<div class="note ooc">(( Eligibility: admin violation clear 14 days &middot; no felony convictions within 14 days &middot; terrorism or the murder of a government employee is a hard bar. ))</div>' +
       '<h2>Submit</h2>' +
@@ -13116,7 +13121,7 @@ function packetBody(a, kind, c) {
         ['Proposed start', c.hire],
         ['Probation', 'Seven days from start, ending ' + c.probationEnd],
         ['Reports to', c.supervisor],
-        ['Payday', 'Sunday, 9:00 AM, paid at Frenchie\'s']
+        ['Payday', 'Sunday, 12:00 AM (midnight), paid at Frenchie\'s']
       ]) +
       '<h2>What this offer means</h2>' +
       '<p>During probation you are shadowed on shift, trained on a station, and reviewed by HR at the end of the week. Pass and you move onto the ladder proper. Fall short and we part ways without prejudice.</p>' +
@@ -13138,7 +13143,7 @@ function packetBody(a, kind, c) {
         ['Position', c.role],
         ['Rate', money(c.rate) + ' per hour on hours logged by HR'],
         ['Start date', c.hire],
-        ['Payday', 'Sunday, 9:00 AM, paid at Frenchie\'s']
+        ['Payday', 'Sunday, 12:00 AM (midnight), paid at Frenchie\'s']
       ]) +
       '<p>Hours are logged by HR through the week. If your hours look wrong, raise it before Sunday, not after.</p>' +
       '<h2>2. Probation</h2>' +
@@ -13201,7 +13206,7 @@ function packetBody(a, kind, c) {
         ['10-99', 'emergency, all hands']
       ]) +
       '<h2>House notes for week one</h2>' +
-      '<p>Payday is Sunday at 9:00 AM, paid at Frenchie\'s. Raise hour problems before Sunday. The bar register\'s flat $1,000 is the guest counter price — not your wage.</p>' +
+      '<p>Payday is Sunday at 12:00 AM (midnight), paid at Frenchie\'s. Raise hour problems before Sunday. The bar register\'s flat $1,000 is the guest counter price — not your wage.</p>' +
       '<div class="note">Full handbook: ' + esc(handbookUrl()) + '</div>' +
       '<h2>Confirm *</h2>' +
       pkChoice('confirm', 'I have read the new-hire packet', 'Confirms you have the checklist, contacts, and radio codes for week one.') +
@@ -15205,7 +15210,7 @@ function buildSundayRunText(p) {
   lines.push("Frenchie\'s Sunday pay run");
   lines.push(label(p) + ' · ' + String(p.status).toUpperCase());
   lines.push('Tip pool: ' + money(p.tipPool || 0) + ' (Waiter / Hostess / Cook with hours)');
-  lines.push('Payday: Sunday 9:00 AM at Frenchie\'s');
+  lines.push('Payday: Sunday 12:00 AM (midnight) at Frenchie\'s');
   lines.push('');
   if (!unpaid.length) {
     lines.push('Everyone payable is marked paid. Queue is clear.');
@@ -15320,7 +15325,7 @@ function sundayRunDiscordCard(p) {
       discordField('Tip pool', money(p.tipPool || 0), true),
       discordField('Still owed', money(owedGrossOf(p)), true),
       discordField('Clock backlog', clockPairs ? (clockPairs + ' unapplied pair(s)') : 'Clear', true),
-      discordField('Payday', 'Sunday 9:00 AM at Frenchie\'s', false)
+      discordField('Payday', 'Sunday 12:00 AM (midnight) at Frenchie\'s', false)
     ]
   });
 }
@@ -15336,8 +15341,8 @@ function paydayAnnouncementCard(p) {
   if (!p) return discordCard('announcements', { title: 'Payday', description: 'No open period on the desk yet — I\'ll post when we\'re ready.' });
   const unpaid = unpaidCount(p);
   return discordCard('announcements', {
-    title: 'Sunday payday — 9:00 AM at Frenchie\'s',
-    description: 'Hey team — payday is Sunday at **9:00 AM** for **' + label(p) + '**. Come by Frenchie\'s (8 Elgin Ave). If your hours look off, tell me before we run pay.\n\n— Kenzie',
+    title: 'Sunday payday — midnight at Frenchie\'s',
+    description: 'Hey team — payday is Sunday at **12:00 AM (midnight)** for **' + label(p) + '**. Come by Frenchie\'s (8 Elgin Ave). If your hours look off, tell me before we run pay.\n\n— Kenzie',
     fields: [
       discordField('Period', shortLabel(p), true),
       discordField('Tip pool', money(p.tipPool || 0), true),
@@ -17738,7 +17743,7 @@ document.querySelectorAll('#view-hiring details.fold').forEach(fold => {
    ROADMAP v18–v25 FEATURES (full implementations)
 ===================================================== */
 const HANDBOOK_EXCERPTS = [
-  { id: 'payday', title: 'Payday', tags: 'pay sunday cash tips', body: 'Payday is Sunday at 9:00 AM at Frenchie\'s. Confirm hours and tip pool before the run. Mark stubs paid after cash is handed out.' },
+  { id: 'payday', title: 'Payday', tags: 'pay sunday cash tips', body: 'Payday is Sunday at 12:00 AM (midnight) at Frenchie\'s. Confirm hours and tip pool before the run. Mark stubs paid after cash is handed out.' },
   { id: 'tips', title: 'Tip pool', tags: 'tips bar floor host cook equal hours', body: 'Tip-eligible roles share the pool. Split is equal share or weighted by hours (Settings). Paid stubs lock their tip line; unpaid lines recompute when the pool changes.' },
   { id: 'hours', title: 'Hours & disputes', tags: 'hours radio clock dispute', body: 'Staff log 10-1/10-2 on the clock. Leads use Apply since payday to push pairs into the open period, then fix stragglers in Set hours. If your hours look wrong, file an Hours dispute from the account menu — do not edit the payroll yourself.' },
   { id: 'calloff', title: 'Call-offs', tags: 'call-off time-off sick', body: 'Same-day or next-shift absences are Call-offs. Future ranges are Time-off. Submit from the account menu; leads approve and mark the shift board Off.' },
