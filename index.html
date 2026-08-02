@@ -2473,8 +2473,8 @@ body.session-staff #pullSharedBtn{display:none!important}
       </div>
       <div class="field">
         <label for="loginPass">PIN</label>
-        <input id="loginPass" name="password" type="password" inputmode="numeric" placeholder="Personal or house PIN" autocomplete="current-password" required>
-        <p class="ui-hint" style="margin:6px 0 0">First sign-in: house PIN from your hire paper (or ask HR), then set your own. Owner may use a master password.</p>
+        <input id="loginPass" name="password" type="password" inputmode="numeric" placeholder="Personal or starter PIN" autocomplete="current-password" required>
+        <p class="ui-hint" style="margin:6px 0 0">First sign-in: starter PIN from your hire paper (or ask Kenzie / HR), then set your own. Owner may use a master password.</p>
       </div>
       <label class="checkline" style="margin:4px 0 10px"><input type="checkbox" id="loginStay" checked><span>Stay logged in on this device</span></label>
       <div class="login-err" id="loginErr" role="status"></div>
@@ -2484,7 +2484,7 @@ body.session-staff #pullSharedBtn{display:none!important}
     </form>
     <form class="login-panel" id="loginSetupPanel" autocomplete="off">
       <div class="brand">Create your PIN</div>
-      <p class="sub" id="loginSetupSub">Choose a personal PIN (6 or more digits) for this desk. You will use it next time instead of the house PIN.</p>
+      <p class="sub" id="loginSetupSub">Choose a personal PIN (6 or more digits) for this desk. You will use it next time instead of the starter PIN.</p>
       <div class="field">
         <label for="setupPass">New PIN</label>
         <input id="setupPass" type="password" inputmode="numeric" pattern="[0-9]*" minlength="6" placeholder="At least 6 digits" autocomplete="new-password" required>
@@ -2589,7 +2589,7 @@ body.session-staff #pullSharedBtn{display:none!important}
         <button type="button" class="top-account-item danger" id="logoutBtn" role="menuitem">Sign out</button>
         <button type="button" class="top-account-item" id="logoutAllBtn" role="menuitem">Sign out all remembered</button>
         <div class="top-account-foot">
-          <span class="build-chip" id="deskBuildChip" title="Desk build">v50</span>
+          <span class="build-chip" id="deskBuildChip" title="Desk build">v51</span>
           <label class="top-jump-label" for="quickJump">Jump to</label>
           <select class="top-jump" id="quickJump" title="Jump to any tab">
             <option value="overview">Overview</option>
@@ -2652,7 +2652,7 @@ body.session-staff #pullSharedBtn{display:none!important}
     <div class="ov-next nba-card" id="nbaCard">
       <div class="nba-copy">
         <span class="nba-kicker">Next up</span>
-        <div id="nbaText">Scanning the desk…</div>
+        <div id="nbaText">Checking what’s open…</div>
       </div>
       <button type="button" class="btn tiny primary" id="nbaGoBtn">Open</button>
     </div>
@@ -2733,7 +2733,7 @@ body.session-staff #pullSharedBtn{display:none!important}
     <div class="metric"><label>Hours logged</label><strong id="hours">0.00</strong><span>Across the roster</span></div>
     <div class="metric"><label>Still unpaid</label><strong id="owedCount">0</strong><span id="owedSub">Ready for Sunday</span></div>
     <div class="metric"><label>Paid out</label><strong id="paidOutMetric">$0</strong><span>Marked paid this period</span></div>
-    <div class="metric"><label>House in</label><strong id="ovHouseIn">$0</strong><span id="ovHouseNetSub">Net this period</span></div>
+    <div class="metric"><label>Cash in</label><strong id="ovHouseIn">$0</strong><span id="ovHouseNetSub">Net this period</span></div>
   </div>
 
   <div class="grid desk-split">
@@ -2825,9 +2825,9 @@ body.session-staff #pullSharedBtn{display:none!important}
   <div class="hire-stage">
     <div class="hire-hero">
       <div>
-        <div class="hire-brand">Frenchie&apos;s Restaurant · Human Resources</div>
+        <div class="hire-brand">Frenchie&apos;s Restaurant · Kenzie Long, HR</div>
         <h1 class="title" id="title-hiring">Hiring desk</h1>
-        <p class="subtitle">Formal pipeline from application through interview, offer, hire, contract, orientation packet, and account access.</p>
+        <p class="subtitle">From application to interview, offer, hire, contract, orientation, and desk login — one file at a time.</p>
       </div>
       <div class="actions hire-forms">
         <button class="btn soft" id="interviewBoardBtn">Interview board</button>
@@ -2850,9 +2850,9 @@ body.session-staff #pullSharedBtn{display:none!important}
     <details class="fold quiet">
       <summary>Hiring standards &amp; paper path</summary>
       <div class="fold-body">
-        <p class="ui-hint">Every candidate completes an employment application, clears eligibility, interviews with Human Resources, and begins on seven-day probation. City standing and a clear recent felony record are required. Terrorism charges or murder of a government employee are a hard bar.</p>
+        <p class="ui-hint">Every candidate fills out an application, clears eligibility, interviews with HR, and starts on a seven-day probation. City standing and a clear recent felony record are required. Terrorism charges or murder of a government employee are a hard bar.</p>
         <p class="ui-hint"><b>Before hire:</b> Issue application → clear eligibility → issue invitation → issue interviewer questions → record notes → issue offer → hire onto roster.</p>
-        <p class="ui-hint"><b>After hire:</b> Issue contract (house signs first) → file signed reply → issue new-hire packet → issue account login information (desk access granted when the acknowledgement is filed).</p>
+        <p class="ui-hint"><b>After hire:</b> Issue contract (company signs first) → file signed reply → issue new-hire packet → issue account login information (desk access granted when the acknowledgement is filed).</p>
       </div>
     </details>
     <div class="metrics" id="hireMetrics">
@@ -2924,7 +2924,7 @@ body.session-staff #pullSharedBtn{display:none!important}
       <div class="emp-hero-copy">
         <div class="emp-brand">Frenchie&apos;s Restaurant</div>
         <h1 class="emp-title" id="title-employees">Staff roster</h1>
-        <p class="emp-lede">Personnel files, probation, and hire paperwork. Open a file to work the dossier.</p>
+        <p class="emp-lede">Staff files, probation, and hire paperwork. Open a file to edit someone’s record.</p>
       </div>
       <div class="emp-hero-actions">
         <button class="btn primary" id="addEmployee2" type="button">Add employee</button>
@@ -2998,7 +2998,7 @@ body.session-staff #pullSharedBtn{display:none!important}
 <!-- TIME & PAY -->
 <section class="view" id="view-periods" role="region" aria-labelledby="title-periods" tabindex="-1">
   <div class="header">
-    <div><div class="eyebrow">Payroll</div><h1 class="title" id="title-periods">Time &amp; Pay</h1><div class="subtitle">Weekly periods — hours, tips, bonuses, and paid flags.</div></div>
+    <div><div class="eyebrow">Payroll</div><h1 class="title" id="title-periods">Time &amp; Pay</h1><div class="subtitle">Weekly periods — hours, tips, bonuses, and who has been paid.</div></div>
     <div class="actions"><button class="btn soft" id="pdfPeriods">Export periods PDF</button><button class="btn primary" id="newPeriod2">Create next period</button></div>
   </div>
   <div class="card"><div class="card-head"><b>Open &amp; recent periods</b></div>
@@ -3026,7 +3026,7 @@ body.session-staff #pullSharedBtn{display:none!important}
 <!-- EXPENSES -->
 <section class="view" id="view-expenses" role="region" aria-labelledby="title-expenses" tabindex="-1">
   <div class="header">
-    <div><div class="eyebrow">Office</div><h1 class="title" id="title-expenses">Expenses</h1><div class="subtitle">House purchases — food, drink, furniture, Weazel ads, map markers, permits, and more. Build a clean report for rebates.</div></div>
+    <div><div class="eyebrow">Office</div><h1 class="title" id="title-expenses">Expenses</h1><div class="subtitle">Company purchases — food, drink, furniture, Weazel ads, map markers, permits, and more. Keep receipts tidy for rebates.</div></div>
     <div class="actions">
       <button class="btn" id="csvExpenses">Export CSV</button>
       <button class="btn soft" id="pdfExpensesReimb">Print reimbursable pack</button>
@@ -3088,7 +3088,7 @@ body.session-staff #pullSharedBtn{display:none!important}
 <!-- INCOME -->
 <section class="view" id="view-income" role="region" aria-labelledby="title-income" tabindex="-1">
   <div class="header">
-      <div><div class="eyebrow">Office</div><h1 class="title" id="title-income">Income</h1><div class="subtitle">House cash-in from registers, events, deposits, and rebates. Staff keep 100% of tips. Player <b>/register</b> drops from Discord land here.</div></div>
+      <div><div class="eyebrow">Office</div><h1 class="title" id="title-income">Income</h1><div class="subtitle">Frenchie’s cash-in from registers, events, deposits, and rebates. Staff keep 100% of tips. Player <b>/register</b> drops from Discord show up here.</div></div>
     <div class="actions header-actions-primary">
       <button class="btn soft" id="pullSupabaseIncome" type="button">Pull from Discord</button>
       <button class="btn primary" id="addIncome" type="button">Log income</button>
@@ -3104,17 +3104,17 @@ body.session-staff #pullSharedBtn{display:none!important}
       </details>
     </div>
   </div>
-  <p class="ui-hint" id="incSupabaseHint" style="margin:0 0 10px">Discord income feed is not connected yet — Owner sets it up under Settings. Players use <code>/register</code> in Discord. Staff keep 100% of tips (not house income).</p>
+  <p class="ui-hint" id="incSupabaseHint" style="margin:0 0 10px">Discord income isn’t connected yet — Owner sets that up under Settings. Players use <code>/register</code> in Discord. Staff keep 100% of tips (tips are not company income).</p>
   <div class="toolbar" style="margin:0 0 10px;gap:8px;align-items:center;flex-wrap:wrap">
     <span class="pill gray" id="incSupabaseChip">Discord · off</span>
     <span class="mini-note" id="incSupabaseStatus">Not connected</span>
   </div>
   <div class="metrics metrics-five" id="incomeWeekStrip">
-    <div class="metric"><label>House in</label><strong id="incHouseIn">$0</strong><span id="incWeekLabel">Selected week</span></div>
-    <div class="metric" id="incTipPoolMetric" style="display:none"><label>Period tip pool</label><strong id="incTipPool">$0</strong><span>HR-entered pool only</span></div>
-    <div class="metric"><label>Payroll owed</label><strong id="incPayrollOwed">$0</strong><span>Unpaid gross</span></div>
-    <div class="metric"><label>Expenses</label><strong id="incExpenses">$0</strong><span>Week window</span></div>
-    <div class="metric"><label>Net house</label><strong id="incNetHouse">$0</strong><span>In − payroll − expenses</span></div>
+    <div class="metric"><label>Cash in</label><strong id="incHouseIn">$0</strong><span id="incWeekLabel">Selected week</span></div>
+    <div class="metric" id="incTipPoolMetric" style="display:none"><label>Tip pool</label><strong id="incTipPool">$0</strong><span>What HR set for Sunday</span></div>
+    <div class="metric"><label>Payroll owed</label><strong id="incPayrollOwed">$0</strong><span>Still unpaid</span></div>
+    <div class="metric"><label>Expenses</label><strong id="incExpenses">$0</strong><span>This week</span></div>
+    <div class="metric"><label>Net for Frenchie’s</label><strong id="incNetHouse">$0</strong><span>In − payroll − expenses</span></div>
   </div>
   <div class="toolbar filter-rail">
     <select id="incPeriod"><option value="open">Open period</option></select>
@@ -3140,7 +3140,7 @@ body.session-staff #pullSharedBtn{display:none!important}
 <!-- PAY STUBS -->
 <section class="view" id="view-paystubs" role="region" aria-labelledby="title-paystubs" tabindex="-1">
   <div class="header">
-    <div><div class="eyebrow">Payroll</div><h1 class="title" id="title-paystubs">Pay stubs</h1><div class="subtitle">Printable house statements — mark paid when the Sunday run is done.</div></div>
+    <div><div class="eyebrow">Payroll</div><h1 class="title" id="title-paystubs">Pay stubs</h1><div class="subtitle">Printable pay statements — mark paid when Sunday’s run is done.</div></div>
     <div class="actions">
       <button class="btn" id="copyStubBtn">Copy stub</button>
       <button class="btn" id="downloadStubHtml">Download .html</button>
@@ -3280,16 +3280,16 @@ body.session-staff #pullSharedBtn{display:none!important}
 
         <h4>Bar register</h4>
         <p>The bar register runs a flat $1,000 rate per the handbook. That figure is the counter price the guest pays &mdash; it is not a wage,
-        a payroll rate, or anything that touches your pay stub. Wages are hours &times; your role rate, paid Sunday 9:00 AM from the house.</p>
+        a payroll rate, or anything that touches your pay stub. Wages are hours &times; your role rate, paid Sunday 9:00 AM at Frenchie's.</p>
 
         <h4>Payday</h4>
-        <p>Payroll runs Sunday at 9:00 AM. Payments go out from the house. Hours are logged by HR through the week &mdash;
+        <p>Payroll runs Sunday at 9:00 AM. Come by Frenchie's for pay. Hours are logged by HR through the week &mdash;
         if your hours look wrong, raise it before Sunday, not after.</p>
       </div>
     </details>
     <div>
       <details class="fold quiet" open>
-        <summary>Office library &amp; house rules</summary>
+        <summary>Office library &amp; company rules</summary>
         <div class="fold-body">
           <p class="ui-hint"><a id="complianceHandbookLink" href="https://docs.google.com/document/d/11gAskCqa9xXbTfopR7q1RmLu_pdVenVh-qVK4Rcyd8c/edit?usp=sharing" target="_blank" rel="noopener">Full employee handbook</a></p>
           <p class="ui-hint">Restaurant first, then raffles and adult entertainment as licenses allow.</p>
@@ -3307,7 +3307,7 @@ body.session-staff #pullSharedBtn{display:none!important}
 <!-- REPORTS -->
 <section class="view" id="view-reports" role="region" aria-labelledby="title-reports" tabindex="-1">
   <div class="header">
-    <div><div class="eyebrow">Office</div><h1 class="title" id="title-reports">Reports</h1><div class="subtitle">Monthly and yearly payroll, staff rankings, and house P&amp;L (income − payroll − expenses).</div></div>
+    <div><div class="eyebrow">Office</div><h1 class="title" id="title-reports">Reports</h1><div class="subtitle">Monthly and yearly payroll, staff rankings, and Frenchie’s P&amp;L — income minus payroll and expenses.</div></div>
     <div class="actions">
       <select id="reportYear" style="border:1px solid var(--line);border-radius:7px;padding:8px 10px;background:var(--paper);font-size:.78rem"></select>
       <button class="btn" id="csvMonthly">Export CSV</button>
@@ -3328,9 +3328,9 @@ body.session-staff #pullSharedBtn{display:none!important}
       <div class="metric"><label>Hours</label><strong id="yearHours">0</strong></div>
     </div>
     <div class="metrics metrics-dense">
-      <div class="metric"><label>House spend</label><strong id="houseSpend">$0</strong><span>Payroll + expenses</span></div>
-      <div class="metric"><label>House income</label><strong id="yearIncome">$0</strong><span id="yearIncomeSub">Cash-in</span></div>
-      <div class="metric"><label>Net house</label><strong id="yearNetHouse">$0</strong><span>Income − payroll − expenses</span></div>
+      <div class="metric"><label>Company spend</label><strong id="houseSpend">$0</strong><span>Payroll + expenses</span></div>
+      <div class="metric"><label>Cash in</label><strong id="yearIncome">$0</strong><span id="yearIncomeSub">Registers &amp; deposits</span></div>
+      <div class="metric"><label>Net for Frenchie’s</label><strong id="yearNetHouse">$0</strong><span>Income − payroll − expenses</span></div>
       <div class="metric"><label>Expenses</label><strong id="yearExpenses">$0</strong><span id="yearExpReimb">Reimbursable</span></div>
     </div>
     <div class="metrics metrics-dense">
@@ -3366,9 +3366,9 @@ body.session-staff #pullSharedBtn{display:none!important}
       <table><thead><tr><th>Period</th><th>Status</th><th class="r">Hours</th><th class="r">Wages</th><th class="r">Bonus</th><th class="r">Tips</th><th class="r">Gross</th><th class="r">Paid</th><th class="r">Owed</th><th class="r"></th></tr></thead><tbody id="yearPeriods"></tbody></table>
     </div>
   </div>
-  <div class="card"><div class="card-head"><b>House P&amp;L by month</b><span class="pill gray" id="housePnlYearLabel">Year</span></div>
-    <div class="mini-note" style="padding:8px 16px 0">Income − payroll gross − expenses by calendar month (same year as the Reports selector).</div>
-    <div class="table-scroll"><table><thead><tr><th>Month</th><th class="r">Income</th><th class="r">Payroll</th><th class="r">Expenses</th><th class="r">Net house</th></tr></thead><tbody id="housePnlMonthly"></tbody></table></div>
+  <div class="card"><div class="card-head"><b>Frenchie’s P&amp;L by month</b><span class="pill gray" id="housePnlYearLabel">Year</span></div>
+    <div class="mini-note" style="padding:8px 16px 0">Income minus payroll and expenses, by month — same year as the selector above.</div>
+    <div class="table-scroll"><table><thead><tr><th>Month</th><th class="r">Income</th><th class="r">Payroll</th><th class="r">Expenses</th><th class="r">Net</th></tr></thead><tbody id="housePnlMonthly"></tbody></table></div>
   </div>
   <div class="card"><div class="card-head"><b>Yearly payroll</b><span class="pill gray">All years on file</span></div>
     <div class="table-scroll"><table><thead><tr><th>Year</th><th class="r">Periods</th><th class="r">Hours</th><th class="r">Wages</th><th class="r">Bonus</th><th class="r">Tips</th><th class="r">Gross</th><th class="r">Paid</th><th class="r">Owed</th></tr></thead><tbody id="yearly"></tbody></table></div>
@@ -3378,16 +3378,16 @@ body.session-staff #pullSharedBtn{display:none!important}
 <!-- ROLES -->
 <section class="view" id="view-roles" role="region" aria-labelledby="title-roles" tabindex="-1">
   <div class="header">
-    <div><div class="eyebrow">Payroll</div><h1 class="title" id="title-roles">Role rates</h1><div class="subtitle">House ladder — rates save as you type.</div></div>
+    <div><div class="eyebrow">Payroll</div><h1 class="title" id="title-roles">Role rates</h1><div class="subtitle">Pay ladder for Frenchie’s — rates save as you type.</div></div>
     <div class="actions"><button class="btn soft" id="pdfRoles">Export rates PDF</button></div>
   </div>
   <details class="fold quiet"><summary>About role rates</summary><div class="fold-body"><p class="ui-hint">Changing a rate sets the standard for future hires and new hour entries. <b>Apply to all</b> pushes it onto everyone in that role. Saved period entries keep the rate they were logged at.</p></div></details>
-  <div class="card"><div class="card-head"><b>House ladder</b></div><div class="table-scroll"><table><thead><tr><th>Role</th><th class="r">Staff</th><th class="r">Avg logged / yr</th><th class="r">Standard rate / hr</th><th class="r">Action</th></tr></thead><tbody id="roles"></tbody></table></div></div>
+  <div class="card"><div class="card-head"><b>Pay ladder</b></div><div class="table-scroll"><table><thead><tr><th>Role</th><th class="r">Staff</th><th class="r">Avg logged / yr</th><th class="r">Standard rate / hr</th><th class="r">Action</th></tr></thead><tbody id="roles"></tbody></table></div></div>
 </section>
 
 <!-- BACKUP -->
 <section class="view" id="view-backup" role="region" aria-labelledby="title-backup" tabindex="-1">
-  <div class="header"><div><div class="eyebrow">Office</div><h1 class="title" id="title-backup">Backup</h1><div class="subtitle">Autosave is on. Export a JSON copy after busy days.</div></div></div>
+  <div class="header"><div><div class="eyebrow">Office</div><h1 class="title" id="title-backup">Backup</h1><div class="subtitle">The desk autosaves as you work. Download a backup file after busy days.</div></div></div>
   <div class="metrics">
     <div class="metric"><label>Last autosave</label><strong id="backupLastSaved">—</strong><span>Written into the browser</span></div>
     <div class="metric"><label>Last file export</label><strong id="backupLastExport">—</strong><span>Downloadable JSON</span></div>
@@ -3430,7 +3430,7 @@ body.session-staff #pullSharedBtn{display:none!important}
       <button class="btn" id="importJson">Import JSON</button>
     </div></div>
   </div>
-  <div class="card mgmt-only" style="margin-top:12px" data-mgmt-only><div class="card-head"><b>Live office</b><span class="pill gray" id="sharedDeskBuildPill">v50</span></div>
+  <div class="card mgmt-only" style="margin-top:12px" data-mgmt-only><div class="card-head"><b>Live office</b><span class="pill gray" id="sharedDeskBuildPill">v51</span></div>
     <div class="card-body">
       <p class="ui-hint"><b>Automatic:</b> Every save quietly updates other open desks. No Share button — just work. Staff stay signed in. Personal PINs and Discord channel links stay private on each browser. Owner connects cloud office under Settings.</p>
       <div class="field" data-owner-only><label>Host file link (recovery fallback — Owner only)</label><input id="sharedDeskUrlSetting" placeholder="https://yourdomain/…/frenchies-shared-desk.json"></div>
@@ -3513,7 +3513,7 @@ body.session-staff #pullSharedBtn{display:none!important}
     </div>
     <div class="probation-box" id="probationBox" style="display:none">
       <h3 style="margin:0 0 6px;font:700 .72rem 'DM Sans',sans-serif;letter-spacing:.08em;text-transform:uppercase;color:var(--muted)">Probation review</h3>
-      <div class="mini-note" id="probationBoxNote">Pass them into a house role, or end probation.</div>
+      <div class="mini-note" id="probationBoxNote">Pass them into a company role, or end probation.</div>
       <div class="field-row">
         <div class="field"><label>Pass into role</label><select id="probPassRole"></select></div>
         <div class="field"><label>Review notes</label><input id="probNotes" placeholder="Floor notes, radio comfort…"></div>
@@ -3602,7 +3602,7 @@ body.session-staff #pullSharedBtn{display:none!important}
             <button class="btn tiny soft" id="sendEmpLogin">Send account login</button>
             <button class="btn tiny soft" id="importEmpReplyBtn" type="button" title="Import the completed Frenchies-Reply-….html from the employee">Import reply</button>
             <input type="file" class="file-mini" id="importEmpReplyFile" accept=".html,.htm,.json,.txt,text/html,application/json" title="Import reply file" hidden>
-            <button class="btn tiny" id="resetEmpPasswordBtn" type="button" title="Clear personal PIN — they sign in with house PIN again">Reset PIN</button>
+            <button class="btn tiny" id="resetEmpPasswordBtn" type="button" title="Clear personal PIN — they sign in with starter PIN again">Reset PIN</button>
             <button class="btn tiny" id="openHirePapersBtn" type="button" style="display:none">Hiring file</button>
           </div>
         </div>
@@ -3867,7 +3867,7 @@ body.session-staff #pullSharedBtn{display:none!important}
     </div>
     <div class="field"><label>Event name</label><input id="evName" placeholder="e.g. Friday raffle"></div>
     <div class="field-row">
-      <div class="field"><label>House take ($)</label><input id="evHouseTake" type="number" min="0" step="1" placeholder="0" title="House proceeds from this event — books to Income"></div>
+      <div class="field"><label>Company take ($)</label><input id="evHouseTake" type="number" min="0" step="1" placeholder="0" title="Frenchie’s proceeds from this event — books to Income"></div>
       <div class="field"><label>&nbsp;</label><p class="ui-hint" style="margin:8px 0 0">Logged as Income · Event proceeds when saved.</p></div>
     </div>
     <div class="field"><label>Notes</label><textarea id="evNotes" rows="3" placeholder="Optional — what ran, guest notes, house callouts"></textarea></div>
@@ -4114,10 +4114,10 @@ body.session-staff #pullSharedBtn{display:none!important}
 </div></div>
 
 <div class="modal" id="hrSignModal" role="dialog" aria-modal="true" aria-labelledby="hrSignModalTitle" hidden><div class="dialog" role="document" tabindex="-1">
-  <h2 id="hrSignModalTitle">Sign for the house</h2>
-  <p class="mini-note" style="margin-top:-6px">Sign and date the <b>Contract</b> for the house first. Then issue it to the employee — they sign, date, select Download reply, and return the completed file. Import their reply to file the signed contract.</p>
+  <h2 id="hrSignModalTitle">Sign for Frenchie’s</h2>
+  <p class="mini-note" style="margin-top:-6px">Sign and date the <b>Contract</b> for the company first. Then issue it to the employee — they sign, date, hit Download reply, and send the file back. Import their reply to file the signed contract.</p>
   <div class="field"><label>Employee</label><div id="hrSignWho" style="font-weight:600;padding:6px 0"></div></div>
-  <div class="field"><label>House signature — your name *</label><input id="hrSignName" value="Kenzie Long, HR Director"></div>
+  <div class="field"><label>Company signature — your name *</label><input id="hrSignName" value="Kenzie Long, HR Director"></div>
   <div class="field"><label>Date signed *</label><input id="hrSignDate" type="date"></div>
   <div class="dialog-foot">
     <button class="btn soft" id="cancelHrSign">Cancel</button>
@@ -4181,7 +4181,7 @@ body.session-staff #pullSharedBtn{display:none!important}
 <div class="modal" id="sundayRunModal" role="dialog" aria-modal="true" aria-labelledby="sundayRunTitle" hidden>
   <div class="dialog wide" role="document" tabindex="-1">
     <h2 id="sundayRunTitle">Sunday pay run</h2>
-    <div class="mini-note">Checklist first, then Discord-ready paste for the house.</div>
+    <div class="mini-note">Checklist first, then a Discord-ready note from Kenzie.</div>
     <div id="sundayRunChecklist" class="roadmap-panel" style="margin-bottom:12px"></div>
     <div class="sunday-preview" id="sundayRunPreview"></div>
     <div class="dialog-foot">
@@ -4249,7 +4249,7 @@ body.session-staff #pullSharedBtn{display:none!important}
     <h2 id="settingsTitle" style="font:600 1.2rem 'Playfair Display',serif;margin:0 0 12px">Desk settings</h2>
     <h3 style="margin:0 0 8px;font:700 .72rem 'DM Sans',sans-serif;letter-spacing:.08em;text-transform:uppercase;color:var(--muted)">Sign-in</h3>
     <div class="field"><label>Stay-logged-in days</label><select id="setSessionDays"><option value="1">1</option><option value="7">7</option><option value="14" selected>14</option><option value="30">30</option></select></div>
-    <div class="field"><label>House PIN (first sign-in)</label><input id="setHousePass" type="password" inputmode="numeric" pattern="[0-9]*" placeholder="Leave blank to keep current · 6+ digits" autocomplete="new-password"></div>
+    <div class="field"><label>Starter PIN (first sign-in)</label><input id="setHousePass" type="password" inputmode="numeric" pattern="[0-9]*" placeholder="Leave blank to keep current · 6+ digits" autocomplete="new-password"></div>
     <p class="ui-hint" style="margin:-6px 0 10px">6+ digit PIN, stored hashed. After hashing, hire papers say “ask HR” — share the PIN privately. Owner may keep a personal master password.</p>
     <div class="field"><label>Handbook Google Doc URL</label><input id="setHandbookUrl" placeholder="https://docs.google.com/document/d/…"></div>
     <h3 style="margin:16px 0 8px;font:700 .72rem 'DM Sans',sans-serif;letter-spacing:.08em;text-transform:uppercase;color:var(--muted)">Payroll tips</h3>
@@ -4259,7 +4259,7 @@ body.session-staff #pullSharedBtn{display:none!important}
     </div>
     <div class="field"><label>Tip-eligible roles (comma-separated)</label><input id="setTipRoles" placeholder="Waiter, Hostess, Cook"></div>
     <div class="field"><label>High-hours warning threshold</label><input id="setOtHours" type="number" min="1" step="0.5" value="40"></div>
-    <p class="ui-hint" style="margin:-6px 0 10px">Period tip pool is only what HR enters for Sunday settlement. Staff keep 100% of tips they earn — not house income.</p>
+    <p class="ui-hint" style="margin:-6px 0 10px">Tip pool is only what HR enters for Sunday settlement. Staff keep 100% of tips they earn — tips are not company income.</p>
     <div data-owner-only>
       <h3 style="margin:16px 0 8px;font:700 .72rem 'DM Sans',sans-serif;letter-spacing:.08em;text-transform:uppercase;color:var(--muted)">Discord channel links (Owner)</h3>
       <p class="ui-hint" style="margin:0 0 10px">Owner only. Paste each Discord channel post link (from Discord Server Settings → Integrations → Webhooks). These stay on this browser — not shared with other desks.</p>
@@ -4294,7 +4294,7 @@ body.session-staff #pullSharedBtn{display:none!important}
 'use strict';
 
 /* ---------------------------------------------------------------
-   Frenchie's HR & Payroll — single file office tool
+   Frenchie\'s HR & Payroll — single file office tool
    Storage: frenchies_hr_v7 (migrates v6 / final_v5)
 --------------------------------------------------------------- */
 
@@ -4343,7 +4343,7 @@ const LOG_TYPES = {
 };
 const TIP_ROLES_DEFAULT = ['Waiter', 'Hostess', 'Cook'];
 const TIP_ROLES = TIP_ROLES_DEFAULT; /* legacy alias — use tipRoles() */
-const DESK_BUILD = 'v50';
+const DESK_BUILD = 'v51';
 /** ECRP: house first-sign-in secret is a 6+ digit PIN (override in Settings). Stored hashed after first use/set. */
 const HOUSE_LOGIN_PIN = '86368636';
 const HOUSE_LOGIN_PASSWORD = HOUSE_LOGIN_PIN; /* legacy alias — prefer settings.housePassword */
@@ -4444,10 +4444,10 @@ const DAY_NAMES = ['Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat', 'Sun'];
 /* ---- hiring paperwork pack ---- */
 const PAPER_KINDS = {
   application: { title: 'Employment application', short: 'Application', sendable: true, note: 'Issue to the candidate. They complete, sign, and return a reply for filing.' },
-  screening: { title: 'Screening sheet', short: 'Screening', sendable: false, hrOnly: true, note: 'Human Resources only — never issued to the candidate.' },
+  screening: { title: 'Screening sheet', short: 'Screening', sendable: false, hrOnly: true, note: 'HR only — never sent to the candidate.' },
   invite: { title: 'Interview invitation', short: 'Invitation', sendable: true, note: 'Issue proposed interview time. Candidate confirms or requests another slot.' },
   interviewIc: { title: 'Interviewer questions', short: 'Questions', sendable: true, note: 'Written interview answers — issued for return, or used at the table.' },
-  interviewOoc: { title: 'Interviewer notes', short: 'Notes', sendable: false, hrOnly: true, note: 'Human Resources only — stays in the file.' },
+  interviewOoc: { title: 'Interviewer notes', short: 'Notes', sendable: false, hrOnly: true, note: 'HR only — stays in the file.' },
   offer: { title: 'Offer letter', short: 'Offer letter', sendable: true, note: 'Formal job offer. Contract is issued separately after acceptance and hire.' },
   contract: { title: 'Employment contract', short: 'Contract', sendable: true, note: 'Binding agreement — separate from the offer and the new-hire packet.' },
   packet: { title: 'New-hire packet', short: 'New-hire packet', sendable: true, note: 'Week-one orientation checklist — not the contract.' },
@@ -4520,7 +4520,7 @@ const PACKET_RULES = {
 };
 
 const IC_QUESTIONS = [
-  "Why Frenchie's? What brings you to our door rather than any other house in the city?",
+  "Why Frenchie\'s? What brings you to our door rather than any other house in the city?",
   'Tell me about a rush — full floor, bar backed up, tickets stacking in the kitchen. What do you do first?',
   'Which station do you want most — bar, kitchen, or floor — and why that one?',
   'A guest is rude to you in front of a full room. Walk me through exactly what you say and do.',
@@ -5803,7 +5803,7 @@ function printOfficeHtml(title, html) {
     '<h1>' + esc(title) + '</h1>' +
     '<div class="print-meta">Printed ' + today() + ' · Kenzie Long, HR Director</div>' +
     html +
-    '<div class="print-meta" style="margin-top:24px;border-top:1px solid #ccc;padding-top:8px">Frenchie\'s office desk · Payday Sunday 9:00 AM from the house</div>';
+    '<div class="print-meta" style="margin-top:24px;border-top:1px solid #ccc;padding-top:8px">Frenchie\'s office desk · Payday Sunday 9:00 AM at Frenchie\'s</div>';
   window.print();
 }
 
@@ -6507,7 +6507,7 @@ function grantEmpLoginAccess(e, detail) {
       pushEmpLog(e, {
         type: 'status',
         summary: 'Desk login access granted',
-        detail: detail || ('Username ' + e.loginUsername + ' · first sign-in with house PIN, then create your own PIN')
+        detail: detail || ('Username ' + e.loginUsername + ' · first sign-in with starter PIN, then create your own PIN')
       });
     } catch (err) {}
   }
@@ -6634,19 +6634,19 @@ async function validatePersonalSecret(raw, e) {
   const a = String(raw || '');
   if (empMayUseMasterPassword(e)) {
     if (a.length < 6) return { ok: false, msg: 'Master password or PIN must be at least 6 characters' };
-    if (await verifySecret(a, housePassword())) return { ok: false, msg: 'Choose something other than the house PIN' };
+    if (await verifySecret(a, housePassword())) return { ok: false, msg: 'Choose something other than the starter PIN' };
     if (isDigitPin(a) && isWeakPin(a)) return { ok: false, msg: 'That PIN is too easy to guess — pick different digits' };
     return { ok: true, kind: isDigitPin(a) ? 'pin' : 'master' };
   }
   if (!isDigitPin(a)) return { ok: false, msg: 'Personal PIN must be 6 or more digits (ECRP rule)' };
   if (isWeakPin(a)) return { ok: false, msg: 'PIN is too easy to guess — avoid repeats (111111) and sequences (123456)' };
-  if (await verifySecret(a, housePassword())) return { ok: false, msg: 'Choose something other than the house PIN' };
+  if (await verifySecret(a, housePassword())) return { ok: false, msg: 'Choose something other than the starter PIN' };
   return { ok: true, kind: 'pin' };
 }
 function validateHousePin(raw) {
   const a = String(raw || '').trim();
-  if (!isDigitPin(a)) return { ok: false, msg: 'House PIN must be 6 or more digits (ECRP)' };
-  if (isWeakPin(a)) return { ok: false, msg: 'House PIN is too weak — avoid sequences and repeats' };
+  if (!isDigitPin(a)) return { ok: false, msg: 'Starter PIN must be 6 or more digits (ECRP)' };
+  if (isWeakPin(a)) return { ok: false, msg: 'Starter PIN is too weak — avoid sequences and repeats' };
   return { ok: true };
 }
 function readLoginFailState() {
@@ -6693,7 +6693,7 @@ function resetEmpLoginPassword(e, reason) {
   pushEmpLog(e, {
     type: 'status',
     summary: 'Desk PIN reset',
-    detail: reason || 'Must sign in with house PIN and create a new personal PIN'
+    detail: reason || 'Must sign in with starter PIN and create a new personal PIN'
   });
   return true;
 }
@@ -6720,7 +6720,7 @@ function setLoginGateMode(mode) {
         $('loginSetupSub').textContent = 'Welcome, ' + e.name + '. ' +
           (migrate ? 'ECRP requires a digit PIN now — ' : '') +
           'Create a personal PIN (6 or more digits) for ' +
-          (e.loginUsername || loginUsernameFromName(e.name)) + '. You will use this next time instead of the house PIN.';
+          (e.loginUsername || loginUsernameFromName(e.name)) + '. You will use this next time instead of the starter PIN.';
         if ($('setupPass')) { $('setupPass').setAttribute('inputmode', 'numeric'); $('setupPass').setAttribute('pattern', '[0-9]*'); $('setupPass').placeholder = 'At least 6 digits'; }
         if ($('setupPass2')) { $('setupPass2').setAttribute('inputmode', 'numeric'); $('setupPass2').setAttribute('pattern', '[0-9]*'); $('setupPass2').placeholder = 'Repeat PIN'; }
         const brand = document.querySelector('#loginSetupPanel .brand');
@@ -6977,7 +6977,7 @@ async function loginAsEmployee(username, password) {
     if (!personalOk) {
       recordLoginFail();
       if (await verifySecret(p, houseStored)) {
-        return { ok: false, msg: 'House PIN no longer works — use your personal PIN (HR can reset)' };
+        return { ok: false, msg: 'Starter PIN no longer works — use your personal PIN (ask HR)' };
       }
       return { ok: false, msg: empMayUseMasterPassword(e) ? 'Wrong PIN or master password' : 'Wrong PIN' };
     }
@@ -7002,7 +7002,7 @@ async function loginAsEmployee(username, password) {
   }
   if (!(await verifySecret(p, houseStored))) {
     recordLoginFail();
-    return { ok: false, msg: 'First sign-in uses the house PIN from your Account login paper (ask HR)' };
+    return { ok: false, msg: 'First sign-in uses the starter PIN from your Account login paper (ask HR)' };
   }
   clearLoginFails();
   /* Upgrade plaintext house PIN to hash after successful first-sign-in check */
@@ -8069,7 +8069,7 @@ function validateDeskData() {
 
 function exportTodosText() {
   const all = buildTodos();
-  const lines = ["Frenchie's to-do desk — " + today(), ''];
+  const lines = ["Frenchie\'s to-do desk — " + today(), ''];
   all.forEach(i => {
     lines.push('[' + (i.tag || i.group) + '] ' + (i.title || '') + (i.detail ? ' — ' + i.detail : '') + (i.due ? ' (due ' + i.due + ')' : ''));
   });
@@ -8300,9 +8300,9 @@ async function saveSettings() {
       try {
         s.settings.housePassword = await storeSecretHashed(hp);
         $('setHousePass').value = '';
-        houseNote = ' · house PIN hashed (share privately; papers no longer print it)';
+        houseNote = ' · starter PIN hashed (share privately; papers no longer print it)';
       } catch (err) {
-        return toast('Could not hash house PIN — try another browser');
+        return toast('Could not hash starter PIN — try another browser');
       }
     }
   }
@@ -8331,6 +8331,7 @@ function openChangelog() {
   const grid = $('upgradeGrid');
   if (grid) {
     const recent = [
+      ['v51', 'Human voice pass — Frenchie\'s / company wording · Kenzie Discord announcements & hire posts · starter PIN'],
       ['v50', 'Auto live office — every save quietly updates other desks · Share button removed · catch-up if another desk is ahead'],
       ['v49', 'HR immersion labels — Pull from Discord · Share with other desks · cloud office wording · Discord chips'],
       ['v48', 'Live shared desk for everyone signed in · Owner-only webhooks/Supabase Settings · packs share URL+anon · staff need no Pull'],
@@ -8481,14 +8482,14 @@ function stubDiscordText(empId) {
   const x = entry(p, empId);
   const g = lineGross(e, x);
   return [
-    "Frenchie's pay — " + e.name,
+    "Frenchie\'s pay — " + e.name,
     'Period: ' + shortLabel(p),
     'Hours: ' + dec(x.hours) + ' @ ' + money(entryRate(e, x)) + '/hr',
     'Bonus: ' + money(x.bonus || 0),
     'Tips: ' + money(x.tips || 0),
     'Gross: ' + money(g),
     'Status: ' + (x.paidOut ? 'PAID' : 'UNPAID'),
-    'Payday: Sunday 9:00 AM from the house'
+    'Payday: Sunday 9:00 AM at Frenchie\'s'
   ].join('\n');
 }
 window.copyStubDiscord = function (empId) {
@@ -8512,7 +8513,7 @@ window.postStubDiscord = function (empId) {
       discordField('Bonus', money(x.bonus || 0), true),
       discordField('Gross', money(g), true),
       discordField('Status', x.paidOut ? 'PAID' : 'UNPAID', true),
-      discordField('Payday', 'Sunday 9:00 AM from the house', false)
+      discordField('Payday', 'Sunday 9:00 AM at Frenchie\'s', false)
     ]
   });
   return postDiscord('payroll', card, { label: 'Stub · ' + e.name });
@@ -8748,7 +8749,7 @@ function render() {
     if (isStaffSession() && sessionUser) {
       $('staffWelcome').style.display = '';
       $('staffWelcome').innerHTML = '<b>Welcome, ' + esc(sessionUser.name) + '</b><div class="mini-note" style="margin:4px 0 0">Signed in as ' +
-        esc(sessionUser.username) + ' · ' + esc(sessionUser.role) + '. Your stubs, shifts, and self-service tools are below — house payroll stays with HR.</div>' +
+        esc(sessionUser.username) + ' · ' + esc(sessionUser.role) + '. Your stubs, shifts, and self-service tools are below — payroll stays with HR.</div>' +
         '<div class="staff-actions">' +
         '<button type="button" class="btn tiny primary" id="staffOpenFileBtn">My file</button>' +
         '<button type="button" class="btn tiny soft" id="staffStubsBtn">My stubs</button>' +
@@ -9551,7 +9552,7 @@ function renderEvents() {
       '<td>' + esc(ev.date) + '</td>' +
       '<td><span class="pill gray">' + esc(ev.type) + '</span></td>' +
       '<td class="name">' + esc(ev.name) +
-      (Number(ev.houseTake || 0) ? '<div class="history">House take ' + money(ev.houseTake) + '</div>' : '') +
+      (Number(ev.houseTake || 0) ? '<div class="history">Company take ' + money(ev.houseTake) + '</div>' : '') +
       '</td>' +
       '<td class="r">' + (ev.staff ? ev.staff.length : 0) + '</td>' +
       '<td class="r mono">' + money(tot) + '</td>' +
@@ -10047,7 +10048,7 @@ function updateIncomeKindUi() {
   const hints = {
     register: 'Register drops book customer payments for food, drinks, or service. Staff tips are kept by the employee — not logged here.',
     tips: 'Legacy tip jar only. Frenchie\'s staff keep 100% of tips — do not book new tip jars as house income.',
-    event: 'Event proceeds — usually linked from an event House take; pick the event if logging manually.',
+    event: 'Event proceeds — usually linked from an event company take; pick the event if logging manually.',
     deposit: 'Owner or house deposit into the till / bank.',
     rebate: 'Cash back when a reimbursable expense is marked reimbursed.',
     other: 'Other house cash-in.'
@@ -10122,7 +10123,7 @@ function renderIncomes() {
     '<button class="btn tiny soft" onclick="postIncomeLineDiscord(' + x.id + ')">Post</button> ' +
     '<button class="btn tiny danger" onclick="delIncome(' + x.id + ')">Delete</button></td>' +
     '</tr>'
-  ).join('') : emptyState('No income logged.', 'Log register drops, deposits, or Pull from Discord (/register).');
+  ).join('') : emptyState('No income logged yet.', 'Log a register drop or deposit, or Pull from Discord (/register).');
 
   if ($('incByKind')) {
     const keys = Object.keys(INCOME_KINDS).filter(k => byKind[k] && k !== 'tips').concat(Object.keys(byKind).filter(k => !INCOME_KINDS[k] && k !== 'tips'));
@@ -10316,7 +10317,7 @@ function ensureRebateIncome(expense) {
 
 function registerTemplateText() {
   return [
-    "Frenchie's #register-sales",
+    "Frenchie\'s #register-sales",
     'Preferred: type /register or tap Log house income — fill Kind, Station, Amount, What was sold / notes, Date.',
     'Stations: Bar · Floor · Door · Kitchen · Other',
     'Drops land on the Income desk — use Pull from Discord (or auto-check).',
@@ -10401,10 +10402,10 @@ function buildIncomeWeekHtml(list, win) {
     '</table>';
   return '<div style="margin:0 0 18px;padding:14px 16px;border:1px solid #ddd;border-radius:8px;background:#faf8f3">' +
     '<div style="font:700 11px Arial,sans-serif;text-transform:uppercase;letter-spacing:.08em;color:#666;margin-bottom:6px">Income week sheet</div>' +
-    '<div style="font:700 20px Georgia,serif;margin-bottom:4px">Frenchie\'s Restaurant — House income</div>' +
+    '<div style="font:700 20px Georgia,serif;margin-bottom:4px">Frenchie\'s Restaurant — Income week</div>' +
     '<div style="color:#555;font-size:12px;line-height:1.55">Week: <b>' + esc(win.label || 'All') + '</b><br>' +
-    'House in ' + money(net.income) + ' · Payroll ' + money(net.payroll) + ' · Expenses ' + money(net.expenses) + ' · Net ' + money(net.net) + '<br>' +
-    'Printed ' + esc(today()) + '</div></div>' + lines;
+    'Cash in ' + money(net.income) + ' · Payroll ' + money(net.payroll) + ' · Expenses ' + money(net.expenses) + ' · Net ' + money(net.net) + '<br>' +
+    'Printed ' + esc(today()) + ' · Kenzie Long, HR</div></div>' + lines;
 }
 
 function printIncomeWeekSheet() {
@@ -10426,17 +10427,17 @@ function incomeWeekDiscordCard() {
   ).join('\n');
   const fields = [
     discordField('Week', win.label || 'All', true),
-    discordField('House in', money(net.income), true),
-    discordField('Net house', money(net.net), true),
+    discordField('Cash in', money(net.income), true),
+    discordField('Net for Frenchie\'s', money(net.net), true),
     discordField('Payroll', money(net.payroll), true),
     discordField('Expenses', money(net.expenses), true),
     discordField('By kind', kindLines || '—', false)
   ];
-  if (net.tipJar > 0) fields.splice(3, 0, discordField('Legacy tip rows', money(net.tipJar) + ' (not house)', true));
+  if (net.tipJar > 0) fields.splice(3, 0, discordField('Legacy tip rows', money(net.tipJar) + ' (not company income)', true));
   if (top) fields.push(discordField('Register lines', top, false));
   return discordCard('incomeReports', {
-    title: 'House income report',
-    description: 'Week strip for ' + (win.label || 'all periods') + ' · ' + list.length + ' entries · staff keep 100% tips',
+    title: 'Frenchie\'s income · week report',
+    description: 'Week of ' + (win.label || 'all periods') + ' · ' + list.length + ' entries. Staff keep 100% of tips — tips are not company income.\n\n— Kenzie',
     fields: fields
   });
 }
@@ -11293,7 +11294,7 @@ function stub(e, p) {
       '<div style="color:#666;font-size:.72rem">Employee pay statement &middot; 8 Elgin Ave, Legion Square</div></div>' +
       '<div style="text-align:right">' + seal + '<div style="font-size:.72rem;color:#666;margin-top:8px">' + esc(label(p)) + '</div></div></div>' +
       '<div class="empty" style="padding:18px 0">No hours, bonus, or tips logged for ' + esc(e.name) + ' this period.</div>' +
-      '<div class="stub-foot"><span>' + esc(stubRefId(e, p)) + '</span><span>Payday: Sunday 9:00 AM from the house</span></div></article>';
+      '<div class="stub-foot"><span>' + esc(stubRefId(e, p)) + '</span><span>Payday: Sunday 9:00 AM at Frenchie\'s</span></div></article>';
   }
   return '<article class="paystub">' +
     '<div class="paystub-head"><div>' + logoSvg() +
@@ -11315,7 +11316,7 @@ function stub(e, p) {
     '</tbody></table>' +
     '<div class="stub-grid" style="margin-top:8px">' +
     '<div>Year to date (through this period)<br><b>' + money(ytd) + '</b></div>' +
-    '<div>Payday<br><b>Sunday 9:00 AM from the house</b></div>' +
+    '<div>Payday<br><b>Sunday 9:00 AM at Frenchie\'s</b></div>' +
     '</div>' +
     '<div class="stub-foot"><span>' + esc(stubRefId(e, p)) + '</span><span>' + (paid ? 'Marked paid for Sunday run' : 'Awaiting Sunday payout') + '</span></div>' +
     '</article>';
@@ -11331,7 +11332,7 @@ function stubPlainText(e, p) {
   const tip = Number(x.tips || 0);
   const gross = wages + bon + tip;
   return [
-    "Frenchie's Restaurant — pay stub",
+    "Frenchie\'s Restaurant — pay stub",
     'Employee: ' + e.name,
     'Role: ' + e.role + ' · ' + e.status,
     'Period: ' + label(p),
@@ -11344,7 +11345,7 @@ function stubPlainText(e, p) {
     'Gross: ' + money(gross),
     'YTD: ' + money(employeeYtdGross(e.id, p)),
     'Status: ' + (x.paidOut ? 'PAID' : 'UNPAID'),
-    'Payday: Sunday 9:00 AM from the house'
+    'Payday: Sunday 9:00 AM at Frenchie\'s'
   ].join('\n');
 }
 
@@ -11520,8 +11521,8 @@ const DISCORD_EMBED_COLORS = {
   announcements: 0x1a3329,
   incomeReports: 0x3f7a56
 };
-const DISCORD_FOOTER = "Frenchie's HR · 8 Elgin Ave";
-const DISCORD_USERNAME = "Frenchie's HR desk";
+const DISCORD_FOOTER = "Kenzie Long, HR · Frenchie\'s · 8 Elgin Ave";
+const DISCORD_USERNAME = "Kenzie Long · Frenchie's HR";
 
 function discordWebhookUrl(channelKey) {
   ensureMeta();
@@ -11685,7 +11686,7 @@ function postDiscordHrLog(payload, label) {
   /* Accept plain string or discordCard payload */
   if (typeof payload === 'string') {
     const lines = String(payload).split('\n');
-    const title = (lines[0] || 'HR desk log').replace(/^Frenchie's HR log —\s*/i, '') || 'HR desk log';
+    const title = (lines[0] || 'HR desk log').replace(/^Frenchie\'s HR log —\s*/i, '') || 'HR desk log';
     const body = lines.slice(1).join('\n').trim();
     payload = discordCard('hrLog', {
       title: 'HR desk log · ' + title,
@@ -11699,66 +11700,66 @@ function discordHireKindMeta(kind) {
     application: {
       title: 'Employment application',
       step: 'Application',
-      issued: 'Human Resources has successfully issued the employment application for this candidate.',
-      action: 'Open the attached .html packet, complete every required field, sign the form, select **Download reply**, and return the completed file to Human Resources.',
-      filed: 'The employment application has been returned and filed. This hiring step is complete.'
+      issued: 'Hey — I sent over the Frenchie\'s employment application for you.',
+      action: 'Open the attached .html file, fill it out, sign it, hit **Download reply**, and send that file back to me (Kenzie / HR).',
+      filed: 'Got your application back — it\'s on file. Thanks for getting that over.'
     },
     invite: {
       title: 'Interview invitation',
       step: 'Interview invitation',
-      issued: 'Human Resources has successfully issued an interview invitation for this candidate.',
-      action: 'Open the attached .html packet, confirm the proposed time or request an alternative, sign the form, select **Download reply**, and return the completed file to Human Resources.',
-      filed: 'The interview invitation reply has been filed. This hiring step is complete.'
+      issued: 'Interview invite is out — hope the time works for you.',
+      action: 'Open the attached .html file, confirm the time (or ask for another), sign it, hit **Download reply**, and send it back to me.',
+      filed: 'Interview time is locked in on our side. See you there.'
     },
     interviewIc: {
       title: 'Interviewer questions',
       step: 'Interview questions',
-      issued: 'Human Resources has successfully issued the interviewer questions packet for this candidate.',
-      action: 'Open the attached .html packet, complete the written answers, sign the form, select **Download reply**, and return the completed file to Human Resources.',
-      filed: 'Interview answers have been returned and filed. This hiring step is complete.'
+      issued: 'Sending the interview questions so you can answer in writing.',
+      action: 'Open the attached .html file, answer the questions, sign it, hit **Download reply**, and send it back to me.',
+      filed: 'Answers are on file — appreciate you taking the time.'
     },
     offer: {
       title: 'Offer letter',
       step: 'Offer',
-      issued: 'Human Resources has successfully issued a formal offer of employment for this candidate.',
-      action: 'Open the attached .html packet, accept or decline the offer, sign the form, select **Download reply**, and return the completed file to Human Resources.',
-      filed: 'The offer response has been filed. This hiring step is complete.'
+      issued: 'Good news — here\'s your formal offer from Frenchie\'s.',
+      action: 'Open the attached .html file, accept or decline, sign it, hit **Download reply**, and send it back to me.',
+      filed: 'Offer response is on file. I\'ll follow up with next steps.'
     },
     contract: {
       title: 'Employment contract',
       step: 'Contract',
-      issued: 'Human Resources has successfully issued the employment contract. The house signature is already on file.',
-      action: 'Open the attached .html packet, review the terms, sign as the employee, select **Download reply**, and return the completed file to Human Resources.',
-      filed: 'The signed employment contract has been filed. This hiring step is complete.'
+      issued: 'Contract is ready — I\'ve already signed for Frenchie\'s.',
+      action: 'Open the attached .html file, read it over, sign as the employee, hit **Download reply**, and send it back to me.',
+      filed: 'Signed contract is on file. Welcome aboard.'
     },
     packet: {
       title: 'New-hire packet',
       step: 'New-hire packet',
-      issued: 'Human Resources has successfully issued the new-hire orientation packet.',
-      action: 'Open the attached .html packet, complete every required field and declaration, sign the form, select **Download reply**, and return the acknowledgement to Human Resources.',
-      filed: 'The new-hire packet acknowledgement has been filed. This hiring step is complete.'
+      issued: 'Here\'s your week-one orientation packet for Frenchie\'s.',
+      action: 'Open the attached .html file, complete the checklist and declarations, sign it, hit **Download reply**, and send the acknowledgement back to me.',
+      filed: 'Orientation packet is on file. You\'re set for week one.'
     },
     login: {
       title: 'Account login information',
       step: 'Account login',
-      issued: 'Human Resources has successfully issued account login credentials for this employee.',
-      action: 'Open the attached .html packet, review the username and house PIN, complete the acknowledgements, sign the form, select **Download reply**, and return the completed file to Human Resources. On first desk sign-in you will create your own 6+ digit PIN. Desk access is granted when the reply is filed.',
-      filed: 'Account login has been acknowledged and filed. Desk access is now granted. This hiring step is complete.'
+      issued: 'Your desk login info is ready — keep the starter PIN private.',
+      action: 'Open the attached .html file, check your username and starter PIN, sign the acknowledgements, hit **Download reply**, and send it back to me. First time you sign in, you\'ll make your own 6+ digit PIN. Desk access opens once that reply is filed.',
+      filed: 'Login acknowledgement is on file — you\'re cleared to use the desk.'
     },
     decline: {
       title: 'Decline letter',
       step: 'Decline',
-      issued: 'Human Resources has issued a formal decline letter for this application.',
-      action: 'Open the attached .html packet, acknowledge receipt, sign the form, select **Download reply**, and return the completed file to Human Resources.',
-      filed: 'The decline letter acknowledgement has been filed. This hiring step is complete.'
+      issued: 'I\'m sending a formal decline letter for this application.',
+      action: 'Open the attached .html file, acknowledge receipt, sign it, hit **Download reply**, and send it back to me.',
+      filed: 'Decline acknowledgement is on file. Wishing you well.'
     }
   };
   return map[kind] || {
     title: (PAPER_KINDS[kind] && PAPER_KINDS[kind].title) || kind,
     step: (PAPER_KINDS[kind] && PAPER_KINDS[kind].short) || kind,
-    issued: 'Human Resources has successfully issued this hiring document.',
-    action: 'Open the attached .html packet, complete and sign the form, select **Download reply**, and return the completed file to Human Resources.',
-    filed: 'The signed reply has been filed. This hiring step is complete.'
+    issued: 'I sent over a hiring document for you.',
+    action: 'Open the attached .html file, complete and sign it, hit **Download reply**, and send it back to me (Kenzie / HR).',
+    filed: 'Signed reply is on file. Thanks.'
   };
 }
 function discordHirePaperCard(name, kind, packetId) {
@@ -11766,13 +11767,13 @@ function discordHirePaperCard(name, kind, packetId) {
   const fields = [
     discordField('Applicant', name || '—', true),
     discordField('Document', meta.title, true),
-    discordField('Status', 'Issued — awaiting signed return', true)
+    discordField('Status', 'Out for signature', true)
   ];
   if (packetId) fields.push(discordField('Packet ID', '`' + packetId + '`', true));
-  fields.push(discordField('Return instruction', 'Select **Download reply** inside the packet, then return the completed .html file to Human Resources.', false));
+  fields.push(discordField('How to return it', 'Inside the packet, hit **Download reply**, then send that completed .html file back to Kenzie / HR.', false));
   return discordCard('hiring', {
-    title: meta.title + ' issued · ' + (name || 'Applicant'),
-    description: '**' + meta.step + ' — document issued**\n\n' + meta.issued + '\n\n**Applicant action**\n' + meta.action,
+    title: meta.title + ' · ' + (name || 'Applicant'),
+    description: meta.issued + '\n\n' + meta.action,
     fields
   });
 }
@@ -11786,11 +11787,11 @@ function discordHireStepCompleteCard(name, kind, packetId, status, nextAction) {
   ];
   if (packetId) fields.push(discordField('Packet ID', '`' + packetId + '`', true));
   if (nextAction && nextAction !== '—' && nextAction !== 'Closed') {
-    fields.push(discordField('Next hiring step', nextAction, false));
+    fields.push(discordField('What\'s next', nextAction, false));
   }
   return discordCard('hiring', {
-    title: meta.title + ' filed · ' + (name || 'Applicant'),
-    description: '**' + meta.step + ' — step complete**\n\n' + meta.filed,
+    title: meta.title + ' on file · ' + (name || 'Applicant'),
+    description: meta.filed,
     fields
   });
 }
@@ -11879,7 +11880,7 @@ function wrapLetter(title, innerHtml, metaLine) {
     '<div class="letter-meta">' + esc(metaLine || ('Issued ' + today())) + '</div>' +
     '<div class="letter-body">' + innerHtml + '</div>' +
     '<footer class="letter-sign"><div class="sign-line">Kenzie Long</div>' +
-    '<div class="sign-role">HR Director, Frenchie\'s Restaurant &middot; 636 &middot; Payday Sunday 9:00 AM from the house</div></footer>' +
+    '<div class="sign-role">HR Director, Frenchie\'s Restaurant &middot; 636 &middot; Payday Sunday 9:00 AM at Frenchie\'s</div></footer>' +
     '</article>';
 }
 
@@ -12060,7 +12061,7 @@ function letterApplication(a) {
       chk('I am clear of recent felony convictions', false),
       chk('I carry no terrorism charge and no murder of a government employee on my record', false),
       chk('I understand every new hire serves a seven-day probation as a New Hire', false),
-      chk('I understand payday is Sunday at 9:00 AM, paid from the house', false)
+      chk('I understand payday is Sunday at 9:00 AM, paid at Frenchie\'s', false)
     ]) +
     '<div class="letter-note ooc">(( Eligibility bar: admin violation clear 14 days · no felony convictions within 14 days · terrorism or the murder of a government employee is a hard bar. ))</div>' +
     signGrid('Applicant signature', '', 'Date', '') +
@@ -12108,7 +12109,7 @@ function letterInvite(a) {
     ff('Ask for', 'Kenzie Long, HR Director · 636') +
     '<p>Come as you would come to a shift: presentable and on time. Bring nothing but yourself and straight answers. It runs about twenty minutes and covers the floor, the stations, your availability, and how you carry yourself in a rush.</p>' +
     '<p>If that date does not suit you, send word and we will find another. If we have not heard from you within three days of this letter the application is set aside and the desk moves on.</p>' +
-    '<p>Every hire at Frenchie\'s starts on a seven-day probation as a New Hire, shadowed and trained on a station. Payday is Sunday at 9:00 AM, paid from the house.</p>' +
+    '<p>Every hire at Frenchie\'s starts on a seven-day probation as a New Hire, shadowed and trained on a station. Payday is Sunday at 9:00 AM, paid at Frenchie\'s.</p>' +
     '<p>We look forward to meeting you.</p>' +
     signGrid('Confirmed by applicant', '', 'Date confirmed', '');
   return wrapLetter('Interview invitation', body, (c.name ? 'To ' + c.name + ' · ' : '') + 'Issued ' + today());
@@ -12158,14 +12159,14 @@ function letterOffer(c) {
     ff('Start date', c.hire) +
     ff('Probation', 'Seven days from start, ending ' + c.probationEnd) +
     ff('Reports to', c.supervisor) +
-    ff('Payday', 'Sunday, 9:00 AM, paid from the house') +
+    ff('Payday', 'Sunday, 9:00 AM, paid at Frenchie\'s') +
     '<h4>Probation</h4>' +
     '<p>During probation you are shadowed on shift, trained on a station, and reviewed by HR at the end of the week. Pass and you move onto the ladder proper and become eligible for promotion consideration. Fall short and we part ways without prejudice.</p>' +
     '<h4>What we expect</h4>' +
     '<p>Show up in uniform, on time, and ready to look after the guests. Treat the staff beside you the way you would treat a paying customer. Clock in on radio with 10-1 and out with 10-2. Anything you cannot solve on the floor goes to a Shift Lead, and from there to Operations or to me — one rung at a time.</p>' +
     '<div class="letter-note">This offer holds so long as your standing with the city remains in good order. To accept, sign below and return this letter to the HR office. The Contract follows separately.</div>' +
     signGrid('Accepted by ' + (c.name || 'applicant'), '', 'Date', '') +
-    signGrid('For the house', 'Kenzie Long, HR Director · 636', 'Date', '');
+    signGrid('For Frenchie\'s', 'Kenzie Long, HR Director · 636', 'Date', '');
   return wrapLetter('Offer letter', body, 'To ' + (c.name || 'applicant') + ' · issued ' + today());
 }
 
@@ -12177,7 +12178,7 @@ function letterContract(c) {
     ff('Position', c.role) +
     ff('Rate', money(c.rate) + ' per hour on hours logged by HR') +
     ff('Start date', c.hire) +
-    ff('Payday', 'Sunday, 9:00 AM, paid from the house') +
+    ff('Payday', 'Sunday, 9:00 AM, paid at Frenchie\'s') +
     '<p>Hours are logged by HR through the week. If your hours look wrong, raise it before Sunday, not after.</p>' +
     '<h4>2. Probation</h4>' +
     '<p>The Employee serves a seven-day probation beginning ' + esc(c.hire) + ' and ending ' + esc(c.probationEnd) + '. During probation the Employee is shadowed, trained on a station, and reviewed by HR. Employment may be ended by either party during probation without penalty.</p>' +
@@ -12195,7 +12196,7 @@ function letterContract(c) {
     '<h4>7. Acknowledgement</h4>' +
     '<p>The Employee confirms they have read this Contract and the employee handbook, and accept the terms above in full.</p>' +
     signGrid('Employee — ' + (c.name || ''), '', 'Date', '') +
-    signGrid('For the house', (c.houseSign && c.houseSign.name) || 'Kenzie Long, HR Director · 636', 'Date', (c.houseSign && c.houseSign.date) || '');
+    signGrid('For Frenchie\'s', (c.houseSign && c.houseSign.name) || 'Kenzie Long, HR Director · 636', 'Date', (c.houseSign && c.houseSign.date) || '');
   return wrapLetter('Contract of Employment', body, (c.name || 'Employee') + ' · ' + c.role + ' · ' + today());
 }
 
@@ -12235,8 +12236,8 @@ function letterLogin(c) {
     ff('Employee', c.name) +
     ff('Role', c.role) +
     ff('Username', user) +
-    ff('First sign-in PIN', housePinPaperValue() + (isStoredHash(housePassword()) ? '' : ' (house PIN)')) +
-    '<div class="letter-note">Username format is Firstname_Lastname from your legal name on file. Sign in once with the <b>house PIN</b> from HR — the desk will ask you to create your own <b>personal PIN (6 or more digits)</b> before you continue. ECRP requires digit PINs for site logins (not word passwords). PINs are stored hashed on the desk. Do not post PINs in public Discord — ask HR in person or DMs.</div>' +
+    ff('First sign-in PIN', housePinPaperValue() + (isStoredHash(housePassword()) ? '' : ' (starter PIN)')) +
+    '<div class="letter-note">Username format is Firstname_Lastname from your legal name on file. Sign in once with the <b>starter PIN</b> from HR — the desk will ask you to create your own <b>personal PIN (6 or more digits)</b> before you continue. ECRP requires digit PINs for site logins (not word passwords). PINs are stored hashed on the desk. Do not post PINs in public Discord — ask HR in person or DMs.</div>' +
     '<h4>What you can see</h4>' +
     '<p>Access follows your role on the ladder. Owner and management see the full desk. Shift Leads see coverage and roster tools. Floor staff see their pay stubs, shifts, and handbook.</p>' +
     '<h4>Acknowledgement</h4>' +
@@ -12885,7 +12886,7 @@ function bindPacketForm(root, meta) {
     const tag = kindSlug(meta.kind) + '-' + safeName(reply.signature || reply.name || 'applicant');
     const html = buildFilledReplyHtml(root, reply, meta);
     downloadFile(html, 'Frenchies-Reply-' + tag + '.html', 'text/html');
-    say('Completed reply downloaded — return this .html file to Human Resources.', 'ok');
+    say('Completed reply downloaded — send this .html file back to Kenzie / HR.', 'ok');
     if (meta.template) {
       toast('Reply .html downloaded. Import it on the Hiring desk to file it.');
       return;
@@ -12909,14 +12910,14 @@ function buildPacketSheet(a, kind, packetId, embed) {
     const hsName = (house && house.name) || '';
     const hsDate = (house && house.date) || today();
     signBlock =
-      '<h2>For the house (HR)</h2>' +
+      '<h2>For Frenchie\'s (HR)</h2>' +
       '<p class="pk-hint">Signed by HR before this packet was sent. Locked on this copy.</p>' +
       '<div class="sign">' +
-      '<label class="pk-f"><span>House signature</span><input class="pk-sign-cursive" data-house-sign="name" value="' + esc(hsName) + '" readonly disabled></label>' +
+      '<label class="pk-f"><span>Company signature</span><input class="pk-sign-cursive" data-house-sign="name" value="' + esc(hsName) + '" readonly disabled></label>' +
       '<label class="pk-f"><span>Date signed by house</span><input data-house-sign="date" type="date" value="' + esc(hsDate) + '" readonly disabled></label>' +
       '</div>' +
       '<h2>Employee signature *</h2>' +
-      '<p class="pk-hint">Sign and date below, then select <b>Download reply</b> and return the completed .html file to Human Resources.</p>' +
+      '<p class="pk-hint">Sign and date below, then select <b>Download reply</b> and send the completed .html file back to Kenzie / HR.</p>' +
       '<div class="sign">' +
       '<label class="pk-f req"><span>Employee signature — type your full name *</span>' +
       '<input data-sign="name" class="pk-sign-cursive" placeholder="Your signature" value="' + esc(a.name || '') + '"></label>' +
@@ -12943,7 +12944,7 @@ function buildPacketSheet(a, kind, packetId, embed) {
     '<button type="button" class="ghost" id="pkPr">Print this sheet</button>' +
     '<span class="msg" id="pkMsg"></span>' +
     '</div>' +
-    '<div class="foot"><b>Kenzie Long — HR Director</b>Required fields are marked *. Select <b>Download reply</b> and return the completed .html file to Human Resources at Frenchie\'s Restaurant, 8 Elgin Ave. Payday is Sunday, 9:00 AM, paid from the house.</div>' +
+    '<div class="foot"><b>Kenzie Long — HR Director</b>Required fields are marked *. Select <b>Download reply</b> and send the completed .html file back to Kenzie / HR at Frenchie\'s Restaurant, 8 Elgin Ave. Payday is Sunday, 9:00 AM, paid at Frenchie\'s.</div>' +
     '</div>';
 }
 
@@ -12989,11 +12990,11 @@ function packetBody(a, kind, c) {
     ['Start date', c.hire],
     ['Probation', 'Seven days, ending ' + c.probationEnd],
     ['Reports to', c.supervisor],
-    ['Payday', 'Sunday, 9:00 AM, paid from the house']
+    ['Payday', 'Sunday, 9:00 AM, paid at Frenchie\'s']
   ]);
 
   if (kind === 'application') {
-    return '<p>Thank you for your interest in Frenchie\'s Restaurant, 8 Elgin Ave, Legion Square. This is the official employment application. Fields marked * are required. Complete every section, sign below, then select <b>Download reply</b> and return the completed .html file to Human Resources.</p>' +
+    return '<p>Thank you for your interest in Frenchie\'s Restaurant, 8 Elgin Ave, Legion Square. This is the official employment application. Fields marked * are required. Complete every section, sign below, then select <b>Download reply</b> and send the completed .html file back to Kenzie / HR.</p>' +
       '<h2>1. Applicant details</h2>' +
       '<div class="pk-grid">' + pkIn('Full legal name', 'fullName', c.name, 'text', true) + pkIn('Preferred name on the floor', 'preferredName', '') + '</div>' +
       '<div class="pk-grid">' + pkIn('Phone / contact', 'phone', c.phone, 'text', true) + pkIn('Date of birth (optional)', 'dob', '', 'date') + '</div>' +
@@ -13056,19 +13057,19 @@ function packetBody(a, kind, c) {
         'I am clear of recent felony convictions',
         'I carry no terrorism charge and no murder of a government employee on my record',
         'I understand every new hire serves a seven-day probation as a New Hire',
-        'I understand payday is Sunday at 9:00 AM, paid from the house'
+        'I understand payday is Sunday at 9:00 AM, paid at Frenchie\'s'
       ], true, true) +
       '<div class="note ooc">(( Eligibility: admin violation clear 14 days &middot; no felony convictions within 14 days &middot; terrorism or the murder of a government employee is a hard bar. ))</div>' +
       '<h2>Submit</h2>' +
-      pkChoice('submitted', 'I am ready to submit this application', 'Signs the form and prepares your completed reply for Human Resources.');
+      pkChoice('submitted', 'I am ready to submit this application', 'Signs the form and prepares your completed reply for HR.');
   }
 
   if (kind === 'invite') {
     const known = c.name && c.name !== 'Applicant' ? c.name : '';
     return '<p>Dear ' + esc(known || 'applicant') + ',</p>' +
-      '<p>Thank you for your application to Frenchie\'s Restaurant. Human Resources invites you to an interview at the address below.</p>' +
+      '<p>Thank you for your application to Frenchie\'s Restaurant. I\'d like to invite you to an interview at the address below.</p>' +
       pkIn('Your full name', 'fullName', known, 'text', true) +
-      '<p class="pk-hint">Enter your full name even if the greeting above is blank so Human Resources can file your reply correctly.</p>' +
+      '<p class="pk-hint">Enter your full name even if the greeting above is blank so HR can file your reply correctly.</p>' +
       pkTerms([
         ['Date', c.interviewDate ? fmtLong(c.interviewDate) : 'to be arranged'],
         ['Time', interviewTimeLine(c)],
@@ -13089,11 +13090,11 @@ function packetBody(a, kind, c) {
       pkBoxes('preferredSlots', ['Morning / lunch', 'Afternoon', 'Evening / dinner', 'Late / close', 'Flexible — any slot'], true) +
       pkWriteIn('preferredTime', 'Or write in exact time / slot') +
       pkTa('Anything we should know', 'note', 3) +
-      '<div class="note">If we have not received your reply within three business days, this application may be set aside. Select <b>Download reply</b> and return the completed .html file to Human Resources.</div>';
+      '<div class="note">If we have not received your reply within three business days, this application may be set aside. Select <b>Download reply</b> and send the completed .html file back to Kenzie / HR.</div>';
   }
 
   if (kind === 'interviewIc') {
-    return '<p>Frenchie\'s asks the same written questions of every candidate. Fields marked * are required. Answer in your own words, then select <b>Download reply</b> and return the completed .html file to Human Resources.</p>' +
+    return '<p>Frenchie\'s asks the same written questions of every candidate. Fields marked * are required. Answer in your own words, then select <b>Download reply</b> and send the completed .html file back to Kenzie / HR.</p>' +
       IC_QUESTIONS.map((q, i) => pkTa((i + 1) + '. ' + q, 'q' + (i + 1), 3, true)).join('') +
       '<h2>About the house</h2>' +
       pkRadios('Would you rather start on the floor, in the kitchen, or wherever we need you?', 'preferStation',
@@ -13103,7 +13104,7 @@ function packetBody(a, kind, c) {
         ['This week', 'Within two weeks', 'After a set date — note it below', 'Flexible'], true) +
       pkTa('If you need a set start date, write it here', 'startNote', 2) +
       '<h2>Your answer *</h2>' +
-      pkChoice('submitted', 'I have completed my answers', 'Downloads your completed reply for Human Resources.');
+      pkChoice('submitted', 'I have completed my answers', 'Downloads your completed reply for HR.');
   }
 
   if (kind === 'offer') {
@@ -13115,7 +13116,7 @@ function packetBody(a, kind, c) {
         ['Proposed start', c.hire],
         ['Probation', 'Seven days from start, ending ' + c.probationEnd],
         ['Reports to', c.supervisor],
-        ['Payday', 'Sunday, 9:00 AM, paid from the house']
+        ['Payday', 'Sunday, 9:00 AM, paid at Frenchie\'s']
       ]) +
       '<h2>What this offer means</h2>' +
       '<p>During probation you are shadowed on shift, trained on a station, and reviewed by HR at the end of the week. Pass and you move onto the ladder proper. Fall short and we part ways without prejudice.</p>' +
@@ -13123,10 +13124,10 @@ function packetBody(a, kind, c) {
       '<div class="note">This offer holds so long as your standing with the city remains in good order. Accept below and return this sheet; the Contract follows once you are on the books.</div>' +
       '<h2>Your answer *</h2>' +
       pkChoice('accept', 'I accept this offer', 'Your signature below stands as acceptance of the offer.') +
-      pkChoice('decline', 'I decline this offer', 'No hard feelings — Human Resources will close the file.') +
+      pkChoice('decline', 'I decline this offer', 'No hard feelings — HR will close the file.') +
       pkWriteIn('startPref', 'Preferred first shift date — write in if you have one') +
       pkTa('Anything to add', 'note', 3) +
-      '<p class="pk-hint">Select <b>Download reply</b> and return the completed .html file to Human Resources.</p>';
+      '<p class="pk-hint">Select <b>Download reply</b> and send the completed .html file back to Kenzie / HR.</p>';
   }
 
   if (kind === 'contract') {
@@ -13137,7 +13138,7 @@ function packetBody(a, kind, c) {
         ['Position', c.role],
         ['Rate', money(c.rate) + ' per hour on hours logged by HR'],
         ['Start date', c.hire],
-        ['Payday', 'Sunday, 9:00 AM, paid from the house']
+        ['Payday', 'Sunday, 9:00 AM, paid at Frenchie\'s']
       ]) +
       '<p>Hours are logged by HR through the week. If your hours look wrong, raise it before Sunday, not after.</p>' +
       '<h2>2. Probation</h2>' +
@@ -13166,9 +13167,9 @@ function packetBody(a, kind, c) {
       ], true, true) +
       '<h2>Your answer *</h2>' +
       pkChoice('accept', 'I accept these terms and enter into this contract', 'Your signature below binds you to the agreement.') +
-      pkChoice('decline', 'I decline these terms', 'Human Resources will close the hire file.') +
+      pkChoice('decline', 'I decline these terms', 'HR will close the hire file.') +
       pkTa('Anything to add on the record', 'note', 3) +
-      '<p class="pk-hint">Human Resources signs for the house above your signature block. Then sign, select <b>Download reply</b>, and return the completed .html file.</p>';
+      '<p class="pk-hint">HR signs for Frenchie\'s above your signature block. Then sign, select <b>Download reply</b>, and return the completed .html file.</p>';
   }
 
   if (kind === 'packet') {
@@ -13200,12 +13201,12 @@ function packetBody(a, kind, c) {
         ['10-99', 'emergency, all hands']
       ]) +
       '<h2>House notes for week one</h2>' +
-      '<p>Payday is Sunday at 9:00 AM, paid from the house. Raise hour problems before Sunday. The bar register\'s flat $1,000 is the guest counter price — not your wage.</p>' +
+      '<p>Payday is Sunday at 9:00 AM, paid at Frenchie\'s. Raise hour problems before Sunday. The bar register\'s flat $1,000 is the guest counter price — not your wage.</p>' +
       '<div class="note">Full handbook: ' + esc(handbookUrl()) + '</div>' +
       '<h2>Confirm *</h2>' +
       pkChoice('confirm', 'I have read the new-hire packet', 'Confirms you have the checklist, contacts, and radio codes for week one.') +
       pkTa('Questions for HR before or during week one', 'note', 3) +
-      '<p class="pk-hint">Select <b>Download reply</b> and return the completed .html file to Human Resources.</p>';
+      '<p class="pk-hint">Select <b>Download reply</b> and send the completed .html file back to Kenzie / HR.</p>';
   }
 
   if (kind === 'login') {
@@ -13213,36 +13214,36 @@ function packetBody(a, kind, c) {
     return '<p>Welcome, <b>' + esc(c.name || 'employee') + '</b>. This is your <b>Account login information</b> — the final hire document before desk access is granted.</p>' +
       pkTerms([
         ['Your username', user],
-        ['First sign-in PIN', housePinPaperValue() + (isStoredHash(housePassword()) ? '' : ' (house PIN)')],
+        ['First sign-in PIN', housePinPaperValue() + (isStoredHash(housePassword()) ? '' : ' (starter PIN)')],
         ['Then', 'Create your own personal PIN (6 or more digits) on first desk sign-in'],
         ['Your role', c.role],
-        ['Access starts', 'After Human Resources files this signed reply']
+        ['Access starts', 'After HR files this signed reply']
       ]) +
-      '<div class="note">Username is Firstname_Lastname from your name on file. First login uses the <b>house PIN</b> from HR (may be shared privately — not always printed), then you must create your own <b>6+ digit PIN</b> (ECRP). Desk stores PINs hashed. Keep PINs out of public Discord. Floor staff see stubs, shifts, and the handbook; management sees the full desk.</div>' +
+      '<div class="note">Username is Firstname_Lastname from your name on file. First login uses the <b>starter PIN</b> from HR (may be shared privately — not always printed), then you must create your own <b>6+ digit PIN</b> (ECRP). Desk stores PINs hashed. Keep PINs out of public Discord. Floor staff see stubs, shifts, and the handbook; management sees the full desk.</div>' +
       '<h2>Acknowledgements *</h2>' +
       '<p class="pk-hint">Tick every box before you sign:</p>' +
       pkBoxes('loginAck', [
-        'I received my username and know how to get the house PIN for first sign-in',
+        'I received my username and know how to get the starter PIN for first sign-in',
         'I will create my own 6+ digit PIN when the desk asks, and keep it private',
-        'I understand access starts only after Human Resources files this signed reply'
+        'I understand access starts only after HR files this signed reply'
       ], true, true) +
       '<h2>Your answer *</h2>' +
-      pkChoice('accept', 'I acknowledge these login details', 'Human Resources will file this reply and grant desk access.') +
+      pkChoice('accept', 'I acknowledge these login details', 'HR will file this reply and grant desk access.') +
       pkTa('Anything to add for HR', 'note', 3) +
-      '<p class="pk-hint">Select <b>Download reply</b> and return the completed .html file to Human Resources.</p>';
+      '<p class="pk-hint">Select <b>Download reply</b> and send the completed .html file back to Kenzie / HR.</p>';
   }
 
   if (kind === 'decline') {
     return '<p>Dear ' + esc(c.name || 'applicant') + ',</p>' +
       '<p>Thank you for applying to Frenchie\'s Restaurant, and for the time you gave us through the process.</p>' +
       '<p>After careful review of the applications on file, we will not be taking yours forward on this occasion. That is not a judgement of your character — the house has a limited number of stations and we fill them against the coverage required on the board.</p>' +
-      '<p>Your details remain on file with Human Resources. If our needs change, or if you would like to be considered again later, you are welcome to apply once more. If you would like a word about the decision, I am on 636.</p>' +
+      '<p>Your details remain on file with HR. If our needs change, or if you would like to be considered again later, you are welcome to apply once more. If you would like a word about the decision, I am on 636.</p>' +
       '<p>We wish you well, and you are always welcome at 8 Elgin Ave as a guest.</p>' +
       '<h2>Your answer *</h2>' +
       pkChoice('acknowledged', 'I have read this letter', 'Confirms receipt of this outcome.') +
       pkChoice('reapply', 'I may apply again later', 'Keeps the door open on the file.') +
       pkTa('Anything you would like on file', 'note', 3) +
-      '<p class="pk-hint">Select <b>Download reply</b> and return the completed .html file if you wish Human Resources to note your response.</p>';
+      '<p class="pk-hint">Select <b>Download reply</b> and send the completed .html file back if you want HR to note your response.</p>';
   }
 
   return '<p>Nothing to fill in.</p>';
@@ -13267,7 +13268,7 @@ function buildSendPacket(a, kind, packetId, opts) {
   const sheet = buildPacketSheet(a, kind, packetId, false);
   return `<!doctype html>
 <html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
-<title>Frenchie's — ${esc(def.title)} — ${esc(a.name)}</title>
+<title>Frenchie\'s — ${esc(def.title)} — ${esc(a.name)}</title>
 <style>${packetStylesCss()}</style></head>
 <body>
 ${sheet}
@@ -13439,7 +13440,7 @@ ${sheet}
     link.click();
     if (link.parentNode) link.parentNode.removeChild(link);
     setTimeout(function(){ URL.revokeObjectURL(url); }, 1500);
-    say('Completed reply downloaded — return this .html file to Human Resources.', 'ok');
+    say('Completed reply downloaded — send this .html file back to Kenzie / HR.', 'ok');
   };
 })();
 <\/script>
@@ -13506,7 +13507,7 @@ function formSummary(reply) {
   push('Takes direction (write-in)', f.takesDirectionOther);
   push('Radio comfort', f.radioComfort);
   push('Radio (write-in)', f.radioComfortOther);
-  push("Why Frenchie's", f.whyFrenchies);
+  push("Why Frenchie\'s", f.whyFrenchies);
   push('Extra notes', f.extraNotes);
   push('Reference 1', f.ref1);
   push('Reference 2', f.ref2);
@@ -15057,7 +15058,7 @@ function renderEmployeeFile(e) {
     else $('empDocHint').textContent = 'Desk access granted · ' + (e.loginUsername || loginUsernameFromName(e.name)) +
       (empHasOwnPassword(e)
         ? (empNeedsPinMigration(e) ? ' · legacy password — will force PIN on next login' : ' · personal PIN set')
-        : ' · first sign-in with house PIN, then create their own PIN');
+        : ' · first sign-in with starter PIN, then create their own PIN');
   }
   if ($('openHirePapersBtn')) {
     if (linkedApp) {
@@ -15201,15 +15202,15 @@ function buildSundayRunText(p) {
   if (!p) return 'No period selected.';
   const unpaid = unpaidPayable(p);
   const lines = [];
-  lines.push("Frenchie's Sunday pay run");
+  lines.push("Frenchie\'s Sunday pay run");
   lines.push(label(p) + ' · ' + String(p.status).toUpperCase());
   lines.push('Tip pool: ' + money(p.tipPool || 0) + ' (Waiter / Hostess / Cook with hours)');
-  lines.push('Payday: Sunday 9:00 AM from the house');
+  lines.push('Payday: Sunday 9:00 AM at Frenchie\'s');
   lines.push('');
   if (!unpaid.length) {
-    lines.push('All payable stubs marked paid. Nothing left in the unpaid queue.');
+    lines.push('Everyone payable is marked paid. Queue is clear.');
   } else {
-    lines.push('Unpaid queue (' + unpaid.length + '):');
+    lines.push('Still need to pay (' + unpaid.length + '):');
     unpaid.forEach(e => {
       const x = entry(p, e.id);
       lines.push('• ' + e.name + ' — ' + e.role + ' — ' + dec(x.hours) + 'h — ' + money(lineGross(e, x)));
@@ -15302,16 +15303,16 @@ function sundayRunDiscordCard(p) {
   const unpaid = unpaidPayable(p);
   let description;
   if (!unpaid.length) {
-    description = 'All payable stubs marked **paid**. Nothing left in the unpaid queue.';
+    description = 'Everyone payable is marked **paid**. Queue is clear.';
   } else {
-    description = '**Unpaid queue (' + unpaid.length + ')**\n' + unpaid.map(e => {
+    description = '**Still need to pay (' + unpaid.length + ')**\n' + unpaid.map(e => {
       const x = entry(p, e.id);
       return '• **' + e.name + '** — ' + e.role + ' — ' + dec(x.hours) + 'h — ' + money(lineGross(e, x));
     }).join('\n');
   }
   const clockPairs = countUnappliedClockPairs(openPeriodClockWindow(p));
   return discordCard('payroll', {
-    title: 'Sunday pay run',
+    title: 'Sunday pay run · Frenchie\'s',
     description,
     fields: [
       discordField('Period', label(p), true),
@@ -15319,7 +15320,7 @@ function sundayRunDiscordCard(p) {
       discordField('Tip pool', money(p.tipPool || 0), true),
       discordField('Still owed', money(owedGrossOf(p)), true),
       discordField('Clock backlog', clockPairs ? (clockPairs + ' unapplied pair(s)') : 'Clear', true),
-      discordField('Payday', 'Sunday 9:00 AM from the house', false)
+      discordField('Payday', 'Sunday 9:00 AM at Frenchie\'s', false)
     ]
   });
 }
@@ -15332,11 +15333,11 @@ function postSundayRunDiscord() {
 
 function paydayAnnouncementCard(p) {
   p = p || current() || workingPeriod();
-  if (!p) return discordCard('announcements', { title: 'Payday', description: 'No open period on the desk.' });
+  if (!p) return discordCard('announcements', { title: 'Payday', description: 'No open period on the desk yet — I\'ll post when we\'re ready.' });
   const unpaid = unpaidCount(p);
   return discordCard('announcements', {
-    title: 'Sunday payday — house open at 9:00 AM',
-    description: 'Pay from the house for **' + label(p) + '**. Bring questions on hours before the run.',
+    title: 'Sunday payday — 9:00 AM at Frenchie\'s',
+    description: 'Hey team — payday is Sunday at **9:00 AM** for **' + label(p) + '**. Come by Frenchie\'s (8 Elgin Ave). If your hours look off, tell me before we run pay.\n\n— Kenzie',
     fields: [
       discordField('Period', shortLabel(p), true),
       discordField('Tip pool', money(p.tipPool || 0), true),
@@ -16029,7 +16030,7 @@ $('downloadCsv').onclick = () => {
 
 $('copyPayLog').onclick = () => {
   if (!s.payLog.length) return toast('Pay log is empty');
-  const text = "Frenchie's — Sunday pay log\n" +
+  const text = "Frenchie\'s — Sunday pay log\n" +
     s.payLog.map(r => r.date + ' · ' + r.employee + ' · ' + r.period + ' · ' + money(r.amount) + ' · ' + r.method).join('\n');
   copyText(text, 'Pay log copied');
 };
@@ -16427,11 +16428,11 @@ if ($('resetEmpPasswordBtn')) $('resetEmpPasswordBtn').onclick = () => {
   const e = empById(editId);
   if (!e) return toast('Save the file first');
   if (!empHasOwnPassword(e)) return toast('No personal PIN on file yet');
-  if (!confirm('Reset desk PIN for ' + e.name + '? They must sign in with the house PIN and create a new personal PIN.')) return;
+  if (!confirm('Reset desk PIN for ' + e.name + '? They must sign in with the starter PIN and create a new personal PIN.')) return;
   resetEmpLoginPassword(e, 'Reset by ' + ((sessionUser && sessionUser.name) || 'HR'));
   save();
   renderEmployeeFile(e);
-  toast('PIN reset · ' + e.name + ' uses house PIN next');
+  toast('PIN reset · ' + e.name + ' uses starter PIN next');
 };
 
 if ($('sendEmpLogin')) $('sendEmpLogin').onclick = () => {
@@ -16491,7 +16492,7 @@ $('confirmHrSign').onclick = () => {
   if (!hrSignPending) return;
   const name = ($('hrSignName').value || '').trim();
   const date = $('hrSignDate').value;
-  if (!name) return toast('Sign your name for the house');
+  if (!name) return toast('Sign your name for Frenchie\'s');
   if (!date) return toast('Add the date you signed');
   const houseSign = { name, date };
   const a = hrSignPending.a;
@@ -17737,13 +17738,13 @@ document.querySelectorAll('#view-hiring details.fold').forEach(fold => {
    ROADMAP v18–v25 FEATURES (full implementations)
 ===================================================== */
 const HANDBOOK_EXCERPTS = [
-  { id: 'payday', title: 'Payday', tags: 'pay sunday cash tips', body: 'Payday is Sunday at 9:00 AM from the house. Confirm hours and tip pool before the run. Mark stubs paid after cash is handed out.' },
+  { id: 'payday', title: 'Payday', tags: 'pay sunday cash tips', body: 'Payday is Sunday at 9:00 AM at Frenchie\'s. Confirm hours and tip pool before the run. Mark stubs paid after cash is handed out.' },
   { id: 'tips', title: 'Tip pool', tags: 'tips bar floor host cook equal hours', body: 'Tip-eligible roles share the pool. Split is equal share or weighted by hours (Settings). Paid stubs lock their tip line; unpaid lines recompute when the pool changes.' },
   { id: 'hours', title: 'Hours & disputes', tags: 'hours radio clock dispute', body: 'Staff log 10-1/10-2 on the clock. Leads use Apply since payday to push pairs into the open period, then fix stragglers in Set hours. If your hours look wrong, file an Hours dispute from the account menu — do not edit the payroll yourself.' },
   { id: 'calloff', title: 'Call-offs', tags: 'call-off time-off sick', body: 'Same-day or next-shift absences are Call-offs. Future ranges are Time-off. Submit from the account menu; leads approve and mark the shift board Off.' },
-  { id: 'uniform', title: 'Uniform & assets', tags: 'uniform assets equipment', body: 'Uniforms and house assets are listed on your personnel file. Return items when leaving or on request. Termination checklist includes outstanding assets.' },
+  { id: 'uniform', title: 'Uniform & assets', tags: 'uniform assets equipment', body: 'Uniforms and company assets are listed on your personnel file. Return items when leaving or on request. Termination checklist includes outstanding assets.' },
   { id: 'shifts', title: 'Shifts & Host', tags: 'shifts host station coverage', body: 'The shift board uses Bar, Kitchen, Floor, Host, or Off. Staff set availability on their file; leads edit the board. Coverage gaps flag empty days.' },
-  { id: 'login', title: 'Desk login', tags: 'login pin password stay ecrp', body: 'House PIN first, then your personal 6+ digit PIN (ECRP). Owner may use a master password. Stay logged in keeps you signed in on this device until expiry or Sign out. Never share PINs in public Discord.' },
+  { id: 'login', title: 'Desk login', tags: 'login pin password stay ecrp', body: 'Starter PIN first, then your personal 6+ digit PIN (ECRP). Owner may use a master password. Stay logged in keeps you signed in on this device until expiry or Sign out. Never share PINs in public Discord.' },
   { id: 'conduct', title: 'Floor conduct', tags: 'radio respect guests', body: 'Stay professional on radio and Discord. Log serious issues with Relations. Commendations and warnings live on the personnel file.' }
 ];
 
@@ -18246,8 +18247,8 @@ function coverageDiscordCard(e, t) {
   const days = coverageDiscordDays(e, t);
   if (!days.length) return null;
   return discordCard('coverage', {
-    title: 'NEED COVERAGE',
-    description: '**' + e.name + '** (' + e.role + ') call-off approved.\nReply in this channel if you can cover.',
+    title: 'Need coverage · Frenchie\'s',
+    description: '**' + e.name + '** (' + e.role + ') is off — looking for cover.\nReply here if you can take a shift.\n\n— Kenzie',
     fields: [
       discordField('Days open', days.join('\n'), false),
       discordField('Reason', t.reason || '—', false)
@@ -18842,8 +18843,8 @@ function openInterviewBoard() {
 function interviewReminderCard(a) {
   if (!a) return null;
   return discordCard('hiring', {
-    title: 'Interview reminder',
-    description: 'Reply in this channel if you need to reschedule.',
+    title: 'Interview reminder · ' + (a.name || 'Applicant'),
+    description: 'Friendly nudge — interview is coming up. Reply here if you need to reschedule.\n\n— Kenzie',
     fields: [
       discordField('Applicant', a.name, true),
       discordField('Role', a.offerRole || 'New Hire', true),
@@ -18920,7 +18921,7 @@ window.setInterviewOutcome = function (id, outcome) {
     openInterviewBoard();
     postDiscord('hiring', discordCard('hiring', {
       title: 'Interview complete · ' + a.name,
-      description: '**Interview — step complete**\n\nThe interview has been marked complete. This hiring step is finished; Human Resources may proceed toward an offer.',
+      description: 'Interview is done on our side. Next up is usually the offer — I\'ll follow up.\n\n— Kenzie',
       fields: [
         discordField('Applicant', a.name, true),
         discordField('Role', a.offerRole || 'New Hire', true),
@@ -18993,7 +18994,7 @@ function openTipSettlement() {
   const tipJarLegacy = tipJarCollectedTotal(filteredIncomes({ win: tipJarWin, kind: 'tips', q: '' }));
   root.innerHTML =
     '<p class="ui-hint">Period <b>' + esc(label(data.p)) + '</b> · Period tip pool <b>' + money(data.pool) + '</b> · Split <b>' + esc(data.mode) + '</b>' +
-    (tipJarLegacy > 0 ? ' · Legacy tip rows <b>' + money(tipJarLegacy) + '</b> (not house income)' : '') +
+    (tipJarLegacy > 0 ? ' · Legacy tip rows <b>' + money(tipJarLegacy) + '</b> (not company income)' : '') +
     (staffView ? ' · your line only' : '') +
     '. Staff keep 100% of their tips; the pool is only what HR entered for this period.</p>' +
     '<div class="table-scroll"><table><thead><tr><th>Staff</th><th class="r">Hours</th><th class="r">Tips</th><th class="r">Wage</th><th class="r">Bonus</th><th class="r">Gross</th><th>Paid</th></tr></thead><tbody>' +
@@ -19039,11 +19040,11 @@ function tipSettlementDiscordCard() {
     discordField('Period tip pool', money(data.pool), true),
     discordField('Split', data.mode, true)
   ];
-  if (tipJarLegacyD > 0) fields.push(discordField('Legacy tip rows', money(tipJarLegacyD) + ' (not house)', true));
+  if (tipJarLegacyD > 0) fields.push(discordField('Legacy tip rows', money(tipJarLegacyD) + ' (not company income)', true));
   if (data.excluded.length) fields.push(discordField('Excluded', data.excluded.join(', '), false));
   return discordCard('payroll', {
-    title: 'Sunday tip settlement',
-    description: body,
+    title: 'Sunday tip settlement · Frenchie\'s',
+    description: body + '\n\nStaff keep 100% of tips. — Kenzie',
     fields
   });
 }
