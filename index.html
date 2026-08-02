@@ -2589,7 +2589,7 @@ body.session-staff #pullSharedBtn{display:none!important}
         <button type="button" class="top-account-item danger" id="logoutBtn" role="menuitem">Sign out</button>
         <button type="button" class="top-account-item" id="logoutAllBtn" role="menuitem">Sign out all remembered</button>
         <div class="top-account-foot">
-          <span class="build-chip" id="deskBuildChip" title="Desk build">v52</span>
+          <span class="build-chip" id="deskBuildChip" title="Desk build">v53</span>
           <label class="top-jump-label" for="quickJump">Jump to</label>
           <select class="top-jump" id="quickJump" title="Jump to any tab">
             <option value="overview">Overview</option>
@@ -2626,7 +2626,7 @@ body.session-staff #pullSharedBtn{display:none!important}
           <span class="ov-sep" aria-hidden="true">·</span>
           <span id="ovPeriodStatus">Open</span>
           <span class="ov-sep" aria-hidden="true">·</span>
-          <span>Payday Sunday midnight</span>
+          <span data-payday-label="1">Payday: Sunday, 12:00 AM (midnight)</span>
         </p>
         <div class="ov-glance" id="heroGlance" aria-live="polite"></div>
       </div>
@@ -3430,7 +3430,7 @@ body.session-staff #pullSharedBtn{display:none!important}
       <button class="btn" id="importJson">Import JSON</button>
     </div></div>
   </div>
-  <div class="card mgmt-only" style="margin-top:12px" data-mgmt-only><div class="card-head"><b>Live office</b><span class="pill gray" id="sharedDeskBuildPill">v52</span></div>
+  <div class="card mgmt-only" style="margin-top:12px" data-mgmt-only><div class="card-head"><b>Live office</b><span class="pill gray" id="sharedDeskBuildPill">v53</span></div>
     <div class="card-body">
       <p class="ui-hint"><b>Automatic:</b> Every save quietly updates other open desks. No Share button — just work. Staff stay signed in. Personal PINs and Discord channel links stay private on each browser. Owner connects cloud office under Settings.</p>
       <div class="field" data-owner-only><label>Host file link (recovery fallback — Owner only)</label><input id="sharedDeskUrlSetting" placeholder="https://yourdomain/…/frenchies-shared-desk.json"></div>
@@ -4343,7 +4343,7 @@ const LOG_TYPES = {
 };
 const TIP_ROLES_DEFAULT = ['Waiter', 'Hostess', 'Cook'];
 const TIP_ROLES = TIP_ROLES_DEFAULT; /* legacy alias — use tipRoles() */
-const DESK_BUILD = 'v52';
+const DESK_BUILD = 'v53';
 /** ECRP: house first-sign-in secret is a 6+ digit PIN (override in Settings). Stored hashed after first use/set. */
 const HOUSE_LOGIN_PIN = '86368636';
 const HOUSE_LOGIN_PASSWORD = HOUSE_LOGIN_PIN; /* legacy alias — prefer settings.housePassword */
@@ -5073,9 +5073,12 @@ function ensureMeta() {
   if (!s.settings || typeof s.settings !== 'object') s.settings = {};
   const set = s.settings;
   if (!set.paydayLabel) set.paydayLabel = 'Sunday, 12:00 AM (midnight)';
-  /* Migrate old default payday time → Sunday midnight */
-  if (/^Sunday,?\s*9:00\s*AM$/i.test(String(set.paydayLabel || '').trim())) {
-    set.paydayLabel = 'Sunday, 12:00 AM (midnight)';
+  /* Migrate old 9:00 AM payday defaults → Sunday midnight */
+  {
+    const pl = String(set.paydayLabel || '').trim();
+    if (/9:00\s*AM/i.test(pl) && /sunday/i.test(pl)) {
+      set.paydayLabel = 'Sunday, 12:00 AM (midnight)';
+    }
   }
   if (!set.tipMode || !['equal','hours'].includes(set.tipMode)) set.tipMode = 'equal';
   if (!Array.isArray(set.tipRoles) || !set.tipRoles.length) set.tipRoles = TIP_ROLES_DEFAULT.slice();
@@ -5096,15 +5099,19 @@ function applyUiSettings() {
   document.body.classList.toggle('quiet-mode', !!s.settings.quietMode);
   document.body.classList.toggle('print-dense', !!s.settings.quietMode);
   document.body.classList.toggle('compact-todos', !!s.settings.compactTodos || !!window.__todoCompact);
+  const paydayText = 'Payday: ' + (s.settings.paydayLabel || 'Sunday, 12:00 AM (midnight)');
+  document.querySelectorAll('[data-payday-label]').forEach(el => {
+    if (el && el.id !== 'saveBadge') el.textContent = paydayText;
+  });
+  /* Legacy account-menu payday block without the attribute */
   const payday = document.querySelector('.payday');
-  if (payday) {
-    let label = payday.querySelector('[data-payday-label]');
-    if (!label) {
-      const spans = payday.querySelectorAll('span');
-      label = spans[spans.length - 1];
-      if (label && label.id !== 'saveBadge') label.setAttribute('data-payday-label', '1');
+  if (payday && !payday.querySelector('[data-payday-label]')) {
+    const spans = payday.querySelectorAll('span');
+    const label = spans[spans.length - 1];
+    if (label && label.id !== 'saveBadge') {
+      label.setAttribute('data-payday-label', '1');
+      label.textContent = paydayText;
     }
-    if (label && label.id !== 'saveBadge') label.textContent = 'Payday: ' + (s.settings.paydayLabel || 'Sunday, 12:00 AM (midnight)');
   }
 }
 
@@ -8335,6 +8342,7 @@ function openChangelog() {
   const grid = $('upgradeGrid');
   if (grid) {
     const recent = [
+      ['v53', 'Overview payday label wired to Settings · force-migrate leftover Sunday 9:00 AM → midnight'],
       ['v52', 'Payday moved to Sunday 12:00 AM (midnight) at Frenchie\'s'],
       ['v51', 'Human voice pass — Frenchie\'s / company wording · Kenzie Discord announcements & hire posts · starter PIN'],
       ['v50', 'Auto live office — every save quietly updates other desks · Share button removed · catch-up if another desk is ahead'],
