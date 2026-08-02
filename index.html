@@ -2559,7 +2559,7 @@ body.session-staff #pullSharedBtn{display:none!important}
     <div class="top-status" aria-label="Desk status">
       <span id="saveBadge" class="top-save rel" title="Autosave status">Saved</span>
       <span class="top-status-sep" aria-hidden="true"></span>
-      <span class="sync-chip live" id="syncChip" title="Listening for shared desk updates">Live</span>
+      <span class="sync-chip live" id="syncChip" title="Office file is live across open desks">Live</span>
     </div>
     <button type="button" class="top-iconbtn" id="openCmdBtn" title="Search desk (Ctrl+K)" aria-label="Search desk">
       <svg width="16" height="16" viewBox="0 0 24 24" fill="none" aria-hidden="true"><circle cx="11" cy="11" r="6.5" stroke="currentColor" stroke-width="1.8"/><path d="M16.5 16.5L21 21" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"/></svg>
@@ -2583,13 +2583,13 @@ body.session-staff #pullSharedBtn{display:none!important}
         <button type="button" class="top-account-item" id="hoursDisputeBtn" role="menuitem">Hours dispute</button>
         <button type="button" class="top-account-item" id="callOffBtn" role="menuitem">Call-off / time-off</button>
         <button type="button" class="top-account-item" id="syncNowBtn" role="menuitem">Refresh this browser</button>
-        <button type="button" class="top-account-item" id="pullSharedBtn" role="menuitem">Pull shared desk</button>
+        <button type="button" class="top-account-item" id="pullSharedBtn" role="menuitem">Load shared office</button>
         <button type="button" class="top-account-item" id="openSettingsBtn" role="menuitem" data-mgmt-only>Settings</button>
         <button type="button" class="top-account-item" id="helpShortcuts" role="menuitem" aria-haspopup="dialog" aria-controls="shortcutSheet">Keyboard shortcuts</button>
         <button type="button" class="top-account-item danger" id="logoutBtn" role="menuitem">Sign out</button>
         <button type="button" class="top-account-item" id="logoutAllBtn" role="menuitem">Sign out all remembered</button>
         <div class="top-account-foot">
-          <span class="build-chip" id="deskBuildChip" title="Desk build">v48</span>
+          <span class="build-chip" id="deskBuildChip" title="Desk build">v49</span>
           <label class="top-jump-label" for="quickJump">Jump to</label>
           <select class="top-jump" id="quickJump" title="Jump to any tab">
             <option value="overview">Overview</option>
@@ -3088,9 +3088,9 @@ body.session-staff #pullSharedBtn{display:none!important}
 <!-- INCOME -->
 <section class="view" id="view-income" role="region" aria-labelledby="title-income" tabindex="-1">
   <div class="header">
-      <div><div class="eyebrow">Office</div><h1 class="title" id="title-income">Income</h1><div class="subtitle">House cash-in from registers, events, deposits, and rebates. Staff keep 100% of tips. Discord <b>/register</b> auto-pulls here.</div></div>
+      <div><div class="eyebrow">Office</div><h1 class="title" id="title-income">Income</h1><div class="subtitle">House cash-in from registers, events, deposits, and rebates. Staff keep 100% of tips. Player <b>/register</b> drops from Discord land here.</div></div>
     <div class="actions header-actions-primary">
-      <button class="btn soft" id="pullSupabaseIncome" type="button">Pull from Supabase</button>
+      <button class="btn soft" id="pullSupabaseIncome" type="button">Pull from Discord</button>
       <button class="btn primary" id="addIncome" type="button">Log income</button>
       <details class="fold quiet header-more" style="margin:0;border:0;background:transparent">
         <summary class="btn soft" style="list-style:none;cursor:pointer">More</summary>
@@ -3098,16 +3098,16 @@ body.session-staff #pullSharedBtn{display:none!important}
           <button class="btn soft" id="csvIncomes" type="button">Export CSV</button>
           <button class="btn soft" id="pdfIncomes" type="button">Print week sheet</button>
           <button class="btn soft" id="postIncomeWeekDiscord" type="button">Post week to Discord</button>
-          <button class="btn soft" id="importDiscordIncome" type="button">Import Discord lines</button>
-          <button class="btn soft" id="copyRegisterTemplate" type="button">Copy register template</button>
+          <button class="btn soft" id="importDiscordIncome" type="button">Paste Discord lines</button>
+          <button class="btn soft" id="copyRegisterTemplate" type="button">Copy /register guide</button>
         </div>
       </details>
     </div>
   </div>
-  <p class="ui-hint" id="incSupabaseHint" style="margin:0 0 10px">Supabase income feed — set URL + anon key in Settings. Players use Discord <code>/register</code>. Staff keep 100% of tips (not house income).</p>
+  <p class="ui-hint" id="incSupabaseHint" style="margin:0 0 10px">Discord income feed is not connected yet — Owner sets it up under Settings. Players use <code>/register</code> in Discord. Staff keep 100% of tips (not house income).</p>
   <div class="toolbar" style="margin:0 0 10px;gap:8px;align-items:center;flex-wrap:wrap">
-    <span class="pill gray" id="incSupabaseChip">Supabase · off</span>
-    <span class="mini-note" id="incSupabaseStatus">Not configured</span>
+    <span class="pill gray" id="incSupabaseChip">Discord · off</span>
+    <span class="mini-note" id="incSupabaseStatus">Not connected</span>
   </div>
   <div class="metrics metrics-five" id="incomeWeekStrip">
     <div class="metric"><label>House in</label><strong id="incHouseIn">$0</strong><span id="incWeekLabel">Selected week</span></div>
@@ -3430,17 +3430,17 @@ body.session-staff #pullSharedBtn{display:none!important}
       <button class="btn" id="importJson">Import JSON</button>
     </div></div>
   </div>
-  <div class="card mgmt-only" style="margin-top:12px" data-mgmt-only><div class="card-head"><b>Shared desk sync</b><span class="pill gray" id="sharedDeskBuildPill">v48</span></div>
+  <div class="card mgmt-only" style="margin-top:12px" data-mgmt-only><div class="card-head"><b>Share with other desks</b><span class="pill gray" id="sharedDeskBuildPill">v49</span></div>
     <div class="card-body">
-      <p class="ui-hint"><b>Live:</b> After you Publish, open desks update themselves (staff just stay signed in). Packs keep local PINs + Discord webhooks private; Supabase URL + anon ride along so others can listen.</p>
-      <div class="field" data-owner-only><label>Shared raw URL (Tiiny fallback — Owner only)</label><input id="sharedDeskUrlSetting" placeholder="https://yourdomain/…/frenchies-shared-desk.json"></div>
-      <div class="mini-note" id="sharedDeskLiveStatus" style="margin:8px 0">No publish yet this session.</div>
+      <p class="ui-hint"><b>Live office:</b> After you share an update, other open desks refresh on their own. Staff just stay signed in. Personal PINs and Discord channel links stay private on each browser.</p>
+      <div class="field" data-owner-only><label>Host file link (fallback — Owner only)</label><input id="sharedDeskUrlSetting" placeholder="https://yourdomain/…/frenchies-shared-desk.json"></div>
+      <div class="mini-note" id="sharedDeskLiveStatus" style="margin:8px 0">No office share yet this session.</div>
       <div id="sharedPublishChecklist" class="roadmap-panel" style="display:none;margin:10px 0"></div>
       <div class="actions" style="margin-top:10px">
-        <button type="button" class="btn primary" id="publishSharedBtn">Publish shared desk</button>
-        <button type="button" class="btn soft" id="downloadSharedPackBtn">Download pack only</button>
-        <button type="button" class="btn soft" id="probeSharedAheadBtn">Check if shared ahead</button>
-        <button type="button" class="btn soft" id="pullSharedFromBackupBtn">Pull shared desk…</button>
+        <button type="button" class="btn primary" id="publishSharedBtn">Share with other desks</button>
+        <button type="button" class="btn soft" id="downloadSharedPackBtn">Download office copy</button>
+        <button type="button" class="btn soft" id="probeSharedAheadBtn">Check for newer office</button>
+        <button type="button" class="btn soft" id="pullSharedFromBackupBtn">Load shared office…</button>
       </div>
     </div>
   </div>
@@ -3827,13 +3827,13 @@ body.session-staff #pullSharedBtn{display:none!important}
 
 <!-- Shared desk pull modal -->
 <div class="modal" id="sharedPullModal" role="dialog" aria-modal="true" hidden><div class="dialog" role="document" tabindex="-1">
-  <h2>Pull shared desk</h2>
+  <h2>Load shared office</h2>
   <div class="dialog-scroll">
-    <p class="ui-hint">Paste a shared desk JSON pack or fetch your domain raw URL. A snapshot is taken first. Personal PINs from this browser are kept when the pack is redacted. On a rev clash you choose Keep mine or Take theirs.</p>
-    <div class="field"><label>Raw URL (optional)</label><input id="sharedUrl" placeholder="https://…/frenchies-shared-desk.json"></div>
-    <div class="field"><label>Or paste JSON</label><textarea id="sharedPaste" rows="8" placeholder="{ … }"></textarea></div>
+    <p class="ui-hint">Paste a shared office file or fetch your host file link. A safety snapshot is taken first. Personal PINs on this browser stay put. If versions clash, choose Keep mine or Take theirs.</p>
+    <div class="field"><label>Host file link (optional)</label><input id="sharedUrl" placeholder="https://…/frenchies-shared-desk.json"></div>
+    <div class="field"><label>Or paste office JSON</label><textarea id="sharedPaste" rows="8" placeholder="{ … }"></textarea></div>
     <div id="sharedConflictBox" class="roadmap-panel" style="display:none">
-      <h3>Conflict</h3>
+      <h3>Version clash</h3>
       <p class="ui-hint" id="sharedConflictText"></p>
       <div class="actions">
         <button type="button" class="btn soft" id="sharedKeepMine">Keep mine</button>
@@ -3841,7 +3841,7 @@ body.session-staff #pullSharedBtn{display:none!important}
       </div>
     </div>
   </div>
-  <div class="dialog-foot"><button class="btn" id="cancelSharedPull">Cancel</button><button class="btn primary" id="confirmSharedPull">Compare &amp; pull</button></div>
+  <div class="dialog-foot"><button class="btn" id="cancelSharedPull">Cancel</button><button class="btn primary" id="confirmSharedPull">Compare &amp; load</button></div>
 </div></div>
 
 <!-- Handbook hub modal -->
@@ -3972,7 +3972,7 @@ body.session-staff #pullSharedBtn{display:none!important}
 
 <!-- Import Discord register lines -->
 <div class="modal" id="importIncomeModal" role="dialog" aria-modal="true" aria-labelledby="importIncomeTitle" hidden><div class="dialog wide" role="document" tabindex="-1">
-  <h2 id="importIncomeTitle">Import Discord lines</h2>
+  <h2 id="importIncomeTitle">Paste Discord lines</h2>
   <div class="dialog-scroll">
     <p class="ui-hint">Paste lines from <b>#register-sales</b>. Preferred format:<br>
     <code>REGISTER | 2026-08-01 | Bar | 1000 | Food &amp; drinks till drop | @Alex</code></p>
@@ -4262,21 +4262,21 @@ body.session-staff #pullSharedBtn{display:none!important}
     <div class="field"><label>High-hours warning threshold</label><input id="setOtHours" type="number" min="1" step="0.5" value="40"></div>
     <p class="ui-hint" style="margin:-6px 0 10px">Period tip pool is only what HR enters for Sunday settlement. Staff keep 100% of tips they earn — not house income.</p>
     <div data-owner-only>
-      <h3 style="margin:16px 0 8px;font:700 .72rem 'DM Sans',sans-serif;letter-spacing:.08em;text-transform:uppercase;color:var(--muted)">Discord webhooks (Owner)</h3>
-      <p class="ui-hint" style="margin:0 0 10px">Owner only. Paste Incoming Webhook URLs from Discord. Not shared in Publish packs — stay on this browser.</p>
-      <div class="field"><label>Payroll webhook</label><input id="setWhPayroll" placeholder="https://discord.com/api/webhooks/…" autocomplete="off"></div>
-      <div class="field"><label>Hiring webhook</label><input id="setWhHiring" placeholder="https://discord.com/api/webhooks/…" autocomplete="off"></div>
-      <div class="field"><label>Coverage / call-offs webhook</label><input id="setWhCoverage" placeholder="https://discord.com/api/webhooks/…" autocomplete="off"></div>
-      <div class="field"><label>HR desk log webhook</label><input id="setWhHrLog" placeholder="https://discord.com/api/webhooks/…" autocomplete="off"></div>
-      <div class="field"><label>Announcements webhook</label><input id="setWhAnnounce" placeholder="https://discord.com/api/webhooks/…" autocomplete="off"></div>
-      <div class="field"><label>Income reports webhook (#hr-income-reports)</label><input id="setWhIncomeReports" placeholder="https://discord.com/api/webhooks/…" autocomplete="off"></div>
-      <h3 style="margin:16px 0 8px;font:700 .72rem 'DM Sans',sans-serif;letter-spacing:.08em;text-transform:uppercase;color:var(--muted)">Supabase / live desk (Owner)</h3>
-      <p class="ui-hint" style="margin:0 0 10px">Owner only. URL + anon key ride along in shared packs so staff can live-listen without opening Settings. Discord webhooks stay local. Tiiny raw URL is under Backup.</p>
-      <div class="field"><label>Supabase URL</label><input id="setSupabaseUrl" placeholder="https://xxxx.supabase.co" autocomplete="off"></div>
-      <div class="field"><label>Supabase anon key</label><input id="setSupabaseAnon" placeholder="eyJ…" autocomplete="off"></div>
-      <label class="checkline"><input type="checkbox" id="setRegisterAutoPull" checked><span>Auto-pull register sales on login / focus / Income tab</span></label>
-      <label class="checkline"><input type="checkbox" id="setSharedPreferSupabase" checked><span>Prefer Supabase for shared desk Publish / live listen (fallback to Tiiny URL)</span></label>
-      <label class="checkline"><input type="checkbox" id="setSharedAutoPull"><span>Backup auto-pull on login / tab focus if live wire is down (mgmt)</span></label>
+      <h3 style="margin:16px 0 8px;font:700 .72rem 'DM Sans',sans-serif;letter-spacing:.08em;text-transform:uppercase;color:var(--muted)">Discord channel links (Owner)</h3>
+      <p class="ui-hint" style="margin:0 0 10px">Owner only. Paste each Discord channel post link (from Discord Server Settings → Integrations → Webhooks). These stay on this browser — not shared with other desks.</p>
+      <div class="field"><label>Payroll channel</label><input id="setWhPayroll" placeholder="https://discord.com/api/webhooks/…" autocomplete="off"></div>
+      <div class="field"><label>Hiring channel</label><input id="setWhHiring" placeholder="https://discord.com/api/webhooks/…" autocomplete="off"></div>
+      <div class="field"><label>Coverage / call-offs channel</label><input id="setWhCoverage" placeholder="https://discord.com/api/webhooks/…" autocomplete="off"></div>
+      <div class="field"><label>HR desk log channel</label><input id="setWhHrLog" placeholder="https://discord.com/api/webhooks/…" autocomplete="off"></div>
+      <div class="field"><label>Announcements channel</label><input id="setWhAnnounce" placeholder="https://discord.com/api/webhooks/…" autocomplete="off"></div>
+      <div class="field"><label>Income reports channel (#hr-income-reports)</label><input id="setWhIncomeReports" placeholder="https://discord.com/api/webhooks/…" autocomplete="off"></div>
+      <h3 style="margin:16px 0 8px;font:700 .72rem 'DM Sans',sans-serif;letter-spacing:.08em;text-transform:uppercase;color:var(--muted)">Cloud office (Owner)</h3>
+      <p class="ui-hint" style="margin:0 0 10px">Owner only. Connects Discord income and live desk updates. The office URL + access key travel with shared office files so staff can listen without opening Settings. Channel links stay local. Host file link is under Backup.</p>
+      <div class="field"><label>Cloud office URL</label><input id="setSupabaseUrl" placeholder="https://xxxx.supabase.co" autocomplete="off"></div>
+      <div class="field"><label>Cloud access key</label><input id="setSupabaseAnon" placeholder="eyJ…" autocomplete="off"></div>
+      <label class="checkline"><input type="checkbox" id="setRegisterAutoPull" checked><span>Auto-check Discord income on login / focus / Income tab</span></label>
+      <label class="checkline"><input type="checkbox" id="setSharedPreferSupabase" checked><span>Use cloud office for live desk updates (fallback: host file link)</span></label>
+      <label class="checkline"><input type="checkbox" id="setSharedAutoPull"><span>If live updates fail, check for office updates on login (mgmt)</span></label>
     </div>
     <h3 style="margin:16px 0 8px;font:700 .72rem 'DM Sans',sans-serif;letter-spacing:.08em;text-transform:uppercase;color:var(--muted)">Desk prefs</h3>
     <label class="checkline"><input type="checkbox" id="setQuietMode"><span>Quiet mode (less motion / hover)</span></label>
@@ -4344,7 +4344,7 @@ const LOG_TYPES = {
 };
 const TIP_ROLES_DEFAULT = ['Waiter', 'Hostess', 'Cook'];
 const TIP_ROLES = TIP_ROLES_DEFAULT; /* legacy alias — use tipRoles() */
-const DESK_BUILD = 'v48';
+const DESK_BUILD = 'v49';
 /** ECRP: house first-sign-in secret is a 6+ digit PIN (override in Settings). Stored hashed after first use/set. */
 const HOUSE_LOGIN_PIN = '86368636';
 const HOUSE_LOGIN_PASSWORD = HOUSE_LOGIN_PIN; /* legacy alias — prefer settings.housePassword */
@@ -5142,11 +5142,11 @@ function setSyncChip(state, detail) {
   const el = $('syncChip');
   if (!el) return;
   const map = {
-    live: ['Live', 'live', detail || 'Listening for shared desk updates across PCs'],
-    syncing: ['Syncing', 'syncing', detail || 'Applying shared desk update…'],
-    behind: ['Behind', 'behind', detail || 'Local file is behind the shared desk'],
-    conflict: ['Conflict', 'conflict', detail || 'Conflicting shared desk revisions'],
-    offline: ['Local', 'offline', detail || 'Not listening for live shared desk — tabs still sync in this browser']
+    live: ['Live', 'live', detail || 'Office file is live across open desks'],
+    syncing: ['Updating', 'syncing', detail || 'Applying office update…'],
+    behind: ['Behind', 'behind', detail || 'This desk is behind the shared office'],
+    conflict: ['Conflict', 'conflict', detail || 'Office versions clash — choose Keep mine or Take theirs'],
+    offline: ['Local', 'offline', detail || 'Live office offline — tabs in this browser still stay in sync']
   };
   const row = map[syncState] || map.live;
   el.textContent = row[0];
@@ -5289,7 +5289,7 @@ function save(opts) {
       const remoteMeta = readStoredMeta();
       if (remoteMeta && Number(remoteMeta.rev || 0) > Number(s.meta.rev || 0)) {
         setSyncChip('behind', 'Skipped save — another tab has rev ' + remoteMeta.rev);
-        if (!quiet) toast('Another tab has newer data — pulling it');
+        if (!quiet) toast('Another tab has newer data — refreshing it');
         pullRemote({ reason: 'stale-save' });
         return false;
       }
@@ -5394,7 +5394,7 @@ function pullRemote(opts) {
     return true;
   } catch (err) {
     applyingRemote = false;
-    setSyncChip('offline', 'Pull failed');
+    setSyncChip('offline', 'Browser refresh failed');
     return false;
   }
 }
@@ -5489,15 +5489,15 @@ function scheduleSupabaseSharedRealtimeReconnect() {
 function startSupabaseSharedRealtime() {
   stopSupabaseSharedRealtime();
   if (!canListenSharedRealtime()) {
-    if (sessionUser && syncChannel) setSyncChip('live', 'Same-browser tabs only — Owner sets Supabase for cross-PC live');
-    else if (sessionUser) setSyncChip('offline', 'Not listening for live shared desk');
+    if (sessionUser && syncChannel) setSyncChip('live', 'Same-browser tabs only — Owner connects cloud office for other PCs');
+    else if (sessionUser) setSyncChip('offline', 'Live office not connected');
     return;
   }
   let host = '';
   try {
     host = new URL(supabaseBaseUrl()).host;
   } catch (err) {
-    setSyncChip('offline', 'Bad Supabase URL');
+    setSyncChip('offline', 'Cloud office URL looks wrong');
     return;
   }
   const key = supabaseAnonKey();
@@ -5506,7 +5506,7 @@ function startSupabaseSharedRealtime() {
   try {
     socket = new WebSocket(wsUrl);
   } catch (err) {
-    setSyncChip('offline', 'Could not open live desk connection');
+    setSyncChip('offline', 'Could not open live office connection');
     scheduleSupabaseSharedRealtimeReconnect();
     return;
   }
@@ -5551,10 +5551,10 @@ function startSupabaseSharedRealtime() {
       const status = msg.payload && msg.payload.status;
       if (status === 'ok') {
         supabaseRtJoined = true;
-        setSyncChip('live', 'Listening for shared desk updates across PCs');
+        setSyncChip('live', 'Office file is live across open desks');
       } else {
         supabaseRtJoined = false;
-        setSyncChip('offline', 'Live desk join failed — run Realtime SQL migration');
+        setSyncChip('offline', 'Live office join failed — Owner: finish cloud office setup');
       }
       return;
     }
@@ -5571,7 +5571,7 @@ function startSupabaseSharedRealtime() {
     supabaseRtSocket = null;
     if (supabaseRtHeartbeat) { clearInterval(supabaseRtHeartbeat); supabaseRtHeartbeat = null; }
     if (sessionUser && canListenSharedRealtime()) {
-      setSyncChip('offline', 'Live desk disconnected — retrying…');
+      setSyncChip('offline', 'Live office disconnected — retrying…');
       scheduleSupabaseSharedRealtimeReconnect();
     }
   };
@@ -5593,15 +5593,15 @@ async function handleSharedRealtimePing(reason) {
   }
   sharedRtApplyBusy = true;
   try {
-    setSyncChip('syncing', 'Applying shared desk update…');
+    setSyncChip('syncing', 'Applying office update…');
     const pulled = await pullSharedDeskPackFromSupabase();
     if (!pulled.ok) {
-      if (!pulled.empty) setSyncChip('behind', pulled.error || 'Shared desk read failed');
-      else setSyncChip('live', 'Listening — no shared desk published yet');
+      if (!pulled.empty) setSyncChip('behind', pulled.error || 'Could not read shared office');
+      else setSyncChip('live', 'Live — waiting for first office share');
       return;
     }
     if (pulled.sharedAt && lastOwnSharedPublishAt && pulled.sharedAt === lastOwnSharedPublishAt) {
-      setSyncChip('live', 'Listening for shared desk updates across PCs');
+      setSyncChip('live', 'Office file is live across open desks');
       return;
     }
     const parsed = typeof pulled.pack === 'string' ? JSON.parse(pulled.pack) : pulled.pack;
@@ -5613,21 +5613,21 @@ async function handleSharedRealtimePing(reason) {
     const remoteAt = pulled.sharedAt || (migrated.meta && migrated.meta.sharedAt) || (migrated.meta && migrated.meta.updatedAt) || '';
     const localAt = (s.meta && s.meta.updatedAt) || '';
     if (remoteRev < localRev) {
-      setSyncChip('live', 'Listening — local rev ahead (Publish to share)');
+      setSyncChip('live', 'Live — this desk is ahead (Share with other desks to push)');
       return;
     }
     if (remoteRev === localRev && (!remoteAt || remoteAt === localAt || (s.meta && s.meta.sharedAt === remoteAt))) {
-      setSyncChip('live', 'Listening for shared desk updates across PCs');
+      setSyncChip('live', 'Office file is live across open desks');
       return;
     }
     if (remoteRev > localRev) {
       applySharedDesk(migrated, 'live rev ' + remoteRev, { quietToast: true, fromRealtime: true });
-      toast('Shared desk updated · rev ' + remoteRev);
-      setSyncChip('live', 'Listening for shared desk updates across PCs');
+      toast('Office updated · rev ' + remoteRev);
+      setSyncChip('live', 'Office file is live across open desks');
       return;
     }
     if (!canMutateDesk()) {
-      setSyncChip('live', 'Listening for shared desk updates across PCs');
+      setSyncChip('live', 'Office file is live across open desks');
       return;
     }
     pendingSharedPull = { migrated, remoteRev, localRev, remoteAt, localAt, auto: true };
@@ -5637,16 +5637,16 @@ async function handleSharedRealtimePing(reason) {
     const msg = $('sharedConflictText');
     if (box) box.style.display = '';
     if (msg) {
-      msg.textContent = 'Live desk (' + (reason || 'realtime') + '): local rev ' + localRev +
+      msg.textContent = 'Office update (' + (reason || 'live') + '): this desk rev ' + localRev +
         ' vs shared rev ' + remoteRev +
         (remoteAt ? ' · shared ' + String(remoteAt).replace('T', ' ').slice(0, 19) : '') +
         (pulled.updatedBy ? ' · from ' + pulled.updatedBy : '') +
-        '. Keep mine or Take theirs. PINs and Discord webhooks stay local.';
+        '. Keep mine or Take theirs. PINs and Discord channel links stay on this browser.';
     }
-    setSyncChip('conflict', 'Shared desk conflict — choose Keep mine or Take theirs');
-    toast('Shared desk update available · choose Keep mine or Take theirs');
+    setSyncChip('conflict', 'Office versions clash — choose Keep mine or Take theirs');
+    toast('Office update waiting · choose Keep mine or Take theirs');
   } catch (err) {
-    setSyncChip('behind', (err && err.message) ? err.message : 'Live apply failed');
+    setSyncChip('behind', (err && err.message) ? err.message : 'Could not apply office update');
   } finally {
     sharedRtApplyBusy = false;
     if (sharedRtPending) {
@@ -8123,12 +8123,12 @@ function cmdCommands() {
   cmds.push({ label: 'Bulk hours', hint: 'Payroll', run: () => openBulkHours() });
   cmds.push({ label: 'Apply clock since payday', hint: 'Payroll', run: () => applyClockHoursSincePayday() });
   cmds.push({ label: 'Sunday checklist', hint: 'Payroll', run: () => openSundayRunPreview() });
-  cmds.push({ label: 'Publish shared desk', hint: 'Backup', run: () => publishSharedPack() });
+  cmds.push({ label: 'Share with other desks', hint: 'Backup', run: () => publishSharedPack() });
   cmds.push({ label: 'Announce payday', hint: 'Discord', run: () => postPaydayAnnouncement() });
   cmds.push({ label: 'Log register drop', hint: 'Income', run: () => { goView('income'); setTimeout(() => openIncomeForm(null, { kind: 'register', amount: 1000, station: 'Bar', source: 'Bar register' }), 40); } });
   cmds.push({ label: 'Log deposit', hint: 'Income', run: () => { goView('income'); setTimeout(() => openIncomeForm(null, { kind: 'deposit', source: 'House deposit' }), 40); } });
-  cmds.push({ label: 'Import Discord register lines', hint: 'Income', run: () => { goView('income'); setTimeout(() => openImportIncomeModal(), 40); } });
-  cmds.push({ label: 'Pull Discord income from Supabase', hint: 'Income', run: () => { goView('income'); setTimeout(() => pullRegisterSalesFromSupabase({ quiet: false }), 40); } });
+  cmds.push({ label: 'Paste Discord income lines', hint: 'Income', run: () => { goView('income'); setTimeout(() => openImportIncomeModal(), 40); } });
+  cmds.push({ label: 'Pull from Discord', hint: 'Income', run: () => { goView('income'); setTimeout(() => pullRegisterSalesFromSupabase({ quiet: false }), 40); } });
   cmds.push({ label: 'Post income week report', hint: 'Discord', run: () => { goView('income'); setTimeout(() => postDiscord('incomeReports', incomeWeekDiscordCard(), { label: 'Income week' }), 40); } });
   cmds.push({ label: 'Open settings', hint: 'Desk', run: () => openSettings() });
   cmds.push({ label: 'Export to-dos', hint: 'Todos', run: () => copyTextSafe(exportTodosText(), 'To-dos copied') });
@@ -8258,6 +8258,7 @@ function openChangelog() {
   const grid = $('upgradeGrid');
   if (grid) {
     const recent = [
+      ['v49', 'HR immersion labels — Pull from Discord · Share with other desks · cloud office wording · Discord chips'],
       ['v48', 'Live shared desk for everyone signed in · Owner-only webhooks/Supabase Settings · packs share URL+anon · staff need no Pull'],
       ['v47', 'Publish rev guard · keep Income Reports webhook on pull · tip-jar out of house P&L · Overview/Income/Settings declutter · honest Sync vs Pull'],
       ['v46', 'Hashed PINs (PBKDF2) · Supabase shared desk sync · tip-jar cleanup · house P&L by month on Reports'],
@@ -10047,7 +10048,7 @@ function renderIncomes() {
     '<button class="btn tiny soft" onclick="postIncomeLineDiscord(' + x.id + ')">Post</button> ' +
     '<button class="btn tiny danger" onclick="delIncome(' + x.id + ')">Delete</button></td>' +
     '</tr>'
-  ).join('') : emptyState('No income logged.', 'Log register drops, deposits, or pull Discord /register rows.');
+  ).join('') : emptyState('No income logged.', 'Log register drops, deposits, or Pull from Discord (/register).');
 
   if ($('incByKind')) {
     const keys = Object.keys(INCOME_KINDS).filter(k => byKind[k] && k !== 'tips').concat(Object.keys(byKind).filter(k => !INCOME_KINDS[k] && k !== 'tips'));
@@ -10242,11 +10243,11 @@ function ensureRebateIncome(expense) {
 function registerTemplateText() {
   return [
     "Frenchie's #register-sales",
-    'Preferred: type /register or tap Log register drop — fill the modal (Amount, Station, Source, Date).',
+    'Preferred: type /register or tap Log house income — fill Kind, Station, Amount, What was sold / notes, Date.',
     'Stations: Bar · Floor · Door · Kitchen · Other',
-    'Drops sync to Supabase → Income desk Pull / auto-pull.',
+    'Drops land on the Income desk — use Pull from Discord (or auto-check).',
     '',
-    'Backup text format (Import Discord lines):',
+    'Backup text format (Paste Discord lines):',
     'REGISTER | YYYY-MM-DD | Station | Amount | Source/notes | @Who',
     'Example: REGISTER | ' + today() + ' | Bar | 1000 | Food & drinks till drop | @Alex'
   ].join('\n');
@@ -10503,7 +10504,7 @@ async function publishSharedDeskToSupabase(text, rev, opts) {
 async function pullSharedDeskPackFromSupabase() {
   const fetched = await fetchSupabaseSharedDeskRow();
   if (!fetched.ok) return { ok: false, error: fetched.error || 'supabase read failed' };
-  if (!fetched.row || !fetched.row.pack) return { ok: false, error: 'No shared desk row yet — Publish from a management PC first', empty: true };
+  if (!fetched.row || !fetched.row.pack) return { ok: false, error: 'No shared office yet — Share with other desks from a management PC first', empty: true };
   return {
     ok: true,
     pack: fetched.row.pack,
@@ -10521,24 +10522,24 @@ function updateIncomeSupabaseChip(opts) {
   const hint = $('incSupabaseHint');
   if (!chip && !status) return;
   if (!supabaseConfigured()) {
-    if (chip) { chip.textContent = 'Supabase · off'; chip.className = 'pill gray'; }
-    if (status) status.textContent = 'Set Supabase URL + anon key in Settings';
+    if (chip) { chip.textContent = 'Discord · off'; chip.className = 'pill gray'; }
+    if (status) status.textContent = 'Owner: connect cloud office in Settings';
     if (hint) hint.style.display = '';
     return;
   }
   if (hint) hint.style.display = 'none';
   const n = opts.pending != null ? opts.pending : __registerPendingCount;
   if (n == null) {
-    if (chip) { chip.textContent = 'Supabase · ready'; chip.className = 'pill blue'; }
-    if (status) status.textContent = __registerPullLastMsg || (s.settings.registerAutoPull !== false ? 'Auto-pull on' : 'Manual pull');
+    if (chip) { chip.textContent = 'Discord · ready'; chip.className = 'pill blue'; }
+    if (status) status.textContent = __registerPullLastMsg || (s.settings.registerAutoPull !== false ? 'Auto-check on' : 'Manual check');
     return;
   }
   if (n > 0) {
-    if (chip) { chip.textContent = 'Supabase · ' + n + ' pending'; chip.className = 'pill warn'; }
+    if (chip) { chip.textContent = 'Discord · ' + n + ' waiting'; chip.className = 'pill warn'; }
     if (status) status.textContent = __registerPullLastMsg || 'Waiting to book into Income';
   } else {
-    if (chip) { chip.textContent = 'Supabase · synced'; chip.className = 'pill green'; }
-    if (status) status.textContent = __registerPullLastMsg || 'No pending register drops';
+    if (chip) { chip.textContent = 'Discord · caught up'; chip.className = 'pill green'; }
+    if (status) status.textContent = __registerPullLastMsg || 'No Discord income waiting';
   }
 }
 
@@ -10556,7 +10557,7 @@ async function refreshRegisterPendingCount(opts) {
   }
   const rows = Array.isArray(listRes.data) ? listRes.data : [];
   __registerPendingCount = rows.length;
-  if (!opts.keepMsg) __registerPullLastMsg = rows.length ? (rows.length + ' waiting') : 'Synced';
+  if (!opts.keepMsg) __registerPullLastMsg = rows.length ? (rows.length + ' waiting') : 'Caught up';
   updateIncomeSupabaseChip({ pending: rows.length });
   return rows.length;
 }
@@ -10564,11 +10565,11 @@ async function refreshRegisterPendingCount(opts) {
 async function pullRegisterSalesFromSupabase(opts) {
   opts = opts || {};
   if (!canEditIncomes()) {
-    if (!opts.quiet) toast('Income pull — management only');
+    if (!opts.quiet) toast('Pull from Discord — management only');
     return { ok: false, msg: 'denied' };
   }
   if (!supabaseConfigured()) {
-    if (!opts.quiet) toast('Set Supabase URL + anon key in Settings first');
+    if (!opts.quiet) toast('Owner: connect cloud office in Settings first');
     updateIncomeSupabaseChip();
     return { ok: false, msg: 'not-configured' };
   }
@@ -10577,7 +10578,7 @@ async function pullRegisterSalesFromSupabase(opts) {
   try {
     const listRes = await supabaseFetch('/rest/v1/register_sales?status=eq.pending&select=*&order=created_at.asc');
     if (!listRes.ok) {
-      __registerPullLastMsg = 'Pull failed: ' + (listRes.error || 'error');
+      __registerPullLastMsg = 'Discord pull failed: ' + (listRes.error || 'error');
       updateIncomeSupabaseChip();
       if (!opts.quiet) toast(__registerPullLastMsg);
       return { ok: false, msg: listRes.error };
@@ -10585,9 +10586,9 @@ async function pullRegisterSalesFromSupabase(opts) {
     const rows = Array.isArray(listRes.data) ? listRes.data : [];
     __registerPendingCount = rows.length;
     if (!rows.length) {
-      __registerPullLastMsg = 'Synced — nothing pending';
+      __registerPullLastMsg = 'Caught up — nothing waiting';
       updateIncomeSupabaseChip({ pending: 0 });
-      if (!opts.quiet) toast('No pending Discord income rows');
+      if (!opts.quiet) toast('No Discord income waiting');
       return { ok: true, added: 0 };
     }
     ensureMeta();
@@ -10646,7 +10647,7 @@ async function pullRegisterSalesFromSupabase(opts) {
       if (!book.ok) {
         s.incomes = s.incomes.filter(x => x.id !== data.id);
         console.warn('book_register_sale failed', book.error);
-        if (!opts.quiet) toast('Could not book Discord row — desk left unchanged for that line');
+        if (!opts.quiet) toast('Could not book that Discord drop — desk left unchanged for that line');
         continue;
       }
       booked.push(data);
@@ -10657,12 +10658,12 @@ async function pullRegisterSalesFromSupabase(opts) {
         label: 'pull Discord income',
         restore: () => { s.incomes = before; }
       });
-      log('Pulled ' + added + ' Discord income row' + (added === 1 ? '' : 's') + ' from Supabase');
+      log('Pulled ' + added + ' Discord income row' + (added === 1 ? '' : 's'));
       save();
       render();
     }
     __registerPendingCount = 0;
-    __registerPullLastMsg = added ? ('Pulled ' + added + ' income row' + (added === 1 ? '' : 's')) : 'Already booked locally';
+    __registerPullLastMsg = added ? ('Booked ' + added + ' Discord drop' + (added === 1 ? '' : 's')) : 'Already on the books';
     updateIncomeSupabaseChip({ pending: 0 });
     if (!opts.quiet || added) toast(__registerPullLastMsg);
     return { ok: true, added: added, rows: booked };
@@ -11544,9 +11545,9 @@ async function postDiscord(channelKey, payload, opts) {
     if (opts.fallbackCopy !== false) {
       const copied = await copyText(text, '');
       toast(copied
-        ? ('No webhook for ' + channelKey + ' — copied instead. Add URL in Settings.')
-        : ('No webhook for ' + channelKey + ' — copy failed. Add URL in Settings.'));
-    } else toast('Set the ' + channelKey + ' webhook in Settings first');
+        ? ('No Discord channel for ' + channelKey + ' — copied instead. Add the channel link in Settings.')
+        : ('No Discord channel for ' + channelKey + ' — copy failed. Add the channel link in Settings.'));
+    } else toast('Set the ' + channelKey + ' Discord channel in Settings first');
     return { ok: false, msg: 'missing-webhook' };
   }
   const url = discordWebhookUrl(channelKey);
@@ -15185,8 +15186,8 @@ function sundayRunChecklistItems(p) {
       warn: !(discordWebhookConfigured('payroll') || discordWebhookConfigured('announcements')),
       label: 'Discord',
       detail: discordWebhookConfigured('payroll')
-        ? 'Payroll webhook ready'
-        : (discordWebhookConfigured('announcements') ? 'Announcements webhook ready' : 'No payroll/announcements webhook — posts will copy instead')
+        ? 'Payroll Discord channel ready'
+        : (discordWebhookConfigured('announcements') ? 'Announcements Discord channel ready' : 'No payroll/announcements Discord channel — posts will copy instead')
     }
   ];
 }
@@ -17079,7 +17080,7 @@ if ($('postIncomeDiscord')) $('postIncomeDiscord').onclick = () => {
 if ($('csvIncomes')) $('csvIncomes').onclick = () => exportIncomesCsv();
 if ($('pdfIncomes')) $('pdfIncomes').onclick = () => printIncomeWeekSheet();
 if ($('postIncomeWeekDiscord')) $('postIncomeWeekDiscord').onclick = () => postDiscord('incomeReports', incomeWeekDiscordCard(), { label: 'Income week' });
-if ($('copyRegisterTemplate')) $('copyRegisterTemplate').onclick = () => copyText(registerTemplateText(), 'Register template copied — pin in #register-sales');
+if ($('copyRegisterTemplate')) $('copyRegisterTemplate').onclick = () => copyText(registerTemplateText(), '/register guide copied — pin in #register-sales');
 if ($('importDiscordIncome')) $('importDiscordIncome').onclick = () => openImportIncomeModal();
 if ($('cancelImportIncome')) $('cancelImportIncome').onclick = () => { $('importIncomeModal').classList.remove('open'); $('importIncomeModal').setAttribute('hidden', ''); };
 if ($('parseImportIncome')) $('parseImportIncome').onclick = () => {
@@ -17441,13 +17442,13 @@ $('importJson').onclick = () => {
   if (!requireMgmt('Import backup')) return;
   const f = $('importFile').files[0];
   if (!f) return toast('Choose a JSON file first');
-  if (!confirm('Replace the entire office file with this backup? A local snapshot will be kept first.\n\nFull backups include login PINs. Shared packs are PIN-redacted — use Pull shared desk for those.')) return;
+  if (!confirm('Replace the entire office file with this backup? A local snapshot will be kept first.\n\nFull backups include login PINs. Shared office packs hide PINs — use Load shared office for those.')) return;
   const reader = new FileReader();
   reader.onload = () => {
     try {
       const parsed = JSON.parse(reader.result);
       const looksShared = !!(parsed && parsed.meta && parsed.meta.passwordsRedacted);
-      if (looksShared && !confirm('This file looks like a shared pack (passwords redacted), not a full backup. Import anyway? Prefer Pull shared desk for multi-PC sync.')) return;
+      if (looksShared && !confirm('This file looks like a shared office pack (PINs hidden), not a full backup. Import anyway? Prefer Load shared office for multi-PC sync.')) return;
       const hasPasswords = (parsed.employees || []).some(e => e && String(e.loginPassword || '').length);
       if (hasPasswords && !confirm('This backup includes personal login PINs. Continue import?')) return;
       const data = migrate(parsed);
@@ -17640,7 +17641,9 @@ if ($('setSessionDays')) {
 if ($('deskBuildChip')) $('deskBuildChip').textContent = DESK_BUILD;
 if ($('sharedDeskBuildPill')) $('sharedDeskBuildPill').textContent = DESK_BUILD;
 if (s.meta && s.meta.lastSharedPublishAt) {
-  setSharedDeskLiveStatus('Last publish ' + s.meta.lastSharedPublishAt + (s.meta.lastSharedPublishUrl ? ' · ' + s.meta.lastSharedPublishUrl : ''));
+  const lastUrl = s.meta.lastSharedPublishUrl || '';
+  const lastLabel = lastUrl.indexOf('supabase:') === 0 ? 'cloud office' : lastUrl;
+  setSharedDeskLiveStatus('Last shared ' + s.meta.lastSharedPublishAt + (lastLabel ? ' · ' + lastLabel : ''));
 }
 if (sessionUser) render();
 updateSaveBadge();
@@ -19022,45 +19025,45 @@ function showSharedPublishChecklist(opts) {
   const name = opts.filename || ('frenchies-shared-desk-r' + (s.meta.rev || 0) + '.json');
   box.style.display = '';
   box.innerHTML =
-    '<h3 style="margin:0 0 8px">Tiiny Host publish checklist</h3>' +
-    '<div class="history"><b>1.</b> Pack file: <code>' + esc(name) + '</code> ' +
+    '<h3 style="margin:0 0 8px">Host file share checklist</h3>' +
+    '<div class="history"><b>1.</b> Office copy: <code>' + esc(name) + '</code> ' +
       '<button type="button" class="btn tiny soft" id="copySharedFilenameBtn">Copy filename</button></div>' +
-    '<div class="history"><b>2.</b> Upload that file to Tiiny Host (replace the JSON at your raw URL).</div>' +
-    '<div class="history"><b>3.</b> Raw URL: ' + (url ? ('<code>' + esc(url) + '</code> ') : '<span class="pill warn">not set</span> ') +
-      (url ? '<button type="button" class="btn tiny soft" id="copySharedUrlBtn">Copy URL</button>' : '') + '</div>' +
-    '<div class="history"><b>4.</b> On the other PC: Pull shared desk → Compare &amp; pull → Take theirs if rev is ahead.</div>' +
-    '<div class="history"><b>5.</b> Optional: Check if shared ahead (button below) after upload.</div>' +
+    '<div class="history"><b>2.</b> Upload that file to your host (replace the JSON at your host file link).</div>' +
+    '<div class="history"><b>3.</b> Host file link: ' + (url ? ('<code>' + esc(url) + '</code> ') : '<span class="pill warn">not set</span> ') +
+      (url ? '<button type="button" class="btn tiny soft" id="copySharedUrlBtn">Copy link</button>' : '') + '</div>' +
+    '<div class="history"><b>4.</b> On the other PC: Load shared office → Compare &amp; load → Take theirs if rev is ahead.</div>' +
+    '<div class="history"><b>5.</b> Optional: Check for newer office after upload.</div>' +
     (opts.note ? '<p class="ui-hint" style="margin:8px 0 0">' + esc(opts.note) + '</p>' : '');
   if ($('copySharedFilenameBtn')) $('copySharedFilenameBtn').onclick = () => copyText(name, 'Filename copied');
-  if ($('copySharedUrlBtn')) $('copySharedUrlBtn').onclick = () => copyText(url, 'Shared URL copied');
+  if ($('copySharedUrlBtn')) $('copySharedUrlBtn').onclick = () => copyText(url, 'Host file link copied');
 }
 
 async function probeSharedDeskAhead() {
-  if (!canEditHours() && !canMutateDesk()) return toast('Leads and management only');
+  if (!canMutateDesk()) return toast('Management only');
   ensureMeta();
   const localRev = Number((s.meta && s.meta.rev) || 0);
   if (preferSupabaseSharedDesk()) {
-    setSharedDeskLiveStatus('Checking Supabase shared desk…');
+    setSharedDeskLiveStatus('Checking shared office…');
     try {
       const pulled = await pullSharedDeskPackFromSupabase();
       if (!pulled.ok) throw new Error(pulled.error || 'no row');
       const remoteRev = Number(pulled.rev || 0);
       const remoteAt = pulled.sharedAt || '';
       let verdict;
-      if (remoteRev > localRev) verdict = 'Supabase ahead (rev ' + remoteRev + ' > local ' + localRev + ') — Pull when ready.';
-      else if (remoteRev < localRev) verdict = 'Local ahead (rev ' + localRev + ' > Supabase ' + remoteRev + ') — Publish when ready.';
-      else verdict = 'Same rev ' + localRev + (remoteAt ? ' · ' + remoteAt : '') + ' (Supabase).';
+      if (remoteRev > localRev) verdict = 'Shared office ahead (rev ' + remoteRev + ' > this desk ' + localRev + ') — Load shared office when ready.';
+      else if (remoteRev < localRev) verdict = 'This desk ahead (rev ' + localRev + ' > shared ' + remoteRev + ') — Share with other desks when ready.';
+      else verdict = 'Same rev ' + localRev + (remoteAt ? ' · ' + remoteAt : '') + ' (cloud office).';
       setSharedDeskLiveStatus(verdict);
       toast(verdict);
       return;
     } catch (err) {
-      const msg = 'Supabase check failed — ' + (err && err.message ? err.message : 'error') + ' · trying Tiiny URL…';
+      const msg = 'Cloud office check failed — ' + (err && err.message ? err.message : 'error') + ' · trying host file link…';
       setSharedDeskLiveStatus(msg);
     }
   }
   const url = ((s.settings && s.settings.sharedDeskUrl) || ($('sharedDeskUrlSetting') && $('sharedDeskUrlSetting').value) || '').trim();
-  if (!url) return toast(preferSupabaseSharedDesk() ? 'Supabase empty/failed — set Tiiny raw URL or Publish first' : 'Set Supabase or shared raw URL first');
-  setSharedDeskLiveStatus('Checking shared desk at ' + url + '…');
+  if (!url) return toast(preferSupabaseSharedDesk() ? 'Cloud office empty/failed — set host file link or Share first' : 'Set cloud office or host file link first');
+  setSharedDeskLiveStatus('Checking host file link…');
   try {
     const res = await fetch(url, { cache: 'no-store' });
     if (!res.ok) throw new Error('HTTP ' + res.status);
@@ -19071,29 +19074,29 @@ async function probeSharedDeskAhead() {
     const remoteRev = Number((migrated.meta && migrated.meta.rev) || 0);
     const remoteAt = (migrated.meta && migrated.meta.updatedAt) || (migrated.meta && migrated.meta.sharedAt) || '';
     let verdict;
-    if (remoteRev > localRev) verdict = 'Shared is ahead (rev ' + remoteRev + ' > local ' + localRev + ') — Pull when ready.';
-    else if (remoteRev < localRev) verdict = 'Local is ahead (rev ' + localRev + ' > shared ' + remoteRev + ') — Publish/upload when ready.';
-    else verdict = 'Same rev ' + localRev + (remoteAt ? ' · shared stamp ' + remoteAt : '') + '.';
+    if (remoteRev > localRev) verdict = 'Shared office ahead (rev ' + remoteRev + ' > this desk ' + localRev + ') — Load shared office when ready.';
+    else if (remoteRev < localRev) verdict = 'This desk ahead (rev ' + localRev + ' > shared ' + remoteRev + ') — Share with other desks when ready.';
+    else verdict = 'In sync (rev ' + localRev + ')' + (remoteAt ? ' · shared stamp ' + remoteAt : '') + '.';
     setSharedDeskLiveStatus(verdict);
     toast(verdict);
   } catch (err) {
-    const msg = 'Shared check failed — ' + (err && err.message ? err.message : 'bad URL/JSON');
+    const msg = 'Office check failed — ' + (err && err.message ? err.message : 'bad URL/JSON');
     setSharedDeskLiveStatus(msg);
     toast(msg);
   }
 }
 
 function downloadSharedPackOnly() {
-  if (!requireMgmt('Download shared pack')) return;
+  if (!requireMgmt('Download office copy')) return;
   ensureMeta();
   pushSnapshot('pre-publish');
   const text = buildSharedPackText();
   const name = 'frenchies-shared-desk-r' + (s.meta.rev || 0) + '.json';
   downloadFile(text, name, 'application/json');
-  copyText(text, 'Pack downloaded · JSON copied (passwords redacted)');
+  copyText(text, 'Office copy downloaded · JSON copied (PINs hidden)');
   markExported();
-  setSharedDeskLiveStatus('Downloaded ' + name + ' · follow the Tiiny checklist, then Pull on other PCs.');
-  showSharedPublishChecklist({ filename: name, note: 'Download-only — upload this file to Tiiny Host.' });
+  setSharedDeskLiveStatus('Downloaded ' + name + ' · upload to host, then Load shared office on other PCs.');
+  showSharedPublishChecklist({ filename: name, note: 'Download-only — upload this file to your host, then Load shared office elsewhere.' });
   log('Shared pack downloaded (rev ' + (s.meta.rev || 0) + ')');
 }
 
@@ -19126,7 +19129,7 @@ async function tryPublishSharedToUrl(text, url) {
 }
 
 async function publishSharedPack() {
-  if (!requireMgmt('Publish shared desk')) return;
+  if (!requireMgmt('Share with other desks')) return;
   ensureMeta();
   pushSnapshot('pre-publish');
   const text = buildSharedPackText();
@@ -19138,19 +19141,19 @@ async function publishSharedPack() {
   markExported();
 
   if (preferSupabaseSharedDesk()) {
-    setSharedDeskLiveStatus('Publishing to Supabase…');
+    setSharedDeskLiveStatus('Sharing office with other desks…');
     let sb = await publishSharedDeskToSupabase(text, s.meta.rev || 0);
     if (!sb.ok && sb.error === 'remote-ahead') {
       const who = sb.updatedBy ? (' by ' + sb.updatedBy) : '';
       const when = sb.remoteAt ? (' · ' + String(sb.remoteAt).replace('T', ' ').slice(0, 19)) : '';
       const okOverwrite = confirm(
-        'Shared desk on Supabase is newer (rev ' + sb.remoteRev + who + when +
-        ').\n\nYour local rev is ' + sb.localRev +
-        '.\n\nOverwrite the newer shared desk? Prefer Pull first if you are not sure.'
+        'The shared office is newer (rev ' + sb.remoteRev + who + when +
+        ').\n\nYour desk is rev ' + sb.localRev +
+        '.\n\nOverwrite the newer shared office? Prefer Load shared office first if you are not sure.'
       );
       if (!okOverwrite) {
-        setSharedDeskLiveStatus('Publish cancelled — remote rev ' + sb.remoteRev + ' is ahead. Pull shared desk first.');
-        toast('Publish cancelled — Pull shared desk first');
+        setSharedDeskLiveStatus('Share cancelled — shared rev ' + sb.remoteRev + ' is ahead. Load shared office first.');
+        toast('Share cancelled — Load shared office first');
         return;
       }
       sb = await publishSharedDeskToSupabase(text, s.meta.rev || 0, { forceOverwrite: true });
@@ -19162,54 +19165,54 @@ async function publishSharedPack() {
       s.meta.sharedAt = publishedAt;
       markOwnSharedPublishEcho(publishedAt);
       save({ quiet: true });
-      setSharedDeskLiveStatus('Published to Supabase · rev ' + (s.meta.rev || 0) + ' · ' + publishedAt);
+      setSharedDeskLiveStatus('Shared with other desks · rev ' + (s.meta.rev || 0) + ' · ' + publishedAt);
       if ($('sharedPublishChecklist')) {
         $('sharedPublishChecklist').style.display = '';
-        $('sharedPublishChecklist').innerHTML = '<h3 style="margin:0 0 8px">Published to Supabase</h3><p class="ui-hint">Open desks update live. Staff just stay signed in — no Pull. PINs and Discord webhooks stay on each browser.</p>';
+        $('sharedPublishChecklist').innerHTML = '<h3 style="margin:0 0 8px">Shared with other desks</h3><p class="ui-hint">Open desks update live. Staff just stay signed in. PINs and Discord channel links stay on each browser.</p>';
       }
-      log('Shared desk published to Supabase (rev ' + (s.meta.rev || 0) + ')');
-      toast('Published shared desk — others update live');
+      log('Shared office published (rev ' + (s.meta.rev || 0) + ')');
+      toast('Shared with other desks — they update live');
       return;
     }
-    setSharedDeskLiveStatus('Supabase publish failed (' + (sb.error || 'error') + ') — trying Tiiny / download…');
+    setSharedDeskLiveStatus('Cloud share failed (' + (sb.error || 'error') + ') — trying host file / download…');
     if (!url) {
       downloadFile(text, name, 'application/json');
-      copyText(text, 'Supabase failed · pack downloaded. Run desk_shared_state SQL or set Tiiny URL.');
-      showSharedPublishChecklist({ filename: name, note: 'Supabase error: ' + (sb.error || 'unknown') + '. Confirm migration ran, or use Tiiny fallback.' });
-      log('Shared publish Supabase failed (' + (sb.error || '') + ')');
+      copyText(text, 'Cloud share failed · office copy downloaded. Owner: check cloud office setup or set host file link.');
+      showSharedPublishChecklist({ filename: name, note: 'Cloud error: ' + (sb.error || 'unknown') + '. Owner: finish cloud office setup, or use host file fallback.' });
+      log('Shared office cloud publish failed (' + (sb.error || '') + ')');
       return;
     }
   }
 
   if (url) {
-    setSharedDeskLiveStatus('Publishing to ' + url + '…');
+    setSharedDeskLiveStatus('Sharing to host file link…');
     const result = await tryPublishSharedToUrl(text, url);
     if (result.ok) {
       s.meta.lastSharedPublishAt = new Date().toISOString();
       s.meta.lastSharedPublishUrl = url;
       save({ quiet: true });
-      setSharedDeskLiveStatus('Published to domain via ' + result.method + ' · rev ' + (s.meta.rev || 0) + ' · ' + (s.meta.lastSharedPublishAt || ''));
+      setSharedDeskLiveStatus('Shared to host file · rev ' + (s.meta.rev || 0) + ' · ' + (s.meta.lastSharedPublishAt || ''));
       if ($('sharedPublishChecklist')) {
         $('sharedPublishChecklist').style.display = '';
-        $('sharedPublishChecklist').innerHTML = '<h3 style="margin:0 0 8px">Published live</h3><p class="ui-hint">Other PCs can Pull now. Use Check if shared ahead to confirm.</p>';
+        $('sharedPublishChecklist').innerHTML = '<h3 style="margin:0 0 8px">Shared to host file</h3><p class="ui-hint">Other PCs can Load shared office now. Use Check for newer office to confirm.</p>';
       }
-      log('Shared desk published to URL (rev ' + (s.meta.rev || 0) + ')');
-      toast('Published shared desk to your domain');
-      copyText(text, 'JSON also copied (PINs redacted)');
+      log('Shared office published to host file (rev ' + (s.meta.rev || 0) + ')');
+      toast('Shared with other desks via host file');
+      copyText(text, 'Office JSON also copied (PINs hidden)');
       return;
     }
-    setSharedDeskLiveStatus('Live PUT blocked (' + result.error + '). Downloaded ' + name + ' — follow the Tiiny checklist.');
+    setSharedDeskLiveStatus('Host write blocked (' + result.error + '). Downloaded ' + name + ' — follow the checklist.');
     downloadFile(text, name, 'application/json');
-    copyText(text, 'Host blocked live write · pack downloaded & copied — upload to Tiiny Host');
+    copyText(text, 'Host blocked live write · office copy downloaded — upload manually');
     showSharedPublishChecklist({ filename: name, note: 'Live write blocked (' + result.error + '). Upload the downloaded file manually.' });
-    log('Shared publish fell back to download (' + result.error + ')');
+    log('Shared office fell back to download (' + result.error + ')');
     return;
   }
   downloadFile(text, name, 'application/json');
-  copyText(text, 'No Supabase/Tiiny target · pack downloaded & copied.');
-  setSharedDeskLiveStatus('Set Supabase (Settings) or a Tiiny raw URL, then Publish again.');
-  showSharedPublishChecklist({ filename: name, note: 'Set Supabase URL + anon key (preferred) or Tiiny raw URL.' });
-  log('Shared pack downloaded without target (rev ' + (s.meta.rev || 0) + ')');
+  copyText(text, 'No cloud/host target · office copy downloaded.');
+  setSharedDeskLiveStatus('Set cloud office (Owner Settings) or a host file link, then Share again.');
+  showSharedPublishChecklist({ filename: name, note: 'Set cloud office URL + access key (preferred) or host file link.' });
+  log('Shared office downloaded without target (rev ' + (s.meta.rev || 0) + ')');
 }
 
 function mergeLocalSecretsIntoShared(migrated, localState) {
@@ -19263,7 +19266,7 @@ function mergeLocalSecretsIntoShared(migrated, localState) {
 let pendingSharedPull = null;
 
 async function pullSharedDesk() {
-  if (!canMutateDesk()) return toast('Management only — staff get live updates automatically');
+  if (!canMutateDesk()) return toast('Management only — staff get office updates automatically');
   ensureMeta();
   if ($('sharedConflictBox')) $('sharedConflictBox').style.display = 'none';
   pendingSharedPull = null;
@@ -19287,12 +19290,12 @@ function applySharedDesk(migrated, labelText, opts) {
   if ($('sharedPullModal')) $('sharedPullModal').classList.remove('open');
   pendingSharedPull = null;
   render();
-  if (!opts.quietToast) toast('Shared desk applied · ' + (labelText || ('rev ' + (s.meta.rev || 0))));
+  if (!opts.quietToast) toast('Shared office loaded · ' + (labelText || ('rev ' + (s.meta.rev || 0))));
   if (sessionUser) {
     const e = empById(sessionUser.empId);
     if (!e || !empHasLoginAccess(e) || e.status === 'terminated' || e.status === 'suspended') {
       logoutDesk();
-      toast('Session ended — employee missing or closed after pull');
+      toast('Session ended — employee missing or closed after load');
     } else if (!empHasOwnPassword(e) || empNeedsPinMigration(e)) {
       clearDurableSession();
       persistSession(null);
@@ -19300,9 +19303,9 @@ function applySharedDesk(migrated, labelText, opts) {
       sessionUser = null;
       applySessionChrome();
       setLoginGateMode('setup');
-      toast('Re-set your personal PIN after shared pull');
+      toast('Re-set your personal PIN after loading the shared office');
     } else {
-      setSharedDeskLiveStatus('Applied rev ' + (s.meta.rev || 0) + ' · local PINs kept');
+      setSharedDeskLiveStatus('Loaded rev ' + (s.meta.rev || 0) + ' · local PINs kept');
       startSupabaseSharedRealtime();
     }
   }
@@ -19315,18 +19318,18 @@ async function confirmSharedPull() {
   try {
     if (!text && !url && preferSupabaseSharedDesk()) {
       const pulled = await pullSharedDeskPackFromSupabase();
-      if (!pulled.ok) throw new Error(pulled.error || 'Supabase pull failed');
+      if (!pulled.ok) throw new Error(pulled.error || 'Could not load shared office');
       text = typeof pulled.pack === 'string' ? pulled.pack : JSON.stringify(pulled.pack);
-      setSharedDeskLiveStatus('Loaded from Supabase · rev ' + pulled.rev + (pulled.updatedBy ? ' · ' + pulled.updatedBy : ''));
+      setSharedDeskLiveStatus('Loaded from cloud office · rev ' + pulled.rev + (pulled.updatedBy ? ' · ' + pulled.updatedBy : ''));
     }
     if (!text && url) {
       const res = await fetch(url);
-      if (!res.ok) throw new Error('Could not fetch URL (' + res.status + ')');
+      if (!res.ok) throw new Error('Could not fetch host file (' + res.status + ')');
       text = await res.text();
       ensureMeta();
       s.settings.sharedDeskUrl = url;
     }
-    if (!text) return toast('Paste JSON, set a URL, or configure Supabase and Publish first');
+    if (!text) return toast('Paste office JSON, set a host file link, or Share with other desks first');
     const parsed = JSON.parse(text);
     const migrated = migrate(parsed);
     if (!migrated || !migrated.employees) throw new Error('Not a desk file');
@@ -19341,18 +19344,18 @@ async function confirmSharedPull() {
       if (box) box.style.display = '';
       if (msg) {
         const pub = (migrated.meta && (migrated.meta.sharedBy || migrated.meta.updatedBy || migrated.meta.clientId)) || '';
-        msg.textContent = 'Local rev ' + localRev + (localAt ? ' · updated ' + String(localAt).replace('T', ' ').slice(0, 19) : '') +
+        msg.textContent = 'This desk rev ' + localRev + (localAt ? ' · updated ' + String(localAt).replace('T', ' ').slice(0, 19) : '') +
           ' vs shared rev ' + remoteRev + (remoteAt ? ' · shared ' + String(remoteAt).replace('T', ' ').slice(0, 19) : '') +
           (pub ? ' · from ' + pub : '') +
-          '. Keep mine leaves this browser unchanged. Take theirs replaces the whole desk (snapshot kept first). Local hashed PINs, Supabase keys, and Discord webhooks stay on this browser.';
+          '. Keep mine leaves this browser unchanged. Take theirs replaces the whole desk (snapshot kept first). Personal PINs, cloud office keys, and Discord channel links stay on this browser.';
       }
-      toast('Conflict — choose Keep mine or Take theirs');
+      toast('Version clash — choose Keep mine or Take theirs');
       return;
     }
-    if (!confirm('Shared pack matches local rev ' + localRev + '. Apply anyway?')) return;
+    if (!confirm('Shared office matches this desk rev ' + localRev + '. Load anyway?')) return;
     applySharedDesk(migrated, 'rev ' + remoteRev);
   } catch (err) {
-    toast('Pull failed — ' + (err && err.message ? err.message : 'bad JSON'));
+    toast('Load failed — ' + (err && err.message ? err.message : 'bad JSON'));
   }
 }
 
@@ -19423,16 +19426,16 @@ async function maybeAutoPullSharedDesk(reason) {
     if (box) box.style.display = '';
     if (msg) {
       const pub = (migrated.meta && (migrated.meta.sharedBy || migrated.meta.updatedBy || migrated.meta.clientId)) || '';
-      msg.textContent = 'Auto-pull (' + (reason || 'focus') + '): local rev ' + localRev +
+      msg.textContent = 'Office update (' + (reason || 'focus') + '): this desk rev ' + localRev +
         ' vs shared rev ' + remoteRev +
         (remoteAt ? ' · shared ' + String(remoteAt).replace('T', ' ').slice(0, 19) : '') +
         (pub ? ' · from ' + pub : '') +
-        (preferSupabaseSharedDesk() ? ' (Supabase)' : '') +
-        '. Keep mine leaves this browser unchanged. Take theirs replaces the desk (snapshot kept). PINs and webhooks stay local.';
+        (preferSupabaseSharedDesk() ? ' (cloud office)' : '') +
+        '. Keep mine leaves this browser unchanged. Take theirs replaces the desk (snapshot kept). PINs and Discord channel links stay local.';
     }
-    toast('Shared desk update available · choose Keep mine or Take theirs');
+    toast('Shared office update available · choose Keep mine or Take theirs');
   } catch (err) {
-    if (reason === 'login') toast('Shared auto-pull failed — check Supabase / URL in Settings');
+    if (reason === 'login') toast('Could not check for office updates — Owner: check cloud office / host file link in Settings');
   } finally {
     sharedAutoPullBusy = false;
   }
