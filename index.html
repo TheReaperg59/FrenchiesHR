@@ -5289,7 +5289,7 @@ function save(opts) {
       const remoteMeta = readStoredMeta();
       if (remoteMeta && Number(remoteMeta.rev || 0) > Number(s.meta.rev || 0)) {
         setSyncChip('behind', 'Skipped save — another tab has rev ' + remoteMeta.rev);
-        if (!quiet) toast('Another tab has newer data — pulling it');
+        if (!quiet) toast('Another tab has newer data — refreshing it');
         pullRemote({ reason: 'stale-save' });
         return false;
       }
