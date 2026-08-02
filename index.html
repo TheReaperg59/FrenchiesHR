@@ -3095,17 +3095,15 @@ body.session-staff #pullSharedBtn{display:none!important}
     <select id="incKind"><option value="">All kinds</option></select>
     <input class="search" id="incSearch" placeholder="Search source, notes, who">
     <button class="btn tiny soft" type="button" id="incQuickRegister">+$1,000 bar register</button>
-    <button class="btn tiny soft" type="button" id="incQuickTipJar" hidden title="Staff keep 100% of tips — tip jar is not booked as house income">Log tip jar</button>
     <button class="btn tiny soft" type="button" id="incQuickDeposit">Log deposit</button>
-    <button class="btn tiny soft" type="button" id="incApplyTipJar" hidden title="Staff keep 100% of tips — tip pool from jar is unused">Apply tip jar to pool</button>
     <span class="pill gray" id="incFilterLabel">Showing all</span>
   </div>
   <div class="card"><div class="card-head"><b>Income log</b><span class="pill gray" id="incTableCount">0</span></div>
-    <div class="table-scroll"><table><thead><tr><th>Date</th><th>Kind</th><th>Source</th><th>Station</th><th class="r">Amount</th><th class="r">Tips→pool</th><th>Logged by</th><th>Notes</th><th class="r">Action</th></tr></thead><tbody id="incomes"></tbody></table></div>
+    <div class="table-scroll"><table><thead><tr><th>Date</th><th>Kind</th><th>What was sold / notes</th><th>Station</th><th class="r">Amount</th><th>Logged by</th><th>Notes</th><th class="r">Action</th></tr></thead><tbody id="incomes"></tbody></table></div>
   </div>
   <div class="grid-2" style="margin-top:12px">
     <div class="card"><div class="card-head"><b>By kind</b><span class="pill gray" id="incByKindLabel">Shown</span></div>
-      <table><thead><tr><th>Kind</th><th class="r">Entries</th><th class="r">Total</th><th class="r">Tips→pool</th></tr></thead><tbody id="incByKind"></tbody></table>
+      <table><thead><tr><th>Kind</th><th class="r">Entries</th><th class="r">Total</th></tr></thead><tbody id="incByKind"></tbody></table>
     </div>
     <div class="card"><div class="card-head"><b>Register stations</b><span class="pill gray">Shown</span></div>
       <table><thead><tr><th>Station</th><th class="r">Entries</th><th class="r">Total</th></tr></thead><tbody id="incByStation"></tbody></table>
@@ -3283,7 +3281,7 @@ body.session-staff #pullSharedBtn{display:none!important}
 <!-- REPORTS -->
 <section class="view" id="view-reports" role="region" aria-labelledby="title-reports" tabindex="-1">
   <div class="header">
-    <div><div class="eyebrow">Office</div><h1 class="title" id="title-reports">Reports</h1><div class="subtitle">Monthly and yearly payroll, staff rankings, and house spend.</div></div>
+    <div><div class="eyebrow">Office</div><h1 class="title" id="title-reports">Reports</h1><div class="subtitle">Monthly and yearly payroll, staff rankings, and house P&amp;L (income − payroll − expenses).</div></div>
     <div class="actions">
       <select id="reportYear" style="border:1px solid var(--line);border-radius:7px;padding:8px 10px;background:var(--paper);font-size:.78rem"></select>
       <button class="btn" id="csvMonthly">Export CSV</button>
@@ -3341,6 +3339,10 @@ body.session-staff #pullSharedBtn{display:none!important}
     <div class="table-scroll" style="max-height:320px">
       <table><thead><tr><th>Period</th><th>Status</th><th class="r">Hours</th><th class="r">Wages</th><th class="r">Bonus</th><th class="r">Tips</th><th class="r">Gross</th><th class="r">Paid</th><th class="r">Owed</th><th class="r"></th></tr></thead><tbody id="yearPeriods"></tbody></table>
     </div>
+  </div>
+  <div class="card"><div class="card-head"><b>House P&amp;L by month</b><span class="pill gray" id="housePnlYearLabel">Year</span></div>
+    <div class="mini-note" style="padding:8px 16px 0">Income − payroll gross − expenses by calendar month (same year as the Reports selector).</div>
+    <div class="table-scroll"><table><thead><tr><th>Month</th><th class="r">Income</th><th class="r">Payroll</th><th class="r">Expenses</th><th class="r">Net house</th></tr></thead><tbody id="housePnlMonthly"></tbody></table></div>
   </div>
   <div class="card"><div class="card-head"><b>Yearly payroll</b><span class="pill gray">All years on file</span></div>
     <div class="table-scroll"><table><thead><tr><th>Year</th><th class="r">Periods</th><th class="r">Hours</th><th class="r">Wages</th><th class="r">Bonus</th><th class="r">Tips</th><th class="r">Gross</th><th class="r">Paid</th><th class="r">Owed</th></tr></thead><tbody id="yearly"></tbody></table></div>
@@ -3402,14 +3404,14 @@ body.session-staff #pullSharedBtn{display:none!important}
       <button class="btn" id="importJson">Import JSON</button>
     </div></div>
   </div>
-  <div class="card mgmt-only" style="margin-top:12px" data-mgmt-only><div class="card-head"><b>Shared desk sync</b><span class="pill gray" id="sharedDeskBuildPill">v38</span></div>
+  <div class="card mgmt-only" style="margin-top:12px" data-mgmt-only><div class="card-head"><b>Shared desk sync</b><span class="pill gray" id="sharedDeskBuildPill">v46</span></div>
     <div class="card-body">
-      <p class="ui-hint"><b>Publish to domain</b> tries to write your redacted pack to the raw URL (when the host allows PUT). If that fails, it downloads the JSON — follow the Tiiny checklist below, then <b>Pull</b> on other PCs. PINs / passwords stay on each browser.</p>
-      <div class="field"><label>Shared raw URL (same file every PC pulls)</label><input id="sharedDeskUrlSetting" placeholder="https://yourdomain/…/frenchies-shared-desk.json"></div>
+      <p class="ui-hint"><b>Preferred:</b> Publish / Pull via <b>Supabase</b> (same URL + anon key as Income). Pack is PIN-redacted; each browser keeps local hashed PINs. <b>Fallback:</b> Tiiny raw URL PUT / download checklist below.</p>
+      <div class="field"><label>Shared raw URL (Tiiny fallback — optional if Supabase is set)</label><input id="sharedDeskUrlSetting" placeholder="https://yourdomain/…/frenchies-shared-desk.json"></div>
       <div class="mini-note" id="sharedDeskLiveStatus" style="margin:8px 0">No publish yet this session.</div>
       <div id="sharedPublishChecklist" class="roadmap-panel" style="display:none;margin:10px 0"></div>
       <div class="actions" style="margin-top:10px">
-        <button type="button" class="btn primary" id="publishSharedBtn">Publish to domain</button>
+        <button type="button" class="btn primary" id="publishSharedBtn">Publish shared desk</button>
         <button type="button" class="btn soft" id="downloadSharedPackBtn">Download pack only</button>
         <button type="button" class="btn soft" id="probeSharedAheadBtn">Check if shared ahead</button>
         <button type="button" class="btn soft" id="pullSharedFromBackupBtn">Pull shared desk…</button>
@@ -3931,13 +3933,11 @@ body.session-staff #pullSharedBtn{display:none!important}
   </div>
   <div class="field-row">
     <div class="field"><label>Amount ($)</label><input id="incAmount" type="number" min="0" step="1" placeholder="0"></div>
-    <div class="field"><label>Tips → pool ($)</label><input id="incTipsToPool" type="number" min="0" step="1" placeholder="0" disabled title="Unused — staff keep 100% of tips; not house income"></div>
-  </div>
-    <div class="field"><label>What was sold / notes</label><input id="incSource" placeholder="Food & drinks sold, or notes for deposit / treasury"></div>
-  <div class="field-row">
     <div class="field"><label>Station</label><select id="incStation"></select></div>
-    <div class="field"><label>Logged by</label><input id="incPaidBy" placeholder="Who logged / player name"></div>
   </div>
+  <input type="hidden" id="incTipsToPool" value="0">
+  <div class="field"><label>What was sold / notes</label><input id="incSource" placeholder="Food & drinks sold, or notes for deposit / treasury"></div>
+  <div class="field"><label>Logged by</label><input id="incPaidBy" placeholder="Who logged / player name"></div>
   <div class="field" id="incEventWrap" style="display:none"><label>Linked event</label><select id="incEventId"><option value="">—</option></select></div>
   <div class="field-row">
     <div class="field"><label>Receipt / reference</label><input id="incReceipt" placeholder="Optional"></div>
@@ -4240,7 +4240,7 @@ body.session-staff #pullSharedBtn{display:none!important}
     <div class="field"><label>High-hours warning threshold</label><input id="setOtHours" type="number" min="1" step="0.5" value="40"></div>
     <div class="field"><label>Stay-logged-in days</label><select id="setSessionDays"><option value="1">1</option><option value="7">7</option><option value="14" selected>14</option><option value="30">30</option></select></div>
     <div class="field"><label>House PIN (first sign-in)</label><input id="setHousePass" type="password" inputmode="numeric" pattern="[0-9]*" placeholder="Leave blank to keep current · 6+ digits" autocomplete="new-password"></div>
-    <p class="ui-hint" style="margin:-6px 0 10px">ECRP: 6+ digit PIN shown on Account login papers for new hires — not printed on the login screen. Staff then create their own PIN. Owner may keep a personal master password (letters OK) after first sign-in.</p>
+    <p class="ui-hint" style="margin:-6px 0 10px">ECRP: 6+ digit PIN, stored hashed. After hashing, hire papers say “ask HR” instead of printing it — share the PIN privately. Staff then create their own hashed PIN. Owner may keep a personal master password (letters OK).</p>
     <div class="field"><label>Shared desk raw URL</label><input id="setSharedUrl" placeholder="https://…/frenchies-shared-desk.json"></div>
     <label class="checkline"><input type="checkbox" id="setSharedAutoPull"><span>Auto-pull shared desk on login / tab focus (mgmt &amp; leads)</span></label>
     <div class="field"><label>Handbook Google Doc URL</label><input id="setHandbookUrl" placeholder="https://docs.google.com/document/d/…"></div>
@@ -4252,11 +4252,12 @@ body.session-staff #pullSharedBtn{display:none!important}
     <div class="field"><label>HR desk log webhook</label><input id="setWhHrLog" placeholder="https://discord.com/api/webhooks/…" autocomplete="off"></div>
     <div class="field"><label>Announcements webhook</label><input id="setWhAnnounce" placeholder="https://discord.com/api/webhooks/…" autocomplete="off"></div>
     <div class="field"><label>Income reports webhook (#hr-income-reports)</label><input id="setWhIncomeReports" placeholder="https://discord.com/api/webhooks/…" autocomplete="off"></div>
-    <h3 style="margin:16px 0 8px;font:700 .72rem 'DM Sans',sans-serif;letter-spacing:.08em;text-transform:uppercase;color:var(--muted)">Supabase Discord income feed</h3>
-    <p class="ui-hint" style="margin:0 0 10px">Discord <code>/register</code> modal writes here; Income tab pulls pending rows. See <code>supabase/README.md</code>. Anon key is redacted from shared packs.</p>
+    <h3 style="margin:16px 0 8px;font:700 .72rem 'DM Sans',sans-serif;letter-spacing:.08em;text-transform:uppercase;color:var(--muted)">Supabase (income + shared desk)</h3>
+    <p class="ui-hint" style="margin:0 0 10px">Same project for Discord income pull and multi-PC shared desk Publish/Pull. Run <code>desk_shared_state</code> SQL migration. Anon key is redacted from shared packs. See <code>supabase/README.md</code>.</p>
     <div class="field"><label>Supabase URL</label><input id="setSupabaseUrl" placeholder="https://xxxx.supabase.co" autocomplete="off"></div>
     <div class="field"><label>Supabase anon key</label><input id="setSupabaseAnon" placeholder="eyJ…" autocomplete="off"></div>
     <label class="checkline"><input type="checkbox" id="setRegisterAutoPull" checked><span>Auto-pull register sales on login / focus / Income tab</span></label>
+    <label class="checkline"><input type="checkbox" id="setSharedPreferSupabase" checked><span>Prefer Supabase for shared desk Publish / Pull (fallback to Tiiny URL)</span></label>
     <label class="checkline"><input type="checkbox" id="setQuietMode"><span>Quiet mode (less motion / hover)</span></label>
     <label class="checkline"><input type="checkbox" id="setRequireNotes"><span>Warn if closing period without notes</span></label>
     <label class="checkline"><input type="checkbox" id="setCompactTodos"><span>Compact to-do rows by default</span></label>
@@ -4322,13 +4323,15 @@ const LOG_TYPES = {
 };
 const TIP_ROLES_DEFAULT = ['Waiter', 'Hostess', 'Cook'];
 const TIP_ROLES = TIP_ROLES_DEFAULT; /* legacy alias — use tipRoles() */
-const DESK_BUILD = 'v45';
-/** ECRP: house first-sign-in secret is a 6+ digit PIN (override in Settings). */
+const DESK_BUILD = 'v46';
+/** ECRP: house first-sign-in secret is a 6+ digit PIN (override in Settings). Stored hashed after first use/set. */
 const HOUSE_LOGIN_PIN = '86368636';
 const HOUSE_LOGIN_PASSWORD = HOUSE_LOGIN_PIN; /* legacy alias — prefer settings.housePassword */
 const LOGIN_FAIL_KEY = 'frenchies_login_fails_v1';
 const LOGIN_FAIL_MAX = 5;
 const LOGIN_FAIL_LOCK_MS = 60000;
+const PIN_HASH_PREFIX = 'v1$';
+const PIN_HASH_ITERATIONS = 120000;
 const SESSION_KEY = 'frenchies_desk_session';
 const SESSION_DURABLE_KEY = 'frenchies_desk_session_durable';
 const MGMT_ROLES = ['Owner', 'District Manager', 'Store Manager', 'HR Director', 'Operations Manager'];
@@ -5030,6 +5033,7 @@ function ensureMeta() {
   if (!('sessionDays' in s.settings)) s.settings.sessionDays = 14;
   if (!('sharedDeskUrl' in s.settings)) s.settings.sharedDeskUrl = '';
   if (!('sharedAutoPull' in s.settings)) s.settings.sharedAutoPull = false;
+  if (!('sharedPreferSupabase' in s.settings)) s.settings.sharedPreferSupabase = true;
   if (!('supabaseUrl' in s.settings)) s.settings.supabaseUrl = '';
   if (!('supabaseAnonKey' in s.settings)) s.settings.supabaseAnonKey = '';
   if (!('registerAutoPull' in s.settings)) s.settings.registerAutoPull = true;
@@ -6194,6 +6198,11 @@ function housePassword() {
   const fromSettings = (s.settings && s.settings.housePassword) ? String(s.settings.housePassword).trim() : '';
   return fromSettings || HOUSE_LOGIN_PIN;
 }
+function housePinPaperValue() {
+  const h = housePassword();
+  if (isStoredHash(h)) return 'Ask HR privately (not printed)';
+  return h;
+}
 function isDigitPin(raw) {
   return /^\d{6,20}$/.test(String(raw || ''));
 }
@@ -6216,25 +6225,99 @@ function isWeakPin(raw) {
   }
   return !!(asc || desc);
 }
+function isStoredHash(stored) {
+  return String(stored || '').indexOf(PIN_HASH_PREFIX) === 0;
+}
+function b64urlFromBuf(buf) {
+  const bytes = buf instanceof ArrayBuffer ? new Uint8Array(buf) : new Uint8Array(buf.buffer || buf);
+  let s = '';
+  for (let i = 0; i < bytes.length; i++) s += String.fromCharCode(bytes[i]);
+  return btoa(s).replace(/\+/g, '-').replace(/\//g, '_').replace(/=+$/g, '');
+}
+function bufFromB64url(str) {
+  const clean = String(str || '');
+  const pad = clean.length % 4 === 0 ? '' : '='.repeat(4 - (clean.length % 4));
+  const b64 = clean.replace(/-/g, '+').replace(/_/g, '/') + pad;
+  const bin = atob(b64);
+  const out = new Uint8Array(bin.length);
+  for (let i = 0; i < bin.length; i++) out[i] = bin.charCodeAt(i);
+  return out;
+}
+async function hashSecret(plain) {
+  if (!crypto || !crypto.subtle) throw new Error('Web Crypto unavailable — use a modern browser');
+  const salt = crypto.getRandomValues(new Uint8Array(16));
+  const keyMaterial = await crypto.subtle.importKey(
+    'raw',
+    new TextEncoder().encode(String(plain)),
+    'PBKDF2',
+    false,
+    ['deriveBits']
+  );
+  const bits = await crypto.subtle.deriveBits(
+    { name: 'PBKDF2', salt: salt, iterations: PIN_HASH_ITERATIONS, hash: 'SHA-256' },
+    keyMaterial,
+    256
+  );
+  return PIN_HASH_PREFIX + b64urlFromBuf(salt) + '$' + b64urlFromBuf(bits);
+}
+async function verifySecret(plain, stored) {
+  const sStored = String(stored || '');
+  const p = String(plain || '');
+  if (!isStoredHash(sStored)) return p === sStored;
+  const parts = sStored.split('$');
+  if (parts.length !== 3 || parts[0] !== 'v1') return false;
+  if (!crypto || !crypto.subtle) return false;
+  try {
+    const salt = bufFromB64url(parts[1]);
+    const expect = bufFromB64url(parts[2]);
+    const keyMaterial = await crypto.subtle.importKey(
+      'raw',
+      new TextEncoder().encode(p),
+      'PBKDF2',
+      false,
+      ['deriveBits']
+    );
+    const bits = await crypto.subtle.deriveBits(
+      { name: 'PBKDF2', salt: salt, iterations: PIN_HASH_ITERATIONS, hash: 'SHA-256' },
+      keyMaterial,
+      256
+    );
+    const got = new Uint8Array(bits);
+    if (got.length !== expect.length) return false;
+    let diff = 0;
+    for (let i = 0; i < got.length; i++) diff |= got[i] ^ expect[i];
+    return diff === 0;
+  } catch (err) {
+    return false;
+  }
+}
+async function storeSecretHashed(plain) {
+  return hashSecret(plain);
+}
 function empMayUseMasterPassword(e) {
   return !!(e && e.role === 'Owner');
 }
 function empNeedsPinMigration(e) {
   if (!e || !empHasOwnPassword(e)) return false;
   if (empMayUseMasterPassword(e)) return false;
-  return !isDigitPin(String(e.loginPassword || ''));
+  const stored = String(e.loginPassword || '');
+  if (isStoredHash(stored)) return false;
+  return !isDigitPin(stored);
 }
-function validatePersonalSecret(raw, e) {
+function empNeedsHashUpgrade(e) {
+  return !!(e && empHasOwnPassword(e) && !isStoredHash(String(e.loginPassword || '')));
+}
+async function validatePersonalSecret(raw, e) {
   const a = String(raw || '');
   if (empMayUseMasterPassword(e)) {
     if (a.length < 6) return { ok: false, msg: 'Master password or PIN must be at least 6 characters' };
-    if (a === housePassword()) return { ok: false, msg: 'Choose something other than the house PIN' };
+    if (await verifySecret(a, housePassword())) return { ok: false, msg: 'Choose something other than the house PIN' };
     if (isDigitPin(a) && isWeakPin(a)) return { ok: false, msg: 'That PIN is too easy to guess — pick different digits' };
     return { ok: true, kind: isDigitPin(a) ? 'pin' : 'master' };
   }
   if (!isDigitPin(a)) return { ok: false, msg: 'Personal PIN must be 6 or more digits (ECRP rule)' };
   if (isWeakPin(a)) return { ok: false, msg: 'PIN is too easy to guess — avoid repeats (111111) and sequences (123456)' };
-  if (a === housePassword()) return { ok: false, msg: 'Choose something other than the house PIN' };
+  if (await verifySecret(a, housePassword())) return { ok: false, msg: 'Choose something other than the house PIN' };
   return { ok: true, kind: 'pin' };
 }
 function validateHousePin(raw) {
@@ -6353,20 +6436,24 @@ function enterDeskSession(e, opts) {
   save({ quiet: true, skipSnapshot: true });
   setTimeout(function () { maybeAutoPullRegisterSales('login'); }, 900);
 }
-function completePasswordSetup(pass1, pass2) {
+async function completePasswordSetup(pass1, pass2) {
   const e = empById(pendingPasswordEmpId);
   if (!e) return { ok: false, msg: 'Sign-in expired — start again' };
   const a = String(pass1 || '');
   const b = String(pass2 || '');
   if (a !== b) return { ok: false, msg: empMayUseMasterPassword(e) ? 'Entries do not match' : 'PINs do not match' };
-  const check = validatePersonalSecret(a, e);
+  const check = await validatePersonalSecret(a, e);
   if (!check.ok) return check;
-  e.loginPassword = a;
+  try {
+    e.loginPassword = await storeSecretHashed(a);
+  } catch (err) {
+    return { ok: false, msg: 'Could not secure PIN — try another browser' };
+  }
   e.loginPasswordSetAt = today();
   pushEmpLog(e, {
     type: 'status',
     summary: check.kind === 'master' ? 'Personal master password created' : 'Personal desk PIN created',
-    detail: check.kind === 'master' ? 'Owner master password setup complete' : 'PIN setup complete (ECRP)'
+    detail: (check.kind === 'master' ? 'Owner master password' : 'PIN') + ' stored hashed (ECRP)'
   });
   save();
   enterDeskSession(e, { forceDurable: true });
@@ -6529,7 +6616,7 @@ function applySessionChrome() {
     el.style.display = mutate ? '' : 'none';
   });
 }
-function loginAsEmployee(username, password) {
+async function loginAsEmployee(username, password) {
   const lock = loginLockStatus();
   if (lock.locked) {
     return { ok: false, msg: 'Too many attempts — try again in ' + lock.waitSec + 's' };
@@ -6554,10 +6641,12 @@ function loginAsEmployee(username, password) {
   }
   ensureEmpLoginUsername(e);
   const hasOwn = empHasOwnPassword(e);
+  const houseStored = housePassword();
   if (hasOwn) {
-    if (p !== String(e.loginPassword)) {
+    const personalOk = await verifySecret(p, e.loginPassword);
+    if (!personalOk) {
       recordLoginFail();
-      if (p === housePassword()) {
+      if (await verifySecret(p, houseStored)) {
         return { ok: false, msg: 'House PIN no longer works — use your personal PIN (HR can reset)' };
       }
       return { ok: false, msg: empMayUseMasterPassword(e) ? 'Wrong PIN or master password' : 'Wrong PIN' };
@@ -6571,14 +6660,29 @@ function loginAsEmployee(username, password) {
       applySessionChrome();
       return { ok: true, emp: e, needPassword: true, migratePin: true };
     }
+    if (empNeedsHashUpgrade(e)) {
+      try {
+        e.loginPassword = await storeSecretHashed(p);
+        e.loginPasswordSetAt = e.loginPasswordSetAt || today();
+        save({ quiet: true, skipSnapshot: true });
+      } catch (err) {}
+    }
     enterDeskSession(e);
     return { ok: true, emp: e, needPassword: false };
   }
-  if (p !== housePassword()) {
+  if (!(await verifySecret(p, houseStored))) {
     recordLoginFail();
     return { ok: false, msg: 'First sign-in uses the house PIN from your Account login paper (ask HR)' };
   }
   clearLoginFails();
+  /* Upgrade plaintext house PIN to hash after successful first-sign-in check */
+  if (!isStoredHash(houseStored)) {
+    try {
+      ensureMeta();
+      s.settings.housePassword = await storeSecretHashed(p);
+      save({ quiet: true, skipSnapshot: true });
+    } catch (err) {}
+  }
   /* First-time: house PIN accepted → force personal PIN (or Owner master) setup */
   sessionUser = null;
   persistSession(null);
@@ -7825,6 +7929,7 @@ function openSettings() {
   if ($('setSessionDays')) $('setSessionDays').value = String(s.settings.sessionDays || 14);
   if ($('setSharedUrl')) $('setSharedUrl').value = s.settings.sharedDeskUrl || '';
   if ($('setSharedAutoPull')) $('setSharedAutoPull').checked = !!s.settings.sharedAutoPull;
+  if ($('setSharedPreferSupabase')) $('setSharedPreferSupabase').checked = s.settings.sharedPreferSupabase !== false;
   if ($('setHandbookUrl')) $('setHandbookUrl').value = handbookUrl();
   if ($('setHousePass')) { $('setHousePass').value = ''; $('setHousePass').placeholder = 'Leave blank to keep current'; }
   const dw = s.settings.discordWebhooks || {};
@@ -7844,7 +7949,7 @@ function closeSettings() {
   if (!d) return;
   d.classList.remove('open'); d.setAttribute('hidden', '');
 }
-function saveSettings() {
+async function saveSettings() {
   if (!requireMgmt('Settings')) return;
   ensureMeta();
   s.settings.paydayLabel = ($('setPaydayLabel').value || 'Sunday, 9:00 AM').trim();
@@ -7858,16 +7963,24 @@ function saveSettings() {
   if ($('setSessionDays')) s.settings.sessionDays = Number($('setSessionDays').value) || 14;
   if ($('setSharedUrl')) s.settings.sharedDeskUrl = ($('setSharedUrl').value || '').trim();
   if ($('setSharedAutoPull')) s.settings.sharedAutoPull = !!$('setSharedAutoPull').checked;
+  if ($('setSharedPreferSupabase')) s.settings.sharedPreferSupabase = !!$('setSharedPreferSupabase').checked;
   if ($('setSupabaseUrl')) s.settings.supabaseUrl = ($('setSupabaseUrl').value || '').trim();
   if ($('setSupabaseAnon')) s.settings.supabaseAnonKey = ($('setSupabaseAnon').value || '').trim();
   if ($('setRegisterAutoPull')) s.settings.registerAutoPull = !!$('setRegisterAutoPull').checked;
   if ($('setHandbookUrl')) s.settings.handbookUrl = ($('setHandbookUrl').value || '').trim() || LINK_HANDBOOK;
+  let houseNote = '';
   if ($('setHousePass')) {
     const hp = ($('setHousePass').value || '').trim();
     if (hp) {
       const hpCheck = validateHousePin(hp);
       if (!hpCheck.ok) return toast(hpCheck.msg);
-      s.settings.housePassword = hp;
+      try {
+        s.settings.housePassword = await storeSecretHashed(hp);
+        $('setHousePass').value = '';
+        houseNote = ' · house PIN hashed (share privately; papers no longer print it)';
+      } catch (err) {
+        return toast('Could not hash house PIN — try another browser');
+      }
     }
   }
   s.settings.discordWebhooks = {
@@ -7878,13 +7991,14 @@ function saveSettings() {
     announcements: ($('setWhAnnounce') && $('setWhAnnounce').value || '').trim(),
     incomeReports: ($('setWhIncomeReports') && $('setWhIncomeReports').value || '').trim()
   };
-  save(); applyUiSettings(); closeSettings(); render(); toast('Settings saved');
+  save(); applyUiSettings(); closeSettings(); render(); toast('Settings saved' + houseNote);
 }
 
 function openChangelog() {
   const grid = $('upgradeGrid');
   if (grid) {
     const recent = [
+      ['v46', 'Hashed PINs (PBKDF2) · Supabase shared desk sync · tip-jar cleanup · house P&L by month on Reports'],
       ['v45', 'ECRP PIN login — staff 6+ digit PIN · house PIN on hire papers · Owner may keep master password · weak-PIN block + lockout'],
       ['v44', 'Discord field: What was sold / notes (replaces Source label — Kind already covers type)'],
       ['v43', 'No tip jar on Discord/desk logs — staff keep 100% tips · Discord modal: Kind, Station, Amount, Source, Date'],
@@ -9657,24 +9771,23 @@ function renderIncomes() {
     '</td>' +
     '<td>' + esc(x.station || '—') + '</td>' +
     '<td class="r mono">' + money(x.amount) + '</td>' +
-    '<td class="r mono">' + (x.kind === 'tips' ? money(x.tipsToPool || 0) : '—') + '</td>' +
     '<td>' + esc(x.paidBy || '—') + '</td>' +
     '<td>' + esc((x.notes || '').slice(0, 80) || '—') + '</td>' +
     '<td class="r"><button class="btn tiny" onclick="editIncome(' + x.id + ')">Edit</button> ' +
     '<button class="btn tiny soft" onclick="postIncomeLineDiscord(' + x.id + ')">Post</button> ' +
     '<button class="btn tiny danger" onclick="delIncome(' + x.id + ')">Delete</button></td>' +
     '</tr>'
-  ).join('') : emptyState('No income logged.', 'Log register drops, tip jars, or import #register-sales lines.');
+  ).join('') : emptyState('No income logged.', 'Log register drops, deposits, or pull Discord /register rows.');
 
   if ($('incByKind')) {
-    const keys = Object.keys(INCOME_KINDS).filter(k => byKind[k]).concat(Object.keys(byKind).filter(k => !INCOME_KINDS[k]));
-    const tipSum = list.reduce((a, x) => a + Number(x.tipsToPool || 0), 0);
+    const keys = Object.keys(INCOME_KINDS).filter(k => byKind[k] && k !== 'tips').concat(Object.keys(byKind).filter(k => !INCOME_KINDS[k] && k !== 'tips'));
+    if (byKind.tips) keys.push('tips');
     $('incByKind').innerHTML = keys.length
       ? keys.map(k => {
         const c = byKind[k];
-        return '<tr><td class="name">' + esc(incomeKindLabel(k)) + '</td><td class="r">' + c.n + '</td><td class="r mono">' + money(c.t) + '</td><td class="r mono">' + money(c.tips) + '</td></tr>';
+        return '<tr><td class="name">' + esc(incomeKindLabel(k)) + '</td><td class="r">' + c.n + '</td><td class="r mono">' + money(c.t) + '</td></tr>';
       }).join('') +
-      '<tr class="total"><td>Total</td><td class="r">' + list.length + '</td><td class="r mono">' + money(houseIncomeTotal(list)) + '</td><td class="r mono">' + money(tipSum) + '</td></tr>'
+      '<tr class="total"><td>Total</td><td class="r">' + list.length + '</td><td class="r mono">' + money(houseIncomeTotal(list)) + '</td></tr>'
       : emptyState('Nothing to summarize yet.');
     if ($('incByKindLabel')) $('incByKindLabel').textContent = list.length ? money(houseIncomeTotal(list)) : 'No rows';
   }
@@ -10049,6 +10162,56 @@ async function supabaseFetch(path, opts) {
   } catch (err) {
     return { ok: false, status: 0, error: String(err && err.message || err) };
   }
+}
+
+function preferSupabaseSharedDesk() {
+  ensureMeta();
+  return supabaseConfigured() && s.settings.sharedPreferSupabase !== false;
+}
+
+async function fetchSupabaseSharedDeskRow() {
+  const res = await supabaseFetch('/rest/v1/desk_shared_state?id=eq.frenchies&select=id,rev,pack,shared_at,build,updated_by&limit=1');
+  if (!res.ok) return res;
+  const row = Array.isArray(res.data) && res.data.length ? res.data[0] : null;
+  return { ok: true, row: row, status: res.status };
+}
+
+async function publishSharedDeskToSupabase(text, rev) {
+  ensureMeta();
+  let packObj;
+  try { packObj = JSON.parse(text); } catch (err) {
+    return { ok: false, error: 'pack json invalid' };
+  }
+  const who = (sessionUser && (sessionUser.name || sessionUser.username)) || 'desk';
+  const body = {
+    id: 'frenchies',
+    rev: Number(rev) || 0,
+    pack: packObj,
+    shared_at: new Date().toISOString(),
+    build: DESK_BUILD,
+    updated_by: String(who).slice(0, 120)
+  };
+  const res = await supabaseFetch('/rest/v1/desk_shared_state?on_conflict=id', {
+    method: 'POST',
+    prefer: 'resolution=merge-duplicates,return=representation',
+    body: body
+  });
+  if (!res.ok) return { ok: false, error: res.error || 'supabase publish failed', status: res.status };
+  return { ok: true, data: res.data, status: res.status };
+}
+
+async function pullSharedDeskPackFromSupabase() {
+  const fetched = await fetchSupabaseSharedDeskRow();
+  if (!fetched.ok) return { ok: false, error: fetched.error || 'supabase read failed' };
+  if (!fetched.row || !fetched.row.pack) return { ok: false, error: 'No shared desk row yet — Publish from a management PC first', empty: true };
+  return {
+    ok: true,
+    pack: fetched.row.pack,
+    rev: Number(fetched.row.rev || 0),
+    sharedAt: fetched.row.shared_at || '',
+    build: fetched.row.build || '',
+    updatedBy: fetched.row.updated_by || ''
+  };
 }
 
 function updateIncomeSupabaseChip(opts) {
@@ -10460,6 +10623,33 @@ function renderMonthly() {
   if ($('yearIncome')) $('yearIncome').textContent = money(incTotal);
   if ($('yearIncomeSub')) $('yearIncomeSub').textContent = yearInc.length + ' entries · ' + year;
   if ($('yearNetHouse')) $('yearNetHouse').textContent = money(incTotal - row.g - expTotal);
+
+  if ($('housePnlYearLabel')) $('housePnlYearLabel').textContent = String(year);
+  if ($('housePnlMonthly')) {
+    const pnlRows = ms.map((lab, i) => {
+      const ym = year + '-' + String(i + 1).padStart(2, '0');
+      const incM = yearInc.filter(x => String(x.date || '').slice(0, 7) === ym).reduce((a, x) => a + Number(x.amount || 0), 0);
+      const expM = yearExp.filter(x => String(x.date || '').slice(0, 7) === ym).reduce((a, x) => a + Number(x.amount || 0), 0);
+      const payM = Number((months[i] && months[i].g) || 0);
+      const netM = incM - payM - expM;
+      if (!incM && !expM && !payM) {
+        return '<tr><td>' + lab + '</td><td class="r">—</td><td class="r">—</td><td class="r">—</td><td class="r">—</td></tr>';
+      }
+      return '<tr><td class="name">' + lab + ' ' + year + '</td>' +
+        '<td class="r mono">' + money(incM) + '</td>' +
+        '<td class="r mono">' + money(payM) + '</td>' +
+        '<td class="r mono">' + money(expM) + '</td>' +
+        '<td class="r mono">' + money(netM) + '</td></tr>';
+    });
+    pnlRows.push(
+      '<tr class="total"><td>Year total</td>' +
+      '<td class="r mono">' + money(incTotal) + '</td>' +
+      '<td class="r mono">' + money(row.g) + '</td>' +
+      '<td class="r mono">' + money(expTotal) + '</td>' +
+      '<td class="r mono">' + money(incTotal - row.g - expTotal) + '</td></tr>'
+    );
+    $('housePnlMonthly').innerHTML = pnlRows.join('');
+  }
 
   const activeN = s.employees.filter(e => e.status === 'active').length;
   const probN = s.employees.filter(e => e.status === 'probation').length;
@@ -11637,8 +11827,8 @@ function letterLogin(c) {
     ff('Employee', c.name) +
     ff('Role', c.role) +
     ff('Username', user) +
-    ff('First sign-in PIN', housePassword() + ' (house PIN)') +
-    '<div class="letter-note">Username format is Firstname_Lastname from your legal name on file. Sign in once with the <b>house PIN</b> — the desk will ask you to create your own <b>personal PIN (6 or more digits)</b> before you continue. ECRP requires digit PINs for site logins (not word passwords). Do not post either PIN in public Discord channels — ask HR in person or DMs if you need it again.</div>' +
+    ff('First sign-in PIN', housePinPaperValue() + (isStoredHash(housePassword()) ? '' : ' (house PIN)')) +
+    '<div class="letter-note">Username format is Firstname_Lastname from your legal name on file. Sign in once with the <b>house PIN</b> from HR — the desk will ask you to create your own <b>personal PIN (6 or more digits)</b> before you continue. ECRP requires digit PINs for site logins (not word passwords). PINs are stored hashed on the desk. Do not post PINs in public Discord — ask HR in person or DMs.</div>' +
     '<h4>What you can see</h4>' +
     '<p>Access follows your role on the ladder. Owner and management see the full desk. Shift Leads see coverage and roster tools. Floor staff see their pay stubs, shifts, and handbook.</p>' +
     '<h4>Acknowledgement</h4>' +
@@ -12615,16 +12805,16 @@ function packetBody(a, kind, c) {
     return '<p>Welcome, <b>' + esc(c.name || 'employee') + '</b>. This is your <b>Account login information</b> — the final hire document before desk access is granted.</p>' +
       pkTerms([
         ['Your username', user],
-        ['First sign-in PIN', housePassword() + ' (house PIN)'],
+        ['First sign-in PIN', housePinPaperValue() + (isStoredHash(housePassword()) ? '' : ' (house PIN)')],
         ['Then', 'Create your own personal PIN (6 or more digits) on first desk sign-in'],
         ['Your role', c.role],
         ['Access starts', 'After Human Resources files this signed reply']
       ]) +
-      '<div class="note">Username is Firstname_Lastname from your name on file. First login uses the <b>house PIN</b>, then you must create your own <b>6+ digit PIN</b> (ECRP rule — digit PINs, not word passwords). Keep PINs out of public Discord — ask HR in person or DMs if needed. Floor staff see stubs, shifts, and the handbook; management sees the full desk.</div>' +
+      '<div class="note">Username is Firstname_Lastname from your name on file. First login uses the <b>house PIN</b> from HR (may be shared privately — not always printed), then you must create your own <b>6+ digit PIN</b> (ECRP). Desk stores PINs hashed. Keep PINs out of public Discord. Floor staff see stubs, shifts, and the handbook; management sees the full desk.</div>' +
       '<h2>Acknowledgements *</h2>' +
       '<p class="pk-hint">Tick every box before you sign:</p>' +
       pkBoxes('loginAck', [
-        'I received my username and the house PIN for first sign-in',
+        'I received my username and know how to get the house PIN for first sign-in',
         'I will create my own 6+ digit PIN when the desk asks, and keep it private',
         'I understand access starts only after Human Resources files this signed reply'
       ], true, true) +
@@ -16604,33 +16794,7 @@ if ($('confirmImportIncome')) $('confirmImportIncome').onclick = () => {
   toast('Added ' + ready.length + ' register income' + (ready.length === 1 ? '' : 's'));
 };
 if ($('incQuickRegister')) $('incQuickRegister').onclick = () => openIncomeForm(null, { kind: 'register', amount: 1000, station: 'Bar', source: 'Bar register' });
-if ($('incQuickTipJar')) $('incQuickTipJar').onclick = () => openIncomeForm(null, { kind: 'tips', source: 'Tip jar' });
 if ($('incQuickDeposit')) $('incQuickDeposit').onclick = () => openIncomeForm(null, { kind: 'deposit', source: 'House deposit' });
-if ($('incApplyTipJar')) $('incApplyTipJar').onclick = () => {
-  if (!requireIncomeEdit('Apply tip jar')) return;
-  const win = incomePeriodWindow();
-  const pending = filteredIncomes({ win: win, kind: 'tips', q: '' }).filter(x => !x.tipPoolApplied && Number(x.tipsToPool || x.amount || 0) > 0);
-  if (!pending.length) return toast('No unapplied tip jar rows in this filter');
-  const beforeIncomes = JSON.parse(JSON.stringify(s.incomes || []));
-  const p = workingPeriod();
-  const beforePool = p ? Number(p.tipPool || 0) : 0;
-  const beforeEntries = p ? JSON.parse(JSON.stringify(p.entries || {})) : null;
-  let applied = 0;
-  pending.forEach(row => {
-    const res = applyTipJarToPool(row, { skipUndo: true, quiet: true });
-    if (res && res.ok) applied += res.amount;
-  });
-  if (!applied) return toast('Nothing applied');
-  pushUndo({
-    label: 'apply tip jars',
-    restore: () => {
-      s.incomes = beforeIncomes;
-      if (p && beforeEntries) { p.tipPool = beforePool; p.entries = beforeEntries; }
-    }
-  });
-  save(); render();
-  toast('Applied ' + money(applied) + ' to tip pool');
-};
 ['incPeriod', 'incKind'].forEach(id => { if ($(id)) $(id).onchange = () => renderIncomes(); });
 if ($('incSearch')) $('incSearch').oninput = () => renderIncomes();
 if ($('ovGotoIncome')) $('ovGotoIncome').onclick = () => goView('income');
@@ -17014,22 +17178,32 @@ if (!sessionUser) {
 
 applySessionChrome();
 if ($('loginSignInPanel')) {
-  $('loginSignInPanel').onsubmit = (ev) => {
+  $('loginSignInPanel').onsubmit = async (ev) => {
     ev.preventDefault();
-    const res = loginAsEmployee($('loginUser').value, $('loginPass').value);
-    if ($('loginErr')) $('loginErr').textContent = res.ok ? '' : (res.msg || 'Sign-in failed');
-    if (res.ok && res.needPassword) {
-      if ($('loginErr')) $('loginErr').textContent = '';
-      toast(res.migratePin ? 'ECRP requires a PIN — create yours to continue' : 'Create your own PIN to continue');
-    } else if (res.ok) toast('Welcome, ' + res.emp.name);
+    if ($('loginSubmit')) $('loginSubmit').disabled = true;
+    try {
+      const res = await loginAsEmployee($('loginUser').value, $('loginPass').value);
+      if ($('loginErr')) $('loginErr').textContent = res.ok ? '' : (res.msg || 'Sign-in failed');
+      if (res.ok && res.needPassword) {
+        if ($('loginErr')) $('loginErr').textContent = '';
+        toast(res.migratePin ? 'ECRP requires a PIN — create yours to continue' : 'Create your own PIN to continue');
+      } else if (res.ok) toast('Welcome, ' + res.emp.name);
+    } finally {
+      if ($('loginSubmit')) $('loginSubmit').disabled = false;
+    }
   };
 }
 if ($('loginSetupPanel')) {
-  $('loginSetupPanel').onsubmit = (ev) => {
+  $('loginSetupPanel').onsubmit = async (ev) => {
     ev.preventDefault();
-    const res = completePasswordSetup($('setupPass').value, $('setupPass2').value);
-    if ($('setupErr')) $('setupErr').textContent = res.ok ? '' : (res.msg || 'Could not save PIN');
-    if (res.ok) toast('PIN saved · welcome, ' + res.emp.name);
+    if ($('setupSubmit')) $('setupSubmit').disabled = true;
+    try {
+      const res = await completePasswordSetup($('setupPass').value, $('setupPass2').value);
+      if ($('setupErr')) $('setupErr').textContent = res.ok ? '' : (res.msg || 'Could not save PIN');
+      if (res.ok) toast('PIN saved · welcome, ' + res.emp.name);
+    } finally {
+      if ($('setupSubmit')) $('setupSubmit').disabled = false;
+    }
   };
 }
 if ($('setupCancel')) {
@@ -18524,8 +18698,28 @@ function showSharedPublishChecklist(opts) {
 async function probeSharedDeskAhead() {
   if (!canEditHours() && !canMutateDesk()) return toast('Leads and management only');
   ensureMeta();
+  const localRev = Number((s.meta && s.meta.rev) || 0);
+  if (preferSupabaseSharedDesk()) {
+    setSharedDeskLiveStatus('Checking Supabase shared desk…');
+    try {
+      const pulled = await pullSharedDeskPackFromSupabase();
+      if (!pulled.ok) throw new Error(pulled.error || 'no row');
+      const remoteRev = Number(pulled.rev || 0);
+      const remoteAt = pulled.sharedAt || '';
+      let verdict;
+      if (remoteRev > localRev) verdict = 'Supabase ahead (rev ' + remoteRev + ' > local ' + localRev + ') — Pull when ready.';
+      else if (remoteRev < localRev) verdict = 'Local ahead (rev ' + localRev + ' > Supabase ' + remoteRev + ') — Publish when ready.';
+      else verdict = 'Same rev ' + localRev + (remoteAt ? ' · ' + remoteAt : '') + ' (Supabase).';
+      setSharedDeskLiveStatus(verdict);
+      toast(verdict);
+      return;
+    } catch (err) {
+      const msg = 'Supabase check failed — ' + (err && err.message ? err.message : 'error') + ' · trying Tiiny URL…';
+      setSharedDeskLiveStatus(msg);
+    }
+  }
   const url = ((s.settings && s.settings.sharedDeskUrl) || ($('sharedDeskUrlSetting') && $('sharedDeskUrlSetting').value) || '').trim();
-  if (!url) return toast('Set the shared raw URL first');
+  if (!url) return toast(preferSupabaseSharedDesk() ? 'Supabase empty/failed — set Tiiny raw URL or Publish first' : 'Set Supabase or shared raw URL first');
   setSharedDeskLiveStatus('Checking shared desk at ' + url + '…');
   try {
     const res = await fetch(url, { cache: 'no-store' });
@@ -18535,7 +18729,6 @@ async function probeSharedDeskAhead() {
     const migrated = migrate(parsed);
     if (!migrated || !migrated.employees) throw new Error('Not a desk pack');
     const remoteRev = Number((migrated.meta && migrated.meta.rev) || 0);
-    const localRev = Number((s.meta && s.meta.rev) || 0);
     const remoteAt = (migrated.meta && migrated.meta.updatedAt) || (migrated.meta && migrated.meta.sharedAt) || '';
     let verdict;
     if (remoteRev > localRev) verdict = 'Shared is ahead (rev ' + remoteRev + ' > local ' + localRev + ') — Pull when ready.';
@@ -18603,6 +18796,33 @@ async function publishSharedPack() {
     s.settings.sharedDeskUrl = url;
   }
   markExported();
+
+  if (preferSupabaseSharedDesk()) {
+    setSharedDeskLiveStatus('Publishing to Supabase…');
+    const sb = await publishSharedDeskToSupabase(text, s.meta.rev || 0);
+    if (sb.ok) {
+      s.meta.lastSharedPublishAt = new Date().toISOString();
+      s.meta.lastSharedPublishUrl = 'supabase:desk_shared_state';
+      save({ quiet: true });
+      setSharedDeskLiveStatus('Published to Supabase · rev ' + (s.meta.rev || 0) + ' · ' + (s.meta.lastSharedPublishAt || ''));
+      if ($('sharedPublishChecklist')) {
+        $('sharedPublishChecklist').style.display = '';
+        $('sharedPublishChecklist').innerHTML = '<h3 style="margin:0 0 8px">Published to Supabase</h3><p class="ui-hint">Other PCs with the same Supabase URL + anon key can <b>Pull shared desk</b> now. PINs stay local (hashed).</p>';
+      }
+      log('Shared desk published to Supabase (rev ' + (s.meta.rev || 0) + ')');
+      toast('Published shared desk to Supabase');
+      return;
+    }
+    setSharedDeskLiveStatus('Supabase publish failed (' + (sb.error || 'error') + ') — trying Tiiny / download…');
+    if (!url) {
+      downloadFile(text, name, 'application/json');
+      copyText(text, 'Supabase failed · pack downloaded. Run desk_shared_state SQL or set Tiiny URL.');
+      showSharedPublishChecklist({ filename: name, note: 'Supabase error: ' + (sb.error || 'unknown') + '. Confirm migration ran, or use Tiiny fallback.' });
+      log('Shared publish Supabase failed (' + (sb.error || '') + ')');
+      return;
+    }
+  }
+
   if (url) {
     setSharedDeskLiveStatus('Publishing to ' + url + '…');
     const result = await tryPublishSharedToUrl(text, url);
@@ -18617,7 +18837,7 @@ async function publishSharedPack() {
       }
       log('Shared desk published to URL (rev ' + (s.meta.rev || 0) + ')');
       toast('Published shared desk to your domain');
-      copyText(text, 'JSON also copied (passwords redacted)');
+      copyText(text, 'JSON also copied (PINs redacted)');
       return;
     }
     setSharedDeskLiveStatus('Live PUT blocked (' + result.error + '). Downloaded ' + name + ' — follow the Tiiny checklist.');
@@ -18628,10 +18848,10 @@ async function publishSharedPack() {
     return;
   }
   downloadFile(text, name, 'application/json');
-  copyText(text, 'No shared URL set · pack downloaded & copied. Set the raw URL, then Publish again.');
-  setSharedDeskLiveStatus('No shared raw URL set. Pack downloaded — set URL, upload to Tiiny Host, then Pull.');
-  showSharedPublishChecklist({ filename: name, note: 'Set the shared raw URL in Backup/Settings so other PCs can Pull.' });
-  log('Shared pack downloaded without URL (rev ' + (s.meta.rev || 0) + ')');
+  copyText(text, 'No Supabase/Tiiny target · pack downloaded & copied.');
+  setSharedDeskLiveStatus('Set Supabase (Settings) or a Tiiny raw URL, then Publish again.');
+  showSharedPublishChecklist({ filename: name, note: 'Set Supabase URL + anon key (preferred) or Tiiny raw URL.' });
+  log('Shared pack downloaded without target (rev ' + (s.meta.rev || 0) + ')');
 }
 
 function mergeLocalSecretsIntoShared(migrated, localState) {
@@ -18665,6 +18885,15 @@ function mergeLocalSecretsIntoShared(migrated, localState) {
   }
   if (localState.settings && typeof localState.settings.sharedAutoPull === 'boolean' && migrated.settings.sharedAutoPull == null) {
     migrated.settings.sharedAutoPull = localState.settings.sharedAutoPull;
+  }
+  if (!(migrated.settings.supabaseUrl || '').trim() && localState.settings && localState.settings.supabaseUrl) {
+    migrated.settings.supabaseUrl = localState.settings.supabaseUrl;
+  }
+  if (!(migrated.settings.supabaseAnonKey || '').trim() && localState.settings && localState.settings.supabaseAnonKey) {
+    migrated.settings.supabaseAnonKey = localState.settings.supabaseAnonKey;
+  }
+  if (localState.settings && typeof localState.settings.sharedPreferSupabase === 'boolean' && migrated.settings.sharedPreferSupabase == null) {
+    migrated.settings.sharedPreferSupabase = localState.settings.sharedPreferSupabase;
   }
   return migrated;
 }
@@ -18720,6 +18949,12 @@ async function confirmSharedPull() {
   let text = ($('sharedPaste') && $('sharedPaste').value || '').trim();
   const url = ($('sharedUrl') && $('sharedUrl').value || '').trim();
   try {
+    if (!text && !url && preferSupabaseSharedDesk()) {
+      const pulled = await pullSharedDeskPackFromSupabase();
+      if (!pulled.ok) throw new Error(pulled.error || 'Supabase pull failed');
+      text = typeof pulled.pack === 'string' ? pulled.pack : JSON.stringify(pulled.pack);
+      setSharedDeskLiveStatus('Loaded from Supabase · rev ' + pulled.rev + (pulled.updatedBy ? ' · ' + pulled.updatedBy : ''));
+    }
     if (!text && url) {
       const res = await fetch(url);
       if (!res.ok) throw new Error('Could not fetch URL (' + res.status + ')');
@@ -18727,7 +18962,7 @@ async function confirmSharedPull() {
       ensureMeta();
       s.settings.sharedDeskUrl = url;
     }
-    if (!text) return toast('Paste JSON or a URL first');
+    if (!text) return toast('Paste JSON, set a URL, or configure Supabase and Publish first');
     const parsed = JSON.parse(text);
     const migrated = migrate(parsed);
     if (!migrated || !migrated.employees) throw new Error('Not a desk file');
@@ -18736,8 +18971,6 @@ async function confirmSharedPull() {
     const remoteAt = (migrated.meta && migrated.meta.updatedAt) || (migrated.meta && migrated.meta.sharedAt) || '';
     const localAt = (s.meta && s.meta.updatedAt) || '';
     pendingSharedPull = { migrated, remoteRev, localRev, remoteAt, localAt };
-    const clash = remoteRev === localRev || remoteRev < localRev || remoteRev > localRev;
-    /* Always offer Keep mine / Take theirs when revs differ or equal with both sides present */
     if (remoteRev !== localRev || (remoteRev === localRev && remoteAt && localAt && remoteAt !== localAt)) {
       const box = $('sharedConflictBox');
       const msg = $('sharedConflictText');
@@ -18745,12 +18978,11 @@ async function confirmSharedPull() {
       if (msg) {
         msg.textContent = 'Local rev ' + localRev + (localAt ? ' (' + localAt + ')' : '') +
           ' vs shared rev ' + remoteRev + (remoteAt ? ' (' + remoteAt + ')' : '') +
-          '. Keep mine leaves this browser unchanged. Take theirs replaces the desk (snapshot kept).';
+          '. Keep mine leaves this browser unchanged. Take theirs replaces the desk (snapshot kept). Local hashed PINs are kept either way.';
       }
       toast('Conflict — choose Keep mine or Take theirs');
       return;
     }
-    /* Identical stamp — still confirm */
     if (!confirm('Shared pack matches local rev ' + localRev + '. Apply anyway?')) return;
     applySharedDesk(migrated, 'rev ' + remoteRev);
   } catch (err) {
@@ -18778,6 +19010,7 @@ function canSharedAutoPull() {
   if (!sessionUser) return false;
   if (!(canEditHours() || canMutateDesk())) return false;
   if (!(s.settings && s.settings.sharedAutoPull)) return false;
+  if (preferSupabaseSharedDesk()) return true;
   const url = (s.settings.sharedDeskUrl || '').trim();
   return !!url;
 }
@@ -18790,24 +19023,31 @@ async function maybeAutoPullSharedDesk(reason) {
   sharedAutoPullBusy = true;
   lastSharedAutoPullAt = Date.now();
   try {
-    const res = await fetch(url, { cache: 'no-store' });
-    if (!res.ok) throw new Error('fetch ' + res.status);
-    const text = await res.text();
-    const parsed = JSON.parse(text);
+    let parsed = null;
+    if (preferSupabaseSharedDesk()) {
+      const pulled = await pullSharedDeskPackFromSupabase();
+      if (!pulled.ok) {
+        if (pulled.empty) return;
+        throw new Error(pulled.error || 'supabase');
+      }
+      parsed = typeof pulled.pack === 'string' ? JSON.parse(pulled.pack) : pulled.pack;
+      if (pulled.sharedAt && parsed && parsed.meta) parsed.meta.sharedAt = parsed.meta.sharedAt || pulled.sharedAt;
+    } else {
+      const res = await fetch(url, { cache: 'no-store' });
+      if (!res.ok) throw new Error('fetch ' + res.status);
+      parsed = JSON.parse(await res.text());
+    }
     const migrated = migrate(parsed);
     if (!migrated || !migrated.employees) throw new Error('bad pack');
     const remoteRev = Number((migrated.meta && migrated.meta.rev) || 0);
     const localRev = Number((s.meta && s.meta.rev) || 0);
     const remoteAt = (migrated.meta && migrated.meta.updatedAt) || (migrated.meta && migrated.meta.sharedAt) || '';
     const localAt = (s.meta && s.meta.updatedAt) || '';
-    if (remoteRev < localRev) {
-      /* quieter when local is ahead */
-      return;
-    }
+    if (remoteRev < localRev) return;
     if (remoteRev === localRev && remoteAt && localAt && remoteAt === localAt) return;
     if (remoteRev === localRev && !remoteAt) return;
     pendingSharedPull = { migrated, remoteRev, localRev, remoteAt, localAt, auto: true };
-    if ($('sharedUrl')) $('sharedUrl').value = url;
+    if ($('sharedUrl') && url) $('sharedUrl').value = url;
     if ($('sharedPaste')) $('sharedPaste').value = '';
     $('sharedPullModal').classList.add('open');
     $('sharedPullModal').removeAttribute('hidden');
@@ -18816,12 +19056,12 @@ async function maybeAutoPullSharedDesk(reason) {
     if (box) box.style.display = '';
     if (msg) {
       msg.textContent = 'Auto-pull (' + (reason || 'focus') + '): local rev ' + localRev +
-        ' vs shared rev ' + remoteRev + '. Keep mine or Take theirs.';
+        ' vs shared rev ' + remoteRev + (preferSupabaseSharedDesk() ? ' (Supabase)' : '') +
+        '. Keep mine or Take theirs.';
     }
     toast('Shared desk update available · choose Keep mine or Take theirs');
   } catch (err) {
-    /* quiet fail on auto */
-    if (reason === 'login') toast('Shared auto-pull failed — check URL in Settings');
+    if (reason === 'login') toast('Shared auto-pull failed — check Supabase / URL in Settings');
   } finally {
     sharedAutoPullBusy = false;
   }

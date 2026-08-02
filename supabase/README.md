@@ -1,6 +1,14 @@
+# Frenchie's Supabase (Discord income + shared desk sync)
+
+## Shared desk sync (multi-PC)
+
+After the income feed is working, run [`migrations/20260801_desk_shared_state.sql`](migrations/20260801_desk_shared_state.sql) in the SQL Editor. Desk **Backup → Publish shared desk** writes a PIN-redacted pack to `desk_shared_state` (id `frenchies`). Other PCs with the same Supabase URL + anon key use **Pull shared desk**. Tiiny raw URL remains a fallback.
+
+---
+
 # Frenchie's register sales (Discord → Supabase → Income desk)
 
-Players log house income with Discord **`/register`** (a form/modal modeled on the desk **Log income** screen) or a **Log house income** button — not free-text chat. Each submission is saved in **Supabase**. Management’s **Income** tab **auto-pulls** those rows into the books with the correct kind, station, tips→pool, source, and **logged-by name**.
+Players log house income with Discord **`/register`** (a form/modal modeled on the desk **Log income** screen) or a **Log house income** button — not free-text chat. Each submission is saved in **Supabase**. Management’s **Income** tab **auto-pulls** those rows into the books with the correct kind, station, sold/notes, and **logged-by name**.
 
 Discord only allows **5 fields** in a modal, so the form matches the desk like this:
 
@@ -348,15 +356,15 @@ Notes:
 1. In Discord (as a player/staff account), go to `#register-sales`.
 2. Click **Log house income** (or type `/register`).
 3. Fill the modal (same ideas as desk **Log income**):
-   - **Kind:** `Register` (or `Deposit / Treasury` / `Tip jar`)
+   - **Kind:** `Register` (or `Deposit / Treasury`)
    - **Station:** `Bar` (or `—` for deposits)
    - **Amount ($):** `1000`
-   - **Tips → pool ($):** `0` (or tip-pool amount if Tip jar)
-   - **Source:** `Food & drinks till drop` / `House deposit`
-4. Submit — reply includes amount + **your Discord nick** as Logged by. Date is today automatically.
-5. `#register-sales` embed shows Kind, Amount, Station, Date, Logged by, Source.
-6. Supabase `register_sales` row: `pending`, correct `kind`, `paid_by`, `tips_to_pool`.
-7. Desk Income pull → matching kind + Logged by name (+ tips→pool for tip jar).
+   - **What was sold / notes:** `Food & drinks till drop` / `House deposit`
+   - **Date:** today
+4. Submit — reply includes amount + **your Discord nick** as Logged by.
+5. `#register-sales` embed shows Kind, Amount, Station, Date, Logged by, notes.
+6. Supabase `register_sales` row: `pending`, correct `kind`, `paid_by`.
+7. Desk Income pull → matching kind + Logged by name.
 8. Row becomes `booked`. Pull again — no duplicate.
 
 Backup path (if Discord/Supabase is down): Income → **Import Discord lines** still accepts:
@@ -374,7 +382,7 @@ You can pin this in `#register-sales` under the button:
 ```text
 Frenchie's house income
 • Tap “Log house income” or type /register
-• Pick Income type (Register, Tip jar, Event, Deposit / Treasury, Rebate, Other)
+• Pick Kind (Register, Event, Deposit / Treasury, Rebate, Other)
 • Pick Station (or None / House), Amount, Source / notes, Date
 • Do not paste free-text REGISTER lines unless a manager asks you to
 • Rows sync to the Income desk for management
@@ -541,16 +549,16 @@ If button post fails with **Missing Access**, `/register` still works — fix ch
 2. Run `/register` (or tap **Log house income**).
 3. Modal title should be **Log income**.
 4. Fill like the desk:
-   - **Kind:** Deposit / Treasury (or Tip jar / Register)
+   - **Kind:** Deposit / Treasury (or Register)
    - **Station:** —
    - **Amount ($):** `500`
-   - **Tips → pool ($):** `0` (or an amount if Tip jar)
-   - **Source:** `House deposit`
+   - **What was sold / notes:** `House deposit`
+   - **Date:** today
 5. Submit → reply includes your name and amount.
-6. `#register-sales` embed shows **Kind, Amount, Station, Date, Logged by, Source** (and Tips→pool when tip jar).
-7. Supabase row: `kind`, `tips_to_pool`, `paid_by` = your nick, `status = pending`.
+6. `#register-sales` embed shows **Kind, Amount, Station, Date, Logged by, notes**.
+7. Supabase row: `kind`, `paid_by` = your nick, `status = pending`.
 8. Desk → Income → **Pull from Supabase**.
-9. Income line should match kind + **Logged by** name + tips→pool when applicable.
+9. Income line should match kind + **Logged by** name.
 10. Supabase row → `booked`.
 
 ### Quick checklist
@@ -558,11 +566,12 @@ If button post fails with **Missing Access**, `/register` still works — fix ch
 | Done? | Step |
 |-------|------|
 | ☐ | Git pull upgrade branch / merged main |
-| ☐ | SQL: `kind` + `tips_to_pool` migrations |
+| ☐ | SQL: `kind` + `tips_to_pool` + `desk_shared_state` migrations |
 | ☐ | `supabase functions deploy discord-register --no-verify-jwt` |
 | ☐ | Re-run `register-discord-commands.mjs` |
-| ☐ | Upload desk `index.html` with **v42** |
-| ☐ | Test Tip jar / Deposit / Register → desk Pull shows Logged by |
+| ☐ | Upload desk `index.html` with **v46** |
+| ☐ | Test Deposit / Register → desk Pull shows Logged by |
+| ☐ | Publish shared desk to Supabase → Pull on another PC |
 
 ---
 
