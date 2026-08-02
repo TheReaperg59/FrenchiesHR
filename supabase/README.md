@@ -1,8 +1,13 @@
 # Frenchie's Supabase (Discord income + shared desk sync)
 
-## Shared desk sync (multi-PC)
+## Shared desk sync (multi-PC + live)
 
-After the income feed is working, run [`migrations/20260801_desk_shared_state.sql`](migrations/20260801_desk_shared_state.sql) in the SQL Editor. Desk **Backup → Publish shared desk** writes a PIN-redacted pack to `desk_shared_state` (id `frenchies`). Other PCs with the same Supabase URL + anon key use **Pull shared desk**. Publish refuses to silently overwrite a newer remote rev (confirm to force). Tiiny raw URL remains a fallback (edited under Backup, not Settings).
+After the income feed is working:
+
+1. Run [`migrations/20260801_desk_shared_state.sql`](migrations/20260801_desk_shared_state.sql) in the SQL Editor (creates the locker row table).
+2. Run [`migrations/20260802_desk_shared_realtime.sql`](migrations/20260802_desk_shared_realtime.sql) so Publish can ping open desks (Realtime).
+
+Desk **Backup → Publish shared desk** writes a pack to `desk_shared_state` (id `frenchies`). Packs strip PINs and Discord webhooks, but **include** Supabase URL + anon key so staff PCs can listen without opening Settings. Open desks (any signed-in user) quiet-apply when the cloud rev is ahead. Publish refuses to silently overwrite a newer remote rev (confirm to force). Owner-only Settings hold webhooks + Supabase keys. Tiiny raw URL remains an Owner-only fallback under Backup.
 
 ---
 
@@ -569,9 +574,10 @@ If button post fails with **Missing Access**, `/register` still works — fix ch
 | ☐ | SQL: `kind` + `tips_to_pool` + `desk_shared_state` migrations |
 | ☐ | `supabase functions deploy discord-register --no-verify-jwt` |
 | ☐ | Re-run `register-discord-commands.mjs` |
-| ☐ | Upload desk `index.html` with **v47** |
+| ☐ | Upload desk `index.html` with **v48** |
+| ☐ | SQL: `desk_shared_realtime` publication migration |
 | ☐ | Test Deposit / Register → desk Pull shows Logged by |
-| ☐ | Publish shared desk to Supabase → Pull on another PC |
+| ☐ | Owner Publish → staff PC updates live (no Pull) |
 
 ---
 
