@@ -2589,7 +2589,7 @@ body.session-staff #pullSharedBtn{display:none!important}
         <button type="button" class="top-account-item danger" id="logoutBtn" role="menuitem">Sign out</button>
         <button type="button" class="top-account-item" id="logoutAllBtn" role="menuitem">Sign out all remembered</button>
         <div class="top-account-foot">
-          <span class="build-chip" id="deskBuildChip" title="Desk build">v49</span>
+          <span class="build-chip" id="deskBuildChip" title="Desk build">v50</span>
           <label class="top-jump-label" for="quickJump">Jump to</label>
           <select class="top-jump" id="quickJump" title="Jump to any tab">
             <option value="overview">Overview</option>
@@ -3430,14 +3430,13 @@ body.session-staff #pullSharedBtn{display:none!important}
       <button class="btn" id="importJson">Import JSON</button>
     </div></div>
   </div>
-  <div class="card mgmt-only" style="margin-top:12px" data-mgmt-only><div class="card-head"><b>Share with other desks</b><span class="pill gray" id="sharedDeskBuildPill">v49</span></div>
+  <div class="card mgmt-only" style="margin-top:12px" data-mgmt-only><div class="card-head"><b>Live office</b><span class="pill gray" id="sharedDeskBuildPill">v50</span></div>
     <div class="card-body">
-      <p class="ui-hint"><b>Live office:</b> After you share an update, other open desks refresh on their own. Staff just stay signed in. Personal PINs and Discord channel links stay private on each browser.</p>
-      <div class="field" data-owner-only><label>Host file link (fallback — Owner only)</label><input id="sharedDeskUrlSetting" placeholder="https://yourdomain/…/frenchies-shared-desk.json"></div>
-      <div class="mini-note" id="sharedDeskLiveStatus" style="margin:8px 0">No office share yet this session.</div>
+      <p class="ui-hint"><b>Automatic:</b> Every save quietly updates other open desks. No Share button — just work. Staff stay signed in. Personal PINs and Discord channel links stay private on each browser. Owner connects cloud office under Settings.</p>
+      <div class="field" data-owner-only><label>Host file link (recovery fallback — Owner only)</label><input id="sharedDeskUrlSetting" placeholder="https://yourdomain/…/frenchies-shared-desk.json"></div>
+      <div class="mini-note" id="sharedDeskLiveStatus" style="margin:8px 0">Live office idle this session.</div>
       <div id="sharedPublishChecklist" class="roadmap-panel" style="display:none;margin:10px 0"></div>
       <div class="actions" style="margin-top:10px">
-        <button type="button" class="btn primary" id="publishSharedBtn">Share with other desks</button>
         <button type="button" class="btn soft" id="downloadSharedPackBtn">Download office copy</button>
         <button type="button" class="btn soft" id="probeSharedAheadBtn">Check for newer office</button>
         <button type="button" class="btn soft" id="pullSharedFromBackupBtn">Load shared office…</button>
@@ -4275,8 +4274,8 @@ body.session-staff #pullSharedBtn{display:none!important}
       <div class="field"><label>Cloud office URL</label><input id="setSupabaseUrl" placeholder="https://xxxx.supabase.co" autocomplete="off"></div>
       <div class="field"><label>Cloud access key</label><input id="setSupabaseAnon" placeholder="eyJ…" autocomplete="off"></div>
       <label class="checkline"><input type="checkbox" id="setRegisterAutoPull" checked><span>Auto-check Discord income on login / focus / Income tab</span></label>
-      <label class="checkline"><input type="checkbox" id="setSharedPreferSupabase" checked><span>Use cloud office for live desk updates (fallback: host file link)</span></label>
-      <label class="checkline"><input type="checkbox" id="setSharedAutoPull"><span>If live updates fail, check for office updates on login (mgmt)</span></label>
+      <label class="checkline"><input type="checkbox" id="setSharedPreferSupabase" checked><span>Live office on — saves update other desks automatically (fallback: host file recovery)</span></label>
+      <label class="checkline"><input type="checkbox" id="setSharedAutoPull"><span>If live wire fails, check for office updates on login (mgmt)</span></label>
     </div>
     <h3 style="margin:16px 0 8px;font:700 .72rem 'DM Sans',sans-serif;letter-spacing:.08em;text-transform:uppercase;color:var(--muted)">Desk prefs</h3>
     <label class="checkline"><input type="checkbox" id="setQuietMode"><span>Quiet mode (less motion / hover)</span></label>
@@ -4344,7 +4343,7 @@ const LOG_TYPES = {
 };
 const TIP_ROLES_DEFAULT = ['Waiter', 'Hostess', 'Cook'];
 const TIP_ROLES = TIP_ROLES_DEFAULT; /* legacy alias — use tipRoles() */
-const DESK_BUILD = 'v49';
+const DESK_BUILD = 'v50';
 /** ECRP: house first-sign-in secret is a 6+ digit PIN (override in Settings). Stored hashed after first use/set. */
 const HOUSE_LOGIN_PIN = '86368636';
 const HOUSE_LOGIN_PASSWORD = HOUSE_LOGIN_PIN; /* legacy alias — prefer settings.housePassword */
@@ -5330,6 +5329,10 @@ function save(opts) {
     if (!opts.silentBroadcast) {
       broadcastSync({ type: 'state', rev: s.meta.rev, clientId: CLIENT_ID, at: s.meta.updatedAt });
     }
+    /* Cross-PC live: push quietly after real desk saves (not remote applies / meta stamps) */
+    if (!opts.skipAutoShare && !opts.skipRevBump) {
+      scheduleAutoShareOffice('save');
+    }
     return true;
   } catch (err) {
     if (!quiet) toast('Could not save — storage full. Export a backup now.');
@@ -5460,6 +5463,76 @@ function canListenSharedRealtime() {
 
 function markOwnSharedPublishEcho(sharedAt) {
   lastOwnSharedPublishAt = sharedAt || new Date().toISOString();
+}
+
+/* ---------- Auto live office share (no Share button) ---------- */
+let autoShareTimer = null;
+let autoShareBusy = false;
+let autoShareQueued = false;
+const AUTO_SHARE_DEBOUNCE_MS = 900;
+
+function canAutoShareOffice() {
+  return !!sessionUser && preferSupabaseSharedDesk() && supabaseConfigured() && !applyingRemote;
+}
+
+function scheduleAutoShareOffice(reason) {
+  if (!canAutoShareOffice()) return;
+  if (autoShareTimer) clearTimeout(autoShareTimer);
+  autoShareTimer = setTimeout(() => {
+    autoShareTimer = null;
+    flushAutoShareOffice(reason || 'save');
+  }, AUTO_SHARE_DEBOUNCE_MS);
+}
+
+async function flushAutoShareOffice(reason) {
+  if (!canAutoShareOffice()) return;
+  if (autoShareBusy) {
+    autoShareQueued = true;
+    return;
+  }
+  autoShareBusy = true;
+  try {
+    ensureMeta();
+    const text = buildSharedPackText();
+    const localRev = Number((s.meta && s.meta.rev) || 0);
+    let sb = await publishSharedDeskToSupabase(text, localRev);
+    if (!sb.ok && sb.error === 'remote-ahead') {
+      /* Another desk won the race — take theirs instead of clobbering */
+      setSyncChip('syncing', 'Catching up with another desk…');
+      setSharedDeskLiveStatus('Another desk was ahead — catching up…');
+      await handleSharedRealtimePing('auto-share-ahead');
+      return;
+    }
+    if (!sb.ok) {
+      setSyncChip('behind', 'Live share failed — ' + (sb.error || 'error'));
+      setSharedDeskLiveStatus('Live share failed — ' + (sb.error || 'error'));
+      return;
+    }
+    const publishedAt = sb.sharedAt || new Date().toISOString();
+    s.meta.lastSharedPublishAt = publishedAt;
+    s.meta.lastSharedPublishUrl = 'supabase:desk_shared_state';
+    s.meta.sharedAt = publishedAt;
+    markOwnSharedPublishEcho(publishedAt);
+    save({
+      quiet: true,
+      skipRevBump: true,
+      skipRevCheck: true,
+      skipAutoShare: true,
+      silentBroadcast: true,
+      skipSnapshot: true
+    });
+    setSharedDeskLiveStatus('Live · rev ' + localRev + (reason ? ' · ' + reason : '') + ' · ' + publishedAt);
+    setSyncChip('live', 'Office file is live across open desks');
+  } catch (err) {
+    setSyncChip('behind', 'Live share failed');
+    setSharedDeskLiveStatus('Live share failed — ' + ((err && err.message) ? err.message : 'error'));
+  } finally {
+    autoShareBusy = false;
+    if (autoShareQueued) {
+      autoShareQueued = false;
+      scheduleAutoShareOffice('queued');
+    }
+  }
 }
 
 function stopSupabaseSharedRealtime() {
@@ -5613,7 +5686,8 @@ async function handleSharedRealtimePing(reason) {
     const remoteAt = pulled.sharedAt || (migrated.meta && migrated.meta.sharedAt) || (migrated.meta && migrated.meta.updatedAt) || '';
     const localAt = (s.meta && s.meta.updatedAt) || '';
     if (remoteRev < localRev) {
-      setSyncChip('live', 'Live — this desk is ahead (Share with other desks to push)');
+      setSyncChip('live', 'Live — this desk is ahead (pushing…)');
+      scheduleAutoShareOffice('catch-up');
       return;
     }
     if (remoteRev === localRev && (!remoteAt || remoteAt === localAt || (s.meta && s.meta.sharedAt === remoteAt))) {
@@ -8123,7 +8197,6 @@ function cmdCommands() {
   cmds.push({ label: 'Bulk hours', hint: 'Payroll', run: () => openBulkHours() });
   cmds.push({ label: 'Apply clock since payday', hint: 'Payroll', run: () => applyClockHoursSincePayday() });
   cmds.push({ label: 'Sunday checklist', hint: 'Payroll', run: () => openSundayRunPreview() });
-  cmds.push({ label: 'Share with other desks', hint: 'Backup', run: () => publishSharedPack() });
   cmds.push({ label: 'Announce payday', hint: 'Discord', run: () => postPaydayAnnouncement() });
   cmds.push({ label: 'Log register drop', hint: 'Income', run: () => { goView('income'); setTimeout(() => openIncomeForm(null, { kind: 'register', amount: 1000, station: 'Bar', source: 'Bar register' }), 40); } });
   cmds.push({ label: 'Log deposit', hint: 'Income', run: () => { goView('income'); setTimeout(() => openIncomeForm(null, { kind: 'deposit', source: 'House deposit' }), 40); } });
@@ -8258,6 +8331,7 @@ function openChangelog() {
   const grid = $('upgradeGrid');
   if (grid) {
     const recent = [
+      ['v50', 'Auto live office — every save quietly updates other desks · Share button removed · catch-up if another desk is ahead'],
       ['v49', 'HR immersion labels — Pull from Discord · Share with other desks · cloud office wording · Discord chips'],
       ['v48', 'Live shared desk for everyone signed in · Owner-only webhooks/Supabase Settings · packs share URL+anon · staff need no Pull'],
       ['v47', 'Publish rev guard · keep Income Reports webhook on pull · tip-jar out of house P&L · Overview/Income/Settings declutter · honest Sync vs Pull'],
@@ -10504,7 +10578,7 @@ async function publishSharedDeskToSupabase(text, rev, opts) {
 async function pullSharedDeskPackFromSupabase() {
   const fetched = await fetchSupabaseSharedDeskRow();
   if (!fetched.ok) return { ok: false, error: fetched.error || 'supabase read failed' };
-  if (!fetched.row || !fetched.row.pack) return { ok: false, error: 'No shared office yet — Share with other desks from a management PC first', empty: true };
+  if (!fetched.row || !fetched.row.pack) return { ok: false, error: 'No shared office yet — make any desk change on a connected PC to start live sync', empty: true };
   return {
     ok: true,
     pack: fetched.row.pack,
@@ -17589,7 +17663,6 @@ if ($('promoEmp')) $('promoEmp').onchange = () => {
   $('promoRate').value = e.rate;
 };
 if ($('addAssetBtn')) $('addAssetBtn').onclick = () => addEmpAsset();
-if ($('publishSharedBtn')) $('publishSharedBtn').onclick = () => { publishSharedPack(); };
 if ($('downloadSharedPackBtn')) $('downloadSharedPackBtn').onclick = () => downloadSharedPackOnly();
 if ($('probeSharedAheadBtn')) $('probeSharedAheadBtn').onclick = () => probeSharedDeskAhead();
 if ($('pullSharedFromBackupBtn')) $('pullSharedFromBackupBtn').onclick = () => pullSharedDesk();
@@ -19050,9 +19123,21 @@ async function probeSharedDeskAhead() {
       const remoteRev = Number(pulled.rev || 0);
       const remoteAt = pulled.sharedAt || '';
       let verdict;
-      if (remoteRev > localRev) verdict = 'Shared office ahead (rev ' + remoteRev + ' > this desk ' + localRev + ') — Load shared office when ready.';
-      else if (remoteRev < localRev) verdict = 'This desk ahead (rev ' + localRev + ' > shared ' + remoteRev + ') — Share with other desks when ready.';
-      else verdict = 'Same rev ' + localRev + (remoteAt ? ' · ' + remoteAt : '') + ' (cloud office).';
+      if (remoteRev > localRev) {
+        verdict = 'Shared office ahead (rev ' + remoteRev + ' > this desk ' + localRev + ') — applying…';
+        setSharedDeskLiveStatus(verdict);
+        toast(verdict);
+        await handleSharedRealtimePing('probe');
+        return;
+      }
+      if (remoteRev < localRev) {
+        verdict = 'This desk ahead (rev ' + localRev + ' > shared ' + remoteRev + ') — pushing live…';
+        setSharedDeskLiveStatus(verdict);
+        toast(verdict);
+        scheduleAutoShareOffice('probe');
+        return;
+      }
+      verdict = 'In sync (rev ' + localRev + ')' + (remoteAt ? ' · ' + remoteAt : '') + ' (cloud office).';
       setSharedDeskLiveStatus(verdict);
       toast(verdict);
       return;
@@ -19062,7 +19147,7 @@ async function probeSharedDeskAhead() {
     }
   }
   const url = ((s.settings && s.settings.sharedDeskUrl) || ($('sharedDeskUrlSetting') && $('sharedDeskUrlSetting').value) || '').trim();
-  if (!url) return toast(preferSupabaseSharedDesk() ? 'Cloud office empty/failed — set host file link or Share first' : 'Set cloud office or host file link first');
+  if (!url) return toast(preferSupabaseSharedDesk() ? 'Cloud office empty/failed — Owner: check Settings / host file link' : 'Set cloud office or host file link first');
   setSharedDeskLiveStatus('Checking host file link…');
   try {
     const res = await fetch(url, { cache: 'no-store' });
@@ -19074,8 +19159,8 @@ async function probeSharedDeskAhead() {
     const remoteRev = Number((migrated.meta && migrated.meta.rev) || 0);
     const remoteAt = (migrated.meta && migrated.meta.updatedAt) || (migrated.meta && migrated.meta.sharedAt) || '';
     let verdict;
-    if (remoteRev > localRev) verdict = 'Shared office ahead (rev ' + remoteRev + ' > this desk ' + localRev + ') — Load shared office when ready.';
-    else if (remoteRev < localRev) verdict = 'This desk ahead (rev ' + localRev + ' > shared ' + remoteRev + ') — Share with other desks when ready.';
+    if (remoteRev > localRev) verdict = 'Shared office ahead (rev ' + remoteRev + ' > this desk ' + localRev + ') — use Load shared office if live wire is down.';
+    else if (remoteRev < localRev) verdict = 'This desk ahead (rev ' + localRev + ' > shared ' + remoteRev + ') — live push needs cloud office (Owner Settings).';
     else verdict = 'In sync (rev ' + localRev + ')' + (remoteAt ? ' · shared stamp ' + remoteAt : '') + '.';
     setSharedDeskLiveStatus(verdict);
     toast(verdict);
@@ -19128,91 +19213,14 @@ async function tryPublishSharedToUrl(text, url) {
   return { ok: false, error: lastErr || 'upload failed' };
 }
 
+/** Legacy entry — live office auto-shares on save; this only forces an immediate push. */
 async function publishSharedPack() {
-  if (!requireMgmt('Share with other desks')) return;
-  ensureMeta();
-  pushSnapshot('pre-publish');
-  const text = buildSharedPackText();
-  const name = 'frenchies-shared-desk-r' + (s.meta.rev || 0) + '.json';
-  const url = ((s.settings && s.settings.sharedDeskUrl) || ($('sharedDeskUrlSetting') && $('sharedDeskUrlSetting').value) || '').trim();
-  if (url && $('sharedDeskUrlSetting')) {
-    s.settings.sharedDeskUrl = url;
+  if (!sessionUser) return toast('Sign in first');
+  if (!preferSupabaseSharedDesk()) {
+    return toast('Owner: turn on live office / cloud office in Settings');
   }
-  markExported();
-
-  if (preferSupabaseSharedDesk()) {
-    setSharedDeskLiveStatus('Sharing office with other desks…');
-    let sb = await publishSharedDeskToSupabase(text, s.meta.rev || 0);
-    if (!sb.ok && sb.error === 'remote-ahead') {
-      const who = sb.updatedBy ? (' by ' + sb.updatedBy) : '';
-      const when = sb.remoteAt ? (' · ' + String(sb.remoteAt).replace('T', ' ').slice(0, 19)) : '';
-      const okOverwrite = confirm(
-        'The shared office is newer (rev ' + sb.remoteRev + who + when +
-        ').\n\nYour desk is rev ' + sb.localRev +
-        '.\n\nOverwrite the newer shared office? Prefer Load shared office first if you are not sure.'
-      );
-      if (!okOverwrite) {
-        setSharedDeskLiveStatus('Share cancelled — shared rev ' + sb.remoteRev + ' is ahead. Load shared office first.');
-        toast('Share cancelled — Load shared office first');
-        return;
-      }
-      sb = await publishSharedDeskToSupabase(text, s.meta.rev || 0, { forceOverwrite: true });
-    }
-    if (sb.ok) {
-      const publishedAt = sb.sharedAt || new Date().toISOString();
-      s.meta.lastSharedPublishAt = publishedAt;
-      s.meta.lastSharedPublishUrl = 'supabase:desk_shared_state';
-      s.meta.sharedAt = publishedAt;
-      markOwnSharedPublishEcho(publishedAt);
-      save({ quiet: true });
-      setSharedDeskLiveStatus('Shared with other desks · rev ' + (s.meta.rev || 0) + ' · ' + publishedAt);
-      if ($('sharedPublishChecklist')) {
-        $('sharedPublishChecklist').style.display = '';
-        $('sharedPublishChecklist').innerHTML = '<h3 style="margin:0 0 8px">Shared with other desks</h3><p class="ui-hint">Open desks update live. Staff just stay signed in. PINs and Discord channel links stay on each browser.</p>';
-      }
-      log('Shared office published (rev ' + (s.meta.rev || 0) + ')');
-      toast('Shared with other desks — they update live');
-      return;
-    }
-    setSharedDeskLiveStatus('Cloud share failed (' + (sb.error || 'error') + ') — trying host file / download…');
-    if (!url) {
-      downloadFile(text, name, 'application/json');
-      copyText(text, 'Cloud share failed · office copy downloaded. Owner: check cloud office setup or set host file link.');
-      showSharedPublishChecklist({ filename: name, note: 'Cloud error: ' + (sb.error || 'unknown') + '. Owner: finish cloud office setup, or use host file fallback.' });
-      log('Shared office cloud publish failed (' + (sb.error || '') + ')');
-      return;
-    }
-  }
-
-  if (url) {
-    setSharedDeskLiveStatus('Sharing to host file link…');
-    const result = await tryPublishSharedToUrl(text, url);
-    if (result.ok) {
-      s.meta.lastSharedPublishAt = new Date().toISOString();
-      s.meta.lastSharedPublishUrl = url;
-      save({ quiet: true });
-      setSharedDeskLiveStatus('Shared to host file · rev ' + (s.meta.rev || 0) + ' · ' + (s.meta.lastSharedPublishAt || ''));
-      if ($('sharedPublishChecklist')) {
-        $('sharedPublishChecklist').style.display = '';
-        $('sharedPublishChecklist').innerHTML = '<h3 style="margin:0 0 8px">Shared to host file</h3><p class="ui-hint">Other PCs can Load shared office now. Use Check for newer office to confirm.</p>';
-      }
-      log('Shared office published to host file (rev ' + (s.meta.rev || 0) + ')');
-      toast('Shared with other desks via host file');
-      copyText(text, 'Office JSON also copied (PINs hidden)');
-      return;
-    }
-    setSharedDeskLiveStatus('Host write blocked (' + result.error + '). Downloaded ' + name + ' — follow the checklist.');
-    downloadFile(text, name, 'application/json');
-    copyText(text, 'Host blocked live write · office copy downloaded — upload manually');
-    showSharedPublishChecklist({ filename: name, note: 'Live write blocked (' + result.error + '). Upload the downloaded file manually.' });
-    log('Shared office fell back to download (' + result.error + ')');
-    return;
-  }
-  downloadFile(text, name, 'application/json');
-  copyText(text, 'No cloud/host target · office copy downloaded.');
-  setSharedDeskLiveStatus('Set cloud office (Owner Settings) or a host file link, then Share again.');
-  showSharedPublishChecklist({ filename: name, note: 'Set cloud office URL + access key (preferred) or host file link.' });
-  log('Shared office downloaded without target (rev ' + (s.meta.rev || 0) + ')');
+  setSharedDeskLiveStatus('Pushing live office now…');
+  await flushAutoShareOffice('manual');
 }
 
 function mergeLocalSecretsIntoShared(migrated, localState) {
@@ -19329,7 +19337,7 @@ async function confirmSharedPull() {
       ensureMeta();
       s.settings.sharedDeskUrl = url;
     }
-    if (!text) return toast('Paste office JSON, set a host file link, or Share with other desks first');
+    if (!text) return toast('Paste office JSON, set a host file link, or wait for a live office save from another desk');
     const parsed = JSON.parse(text);
     const migrated = migrate(parsed);
     if (!migrated || !migrated.employees) throw new Error('Not a desk file');
