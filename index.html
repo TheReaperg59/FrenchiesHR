@@ -5073,6 +5073,10 @@ function ensureMeta() {
   if (!s.settings || typeof s.settings !== 'object') s.settings = {};
   const set = s.settings;
   if (!set.paydayLabel) set.paydayLabel = 'Sunday, 12:00 AM (midnight)';
+  /* Migrate old default payday time → Sunday midnight */
+  if (/^Sunday,?\s*9:00\s*AM$/i.test(String(set.paydayLabel || '').trim())) {
+    set.paydayLabel = 'Sunday, 12:00 AM (midnight)';
+  }
   if (!set.tipMode || !['equal','hours'].includes(set.tipMode)) set.tipMode = 'equal';
   if (!Array.isArray(set.tipRoles) || !set.tipRoles.length) set.tipRoles = TIP_ROLES_DEFAULT.slice();
   if (!set.otHours) set.otHours = 40;
