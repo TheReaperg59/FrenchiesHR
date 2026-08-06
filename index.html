@@ -2692,6 +2692,32 @@ body.dark .dropdown-item:hover { background: oklch(28% .01 240); }
   background: var(--card-bg, #fff); cursor: pointer; transition: background .15s; margin-left: 6px;
 }
 .portal-shortcut-btn:hover { background: oklch(96% .01 155); border-color: var(--green); }
+.chat-sidebar-item.active {
+  background: oklch(45% .15 155) !important;
+  border-left: 4px solid var(--gold, #f59e0b) !important;
+  color: #fff !important;
+  font-weight: 700 !important;
+  box-shadow: 0 2px 8px rgba(22, 163, 74, 0.35);
+}
+.chat-sidebar-item.active .chat-role-sub {
+  color: rgba(255,255,255,.8) !important;
+}
+.chat-emoji-toolbar {
+  position: absolute;
+  bottom: calc(100% + 8px);
+  right: 60px;
+  z-index: 1000;
+  background: #fff;
+  border: 1px solid oklch(88% .02 240);
+  border-radius: 8px;
+  padding: 8px 12px;
+  display: none;
+  gap: 8px;
+  box-shadow: 0 8px 24px rgba(0,0,0,.15);
+}
+.chat-emoji-toolbar.show {
+  display: flex !important;
+}
 </style>
 </head>
 <script src="frenchies-state.js" onerror="/* no state file yet — normal on first run */"></script>
@@ -4848,7 +4874,7 @@ const LOG_TYPES = {
 };
 const TIP_ROLES_DEFAULT = ['Waiter', 'Hostess', 'Cook'];
 const TIP_ROLES = TIP_ROLES_DEFAULT; /* legacy alias — use tipRoles() */
-const DESK_BUILD = 'v71';
+const DESK_BUILD = 'v72';
 /** ECRP: house first-sign-in secret is a 6+ digit PIN (override in Settings). Stored hashed after first use/set. */
 const HOUSE_LOGIN_PIN = '86368636';
 const HOUSE_LOGIN_PASSWORD = HOUSE_LOGIN_PIN; /* legacy alias — prefer settings.housePassword */
@@ -5426,6 +5452,7 @@ function migrate(raw) {
   const wasOld = !raw.version || raw.version < 7;
   if (wasOld) out.activity.unshift({ text: 'Office file upgraded to v7 — relations, shifts, tips, and paperwork added', date: today() });
   out.activity = out.activity.slice(0, ACTIVITY_CAP);
+  ensureDefaultChannels(out);
   return out;
 }
 
@@ -18618,6 +18645,7 @@ if (_stateLooksFresh) {
         migrated.meta.saveCount = Math.max(Number(migrated.meta.saveCount || 0), 100);
         s = migrated;
         ensureMeta();
+        ensureDefaultChannels();
         /* Fix period dates to Sun-Sat before saving */
         fixPeriodEndDays();
         const json = JSON.stringify(s);
@@ -18650,6 +18678,7 @@ if (_stateLooksFresh) {
 function finishBoot() {
 /* Fix period dates on every boot (covers localStorage path) */
 fixPeriodEndDays();
+ensureDefaultChannels();
 sessionUser = loadSession();
 if (!sessionUser) {
   const dur = loadDurableSession();
@@ -21268,9 +21297,9 @@ if (document.getElementById('loginImportBtn')) {
 /* ---- Chat & Messaging System ---- */
 let activeChatThreadId = 'ch_announcements';
 
-function ensureDefaultChannels() {
-  if (!s.channels) s.channels = [];
-  if (!s.messages) s.messages = [];
+function ensureDefaultChannels(state = s) {
+  if (!state.channels) state.channels = [];
+  if (!state.messages) state.messages = [];
   
   const defaults = [
     {id: 'ch_announcements', name: 'announcements', type: 'channel'},
@@ -21280,8 +21309,8 @@ function ensureDefaultChannels() {
   ];
   
   defaults.forEach(d => {
-    if (!s.channels.find(c => c.id === d.id)) {
-      s.channels.push(d);
+    if (!state.channels.find(c => c.id === d.id)) {
+      state.channels.push(d);
     }
   });
 }
@@ -21345,6 +21374,7 @@ function isMgmtUser(emp) {
 
 function renderMessagesView(filterStr = '') {
   if (!sessionUser) return;
+  ensureDefaultChannels(); // <--- GUARANTEES s.channels is initialized!
   const sessionUserEmp = sessionEmp();
   
   const f = filterStr.toLowerCase();
@@ -21376,19 +21406,18 @@ function renderMessagesView(filterStr = '') {
     const isOnline = (e.status === 'active') ? 'online' : '';
     const initials = (e.name || '?')[0].toUpperCase();
     
-    // Check unread DMs from this employee
     const unreadCount = (s.messages || []).filter(m => 
       m.channelId === dmId && String(m.from) === String(e.id) && (!m.readBy || !m.readBy[myEmpId])
     ).length;
     const unreadBadge = unreadCount > 0 ? `<span class="pill primary" style="margin-left:auto;font-size:.68rem">${unreadCount}</span>` : '';
 
     dmsHtml += `
-      <div class="chat-sidebar-item ${active}" onclick="switchChatThread('${dmId}')" style="display:flex;align-items:center;gap:10px;padding:8px 10px;">
+      <div class="chat-sidebar-item ${active}" onclick="switchChatThread('${dmId}')" style="display:flex;align-items:center;gap:10px;padding:8px 10px;cursor:pointer;">
         <span class="chat-status-dot ${isOnline}"></span>
         <div style="width:28px;height:28px;border-radius:50%;background:oklch(55% .16 155);color:#fff;display:flex;align-items:center;justify-content:center;font-size:.72rem;font-weight:700;flex-shrink:0">${esc(initials)}</div>
         <div style="flex:1;min-width:0;overflow:hidden;text-overflow:ellipsis;">
           <div style="font-weight:600;font-size:.82rem;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;">${esc(e.name)}</div>
-          <div style="font-size:.7rem;opacity:.7;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;">${esc(e.role || 'Staff')}</div>
+          <div class="chat-role-sub" style="font-size:.7rem;opacity:.7;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;">${esc(e.role || 'Staff')}</div>
         </div>
         ${unreadBadge}
       </div>
