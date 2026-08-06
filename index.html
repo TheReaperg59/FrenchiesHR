@@ -4588,7 +4588,7 @@ const LOG_TYPES = {
 };
 const TIP_ROLES_DEFAULT = ['Waiter', 'Hostess', 'Cook'];
 const TIP_ROLES = TIP_ROLES_DEFAULT; /* legacy alias — use tipRoles() */
-const DESK_BUILD = 'v61';
+const DESK_BUILD = 'v62';
 /** ECRP: house first-sign-in secret is a 6+ digit PIN (override in Settings). Stored hashed after first use/set. */
 const HOUSE_LOGIN_PIN = '86368636';
 const HOUSE_LOGIN_PASSWORD = HOUSE_LOGIN_PIN; /* legacy alias — prefer settings.housePassword */
@@ -6237,21 +6237,8 @@ async function handleSharedRealtimePing(reason) {
       setSyncChip('live', 'Office file is live across open desks');
       return;
     }
-    pendingSharedPull = { migrated, remoteRev, localRev, remoteAt, localAt, auto: true };
-    $('sharedPullModal').classList.add('open');
-    $('sharedPullModal').removeAttribute('hidden');
-    const box = $('sharedConflictBox');
-    const msg = $('sharedConflictText');
-    if (box) box.style.display = '';
-    if (msg) {
-      msg.textContent = 'Office update (' + (reason || 'live') + '): this desk rev ' + localRev +
-        ' vs shared rev ' + remoteRev +
-        (remoteAt ? ' · shared ' + String(remoteAt).replace('T', ' ').slice(0, 19) : '') +
-        (pulled.updatedBy ? ' · from ' + pulled.updatedBy : '') +
-        '. Keep mine or Take theirs. PINs and Discord channel links stay on this browser.';
-    }
-    setSyncChip('conflict', 'Office versions clash — choose Keep mine or Take theirs');
-    toast('Office update waiting · choose Keep mine or Take theirs');
+    /* Same rev or lower — just keep ours silently */
+    setSyncChip('live', 'Office file is live across open desks');
   } catch (err) {
     setSyncChip('behind', (err && err.message) ? err.message : 'Could not apply office update');
   } finally {
@@ -20212,26 +20199,15 @@ async function maybeAutoPullSharedDesk(reason) {
     const remoteAt = (migrated.meta && migrated.meta.updatedAt) || (migrated.meta && migrated.meta.sharedAt) || '';
     const localAt = (s.meta && s.meta.updatedAt) || '';
     if (remoteRev < localRev) return;
-    if (remoteRev === localRev && remoteAt && localAt && remoteAt === localAt) return;
-    if (remoteRev === localRev && !remoteAt) return;
-    pendingSharedPull = { migrated, remoteRev, localRev, remoteAt, localAt, auto: true };
-    if ($('sharedUrl') && url) $('sharedUrl').value = url;
-    if ($('sharedPaste')) $('sharedPaste').value = '';
-    $('sharedPullModal').classList.add('open');
-    $('sharedPullModal').removeAttribute('hidden');
-    const box = $('sharedConflictBox');
-    const msg = $('sharedConflictText');
-    if (box) box.style.display = '';
-    if (msg) {
-      const pub = (migrated.meta && (migrated.meta.sharedBy || migrated.meta.updatedBy || migrated.meta.clientId)) || '';
-      msg.textContent = 'Office update (' + (reason || 'focus') + '): this desk rev ' + localRev +
-        ' vs shared rev ' + remoteRev +
-        (remoteAt ? ' · shared ' + String(remoteAt).replace('T', ' ').slice(0, 19) : '') +
-        (pub ? ' · from ' + pub : '') +
-        (preferSupabaseSharedDesk() ? ' (cloud office)' : '') +
-        '. Keep mine leaves this browser unchanged. Take theirs replaces the desk (snapshot kept). PINs and Discord channel links stay local.';
+    if (remoteRev === localRev) return; /* Same rev = nothing to do, no popup */
+    /* Auto-apply silently instead of showing a popup */
+    try {
+      applySharedDesk(migrated, 'rev ' + remoteRev, { quietToast: true });
+      console.log('[FrenchiesHR] Shared office auto-applied rev', remoteRev);
+      toast('Office synced · rev ' + remoteRev);
+    } catch (applyErr) {
+      console.warn('[FrenchiesHR] Shared auto-apply failed:', applyErr);
     }
-    toast('Shared office update available · choose Keep mine or Take theirs');
   } catch (err) {
     if (reason === 'login') toast('Could not check for office updates — Owner: check cloud office / host file link in Settings');
   } finally {
