@@ -4591,7 +4591,7 @@ const LOG_TYPES = {
 };
 const TIP_ROLES_DEFAULT = ['Waiter', 'Hostess', 'Cook'];
 const TIP_ROLES = TIP_ROLES_DEFAULT; /* legacy alias — use tipRoles() */
-const DESK_BUILD = 'v57';
+const DESK_BUILD = 'v58';
 /** ECRP: house first-sign-in secret is a 6+ digit PIN (override in Settings). Stored hashed after first use/set. */
 const HOUSE_LOGIN_PIN = '86368636';
 const HOUSE_LOGIN_PASSWORD = HOUSE_LOGIN_PIN; /* legacy alias — prefer settings.housePassword */
@@ -18350,10 +18350,22 @@ if (_stateLooksFresh) {
         const migrated = migrate(rows[0].data);
         migrated.activity = migrated.activity || [];
         migrated.activity.unshift({ text: 'Cloud auto-recovery on boot (rev ' + cloudRev + ')', date: today() });
+        /* Ensure saveCount is high so next refresh uses localStorage, not cloud again */
+        if (!migrated.meta) migrated.meta = {};
+        migrated.meta.saveCount = Math.max(Number(migrated.meta.saveCount || 0), 100);
         s = migrated;
         ensureMeta();
-        try { localStorage.setItem(STORAGE, JSON.stringify(s)); } catch(e) {}
+        const json = JSON.stringify(s);
+        try { localStorage.setItem(STORAGE, json); } catch(e) {}
         try { idbSave(s); } catch(e) {}
+        /* Auto-login: find owner/manager and create session automatically */
+        const autoEmp = s.employees.find(x => x.role === 'Owner' && x.status === 'active')
+          || s.employees.find(x => x.role === 'Manager' && x.status === 'active')
+          || s.employees.find(x => x.status === 'active');
+        if (autoEmp) {
+          console.log('[FrenchiesHR] Auto-login as', autoEmp.name);
+          enterDeskSession(autoEmp, { stay: true, forceDurable: true });
+        }
       }
     } catch (err) {
       console.warn('[FrenchiesHR] Cloud boot check:', err.message || err);
