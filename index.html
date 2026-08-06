@@ -4874,7 +4874,7 @@ const LOG_TYPES = {
 };
 const TIP_ROLES_DEFAULT = ['Waiter', 'Hostess', 'Cook'];
 const TIP_ROLES = TIP_ROLES_DEFAULT; /* legacy alias — use tipRoles() */
-const DESK_BUILD = 'v73';
+const DESK_BUILD = 'v74';
 /** ECRP: house first-sign-in secret is a 6+ digit PIN (override in Settings). Stored hashed after first use/set. */
 const HOUSE_LOGIN_PIN = '86368636';
 const HOUSE_LOGIN_PASSWORD = HOUSE_LOGIN_PIN; /* legacy alias — prefer settings.housePassword */
@@ -5400,6 +5400,8 @@ function migrate(raw) {
   out.disputes = Array.isArray(raw.disputes) ? raw.disputes : [];
   out.timeOff = Array.isArray(raw.timeOff) ? raw.timeOff : [];
   out.clockLog = Array.isArray(raw.clockLog) ? raw.clockLog : [];
+  out.messages = Array.isArray(raw.messages) ? raw.messages : [];
+  out.channels = Array.isArray(raw.channels) ? raw.channels : [];
   out.nextDisputeId = Number(raw.nextDisputeId || 1);
   out.nextTimeOffId = Number(raw.nextTimeOffId || 1);
   out.nextClockId = Number(raw.nextClockId || 1);
