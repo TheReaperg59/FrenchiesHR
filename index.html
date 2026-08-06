@@ -2476,6 +2476,158 @@ body.dark .dropdown-item:hover { background: oklch(28% .01 240); }
 
 /* Metrics dense helper */
 .metrics-dense .metric strong { font-size: .95rem; }
+
+/* ---- Portal Redesign ---- */
+.portal-hero {
+  background: linear-gradient(135deg, oklch(28% .06 155), oklch(22% .04 160));
+  border-radius: var(--radius, 12px);
+  padding: 28px 32px;
+  color: #fff;
+  display: flex;
+  align-items: center;
+  gap: 24px;
+  flex-wrap: wrap;
+  margin-bottom: 20px;
+  box-shadow: 0 8px 32px rgba(0,0,0,.18);
+  position: relative;
+  overflow: hidden;
+}
+.portal-hero::before {
+  content: '';
+  position: absolute;
+  top: -40%; right: -10%;
+  width: 300px; height: 300px;
+  background: radial-gradient(circle, oklch(45% .12 155 / .15), transparent 70%);
+  pointer-events: none;
+}
+.portal-hero-avatar {
+  width: 64px; height: 64px;
+  border-radius: 50%;
+  background: oklch(55% .16 155);
+  display: flex; align-items: center; justify-content: center;
+  font-size: 1.6rem; font-weight: 700; color: #fff;
+  box-shadow: 0 4px 16px rgba(0,0,0,.2);
+  flex-shrink: 0;
+  z-index: 1;
+}
+.portal-hero-info { flex: 1; min-width: 180px; z-index: 1; }
+.portal-hero-name { font-size: 1.3rem; font-weight: 700; margin: 0; }
+.portal-hero-role { font-size: .82rem; opacity: .8; margin-top: 2px; }
+.portal-hero-pay {
+  text-align: right; z-index: 1;
+  min-width: 160px;
+}
+.portal-hero-pay-amount {
+  font-size: 2rem; font-weight: 800;
+  letter-spacing: -0.02em;
+  line-height: 1;
+}
+.portal-hero-pay-label {
+  font-size: .75rem; opacity: .7; margin-top: 4px;
+}
+.portal-hero-period {
+  font-size: .72rem; opacity: .6; margin-top: 6px;
+}
+
+.portal-actions {
+  display: flex; gap: 10px; flex-wrap: wrap;
+  margin-bottom: 20px;
+}
+.portal-action-btn {
+  display: flex; align-items: center; gap: 8px;
+  padding: 10px 18px;
+  border-radius: 10px;
+  border: 1.5px solid oklch(88% .03 155);
+  background: var(--card-bg, #fff);
+  font-size: .82rem; font-weight: 600;
+  color: var(--ink, #1a1a2e);
+  cursor: pointer;
+  transition: all .2s;
+}
+.portal-action-btn:hover {
+  border-color: var(--green);
+  box-shadow: 0 2px 12px rgba(34,197,94,.12);
+  transform: translateY(-1px);
+}
+.portal-action-btn .pa-dot {
+  width: 8px; height: 8px; border-radius: 50%;
+  background: #94a3b8; flex-shrink: 0;
+}
+.portal-action-btn .pa-dot.clocked-in {
+  background: #22c55e;
+  box-shadow: 0 0 8px rgba(34,197,94,.5);
+}
+
+.portal-grid {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 20px;
+}
+@media (max-width: 800px) {
+  .portal-grid { grid-template-columns: 1fr; }
+  .portal-hero { padding: 20px; gap: 16px; }
+  .portal-hero-pay { text-align: left; min-width: auto; }
+}
+
+.portal-card {
+  background: var(--card-bg, #fff);
+  border-radius: var(--radius, 12px);
+  border: 1px solid oklch(92% .01 240);
+  box-shadow: 0 2px 8px rgba(0,0,0,.04);
+  overflow: hidden;
+  transition: box-shadow .2s;
+}
+.portal-card:hover { box-shadow: 0 4px 16px rgba(0,0,0,.08); }
+.portal-card-head {
+  padding: 14px 18px;
+  font-weight: 700; font-size: .88rem;
+  border-bottom: 1px solid oklch(95% .005 240);
+  display: flex; align-items: center; gap: 8px;
+}
+.portal-card-body { padding: 16px 18px; }
+
+.portal-paystub-row {
+  display: flex; justify-content: space-between;
+  padding: 6px 0;
+  font-size: .85rem;
+  border-bottom: 1px solid oklch(96% .005 240);
+}
+.portal-paystub-row:last-child { border-bottom: none; }
+.portal-paystub-row.total {
+  font-weight: 700; font-size: .95rem;
+  border-top: 2px solid oklch(30% .05 155);
+  border-bottom: none;
+  padding-top: 10px; margin-top: 6px;
+}
+.portal-paystub-row .ps-label { color: var(--muted, #888); }
+.portal-paystub-row .ps-detail { font-size: .75rem; color: var(--muted, #888); }
+.portal-paystub-row .ps-amount { font-weight: 600; font-variant-numeric: tabular-nums; }
+.portal-paystub-row.total .ps-amount { color: oklch(40% .12 155); font-size: 1.1rem; }
+
+.portal-stub-list-item {
+  display: flex; align-items: center; gap: 12px;
+  padding: 10px 0;
+  border-bottom: 1px solid oklch(96% .005 240);
+  font-size: .82rem;
+  cursor: pointer;
+  transition: background .15s;
+}
+.portal-stub-list-item:hover { background: oklch(97% .005 155); margin: 0 -18px; padding: 10px 18px; border-radius: 6px; }
+.portal-stub-list-item:last-child { border-bottom: none; }
+.portal-stub-dates { flex: 1; font-weight: 600; }
+.portal-stub-amount { font-weight: 700; font-variant-numeric: tabular-nums; }
+.portal-stub-status { font-size: .72rem; }
+
+.portal-progress {
+  height: 4px; background: oklch(85% .02 155 / .3);
+  border-radius: 4px; margin-top: 10px;
+  overflow: hidden;
+}
+.portal-progress-bar {
+  height: 100%; background: oklch(70% .14 155);
+  border-radius: 4px;
+  transition: width .4s ease;
+}
 </style>
 </head>
 <script src="frenchies-state.js" onerror="/* no state file yet — normal on first run */"></script>
@@ -2642,118 +2794,132 @@ body.dark .dropdown-item:hover { background: oklch(28% .01 240); }
     <div>
       <div class="eyebrow">Self-Service</div>
       <h1 class="title" id="title-portal">My Portal</h1>
-      <div class="subtitle" id="portalWelcomeSub">Your dashboard — schedule, pay, messages, requests &amp; more.</div>
-    </div>
-    <div class="actions">
-      <button type="button" class="btn primary" id="portalClockBtn">Clock in / out</button>
-      <button type="button" class="btn soft" id="portalDisputeBtn">Hours dispute</button>
-      <button type="button" class="btn soft" id="portalTimeOffBtn">Time off / call-off</button>
-      <button type="button" class="btn soft" id="portalProfileBtn">Edit profile</button>
     </div>
   </div>
 
-  <!-- Welcome Banner -->
-  <div class="card" id="portalWelcomeCard" style="background:linear-gradient(135deg,oklch(96% .02 155),oklch(98% .01 220));border:1px solid oklch(88% .04 155)">
-    <div class="card-body" style="display:flex;align-items:center;gap:16px;flex-wrap:wrap">
-      <div style="width:56px;height:56px;border-radius:50%;background:var(--green);display:flex;align-items:center;justify-content:center;font-size:1.6rem;color:#fff;font-weight:700;box-shadow:0 4px 12px rgba(0,200,83,.25)" id="portalAvatar">?</div>
-      <div style="flex:1;min-width:200px">
-        <h2 style="margin:0;font-size:1.15rem" id="portalWelcomeName">Welcome</h2>
-        <div class="mini-note" id="portalWelcomeRole">—</div>
-      </div>
-      <div style="display:flex;gap:8px;flex-wrap:wrap;align-items:center" id="portalQuickPills"></div>
-    </div>
-    <!-- Clock Status Bar -->
-    <div id="portalClockStatus" style="margin-top:12px;padding:10px 14px;border-radius:8px;background:oklch(97% .005 240);display:flex;align-items:center;gap:10px;font-size:.82rem">
-      <span id="portalClockDot" style="width:10px;height:10px;border-radius:50%;background:#888;flex-shrink:0"></span>
-      <span id="portalClockText">Not clocked in</span>
-      <span style="margin-left:auto;font-size:.75rem;color:var(--muted)" id="portalClockTime"></span>
-    </div>
-  </div>
-
-  <!-- Quick Stats -->
-  <div class="metrics" id="portalQuickStats">
-    <div class="metric"><label>Hours this period</label><strong id="portalHours">—</strong></div>
-    <div class="metric"><label>Est. Gross</label><strong id="portalGross">—</strong></div>
-    <div class="metric"><label>PTO Balance</label><strong id="portalPtoBalance" class="mono muted">0.0 hrs</strong></div>
-    <div class="metric"><label>Unread Messages</label><strong id="portalUnreadCount">0</strong></div>
-  </div>
-
-  <div class="grid-2">
-    <!-- Messages -->
-    <div class="card">
-      <div class="card-head">
-        <b>Messages</b>
-        <span class="pill primary" id="portalUnreadBadge" style="display:none">0</span>
-        <button type="button" class="btn primary tiny" id="portalComposeBtn" style="margin-left:auto">Compose</button>
-      </div>
-      <div class="card-body">
-        <div style="display:flex;gap:8px;margin-bottom:12px">
-          <button class="btn tiny primary" id="portalInboxTab" onclick="switchMsgTab('inbox')">Inbox</button>
-          <button class="btn tiny soft" id="portalSentTab" onclick="switchMsgTab('sent')">Sent</button>
-        </div>
-        <div id="portalMessagesList" class="scroll-list" style="max-height:300px;overflow-y:auto">
-          <div class="mini-note">No messages.</div>
-        </div>
+  <!-- Hero Pay Summary -->
+  <div class="portal-hero" id="portalHero">
+    <div class="portal-hero-avatar" id="portalAvatar">?</div>
+    <div class="portal-hero-info">
+      <h2 class="portal-hero-name" id="portalWelcomeName">Welcome</h2>
+      <div class="portal-hero-role" id="portalWelcomeRole">—</div>
+      <div id="portalClockStatus" style="display:flex;align-items:center;gap:8px;margin-top:8px;font-size:.78rem">
+        <span id="portalClockDot" class="pa-dot"></span>
+        <span id="portalClockText" style="opacity:.85">Not clocked in</span>
+        <span id="portalClockTime" style="margin-left:8px;opacity:.6;font-size:.72rem"></span>
       </div>
     </div>
-
-    <!-- My Schedule (Week Grid) -->
-    <div class="card">
-      <div class="card-head"><b>My Schedule</b><span class="pill gray" id="portalScheduleWeek">This week</span></div>
-      <div class="card-body">
-        <div id="portalScheduleGrid" style="overflow-x:auto"></div>
-      </div>
-    </div>
-
-    <!-- Current Pay & Tips -->
-    <div class="card">
-      <div class="card-head"><b>Current Pay Period</b><span class="pill gray" id="portalPayPeriodBadge">—</span></div>
-      <div class="card-body">
-        <div class="metrics metrics-dense">
-          <div class="metric"><label>Hours</label><strong id="portalPayHours">—</strong></div>
-          <div class="metric"><label>Wages</label><strong id="portalPayWages">—</strong></div>
-          <div class="metric"><label>Tips</label><strong id="portalPayTips">—</strong></div>
-          <div class="metric"><label>Bonus</label><strong id="portalPayBonus">—</strong></div>
-        </div>
-        <div class="mini-note" style="margin-top:12px">Estimate based on current clock marks. Official payroll may differ.</div>
-        <button type="button" class="btn soft tiny" id="portalStubsBtn" style="margin-top:12px">View past paystubs</button>
-      </div>
-    </div>
-
-    <!-- My Requests -->
-    <div class="card">
-      <div class="card-head"><b>My Requests</b></div>
-      <div class="card-body">
-        <div id="portalRequestsList">
-          <div class="mini-note">No recent requests.</div>
-        </div>
+    <div class="portal-hero-pay">
+      <div class="portal-hero-pay-amount" id="portalHeroGross">$0</div>
+      <div class="portal-hero-pay-label">Est. Gross Pay</div>
+      <div class="portal-hero-period" id="portalHeroPeriod">—</div>
+      <div class="portal-progress" id="portalPeriodProgress">
+        <div class="portal-progress-bar" id="portalProgressBar" style="width:0%"></div>
       </div>
     </div>
   </div>
 
-  <!-- Pay History -->
-  <div class="card">
-    <div class="card-head"><b>Pay History</b><span class="pill gray">Last 6 periods</span></div>
-    <div class="card-body">
-      <div id="portalPayHistory" style="display:flex;align-items:flex-end;gap:6px;height:80px;padding:4px 0"></div>
-      <div id="portalPayHistoryLabels" style="display:flex;gap:6px;font-size:.65rem;color:var(--muted);margin-top:4px"></div>
+  <!-- Quick Actions -->
+  <div class="portal-actions">
+    <button type="button" class="portal-action-btn" id="portalClockBtn"><span class="pa-dot" id="portalActionClockDot"></span> Clock In / Out</button>
+    <button type="button" class="portal-action-btn" id="portalTimeOffBtn">🗓 Time Off</button>
+    <button type="button" class="portal-action-btn" id="portalDisputeBtn">⚠ Hours Dispute</button>
+    <button type="button" class="portal-action-btn" id="portalProfileBtn">👤 Edit Profile</button>
+  </div>
+
+  <!-- Two Column Grid -->
+  <div class="portal-grid">
+    <!-- LEFT: Current Paystub -->
+    <div>
+      <div class="portal-card">
+        <div class="portal-card-head">
+          <span>Current Paystub</span>
+          <span class="pill gray" id="portalPayPeriodBadge" style="margin-left:auto">—</span>
+        </div>
+        <div class="portal-card-body" id="portalPaystubBody">
+          <div class="mini-note">Loading...</div>
+        </div>
+      </div>
+
+      <!-- Quick Stats -->
+      <div class="metrics" id="portalQuickStats" style="margin-top:20px">
+        <div class="metric"><label>Hours</label><strong id="portalHours">—</strong></div>
+        <div class="metric"><label>PTO Balance</label><strong id="portalPtoBalance" class="mono muted">0.0 hrs</strong></div>
+        <div class="metric"><label>Unread</label><strong id="portalUnreadCount">0</strong></div>
+      </div>
+
+      <!-- Pay History -->
+      <div class="portal-card" style="margin-top:20px">
+        <div class="portal-card-head">Pay History <span class="pill gray" style="margin-left:auto">Last 6 periods</span></div>
+        <div class="portal-card-body">
+          <div id="portalPayHistory" style="display:flex;align-items:flex-end;gap:6px;height:90px;padding:4px 0"></div>
+          <div id="portalPayHistoryLabels" style="display:flex;gap:6px;font-size:.65rem;color:var(--muted);margin-top:4px"></div>
+        </div>
+      </div>
+    </div>
+
+    <!-- RIGHT: Schedule + Messages -->
+    <div>
+      <!-- My Schedule -->
+      <div class="portal-card">
+        <div class="portal-card-head">My Schedule <span class="pill gray" id="portalScheduleWeek" style="margin-left:auto">This week</span></div>
+        <div class="portal-card-body">
+          <div id="portalScheduleGrid" style="overflow-x:auto"></div>
+        </div>
+      </div>
+
+      <!-- Messages -->
+      <div class="portal-card" style="margin-top:20px">
+        <div class="portal-card-head">
+          <span>Messages</span>
+          <span class="pill primary" id="portalUnreadBadge" style="display:none;margin-left:4px">0</span>
+          <button type="button" class="btn primary tiny" id="portalComposeBtn" style="margin-left:auto">Compose</button>
+        </div>
+        <div class="portal-card-body">
+          <div style="display:flex;gap:8px;margin-bottom:12px">
+            <button class="btn tiny primary" id="portalInboxTab" onclick="switchMsgTab('inbox')">Inbox</button>
+            <button class="btn tiny soft" id="portalSentTab" onclick="switchMsgTab('sent')">Sent</button>
+          </div>
+          <div id="portalMessagesList" class="scroll-list" style="max-height:260px;overflow-y:auto">
+            <div class="mini-note">No messages.</div>
+          </div>
+        </div>
+      </div>
+
+      <!-- My Requests -->
+      <div class="portal-card" style="margin-top:20px">
+        <div class="portal-card-head">My Requests</div>
+        <div class="portal-card-body">
+          <div id="portalRequestsList">
+            <div class="mini-note">No recent requests.</div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Full Width: Past Paystubs -->
+  <div class="portal-card" style="margin-top:24px">
+    <div class="portal-card-head">Past Paystubs</div>
+    <div class="portal-card-body" id="portalPastStubs">
+      <div class="mini-note">No closed periods yet.</div>
     </div>
   </div>
 
   <!-- Team On Shift -->
-  <div class="card">
-    <div class="card-head"><b>Team On Shift</b><span class="pill gray" id="portalOnShiftCount">0</span></div>
-    <div class="card-body">
+  <div class="portal-card" style="margin-top:20px">
+    <div class="portal-card-head">Team On Shift <span class="pill gray" id="portalOnShiftCount" style="margin-left:4px">0</span></div>
+    <div class="portal-card-body">
       <div id="portalOnShiftList" style="display:flex;gap:8px;flex-wrap:wrap">
         <div class="mini-note">No one scheduled today.</div>
       </div>
     </div>
   </div>
 
-  <!-- Recent Activity -->
-  <div class="card">
-    <div class="card-head"><b>My Activity</b></div>
-    <div class="card-body">
+  <!-- Activity Feed -->
+  <div class="portal-card" style="margin-top:20px;margin-bottom:40px">
+    <div class="portal-card-head">My Activity</div>
+    <div class="portal-card-body">
       <div id="portalActivityFeed" class="scroll-list" style="max-height:200px;overflow-y:auto">
         <div class="mini-note">No recent activity.</div>
       </div>
@@ -4588,7 +4754,7 @@ const LOG_TYPES = {
 };
 const TIP_ROLES_DEFAULT = ['Waiter', 'Hostess', 'Cook'];
 const TIP_ROLES = TIP_ROLES_DEFAULT; /* legacy alias — use tipRoles() */
-const DESK_BUILD = 'v66';
+const DESK_BUILD = 'v67';
 /** ECRP: house first-sign-in secret is a 6+ digit PIN (override in Settings). Stored hashed after first use/set. */
 const HOUSE_LOGIN_PIN = '86368636';
 const HOUSE_LOGIN_PASSWORD = HOUSE_LOGIN_PIN; /* legacy alias — prefer settings.housePassword */
@@ -20377,55 +20543,102 @@ function renderPortal() {
   const e = sessionEmp();
   if (!e) return;
   
+  // Button handlers
   if ($('portalClockBtn')) $('portalClockBtn').onclick = () => openClockModal();
   if ($('portalDisputeBtn')) $('portalDisputeBtn').onclick = () => openDisputeModal();
   if ($('portalTimeOffBtn')) $('portalTimeOffBtn').onclick = () => openTimeOffModal();
   if ($('portalProfileBtn')) $('portalProfileBtn').onclick = () => openMyFile();
-  if ($('portalStubsBtn')) $('portalStubsBtn').onclick = () => goView('paystubs');
   if ($('portalComposeBtn')) $('portalComposeBtn').onclick = () => openComposeModal();
   
-  // Welcome Banner
+  // Hero Section
   if ($('portalAvatar')) $('portalAvatar').textContent = (e.name || '?')[0].toUpperCase();
-  if ($('portalWelcomeName')) $('portalWelcomeName').textContent = 'Welcome, ' + (e.name || 'Team Member');
+  if ($('portalWelcomeName')) $('portalWelcomeName').textContent = e.name || 'Team Member';
   if ($('portalWelcomeRole')) {
     const tenure = e.hire ? Math.floor((Date.now() - new Date(e.hire + 'T00:00:00').getTime()) / 86400000) : 0;
     const tenureStr = tenure > 365 ? Math.floor(tenure / 365) + 'y ' + (tenure % 365) + 'd' : tenure + ' days';
-    $('portalWelcomeRole').textContent = e.role + ' · Hired ' + (e.hire || '—') + ' · ' + tenureStr + ' tenure';
-  }
-  if ($('portalQuickPills')) {
-    const pills = [];
-    pills.push('<span class="pill ' + (e.status === 'active' ? 'green' : 'gold') + '">' + esc(e.status) + '</span>');
-    if (e.ptoBalance > 0) pills.push('<span class="pill blue">' + dec(e.ptoBalance) + 'h PTO</span>');
-    $('portalQuickPills').innerHTML = pills.join('');
+    $('portalWelcomeRole').textContent = e.role + ' · ' + tenureStr + ' tenure';
   }
   
-  // Quick Stats
+  // Pay calculations
   const myEntry = p && p.entries ? p.entries[e.id] : null;
   const myHours = myEntry ? Number(myEntry.hours || 0) : 0;
   const rate = Number(e.rate || e.wage || 0);
-  const myWages = myHours * rate;
+  const regularHours = Math.min(myHours, 40);
+  const otHours = Math.max(0, myHours - 40);
+  const regularPay = regularHours * rate;
+  const otPay = otHours * rate * 1.5;
+  const myWages = regularPay + otPay;
   const myTips = myEntry ? Number(myEntry.tips || 0) : 0;
   const myBonus = myEntry ? Number(myEntry.bonus || 0) : 0;
   const myGross = myWages + myTips + myBonus;
   
+  // Hero pay display
+  if ($('portalHeroGross')) $('portalHeroGross').textContent = money(myGross);
+  if ($('portalHeroPeriod')) $('portalHeroPeriod').textContent = p ? shortLabel(p) + ' · ' + (p.status === 'open' ? 'In Progress' : 'Closed') : '—';
+  
+  // Period progress bar
+  if ($('portalProgressBar') && p && p.start && p.end) {
+    const startMs = new Date(p.start + 'T00:00:00').getTime();
+    const endMs = new Date(p.end + 'T23:59:59').getTime();
+    const now = Date.now();
+    const pct = Math.min(100, Math.max(0, ((now - startMs) / (endMs - startMs)) * 100));
+    $('portalProgressBar').style.width = pct.toFixed(0) + '%';
+  }
+  
+  // Quick Stats
   if ($('portalHours')) $('portalHours').textContent = dec(myHours);
-  if ($('portalGross')) $('portalGross').textContent = money(myGross);
   if ($('portalPtoBalance')) {
     const pto = Number(e.ptoBalance || 0);
     $('portalPtoBalance').textContent = dec(pto) + ' hrs';
     $('portalPtoBalance').className = pto > 0 ? 'mono' : 'mono muted';
   }
   
-  // Pay Period Detail
-  if ($('portalPayPeriodBadge')) $('portalPayPeriodBadge').textContent = shortLabel(p);
-  if ($('portalPayHours')) $('portalPayHours').textContent = dec(myHours);
-  if ($('portalPayWages')) $('portalPayWages').textContent = money(myWages);
-  if ($('portalPayTips')) $('portalPayTips').textContent = money(myTips);
-  if ($('portalPayBonus')) $('portalPayBonus').textContent = money(myBonus);
+  // Current Paystub Detail
+  if ($('portalPayPeriodBadge')) $('portalPayPeriodBadge').textContent = p ? shortLabel(p) : '—';
+  if ($('portalPaystubBody')) {
+    const paid = myEntry && myEntry.paidOut;
+    let stub = '';
+    stub += '<div class="portal-paystub-row"><span class="ps-label">Regular Hours</span><span><span class="ps-detail">' + dec(regularHours) + ' hrs × ' + money(rate) + '</span> <span class="ps-amount">' + money(regularPay) + '</span></span></div>';
+    if (otHours > 0) {
+      stub += '<div class="portal-paystub-row"><span class="ps-label">Overtime</span><span><span class="ps-detail">' + dec(otHours) + ' hrs × ' + money(rate * 1.5) + '</span> <span class="ps-amount">' + money(otPay) + '</span></span></div>';
+    }
+    if (myTips > 0) {
+      stub += '<div class="portal-paystub-row"><span class="ps-label">Tips</span><span class="ps-amount">' + money(myTips) + '</span></div>';
+    }
+    if (myBonus > 0) {
+      stub += '<div class="portal-paystub-row"><span class="ps-label">Bonus</span><span class="ps-amount">' + money(myBonus) + '</span></div>';
+    }
+    stub += '<div class="portal-paystub-row total"><span>Gross Pay</span><span class="ps-amount">' + money(myGross) + '</span></div>';
+    stub += '<div style="margin-top:10px;display:flex;align-items:center;gap:8px"><span class="pill ' + (paid ? 'green' : 'gold') + '">' + (paid ? '✓ Paid' : 'Unpaid') + '</span>';
+    stub += '<span class="mini-note">Payday: Sunday</span></div>';
+    $('portalPaystubBody').innerHTML = stub;
+  }
+  
+  // Clock Status
+  if ($('portalClockDot')) {
+    const openClock = (s.clockLog || []).find(c => String(c.empId) === String(e.id) && c.type === 'in' && !c.applied);
+    if (openClock) {
+      $('portalClockDot').className = 'pa-dot clocked-in';
+      if ($('portalActionClockDot')) $('portalActionClockDot').className = 'pa-dot clocked-in';
+      $('portalClockText').textContent = 'Clocked in';
+      $('portalClockText').style.color = '#86efac';
+      if ($('portalClockTime')) {
+        const mins = Math.floor((Date.now() - new Date(openClock.at).getTime()) / 60000);
+        const hrs = Math.floor(mins / 60);
+        $('portalClockTime').textContent = 'since ' + new Date(openClock.at).toLocaleTimeString('en-US', {hour:'numeric',minute:'2-digit'}) + ' (' + (hrs > 0 ? hrs + 'h ' : '') + (mins % 60) + 'm)';
+      }
+    } else {
+      $('portalClockDot').className = 'pa-dot';
+      if ($('portalActionClockDot')) $('portalActionClockDot').className = 'pa-dot';
+      $('portalClockText').textContent = 'Not clocked in';
+      $('portalClockText').style.color = '';
+      if ($('portalClockTime')) $('portalClockTime').textContent = '';
+    }
+  }
   
   // Schedule Week Grid
   if ($('portalScheduleGrid')) {
-    const days = ['Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat', 'Sun'];
+    const days = ['Sun', 'Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat'];
     const weekKey = shiftWeek || '';
     const weekShifts = weekKey && s.shifts && s.shifts[weekKey] ? s.shifts[weekKey] : {};
     const weekTimes = weekKey && s.shiftTimes && s.shiftTimes[weekKey] ? s.shiftTimes[weekKey] : {};
@@ -20433,8 +20646,9 @@ function renderPortal() {
     const myTimes = weekTimes[e.id] || [{},{},{},{},{},{},{}];
     if ($('portalScheduleWeek')) $('portalScheduleWeek').textContent = weekKey ? new Date(weekKey + 'T00:00:00').toLocaleDateString('en-US', {month:'short', day:'numeric'}) + ' week' : 'This week';
     
+    const todayDay = new Date().getDay();
     let grid = '<table style="width:100%;font-size:.82rem"><thead><tr>';
-    days.forEach(d => grid += '<th style="text-align:center;padding:6px 4px">' + d + '</th>');
+    days.forEach((d, di) => grid += '<th style="text-align:center;padding:6px 4px;' + (di === todayDay ? 'color:var(--green);font-weight:800' : '') + '">' + d + '</th>');
     grid += '</tr></thead><tbody><tr>';
     myRow.forEach((st, i) => {
       const tw = myTimes[i] || {};
@@ -20469,36 +20683,12 @@ function renderPortal() {
     ).join('') : '<div class="mini-note">No recent activity.</div>';
   }
   
-  // Unread count for quick stats
+  // Unread count
   const unreadCount = (s.messages || []).filter(m => (!m.to || String(m.to) === String(e.id)) && !m.readAt).length;
   if ($('portalUnreadCount')) $('portalUnreadCount').textContent = unreadCount;
   if ($('portalUnreadBadge')) {
     $('portalUnreadBadge').textContent = unreadCount;
     $('portalUnreadBadge').style.display = unreadCount > 0 ? '' : 'none';
-  }
-
-  // Clock Status
-  if ($('portalClockDot')) {
-    const openClock = (s.clockLog || []).find(c => String(c.empId) === String(e.id) && c.type === 'in' && !c.applied);
-    if (openClock) {
-      $('portalClockDot').style.background = '#22c55e';
-      $('portalClockDot').style.boxShadow = '0 0 8px rgba(34,197,94,.5)';
-      $('portalClockText').textContent = 'Clocked in';
-      $('portalClockText').style.fontWeight = '600';
-      $('portalClockText').style.color = '#16a34a';
-      if ($('portalClockTime')) {
-        const mins = Math.floor((Date.now() - new Date(openClock.at).getTime()) / 60000);
-        const hrs = Math.floor(mins / 60);
-        $('portalClockTime').textContent = 'Since ' + new Date(openClock.at).toLocaleTimeString('en-US', {hour:'numeric',minute:'2-digit'}) + ' (' + (hrs > 0 ? hrs + 'h ' : '') + (mins % 60) + 'm)';
-      }
-    } else {
-      $('portalClockDot').style.background = '#94a3b8';
-      $('portalClockDot').style.boxShadow = 'none';
-      $('portalClockText').textContent = 'Not clocked in';
-      $('portalClockText').style.fontWeight = '400';
-      $('portalClockText').style.color = 'var(--muted)';
-      if ($('portalClockTime')) $('portalClockTime').textContent = '';
-    }
   }
 
   // Pay History — bar chart of last 6 closed periods
@@ -20516,9 +20706,9 @@ function renderPortal() {
       const maxPay = Math.max(...payData.map(d => d.total), 1);
       const bars = payData.map(d => {
         const pct = Math.max(4, (d.total / maxPay) * 100);
-        const color = d.total > 0 ? 'oklch(65% .15 155)' : 'oklch(90% .02 240)';
+        const color = d.total > 0 ? 'oklch(55% .16 155)' : 'oklch(90% .02 240)';
         return '<div style="flex:1;display:flex;flex-direction:column;align-items:center" title="' + esc(d.label) + ': ' + money(d.total) + '">' +
-          '<div style="width:100%;max-width:40px;height:' + pct + '%;background:' + color + ';border-radius:4px 4px 0 0;min-height:3px;transition:height .3s"></div>' +
+          '<div style="width:100%;max-width:36px;height:' + pct + '%;background:' + color + ';border-radius:6px 6px 0 0;min-height:3px;transition:height .3s"></div>' +
           '<div style="font-size:.7rem;font-weight:600;margin-top:4px">' + money(d.total) + '</div>' +
           '</div>';
       });
@@ -20533,10 +20723,43 @@ function renderPortal() {
       if ($('portalPayHistoryLabels')) $('portalPayHistoryLabels').innerHTML = '';
     }
   }
+  
+  // Past Paystubs List
+  if ($('portalPastStubs')) {
+    const closed = s.periods.filter(pp => pp.status === 'closed').slice(0, 12);
+    if (closed.length > 0) {
+      $('portalPastStubs').innerHTML = closed.map((pp, idx) => {
+        const entry = pp.entries ? pp.entries[e.id] : null;
+        const hrs = entry ? Number(entry.hours || 0) : 0;
+        const reg = Math.min(hrs, 40);
+        const ot = Math.max(0, hrs - 40);
+        const wages = reg * rate + ot * rate * 1.5;
+        const tips = entry ? Number(entry.tips || 0) : 0;
+        const bonus = entry ? Number(entry.bonus || 0) : 0;
+        const gross = wages + tips + bonus;
+        const paid = entry && entry.paidOut;
+        return '<div class="portal-stub-list-item" onclick="this.nextElementSibling.style.display=this.nextElementSibling.style.display===\'none\'?\'\':\'none\'">' +
+          '<span class="portal-stub-dates">' + esc(shortLabel(pp)) + '</span>' +
+          '<span>' + dec(hrs) + ' hrs</span>' +
+          '<span class="portal-stub-amount">' + money(gross) + '</span>' +
+          '<span class="pill ' + (paid ? 'green' : 'gold') + ' portal-stub-status">' + (paid ? '✓ Paid' : 'Unpaid') + '</span>' +
+          '</div>' +
+          '<div style="display:none;padding:8px 0 16px;border-bottom:1px solid oklch(94% .005 240)">' +
+            '<div class="portal-paystub-row"><span class="ps-label">Regular</span><span><span class="ps-detail">' + dec(reg) + ' hrs × ' + money(rate) + '</span> <span class="ps-amount">' + money(reg * rate) + '</span></span></div>' +
+            (ot > 0 ? '<div class="portal-paystub-row"><span class="ps-label">Overtime</span><span><span class="ps-detail">' + dec(ot) + ' hrs × ' + money(rate * 1.5) + '</span> <span class="ps-amount">' + money(ot * rate * 1.5) + '</span></span></div>' : '') +
+            (tips > 0 ? '<div class="portal-paystub-row"><span class="ps-label">Tips</span><span class="ps-amount">' + money(tips) + '</span></div>' : '') +
+            (bonus > 0 ? '<div class="portal-paystub-row"><span class="ps-label">Bonus</span><span class="ps-amount">' + money(bonus) + '</span></div>' : '') +
+            '<div class="portal-paystub-row total"><span>Gross Pay</span><span class="ps-amount">' + money(gross) + '</span></div>' +
+          '</div>';
+      }).join('');
+    } else {
+      $('portalPastStubs').innerHTML = '<div class="mini-note">No closed periods yet.</div>';
+    }
+  }
 
   // Team On Shift
   if ($('portalOnShiftList')) {
-    const todayIdx = (new Date().getDay() + 6) % 7; // Mon=0
+    const todayIdx = new Date().getDay();
     const weekKey = shiftWeek || '';
     const weekShifts = weekKey && s.shifts && s.shifts[weekKey] ? s.shifts[weekKey] : {};
     const onShift = [];
@@ -20552,7 +20775,7 @@ function renderPortal() {
     if (onShift.length > 0) {
       $('portalOnShiftList').innerHTML = onShift.map(t =>
         '<div style="display:flex;align-items:center;gap:8px;padding:6px 10px;background:oklch(97% .005 155);border-radius:8px;font-size:.8rem">' +
-        '<span style="width:28px;height:28px;border-radius:50%;background:oklch(75% .12 155);color:#fff;display:flex;align-items:center;justify-content:center;font-size:.75rem;font-weight:700">' + esc(t.initial) + '</span>' +
+        '<span style="width:28px;height:28px;border-radius:50%;background:oklch(55% .16 155);color:#fff;display:flex;align-items:center;justify-content:center;font-size:.75rem;font-weight:700">' + esc(t.initial) + '</span>' +
         '<div><b>' + esc(t.name) + '</b><div class="mini-note">' + esc(t.role) + ' · ' + esc(t.shift) + '</div></div>' +
         '</div>'
       ).join('');
