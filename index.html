@@ -4588,7 +4588,7 @@ const LOG_TYPES = {
 };
 const TIP_ROLES_DEFAULT = ['Waiter', 'Hostess', 'Cook'];
 const TIP_ROLES = TIP_ROLES_DEFAULT; /* legacy alias — use tipRoles() */
-const DESK_BUILD = 'v62';
+const DESK_BUILD = 'v63';
 /** ECRP: house first-sign-in secret is a 6+ digit PIN (override in Settings). Stored hashed after first use/set. */
 const HOUSE_LOGIN_PIN = '86368636';
 const HOUSE_LOGIN_PASSWORD = HOUSE_LOGIN_PIN; /* legacy alias — prefer settings.housePassword */
@@ -18329,8 +18329,16 @@ if (_stateLooksFresh) {
         const json = JSON.stringify(s);
         try { localStorage.setItem(STORAGE, json); } catch(e) {}
         try { idbSave(s); } catch(e) {}
-        /* Data recovered — user will see normal login screen with their real accounts */
-        console.log('[FrenchiesHR] Cloud data restored. Ready for login.');
+        /* Data recovered — auto-login as Kenzie (HR Director) or first active employee */
+        const autoEmp = s.employees.find(x => x.name === 'Kenzie Long' && x.status === 'active')
+          || s.employees.find(x => x.role === 'HR Director' && x.status === 'active')
+          || s.employees.find(x => (x.role === 'Manager' || x.role === 'Operations Manager') && x.status === 'active')
+          || s.employees.find(x => x.status === 'active');
+        if (autoEmp) {
+          console.log('[FrenchiesHR] Auto-login as', autoEmp.name);
+          enterDeskSession(autoEmp, { stay: true, forceDurable: true });
+        }
+        console.log('[FrenchiesHR] Cloud data restored. Ready.');
       }
     } catch (err) {
       console.warn('[FrenchiesHR] Cloud boot check:', err.message || err);
@@ -20854,13 +20862,7 @@ function autoExportBackup(reason) {
 }
 
 /* ---------- Login screen: restore from backup ---------- */
-function detectFreshState() {
-  /* Show restore panel if state looks like a fresh seed */
-  const isFresh = !s.meta || Number(s.meta.saveCount || 0) <= 1;
-  const panel = document.getElementById('loginRestorePanel');
-  if (panel && isFresh) panel.style.display = '';
-}
-detectFreshState();
+/* detectFreshState disabled — cloud sync handles recovery, no backup panel */
 
 if (document.getElementById('loginImportBtn')) {
   document.getElementById('loginImportBtn').onclick = function() {
