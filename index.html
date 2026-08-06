@@ -4588,7 +4588,7 @@ const LOG_TYPES = {
 };
 const TIP_ROLES_DEFAULT = ['Waiter', 'Hostess', 'Cook'];
 const TIP_ROLES = TIP_ROLES_DEFAULT; /* legacy alias — use tipRoles() */
-const DESK_BUILD = 'v63';
+const DESK_BUILD = 'v64';
 /** ECRP: house first-sign-in secret is a 6+ digit PIN (override in Settings). Stored hashed after first use/set. */
 const HOUSE_LOGIN_PIN = '86368636';
 const HOUSE_LOGIN_PASSWORD = HOUSE_LOGIN_PIN; /* legacy alias — prefer settings.housePassword */
@@ -14596,14 +14596,15 @@ function createNextPeriod() {
   const lastDate = new Date(lastEnd + 'T00:00:00');
   const a = new Date(lastDate);
   a.setDate(a.getDate() + 1);
-  // Advance to next Sunday if not already Sunday
+  // Advance to next Sunday if not already Sunday (period starts Sunday)
   while (a.getDay() !== 0) a.setDate(a.getDate() + 1);
-  const b = new Date(a); b.setDate(b.getDate() + 6); // Saturday
+  const b = new Date(a); b.setDate(b.getDate() + 6); // End = Saturday
   if (!s.nextPeriodId) s.nextPeriodId = 1;
+  const fmt = d => d.getFullYear() + '-' + String(d.getMonth() + 1).padStart(2, '0') + '-' + String(d.getDate()).padStart(2, '0');
   const p = {
     id: s.nextPeriodId++,
-    start: a.getFullYear() + '-' + String(a.getMonth() + 1).padStart(2, '0') + '-' + String(a.getDate()).padStart(2, '0'),
-    end: b.getFullYear() + '-' + String(b.getMonth() + 1).padStart(2, '0') + '-' + String(b.getDate()).padStart(2, '0'),
+    start: fmt(a),
+    end: fmt(b),
     status: 'open',
     entries: Object.fromEntries(payableEmployees().map(e => [e.id, emptyEntry(e)])),
     tipPool: 0,
@@ -14615,6 +14616,30 @@ function createNextPeriod() {
   setSelectedPeriod(0);
   return p;
 }
+
+/* Fix any existing periods that end on Sunday — shift end back 1 day to Saturday */
+(function fixPeriodEndDays() {
+  if (!s || !s.periods) return;
+  let fixed = 0;
+  s.periods.forEach(function(p) {
+    const endDate = new Date(p.end + 'T00:00:00');
+    if (endDate.getDay() === 0) { /* Sunday */
+      endDate.setDate(endDate.getDate() - 1); /* Move to Saturday */
+      p.end = endDate.getFullYear() + '-' + String(endDate.getMonth() + 1).padStart(2, '0') + '-' + String(endDate.getDate()).padStart(2, '0');
+      fixed++;
+    }
+    const startDate = new Date(p.start + 'T00:00:00');
+    if (startDate.getDay() === 1) { /* Monday */
+      startDate.setDate(startDate.getDate() - 1); /* Move to Sunday */
+      p.start = startDate.getFullYear() + '-' + String(startDate.getMonth() + 1).padStart(2, '0') + '-' + String(startDate.getDate()).padStart(2, '0');
+      fixed++;
+    }
+  });
+  if (fixed > 0) {
+    console.log('[FrenchiesHR] Fixed ' + fixed + ' period date(s) to Sun-Sat schedule');
+    try { save({ quiet: true, skipSnapshot: true }); } catch(e) {}
+  }
+})();
 
 function requireTypedOverride(reason, message) {
   const typed = prompt(message + '\n\nType OVERRIDE to continue anyway:');
