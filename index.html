@@ -2655,6 +2655,42 @@ body.dark .dropdown-item:hover { background: oklch(28% .01 240); }
   border-radius: 4px;
   transition: width .4s ease;
 }
+
+/* ---- New Chat Modal & Portal Enhancements ---- */
+.new-chat-tabs {
+  display: flex; gap: 8px; border-bottom: 1px solid oklch(90% .01 240); margin-bottom: 16px;
+}
+.new-chat-tab-btn {
+  padding: 8px 16px; font-weight: 600; font-size: .85rem; background: none; border: none;
+  border-bottom: 2px solid transparent; color: var(--muted, #888); cursor: pointer;
+}
+.new-chat-tab-btn.active {
+  color: var(--green, #16a34a); border-bottom-color: var(--green, #16a34a);
+}
+.dept-header {
+  font-size: .75rem; font-weight: 700; text-transform: uppercase; letter-spacing: 0.05em;
+  color: var(--muted, #888); margin: 14px 0 6px 0; padding-bottom: 4px; border-bottom: 1px solid oklch(95% .005 240);
+}
+.emp-select-card {
+  display: flex; align-items: center; gap: 12px; padding: 8px 12px; border-radius: 8px;
+  background: oklch(98% .005 240); border: 1px solid oklch(92% .01 240); margin-bottom: 6px;
+  cursor: pointer; transition: all .15s;
+}
+.emp-select-card:hover {
+  background: oklch(95% .02 155); border-color: oklch(80% .08 155); transform: translateX(2px);
+}
+.emp-avatar-circle {
+  width: 36px; height: 36px; border-radius: 50%; background: oklch(55% .16 155); color: #fff;
+  display: flex; align-items: center; justify-content: center; font-size: .85rem; font-weight: 700; flex-shrink: 0;
+}
+.emp-info { flex: 1; }
+.emp-name { font-weight: 600; font-size: .88rem; color: var(--ink, #1a1a2e); }
+.emp-role-sub { font-size: .75rem; color: var(--muted, #888); }
+.portal-shortcut-btn {
+  font-size: .72rem; padding: 3px 8px; border-radius: 6px; border: 1px solid oklch(88% .02 240);
+  background: var(--card-bg, #fff); cursor: pointer; transition: background .15s; margin-left: 6px;
+}
+.portal-shortcut-btn:hover { background: oklch(96% .01 155); border-color: var(--green); }
 </style>
 </head>
 <script src="frenchies-state.js" onerror="/* no state file yet — normal on first run */"></script>
@@ -4811,7 +4847,7 @@ const LOG_TYPES = {
 };
 const TIP_ROLES_DEFAULT = ['Waiter', 'Hostess', 'Cook'];
 const TIP_ROLES = TIP_ROLES_DEFAULT; /* legacy alias — use tipRoles() */
-const DESK_BUILD = 'v69';
+const DESK_BUILD = 'v70';
 /** ECRP: house first-sign-in secret is a 6+ digit PIN (override in Settings). Stored hashed after first use/set. */
 const HOUSE_LOGIN_PIN = '86368636';
 const HOUSE_LOGIN_PASSWORD = HOUSE_LOGIN_PIN; /* legacy alias — prefer settings.housePassword */
@@ -20653,12 +20689,14 @@ function renderPortal() {
   if ($('portalHours')) $('portalHours').textContent = dec(myHours);
   if ($('portalPtoBalance')) {
     const pto = Number(e.ptoBalance || 0);
-    $('portalPtoBalance').textContent = dec(pto) + ' hrs';
+    $('portalPtoBalance').innerHTML = dec(pto) + ' hrs <button class="portal-shortcut-btn" onclick="openTimeOffModal()">+ Request PTO</button>';
     $('portalPtoBalance').className = pto > 0 ? 'mono' : 'mono muted';
   }
   
   // Current Paystub Detail
-  if ($('portalPayPeriodBadge')) $('portalPayPeriodBadge').textContent = p ? shortLabel(p) : '—';
+  if ($('portalPayPeriodBadge')) {
+    $('portalPayPeriodBadge').innerHTML = (p ? esc(shortLabel(p)) : '—') + ' <button class="portal-shortcut-btn" onclick="printCurrentPaystub()">🖨 Print Paystub</button>';
+  }
   if ($('portalPaystubBody')) {
     const paid = myEntry && myEntry.paidOut;
     let stub = '';
@@ -20719,7 +20757,8 @@ function renderPortal() {
       const isOff = st === 'Off';
       const cls = isOff ? 'gray' : 'green';
       const timeStr = (!isOff && tw.start && tw.end) ? '<div class="mini-note" style="margin-top:2px">' + esc(tw.start) + '-' + esc(tw.end) + '</div>' : '';
-      grid += '<td style="text-align:center;padding:6px 4px;vertical-align:top"><span class="pill ' + cls + '" style="font-size:.72rem">' + esc(st) + '</span>' + timeStr + '</td>';
+      const swapBtn = !isOff ? '<div style="margin-top:4px"><button class="portal-shortcut-btn" onclick="openTimeOffModal()">Swap</button></div>' : '';
+      grid += '<td style="text-align:center;padding:6px 4px;vertical-align:top"><span class="pill ' + cls + '" style="font-size:.72rem">' + esc(st) + '</span>' + timeStr + swapBtn + '</td>';
     });
     grid += '</tr></tbody></table>';
     $('portalScheduleGrid').innerHTML = grid;
@@ -20832,15 +20871,16 @@ function renderPortal() {
       if (!row) return;
       const st = row[todayIdx];
       if (st && st !== 'Off') {
-        onShift.push({ name: emp.name, role: emp.role, shift: st, initial: (emp.name || '?')[0].toUpperCase() });
+        onShift.push({ id: emp.id, name: emp.name, role: emp.role, shift: st, initial: (emp.name || '?')[0].toUpperCase() });
       }
     });
     if ($('portalOnShiftCount')) $('portalOnShiftCount').textContent = onShift.length;
     if (onShift.length > 0) {
       $('portalOnShiftList').innerHTML = onShift.map(t =>
         '<div style="display:flex;align-items:center;gap:8px;padding:6px 10px;background:oklch(97% .005 155);border-radius:8px;font-size:.8rem">' +
-        '<span style="width:28px;height:28px;border-radius:50%;background:oklch(55% .16 155);color:#fff;display:flex;align-items:center;justify-content:center;font-size:.75rem;font-weight:700">' + esc(t.initial) + '</span>' +
-        '<div><b>' + esc(t.name) + '</b><div class="mini-note">' + esc(t.role) + ' · ' + esc(t.shift) + '</div></div>' +
+        '<span style="width:28px;height:28px;border-radius:50%;background:oklch(55% .16 155);color:#fff;display:flex;align-items:center;justify-content:center;font-size:.75rem;font-weight:700;flex-shrink:0">' + esc(t.initial) + '</span>' +
+        '<div style="flex:1"><b>' + esc(t.name) + '</b><div class="mini-note">' + esc(t.role) + ' · ' + esc(t.shift) + '</div></div>' +
+        '<button class="portal-shortcut-btn" onclick="selectDirectMessage(' + t.id + ')">💬 Chat</button>' +
         '</div>'
       ).join('');
     } else {
@@ -21489,10 +21529,250 @@ function toggleMessageReaction(msgId, emoji) {
   renderChatThread(activeChatThreadId);
 }
 
+let currentNewChatTab = 'dm';
+
 function openNewChatModal() {
-  const val = prompt('Enter Employee Name or Channel to start chat:');
-  if (val) {
-    toast('New Chat starting with: ' + val);
+  currentNewChatTab = 'dm';
+  renderNewChatModalContent();
+}
+
+function renderNewChatModalContent(searchQuery = '') {
+  const isMgmt = sessionEmp() && isMgmtUser(sessionEmp());
+  
+  const modalHtml = `
+    <div class="new-chat-tabs">
+      <button class="new-chat-tab-btn ${currentNewChatTab === 'dm' ? 'active' : ''}" onclick="switchNewChatTab('dm')">💬 Direct Message</button>
+      <button class="new-chat-tab-btn ${currentNewChatTab === 'channel' ? 'active' : ''}" onclick="switchNewChatTab('channel')">📢 Create Channel / Group</button>
+    </div>
+    <div id="newChatTabBody"></div>
+  `;
+
+  // Existing modal check or open new dynamic modal
+  let existingModal = document.getElementById('newChatModalWrapper');
+  if (!existingModal) {
+    showDynamicModal('Start New Conversation', modalHtml, null);
+    // Find the modal dialog and give wrapper ID
+    const modals = document.querySelectorAll('.modal');
+    if (modals.length) {
+      existingModal = modals[modals.length - 1];
+      existingModal.id = 'newChatModalWrapper';
+    }
+  } else {
+    const dialogBody = existingModal.querySelector('.dialog > div');
+    if (dialogBody) dialogBody.innerHTML = modalHtml;
+  }
+
+  // Populate active tab content
+  const tabBody = document.getElementById('newChatTabBody');
+  if (!tabBody) return;
+
+  if (currentNewChatTab === 'dm') {
+    const q = searchQuery.toLowerCase();
+    const emps = activeEmployees().filter(e => e.id !== (sessionUser ? sessionUser.empId : null));
+    
+    // Group employees by department
+    const groups = {
+      'Management': emps.filter(e => isMgmtUser(e)),
+      'Waitstaff & Front of House': emps.filter(e => ['Waiter', 'Hostess'].includes(e.role)),
+      'Kitchen & Back of House': emps.filter(e => ['Cook', 'Chef'].includes(e.role)),
+      'New Hires & Team': emps.filter(e => !isMgmtUser(e) && !['Waiter', 'Hostess', 'Cook', 'Chef'].includes(e.role))
+    };
+
+    let html = `<div style="margin-bottom:12px">
+      <input type="search" class="input full" placeholder="Search employee name or role..." value="${esc(searchQuery)}" oninput="renderNewChatModalContent(this.value)" id="newChatSearchInput">
+    </div><div style="max-height:350px;overflow-y:auto">`;
+
+    let hasAny = false;
+    Object.keys(groups).forEach(dept => {
+      const filtered = groups[dept].filter(e => !q || e.name.toLowerCase().includes(q) || (e.role || '').toLowerCase().includes(q));
+      if (filtered.length) {
+        hasAny = true;
+        html += `<div class="dept-header">${esc(dept)}</div>`;
+        filtered.forEach(e => {
+          const initials = (e.name || '?')[0].toUpperCase();
+          html += `
+            <div class="emp-select-card" onclick="selectDirectMessage(${e.id})">
+              <div class="emp-avatar-circle">${esc(initials)}</div>
+              <div class="emp-info">
+                <div class="emp-name">${esc(e.name)}</div>
+                <div class="emp-role-sub">${esc(e.role)} &middot; ${esc(e.status)}</div>
+              </div>
+              <button class="btn tiny primary">Chat</button>
+            </div>
+          `;
+        });
+      }
+    });
+
+    if (!hasAny) {
+      html += `<div class="mini-note" style="text-align:center;padding:20px">No matching employees found.</div>`;
+    }
+    html += `</div>`;
+    tabBody.innerHTML = html;
+    
+    // Auto-focus search input if typed
+    if (searchQuery && document.getElementById('newChatSearchInput')) {
+      const inp = document.getElementById('newChatSearchInput');
+      inp.focus();
+      inp.selectionStart = inp.selectionEnd = searchQuery.length;
+    }
+
+  } else {
+    // Channel / Group creation tab
+    let html = `
+      <div class="field">
+        <label>Channel or Group Name</label>
+        <input type="text" id="newChannelName" class="input full" placeholder="e.g. weekend-prep or floor-team">
+      </div>
+      <div class="field" style="margin-top:12px">
+        <label>Privacy & Access</label>
+        <select id="newChannelPrivacy" class="input full">
+          <option value="public">Public Channel (All Staff)</option>
+          ${isMgmt ? '<option value="mgmt">Management Only Channel</option>' : ''}
+          <option value="group">Group DM (Selected Members)</option>
+        </select>
+      </div>
+      <div class="field" style="margin-top:12px">
+        <label>Select Members (Optional for Group DMs)</label>
+        <div style="max-height:160px;overflow-y:auto;border:1px solid oklch(90% .01 240);border-radius:8px;padding:8px">
+          ${activeEmployees().filter(e => e.id !== (sessionUser ? sessionUser.empId : null)).map(e => `
+            <label style="display:flex;align-items:center;gap:8px;padding:4px 0;font-size:.85rem;cursor:pointer">
+              <input type="checkbox" class="new-ch-emp-check" value="${e.id}"> ${esc(e.name)} <span class="muted">(${esc(e.role)})</span>
+            </label>
+          `).join('')}
+        </div>
+      </div>
+      <button class="btn primary full" style="margin-top:16px" onclick="createNewChannelGroup()">Create Channel / Group</button>
+    `;
+    tabBody.innerHTML = html;
+  }
+}
+
+function switchNewChatTab(tab) {
+  currentNewChatTab = tab;
+  renderNewChatModalContent();
+}
+
+function selectDirectMessage(empId) {
+  const myId = sessionUser ? sessionUser.empId : null;
+  if (!myId) return;
+  const dmId = 'dm_' + Math.min(empId, myId) + '_' + Math.max(empId, myId);
+  activeChatThreadId = dmId;
+  
+  // Close modal
+  const m = document.getElementById('newChatModalWrapper');
+  if (m && m.parentNode) m.parentNode.removeChild(m);
+  
+  // Refresh portal chat view & focus chat input
+  renderPortal();
+  setTimeout(() => {
+    if ($('chatInput')) $('chatInput').focus();
+  }, 100);
+  
+  const emp = empById(empId);
+  toast('Chat started with ' + (emp ? emp.name : 'Employee'));
+}
+
+function createNewChannelGroup() {
+  const nameInput = document.getElementById('newChannelName');
+  const privacyInput = document.getElementById('newChannelPrivacy');
+  if (!nameInput || !privacyInput) return;
+  
+  const name = nameInput.value.trim().toLowerCase().replace(/[^a-z0-9_-]/g, '-');
+  if (!name) { toast('Please enter a valid channel name'); return; }
+  
+  const privacy = privacyInput.value;
+  const chId = 'ch_' + name;
+  
+  if (!s.channels) s.channels = [];
+  if (s.channels.find(c => c.id === chId)) {
+    toast('A channel with that name already exists');
+    return;
+  }
+  
+  // Checked members
+  const checkedEls = document.querySelectorAll('.new-ch-emp-check:checked');
+  const memberIds = Array.from(checkedEls).map(el => parseInt(el.value, 10));
+  if (sessionUser) memberIds.push(sessionUser.empId);
+
+  const newCh = {
+    id: chId,
+    name: name,
+    type: privacy === 'mgmt' ? 'management' : (privacy === 'group' ? 'group' : 'channel'),
+    members: memberIds
+  };
+  
+  s.channels.push(newCh);
+  save();
+  activeChatThreadId = chId;
+  
+  // Close modal
+  const m = document.getElementById('newChatModalWrapper');
+  if (m && m.parentNode) m.parentNode.removeChild(m);
+  
+  renderPortal();
+  toast('Created channel #' + name);
+}
+
+function printCurrentPaystub() {
+  const p = current();
+  const e = sessionEmp();
+  if (!p || !e) return toast('No active session or period');
+  
+  const myEntry = p.entries ? p.entries[e.id] : null;
+  const hrs = myEntry ? Number(myEntry.hours || 0) : 0;
+  const reg = Math.min(hrs, 40);
+  const ot = Math.max(0, hrs - 40);
+  const rate = Number(e.rate || e.wage || 0);
+  const wages = reg * rate + ot * rate * 1.5;
+  const tips = myEntry ? Number(myEntry.tips || 0) : 0;
+  const bonus = myEntry ? Number(myEntry.bonus || 0) : 0;
+  const gross = wages + tips + bonus;
+
+  const html = `
+    <html>
+      <head>
+        <title>Frenchie's Paystub - ${esc(e.name)}</title>
+        <style>
+          body { font-family: system-ui, sans-serif; padding: 30px; color: #1a1a2e; }
+          .stub-card { border: 2px solid #16a34a; border-radius: 12px; padding: 24px; max-width: 600px; margin: 0 auto; }
+          .stub-header { display: flex; justify-content: space-between; border-bottom: 2px solid #e2e8f0; padding-bottom: 16px; margin-bottom: 20px; }
+          .row { display: flex; justify-content: space-between; padding: 8px 0; border-bottom: 1px solid #f1f5f9; }
+          .row.total { font-weight: bold; font-size: 1.1rem; border-top: 2px solid #16a34a; border-bottom: none; margin-top: 12px; padding-top: 12px; }
+          .title { font-size: 1.4rem; font-weight: 800; color: #16a34a; margin: 0; }
+        </style>
+      </head>
+      <body>
+        <div class="stub-card">
+          <div class="stub-header">
+            <div>
+              <h1 class="title">FRENCHIE'S RESTAURANT</h1>
+              <div>Official Paystub Statement</div>
+            </div>
+            <div style="text-align:right">
+              <b>${esc(e.name)}</b><br>
+              ${esc(e.role)}<br>
+              Period: ${esc(shortLabel(p))}
+            </div>
+          </div>
+          <div class="row"><span>Regular Hours (${dec(reg)}h @ ${money(rate)})</span><span>${money(reg * rate)}</span></div>
+          ${ot > 0 ? \`<div class="row"><span>Overtime (${dec(ot)}h @ ${money(rate * 1.5)})</span><span>${money(ot * rate * 1.5)}</span></div>\` : ''}
+          ${tips > 0 ? \`<div class="row"><span>Tips Earned</span><span>${money(tips)}</span></div>\` : ''}
+          ${bonus > 0 ? \`<div class="row"><span>Bonus</span><span>${money(bonus)}</span></div>\` : ''}
+          <div class="row total"><span>ESTIMATED GROSS PAY</span><span>${money(gross)}</span></div>
+          <div style="margin-top:20px;font-size:.8rem;color:#64748b;text-align:center">
+            Payday: Sunday &middot; Frenchie's HR System &middot; Build ${DESK_BUILD}
+          </div>
+        </div>
+        <script>window.print();</script>
+      </body>
+    </html>
+  `;
+  
+  const win = window.open('', '_blank');
+  if (win) {
+    win.document.write(html);
+    win.document.close();
   }
 }
 
