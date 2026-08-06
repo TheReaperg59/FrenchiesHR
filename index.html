@@ -2645,7 +2645,7 @@ body.dark .dropdown-item:hover { background: oklch(28% .01 240); }
     <div>
       <div class="eyebrow">Self-Service</div>
       <h1 class="title" id="title-portal">My Portal</h1>
-      <div class="subtitle" id="portalWelcomeSub">Your dashboard — schedule, pay, messages, and requests.</div>
+      <div class="subtitle" id="portalWelcomeSub">Your dashboard — schedule, pay, messages, requests &amp; more.</div>
     </div>
     <div class="actions">
       <button type="button" class="btn primary" id="portalClockBtn">Clock in / out</button>
@@ -4591,7 +4591,7 @@ const LOG_TYPES = {
 };
 const TIP_ROLES_DEFAULT = ['Waiter', 'Hostess', 'Cook'];
 const TIP_ROLES = TIP_ROLES_DEFAULT; /* legacy alias — use tipRoles() */
-const DESK_BUILD = 'v56';
+const DESK_BUILD = 'v57';
 /** ECRP: house first-sign-in secret is a 6+ digit PIN (override in Settings). Stored hashed after first use/set. */
 const HOUSE_LOGIN_PIN = '86368636';
 const HOUSE_LOGIN_PASSWORD = HOUSE_LOGIN_PIN; /* legacy alias — prefer settings.housePassword */
