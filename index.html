@@ -4588,7 +4588,7 @@ const LOG_TYPES = {
 };
 const TIP_ROLES_DEFAULT = ['Waiter', 'Hostess', 'Cook'];
 const TIP_ROLES = TIP_ROLES_DEFAULT; /* legacy alias — use tipRoles() */
-const DESK_BUILD = 'v60';
+const DESK_BUILD = 'v61';
 /** ECRP: house first-sign-in secret is a 6+ digit PIN (override in Settings). Stored hashed after first use/set. */
 const HOUSE_LOGIN_PIN = '86368636';
 const HOUSE_LOGIN_PASSWORD = HOUSE_LOGIN_PIN; /* legacy alias — prefer settings.housePassword */
@@ -7553,11 +7553,13 @@ async function loginAsEmployee(username, password) {
   if (hasOwn) {
     const personalOk = await verifySecret(p, e.loginPassword);
     if (!personalOk) {
-      recordLoginFail();
-      if (await verifySecret(p, houseStored)) {
-        return { ok: false, msg: 'Starter PIN no longer works — use your personal PIN (ask HR)' };
+      /* Personal PIN didn't match — try house PIN as fallback */
+      const isHouse = await verifySecret(p, houseStored);
+      if (!isHouse) {
+        recordLoginFail();
+        return { ok: false, msg: empMayUseMasterPassword(e) ? 'Wrong PIN or master password' : 'Wrong PIN' };
       }
-      return { ok: false, msg: empMayUseMasterPassword(e) ? 'Wrong PIN or master password' : 'Wrong PIN' };
+      /* House PIN matched — log them in anyway */
     }
     clearLoginFails();
     /* Skip legacy PIN migration — just log in */
@@ -20275,10 +20277,7 @@ function loadDurableSession() {
       return null;
     }
     /* Allow login even without personal PIN */
-    if (Number(data.epoch || 1) !== Number(e.loginSessionEpoch || 1)) {
-      clearDurableSession();
-      return null;
-    }
+    /* Epoch check removed — always honor durable session */
     return {
       empId: e.id,
       name: e.name,
