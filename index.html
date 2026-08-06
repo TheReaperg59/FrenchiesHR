@@ -2479,6 +2479,7 @@ body.dark .dropdown-item:hover { background: oklch(28% .01 240); }
 
 /* ---- Chat System ---- */
 .chat-layout { display: flex; height: calc(100vh - 140px); min-height: 550px; border-radius: 12px; border: 1px solid var(--card-border, oklch(90% .01 240)); overflow: hidden; }
+.portal-card-body .chat-layout { height: 520px; min-height: unset; }
 .chat-sidebar { width: 280px; background: oklch(22% .03 160); color: #fff; display: flex; flex-direction: column; overflow-y: auto; }
 .chat-sidebar-section { padding: 12px 14px 4px; font-size: .75rem; text-transform: uppercase; letter-spacing: .05em; opacity: .7; display: flex; justify-content: space-between; align-items: center; }
 .chat-sidebar-list { flex: 1; padding: 8px; display: flex; flex-direction: column; gap: 4px; }
@@ -4847,7 +4848,7 @@ const LOG_TYPES = {
 };
 const TIP_ROLES_DEFAULT = ['Waiter', 'Hostess', 'Cook'];
 const TIP_ROLES = TIP_ROLES_DEFAULT; /* legacy alias — use tipRoles() */
-const DESK_BUILD = 'v70';
+const DESK_BUILD = 'v71';
 /** ECRP: house first-sign-in secret is a 6+ digit PIN (override in Settings). Stored hashed after first use/set. */
 const HOUSE_LOGIN_PIN = '86368636';
 const HOUSE_LOGIN_PASSWORD = HOUSE_LOGIN_PIN; /* legacy alias — prefer settings.housePassword */
@@ -20642,7 +20643,11 @@ function renderPortal() {
   const e = sessionEmp();
   if (!e) return;
   
-  renderMessagesView();
+  try {
+    renderMessagesView();
+  } catch (err) {
+    console.warn('[FrenchiesHR] Portal chat render error:', err);
+  }
 
   // Button handlers
   if ($('portalClockBtn')) $('portalClockBtn').onclick = () => openClockModal();
@@ -21305,17 +21310,17 @@ function updateNavMsgBadges() {
   
   let unread = 0;
   s.messages.forEach(m => {
-    if (m.from === sessionUser.id) return;
+    if (String(m.from) === String(sessionUser.empId)) return;
     if (m.channelId.startsWith('ch_')) {
       // For channels, maybe only count mentions if we want, or count all. The spec says "unread DMs/mentions".
       // We'll count all unread channel messages just so they see something, or strictly mentions.
       // We'll do strictly mentions to match Slack:
-      if (m.body.includes('@' + sessionUser.name) && (!m.readBy || !m.readBy[sessionUser.id])) {
+      if (m.body.includes('@' + sessionUser.name) && (!m.readBy || !m.readBy[sessionUser.empId])) {
         unread++;
       }
     } else {
       // DM
-      if (m.to === sessionUser.id && (!m.readBy || !m.readBy[sessionUser.id])) {
+      if (String(m.to) === String(sessionUser.empId) && (!m.readBy || !m.readBy[sessionUser.empId])) {
         unread++;
       }
     }
@@ -21358,13 +21363,36 @@ function renderMessagesView(filterStr = '') {
   
   let dmsHtml = '';
   const emps = activeEmployees();
+  const myEmpId = sessionUser ? sessionUser.empId : null;
+
   emps.forEach(e => {
-    if (e.id === sessionUser.id) return;
-    if (f && !e.name.toLowerCase().includes(f)) return;
-    const dmId = 'dm_' + Math.min(e.id, sessionUser.id) + '_' + Math.max(e.id, sessionUser.id);
+    if (String(e.id) === String(myEmpId)) return;
+    if (f && !e.name.toLowerCase().includes(f) && !(e.role || '').toLowerCase().includes(f)) return;
+    
+    const id1 = Math.min(Number(e.id), Number(myEmpId));
+    const id2 = Math.max(Number(e.id), Number(myEmpId));
+    const dmId = 'dm_' + id1 + '_' + id2;
     const active = activeChatThreadId === dmId ? 'active' : '';
-    const isOnline = (e.status === 'active' && Math.random() > 0.5) ? 'online' : ''; // Mock online status
-    dmsHtml += `<div class="chat-sidebar-item ${active}" onclick="switchChatThread('${dmId}')"><span class="chat-status-dot ${isOnline}"></span> ${esc(e.name)}</div>`;
+    const isOnline = (e.status === 'active') ? 'online' : '';
+    const initials = (e.name || '?')[0].toUpperCase();
+    
+    // Check unread DMs from this employee
+    const unreadCount = (s.messages || []).filter(m => 
+      m.channelId === dmId && String(m.from) === String(e.id) && (!m.readBy || !m.readBy[myEmpId])
+    ).length;
+    const unreadBadge = unreadCount > 0 ? `<span class="pill primary" style="margin-left:auto;font-size:.68rem">${unreadCount}</span>` : '';
+
+    dmsHtml += `
+      <div class="chat-sidebar-item ${active}" onclick="switchChatThread('${dmId}')" style="display:flex;align-items:center;gap:10px;padding:8px 10px;">
+        <span class="chat-status-dot ${isOnline}"></span>
+        <div style="width:28px;height:28px;border-radius:50%;background:oklch(55% .16 155);color:#fff;display:flex;align-items:center;justify-content:center;font-size:.72rem;font-weight:700;flex-shrink:0">${esc(initials)}</div>
+        <div style="flex:1;min-width:0;overflow:hidden;text-overflow:ellipsis;">
+          <div style="font-weight:600;font-size:.82rem;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;">${esc(e.name)}</div>
+          <div style="font-size:.7rem;opacity:.7;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;">${esc(e.role || 'Staff')}</div>
+        </div>
+        ${unreadBadge}
+      </div>
+    `;
   });
   
   if ($('chatSidebarChannels')) $('chatSidebarChannels').innerHTML = channelsHtml;
@@ -21387,9 +21415,10 @@ function renderChatThread(threadId) {
     memberCount = activeEmployees().length;
   } else if (threadId.startsWith('dm_')) {
     const ids = threadId.replace('dm_', '').split('_');
-    const otherId = parseInt(ids[0] == sessionUser.id ? ids[1] : ids[0], 10);
-    const other = s.employees.find(e => e.id === otherId);
-    title = other ? other.name : 'Unknown';
+    const myEmpId = sessionUser ? sessionUser.empId : null;
+    const otherId = parseInt(ids[0] == myEmpId ? ids[1] : ids[0], 10);
+    const other = empById(otherId);
+    title = other ? other.name : 'Direct Message';
     memberCount = 2;
   }
   
@@ -21401,7 +21430,7 @@ function renderChatThread(threadId) {
   
   const msgs = (s.messages || []).filter(m => {
     if (threadId.startsWith('ch_')) return m.channelId === threadId;
-    if (threadId.startsWith('dm_')) return m.channelId === threadId || (m.to && m.from && ((m.to == sessionUser.id && m.from == threadId.split('_')[1]) || (m.from == sessionUser.id && m.to == threadId.split('_')[1])));
+    if (threadId.startsWith('dm_')) return m.channelId === threadId || (m.to && m.from && ((String(m.to) === String(sessionUser.empId) && m.from == threadId.split('_')[1]) || (String(m.from) === String(sessionUser.empId) && m.to == threadId.split('_')[1])));
     return false;
   });
   
@@ -21409,16 +21438,17 @@ function renderChatThread(threadId) {
   let dirtyRead = false;
   
   msgs.forEach(m => {
-    const isSent = m.from === sessionUser.id;
+    const myEmpId = sessionUser ? sessionUser.empId : null;
+    const isSent = String(m.from) === String(myEmpId);
     const rowClass = isSent ? 'chat-bubble-row sent' : 'chat-bubble-row';
-    const bubClass = threadId === 'ch_announcements' && m.from === 1 ? 'chat-bubble announcement' : isSent ? 'chat-bubble sent' : 'chat-bubble received';
+    const bubClass = threadId === 'ch_announcements' && String(m.from) === '1' ? 'chat-bubble announcement' : isSent ? 'chat-bubble sent' : 'chat-bubble received';
     
     let reactionsHtml = '';
     if (m.reactions) {
       for (let emoji in m.reactions) {
         const arr = m.reactions[emoji];
         if (arr.length > 0) {
-          const isActive = arr.includes(sessionUser.id) ? 'active' : '';
+          const isActive = arr.includes(sessionUser.empId) ? 'active' : '';
           reactionsHtml += `<div class="chat-reaction-pill ${isActive}" onclick="toggleMessageReaction('${m.id}', '${emoji}')">${emoji} ${arr.length}</div>`;
         }
       }
@@ -21442,15 +21472,17 @@ function renderChatThread(threadId) {
     
     if (!isSent) {
       if (!m.readBy) m.readBy = {};
-      if (!m.readBy[sessionUser.id]) {
-        m.readBy[sessionUser.id] = true;
+      if (!m.readBy[sessionUser.empId]) {
+        m.readBy[sessionUser.empId] = true;
         dirtyRead = true;
       }
     }
   });
   
   msgContainer.innerHTML = msgHtml || '<div style="opacity:0.5;text-align:center;margin-top:40px;">No messages yet. Say hi!</div>';
-  msgContainer.scrollTop = msgContainer.scrollHeight;
+  setTimeout(() => {
+    if (msgContainer) msgContainer.scrollTop = msgContainer.scrollHeight;
+  }, 30);
   
   if (dirtyRead) {
     save({ quiet: true });
@@ -21487,20 +21519,20 @@ function sendChatMessage() {
   let to = null;
   if (activeChatThreadId.startsWith('dm_')) {
     const ids = activeChatThreadId.replace('dm_', '').split('_');
-    to = parseInt(ids[0] == sessionUser.id ? ids[1] : ids[0], 10);
+    to = parseInt(ids[0] == sessionUser.empId ? ids[1] : ids[0], 10);
   }
   
   const msg = {
     id: 'msg_' + Date.now() + '_' + Math.random().toString(36).substring(2, 8),
     channelId: activeChatThreadId,
-    from: sessionUser.id,
+    from: sessionUser.empId,
     to: to,
     body: txt,
     sentAt: new Date().toISOString(),
     readBy: {},
     reactions: {}
   };
-  msg.readBy[sessionUser.id] = true;
+  msg.readBy[sessionUser.empId] = true;
   
   s.messages.push(msg);
   input.value = '';
@@ -21518,9 +21550,9 @@ function toggleMessageReaction(msgId, emoji) {
   if (!msg.reactions[emoji]) msg.reactions[emoji] = [];
   
   const arr = msg.reactions[emoji];
-  const idx = arr.indexOf(sessionUser.id);
+  const idx = arr.indexOf(sessionUser.empId);
   if (idx === -1) {
-    arr.push(sessionUser.id);
+    arr.push(sessionUser.empId);
   } else {
     arr.splice(idx, 1);
   }
