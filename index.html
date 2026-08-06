@@ -2478,6 +2478,7 @@ body.dark .dropdown-item:hover { background: oklch(28% .01 240); }
 .metrics-dense .metric strong { font-size: .95rem; }
 </style>
 </head>
+<script src="frenchies-state.js" onerror="/* no state file yet — normal on first run */"></script>
 <body>
 <div id="loginGate" class="open" data-mode="signin" role="dialog" aria-modal="true" aria-labelledby="loginTitle">
   <div class="login-card">
@@ -5265,6 +5266,99 @@ function idbLoad() {
   }).catch(() => null);
 }
 
+/* =========================================================
+   COMPANION STATE FILE — frenchies-state.js
+   Writes data to a file next to index.html so it survives
+   URL/origin changes. Uses File System Access API.
+   First save asks permission once, then auto-writes silently.
+   ========================================================= */
+let _companionFileHandle = null;
+let _companionWriteQueued = false;
+
+async function initCompanionFileHandle() {
+  if (_companionFileHandle) return _companionFileHandle;
+  /* Try to recover stored handle from IDB */
+  try {
+    const db = await openIDB();
+    const tx = db.transaction(IDB_STORE, 'readonly');
+    const store = tx.objectStore(IDB_STORE);
+    const handle = await new Promise((res, rej) => {
+      const r = store.get('companion_file_handle');
+      r.onsuccess = () => res(r.result || null);
+      r.onerror = () => res(null);
+    });
+    db.close();
+    if (handle && typeof handle.queryPermission === 'function') {
+      const perm = await handle.queryPermission({ mode: 'readwrite' });
+      if (perm === 'granted') { _companionFileHandle = handle; return handle; }
+      /* Try to re-request silently */
+      const req = await handle.requestPermission({ mode: 'readwrite' });
+      if (req === 'granted') { _companionFileHandle = handle; return handle; }
+    }
+  } catch (e) {}
+  return null;
+}
+
+async function pickCompanionFile() {
+  if (!window.showSaveFilePicker) return null;
+  try {
+    const handle = await window.showSaveFilePicker({
+      suggestedName: 'frenchies-state.js',
+      types: [{ description: 'JS State File', accept: { 'application/javascript': ['.js'] } }]
+    });
+    _companionFileHandle = handle;
+    /* Store handle in IDB for future sessions */
+    try {
+      const db = await openIDB();
+      const tx = db.transaction(IDB_STORE, 'readwrite');
+      tx.objectStore(IDB_STORE).put(handle, 'companion_file_handle');
+      await new Promise(r => { tx.oncomplete = r; });
+      db.close();
+    } catch (e) {}
+    return handle;
+  } catch (e) { return null; }
+}
+
+async function writeCompanionStateFile(json) {
+  if (!window.showSaveFilePicker) return; /* API not supported */
+  let handle = await initCompanionFileHandle();
+  if (!handle) {
+    /* First time — need user gesture. Queue it for next explicit save action */
+    if (!_companionWriteQueued) {
+      _companionWriteQueued = true;
+      /* Show a one-time prompt to set up auto-save */
+      setTimeout(() => {
+        if (_companionFileHandle) return; /* already set up */
+        const banner = document.createElement('div');
+        banner.id = 'companionSetupBanner';
+        banner.innerHTML = '<div style="position:fixed;bottom:20px;left:50%;transform:translateX(-50%);background:var(--ink,#1a1a2e);color:#fff;padding:14px 20px;border-radius:12px;box-shadow:0 8px 32px rgba(0,0,0,.3);z-index:10000;font-size:.85rem;display:flex;align-items:center;gap:12px;max-width:500px"><div><b>Set up auto-save?</b><br>Save your data to a file so it survives app updates automatically.</div><button id="companionSetupBtn" style="background:#4ade80;color:#000;border:none;padding:8px 16px;border-radius:8px;font-weight:600;cursor:pointer;white-space:nowrap">Set up</button><button onclick="this.parentElement.parentElement.remove()" style="background:none;border:none;color:#888;cursor:pointer;font-size:1.1rem">\u2715</button></div>';
+        document.body.appendChild(banner);
+        document.getElementById('companionSetupBtn').onclick = async () => {
+          const h = await pickCompanionFile();
+          banner.remove();
+          if (h) {
+            await doWriteCompanion(h, JSON.stringify(s));
+            toast('Auto-save file linked — data will persist across updates!');
+          }
+        };
+      }, 3000);
+    }
+    return;
+  }
+  await doWriteCompanion(handle, json);
+}
+
+async function doWriteCompanion(handle, json) {
+  try {
+    const writable = await handle.createWritable();
+    await writable.write('/* FrenchiesHR companion state — auto-generated, do not edit */\nwindow.__FRENCHIES_STATE = ' + json + ';\n');
+    await writable.close();
+  } catch (e) {
+    console.warn('[FrenchiesHR] Companion file write failed:', e);
+    _companionFileHandle = null; /* reset so we re-prompt */
+  }
+}
+
 /* Synchronous load from localStorage (fast, runs at page init) */
 function loadStateSync() {
   const tryKeys = [STORAGE, STORAGE_MIRROR, OLD_V6, OLD_V5];
@@ -5289,9 +5383,25 @@ function loadStateSync() {
 }
 
 function loadState() {
+  /* Priority 1: localStorage (fastest, same origin) */
   const fromLS = loadStateSync();
   if (fromLS) return fromLS;
-  /* localStorage was empty — we'll try IDB recovery after DOM loads */
+
+  /* Priority 2: companion state file (frenchies-state.js loaded via script tag) */
+  if (window.__FRENCHIES_STATE && typeof window.__FRENCHIES_STATE === 'object' && Array.isArray(window.__FRENCHIES_STATE.employees)) {
+    console.log('[FrenchiesHR] Auto-restoring from companion frenchies-state.js');
+    const migrated = migrate(window.__FRENCHIES_STATE);
+    migrated.activity = migrated.activity || [];
+    migrated.activity.unshift({
+      text: '⚡ Office auto-restored from frenchies-state.js — seamless update',
+      date: today()
+    });
+    /* Re-save to localStorage so future loads are instant */
+    try { localStorage.setItem(STORAGE, JSON.stringify(migrated)); } catch (e) {}
+    return migrated;
+  }
+
+  /* Priority 3: seedState (truly first run) */
   return seedState();
 }
 
@@ -5635,6 +5745,8 @@ function save(opts) {
     localStorage.setItem(STORAGE, json);
     /* IndexedDB vault — redundant backup survives origin changes */
     try { idbSave(s); } catch (idbErr) {}
+    /* Companion state file — survives URL/origin changes */
+    try { writeCompanionStateFile(json); } catch (cfErr) {}
     /* Light integrity mirror — not a second full copy */
     try {
       localStorage.setItem(STORAGE_MIRROR, JSON.stringify({
