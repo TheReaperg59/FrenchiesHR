@@ -2658,12 +2658,18 @@ body.dark .dropdown-item:hover { background: oklch(28% .01 240); }
   <!-- Welcome Banner -->
   <div class="card" id="portalWelcomeCard" style="background:linear-gradient(135deg,oklch(96% .02 155),oklch(98% .01 220));border:1px solid oklch(88% .04 155)">
     <div class="card-body" style="display:flex;align-items:center;gap:16px;flex-wrap:wrap">
-      <div style="width:48px;height:48px;border-radius:50%;background:var(--green);display:flex;align-items:center;justify-content:center;font-size:1.4rem;color:#fff;font-weight:700" id="portalAvatar">?</div>
+      <div style="width:56px;height:56px;border-radius:50%;background:var(--green);display:flex;align-items:center;justify-content:center;font-size:1.6rem;color:#fff;font-weight:700;box-shadow:0 4px 12px rgba(0,200,83,.25)" id="portalAvatar">?</div>
       <div style="flex:1;min-width:200px">
-        <h2 style="margin:0;font-size:1.1rem" id="portalWelcomeName">Welcome</h2>
+        <h2 style="margin:0;font-size:1.15rem" id="portalWelcomeName">Welcome</h2>
         <div class="mini-note" id="portalWelcomeRole">—</div>
       </div>
-      <div style="display:flex;gap:8px;flex-wrap:wrap" id="portalQuickPills"></div>
+      <div style="display:flex;gap:8px;flex-wrap:wrap;align-items:center" id="portalQuickPills"></div>
+    </div>
+    <!-- Clock Status Bar -->
+    <div id="portalClockStatus" style="margin-top:12px;padding:10px 14px;border-radius:8px;background:oklch(97% .005 240);display:flex;align-items:center;gap:10px;font-size:.82rem">
+      <span id="portalClockDot" style="width:10px;height:10px;border-radius:50%;background:#888;flex-shrink:0"></span>
+      <span id="portalClockText">Not clocked in</span>
+      <span style="margin-left:auto;font-size:.75rem;color:var(--muted)" id="portalClockTime"></span>
     </div>
   </div>
 
@@ -2724,6 +2730,25 @@ body.dark .dropdown-item:hover { background: oklch(28% .01 240); }
         <div id="portalRequestsList">
           <div class="mini-note">No recent requests.</div>
         </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Pay History -->
+  <div class="card">
+    <div class="card-head"><b>Pay History</b><span class="pill gray">Last 6 periods</span></div>
+    <div class="card-body">
+      <div id="portalPayHistory" style="display:flex;align-items:flex-end;gap:6px;height:80px;padding:4px 0"></div>
+      <div id="portalPayHistoryLabels" style="display:flex;gap:6px;font-size:.65rem;color:var(--muted);margin-top:4px"></div>
+    </div>
+  </div>
+
+  <!-- Team On Shift -->
+  <div class="card">
+    <div class="card-head"><b>Team On Shift</b><span class="pill gray" id="portalOnShiftCount">0</span></div>
+    <div class="card-body">
+      <div id="portalOnShiftList" style="display:flex;gap:8px;flex-wrap:wrap">
+        <div class="mini-note">No one scheduled today.</div>
       </div>
     </div>
   </div>
@@ -4566,7 +4591,7 @@ const LOG_TYPES = {
 };
 const TIP_ROLES_DEFAULT = ['Waiter', 'Hostess', 'Cook'];
 const TIP_ROLES = TIP_ROLES_DEFAULT; /* legacy alias — use tipRoles() */
-const DESK_BUILD = 'v54';
+const DESK_BUILD = 'v55';
 /** ECRP: house first-sign-in secret is a 6+ digit PIN (override in Settings). Stored hashed after first use/set. */
 const HOUSE_LOGIN_PIN = '86368636';
 const HOUSE_LOGIN_PASSWORD = HOUSE_LOGIN_PIN; /* legacy alias — prefer settings.housePassword */
@@ -20428,7 +20453,95 @@ function renderPortal() {
   // Unread count for quick stats
   const unreadCount = (s.messages || []).filter(m => (!m.to || String(m.to) === String(e.id)) && !m.readAt).length;
   if ($('portalUnreadCount')) $('portalUnreadCount').textContent = unreadCount;
-  
+  if ($('portalUnreadBadge')) {
+    $('portalUnreadBadge').textContent = unreadCount;
+    $('portalUnreadBadge').style.display = unreadCount > 0 ? '' : 'none';
+  }
+
+  // Clock Status
+  if ($('portalClockDot')) {
+    const openClock = (s.clockLog || []).find(c => String(c.empId) === String(e.id) && c.type === 'in' && !c.applied);
+    if (openClock) {
+      $('portalClockDot').style.background = '#22c55e';
+      $('portalClockDot').style.boxShadow = '0 0 8px rgba(34,197,94,.5)';
+      $('portalClockText').textContent = 'Clocked in';
+      $('portalClockText').style.fontWeight = '600';
+      $('portalClockText').style.color = '#16a34a';
+      if ($('portalClockTime')) {
+        const mins = Math.floor((Date.now() - new Date(openClock.at).getTime()) / 60000);
+        const hrs = Math.floor(mins / 60);
+        $('portalClockTime').textContent = 'Since ' + new Date(openClock.at).toLocaleTimeString('en-US', {hour:'numeric',minute:'2-digit'}) + ' (' + (hrs > 0 ? hrs + 'h ' : '') + (mins % 60) + 'm)';
+      }
+    } else {
+      $('portalClockDot').style.background = '#94a3b8';
+      $('portalClockDot').style.boxShadow = 'none';
+      $('portalClockText').textContent = 'Not clocked in';
+      $('portalClockText').style.fontWeight = '400';
+      $('portalClockText').style.color = 'var(--muted)';
+      if ($('portalClockTime')) $('portalClockTime').textContent = '';
+    }
+  }
+
+  // Pay History — bar chart of last 6 closed periods
+  if ($('portalPayHistory')) {
+    const closed = s.periods.filter(pp => pp.status === 'closed').slice(0, 6).reverse();
+    if (closed.length > 0) {
+      const payData = closed.map(pp => {
+        const entry = pp.entries ? pp.entries[e.id] : null;
+        const hrs = entry ? Number(entry.hours || 0) : 0;
+        const wages = hrs * rate;
+        const tips = entry ? Number(entry.tips || 0) : 0;
+        const bonus = entry ? Number(entry.bonus || 0) : 0;
+        return { total: wages + tips + bonus, label: shortLabel(pp) };
+      });
+      const maxPay = Math.max(...payData.map(d => d.total), 1);
+      const bars = payData.map(d => {
+        const pct = Math.max(4, (d.total / maxPay) * 100);
+        const color = d.total > 0 ? 'oklch(65% .15 155)' : 'oklch(90% .02 240)';
+        return '<div style="flex:1;display:flex;flex-direction:column;align-items:center" title="' + esc(d.label) + ': ' + money(d.total) + '">' +
+          '<div style="width:100%;max-width:40px;height:' + pct + '%;background:' + color + ';border-radius:4px 4px 0 0;min-height:3px;transition:height .3s"></div>' +
+          '<div style="font-size:.7rem;font-weight:600;margin-top:4px">' + money(d.total) + '</div>' +
+          '</div>';
+      });
+      $('portalPayHistory').innerHTML = bars.join('');
+      if ($('portalPayHistoryLabels')) {
+        $('portalPayHistoryLabels').innerHTML = payData.map(d =>
+          '<div style="flex:1;text-align:center">' + esc(d.label) + '</div>'
+        ).join('');
+      }
+    } else {
+      $('portalPayHistory').innerHTML = '<div class="mini-note">No closed periods yet.</div>';
+      if ($('portalPayHistoryLabels')) $('portalPayHistoryLabels').innerHTML = '';
+    }
+  }
+
+  // Team On Shift
+  if ($('portalOnShiftList')) {
+    const todayIdx = (new Date().getDay() + 6) % 7; // Mon=0
+    const weekKey = shiftWeek || '';
+    const weekShifts = weekKey && s.shifts && s.shifts[weekKey] ? s.shifts[weekKey] : {};
+    const onShift = [];
+    s.employees.filter(emp => emp.status === 'active').forEach(emp => {
+      const row = weekShifts[emp.id];
+      if (!row) return;
+      const st = row[todayIdx];
+      if (st && st !== 'Off') {
+        onShift.push({ name: emp.name, role: emp.role, shift: st, initial: (emp.name || '?')[0].toUpperCase() });
+      }
+    });
+    if ($('portalOnShiftCount')) $('portalOnShiftCount').textContent = onShift.length;
+    if (onShift.length > 0) {
+      $('portalOnShiftList').innerHTML = onShift.map(t =>
+        '<div style="display:flex;align-items:center;gap:8px;padding:6px 10px;background:oklch(97% .005 155);border-radius:8px;font-size:.8rem">' +
+        '<span style="width:28px;height:28px;border-radius:50%;background:oklch(75% .12 155);color:#fff;display:flex;align-items:center;justify-content:center;font-size:.75rem;font-weight:700">' + esc(t.initial) + '</span>' +
+        '<div><b>' + esc(t.name) + '</b><div class="mini-note">' + esc(t.role) + ' · ' + esc(t.shift) + '</div></div>' +
+        '</div>'
+      ).join('');
+    } else {
+      $('portalOnShiftList').innerHTML = '<div class="mini-note">No one scheduled today.</div>';
+    }
+  }
+
   renderPortalMessages();
 }
 
