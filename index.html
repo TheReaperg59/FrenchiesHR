@@ -5207,7 +5207,61 @@ function incomeKindPill(k) {
   return 'gray';
 }
 
-function loadState() {
+/* =========================================================
+   INDEXEDDB REDUNDANT BACKUP — PERMANENT DATA SAFETY NET
+   localStorage is origin-scoped: different URL = data gone.
+   IndexedDB backup survives and auto-recovers on load.
+   ========================================================= */
+const IDB_NAME = 'FrenchiesHR_Vault';
+const IDB_STORE = 'desk';
+const IDB_KEY = 'current_state';
+const IDB_BACKUP_KEY = 'last_good_state';
+
+function openIDB() {
+  return new Promise((resolve, reject) => {
+    const req = indexedDB.open(IDB_NAME, 2);
+    req.onupgradeneeded = (e) => {
+      const db = e.target.result;
+      if (!db.objectStoreNames.contains(IDB_STORE)) {
+        db.createObjectStore(IDB_STORE);
+      }
+    };
+    req.onsuccess = () => resolve(req.result);
+    req.onerror = () => reject(req.error);
+  });
+}
+
+function idbSave(state) {
+  openIDB().then(db => {
+    const tx = db.transaction(IDB_STORE, 'readwrite');
+    const store = tx.objectStore(IDB_STORE);
+    const json = JSON.stringify(state);
+    store.put(json, IDB_KEY);
+    store.put(json, IDB_BACKUP_KEY);
+    tx.oncomplete = () => db.close();
+  }).catch(() => {});
+}
+
+function idbLoad() {
+  return openIDB().then(db => {
+    return new Promise((resolve, reject) => {
+      const tx = db.transaction(IDB_STORE, 'readonly');
+      const store = tx.objectStore(IDB_STORE);
+      const req = store.get(IDB_KEY);
+      req.onsuccess = () => {
+        db.close();
+        if (req.result) {
+          try { resolve(JSON.parse(req.result)); }
+          catch (e) { resolve(null); }
+        } else { resolve(null); }
+      };
+      req.onerror = () => { db.close(); resolve(null); };
+    });
+  }).catch(() => null);
+}
+
+/* Synchronous load from localStorage (fast, runs at page init) */
+function loadStateSync() {
   const tryKeys = [STORAGE, STORAGE_MIRROR, OLD_V6, OLD_V5];
   for (const k of tryKeys) {
     const raw = localStorage.getItem(k);
@@ -5226,7 +5280,41 @@ function loadState() {
       }
     } catch (err) { /* try next key */ }
   }
+  return null; /* return null instead of seedState so we can try IDB */
+}
+
+function loadState() {
+  const fromLS = loadStateSync();
+  if (fromLS) return fromLS;
+  /* localStorage was empty — we'll try IDB recovery after DOM loads */
   return seedState();
+}
+
+/* Async IDB recovery — runs after page load. If localStorage was
+   empty but IDB has data, restore it automatically. */
+function attemptIDBRecovery() {
+  idbLoad().then(data => {
+    if (!data || !Array.isArray(data.employees) || data.employees.length === 0) return;
+    /* Only recover if current state looks like a fresh seed (no real changes) */
+    const isFresh = s.meta && Number(s.meta.saveCount || 0) <= 1 && s.employees.length <= 6;
+    const idbHasMore = data.employees.length > 0 && (data.meta && Number(data.meta.saveCount || 0) > 1);
+    if (isFresh && idbHasMore) {
+      console.log('[FrenchiesHR] Recovering data from IndexedDB vault...');
+      const migrated = migrate(data);
+      migrated.activity = migrated.activity || [];
+      migrated.activity.unshift({
+        text: '⚡ Office file auto-recovered from IndexedDB vault (localStorage was empty — likely URL/origin change)',
+        date: today()
+      });
+      s = migrated;
+      localStorage.setItem(STORAGE, JSON.stringify(s));
+      save({ quiet: true });
+      render();
+      toast('Data recovered from vault — welcome back!');
+    }
+  }).catch(err => {
+    console.warn('[FrenchiesHR] IDB recovery check failed:', err);
+  });
 }
 
 let s = loadState();
@@ -5540,6 +5628,8 @@ function save(opts) {
     }
     const json = JSON.stringify(s);
     localStorage.setItem(STORAGE, json);
+    /* IndexedDB vault — redundant backup survives origin changes */
+    try { idbSave(s); } catch (idbErr) {}
     /* Light integrity mirror — not a second full copy */
     try {
       localStorage.setItem(STORAGE_MIRROR, JSON.stringify({
@@ -20431,6 +20521,12 @@ document.addEventListener('click', function(e) {
   if (!dd.contains(e.target)) dd.style.display = 'none';
 });
 
+
+/* ---------- IndexedDB vault: initial seed + recovery ---------- */
+/* Seed IDB with current state on first load (so it has data for future recovery) */
+try { idbSave(s); } catch (e) {}
+/* If localStorage was empty, try recovering from IDB */
+attemptIDBRecovery();
 
 /* Debug / test hooks (same-origin desk) */
 window.__desk = {
