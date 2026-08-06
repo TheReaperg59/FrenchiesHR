@@ -2499,10 +2499,7 @@ body.dark .dropdown-item:hover { background: oklch(28% .01 240); }
       <div class="actions">
         <button type="submit" class="btn primary" id="loginSubmit">Sign in</button>
       </div>
-      <div id="loginRestorePanel" style="margin-top:18px;padding-top:16px;border-top:1px solid var(--line);display:none">
-        <p style="font-size:.82rem;color:var(--muted);margin:0 0 10px">⚠️ <b>Updated the app?</b> Import your backup to restore all data.</p>
-        <input type="file" id="loginImportFile" accept="application/json,.json" style="font-size:.8rem;margin-bottom:8px">
-        <button type="button" class="btn soft" id="loginImportBtn" style="width:100%">Restore from backup file</button>
+      <div id="loginRestorePanel" style="display:none">
       </div>
     </form>
     <form class="login-panel" id="loginSetupPanel" autocomplete="off">
@@ -4591,7 +4588,7 @@ const LOG_TYPES = {
 };
 const TIP_ROLES_DEFAULT = ['Waiter', 'Hostess', 'Cook'];
 const TIP_ROLES = TIP_ROLES_DEFAULT; /* legacy alias — use tipRoles() */
-const DESK_BUILD = 'v58';
+const DESK_BUILD = 'v59';
 /** ECRP: house first-sign-in secret is a 6+ digit PIN (override in Settings). Stored hashed after first use/set. */
 const HOUSE_LOGIN_PIN = '86368636';
 const HOUSE_LOGIN_PASSWORD = HOUSE_LOGIN_PIN; /* legacy alias — prefer settings.housePassword */
@@ -7599,12 +7596,9 @@ async function loginAsEmployee(username, password) {
       save({ quiet: true, skipSnapshot: true });
     } catch (err) {}
   }
-  /* First-time: house PIN accepted → force personal PIN (or Owner master) setup */
-  sessionUser = null;
-  persistSession(null);
-  pendingPasswordEmpId = e.id;
-  applySessionChrome();
-  return { ok: true, emp: e, needPassword: true };
+  /* House PIN accepted — log them straight in, no forced PIN setup */
+  enterDeskSession(e);
+  return { ok: true, emp: e, needPassword: false };
 }
 function logoutDesk() {
   const who = sessionUser && sessionUser.name;
@@ -18358,14 +18352,8 @@ if (_stateLooksFresh) {
         const json = JSON.stringify(s);
         try { localStorage.setItem(STORAGE, json); } catch(e) {}
         try { idbSave(s); } catch(e) {}
-        /* Auto-login: find owner/manager and create session automatically */
-        const autoEmp = s.employees.find(x => x.role === 'Owner' && x.status === 'active')
-          || s.employees.find(x => x.role === 'Manager' && x.status === 'active')
-          || s.employees.find(x => x.status === 'active');
-        if (autoEmp) {
-          console.log('[FrenchiesHR] Auto-login as', autoEmp.name);
-          enterDeskSession(autoEmp, { stay: true, forceDurable: true });
-        }
+        /* Data recovered — user will see normal login screen with their real accounts */
+        console.log('[FrenchiesHR] Cloud data restored. Ready for login.');
       }
     } catch (err) {
       console.warn('[FrenchiesHR] Cloud boot check:', err.message || err);
