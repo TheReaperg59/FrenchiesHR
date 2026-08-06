@@ -4588,7 +4588,7 @@ const LOG_TYPES = {
 };
 const TIP_ROLES_DEFAULT = ['Waiter', 'Hostess', 'Cook'];
 const TIP_ROLES = TIP_ROLES_DEFAULT; /* legacy alias — use tipRoles() */
-const DESK_BUILD = 'v64';
+const DESK_BUILD = 'v65';
 /** ECRP: house first-sign-in secret is a 6+ digit PIN (override in Settings). Stored hashed after first use/set. */
 const HOUSE_LOGIN_PIN = '86368636';
 const HOUSE_LOGIN_PASSWORD = HOUSE_LOGIN_PIN; /* legacy alias — prefer settings.housePassword */
@@ -14617,21 +14617,22 @@ function createNextPeriod() {
   return p;
 }
 
-/* Fix any existing periods that end on Sunday — shift end back 1 day to Saturday */
-(function fixPeriodEndDays() {
-  if (!s || !s.periods) return;
+/* Fix any existing periods that end on Sunday — shift to Sun-Sat schedule */
+function fixPeriodEndDays() {
+  if (!s || !s.periods || !s.periods.length) return;
   let fixed = 0;
+  const fmt = d => d.getFullYear() + '-' + String(d.getMonth() + 1).padStart(2, '0') + '-' + String(d.getDate()).padStart(2, '0');
   s.periods.forEach(function(p) {
     const endDate = new Date(p.end + 'T00:00:00');
-    if (endDate.getDay() === 0) { /* Sunday */
-      endDate.setDate(endDate.getDate() - 1); /* Move to Saturday */
-      p.end = endDate.getFullYear() + '-' + String(endDate.getMonth() + 1).padStart(2, '0') + '-' + String(endDate.getDate()).padStart(2, '0');
+    if (endDate.getDay() === 0) { /* End is Sunday → move to Saturday */
+      endDate.setDate(endDate.getDate() - 1);
+      p.end = fmt(endDate);
       fixed++;
     }
     const startDate = new Date(p.start + 'T00:00:00');
-    if (startDate.getDay() === 1) { /* Monday */
-      startDate.setDate(startDate.getDate() - 1); /* Move to Sunday */
-      p.start = startDate.getFullYear() + '-' + String(startDate.getMonth() + 1).padStart(2, '0') + '-' + String(startDate.getDate()).padStart(2, '0');
+    if (startDate.getDay() === 1) { /* Start is Monday → move to Sunday */
+      startDate.setDate(startDate.getDate() - 1);
+      p.start = fmt(startDate);
       fixed++;
     }
   });
@@ -14639,7 +14640,7 @@ function createNextPeriod() {
     console.log('[FrenchiesHR] Fixed ' + fixed + ' period date(s) to Sun-Sat schedule');
     try { save({ quiet: true, skipSnapshot: true }); } catch(e) {}
   }
-})();
+}
 
 function requireTypedOverride(reason, message) {
   const typed = prompt(message + '\n\nType OVERRIDE to continue anyway:');
@@ -18351,6 +18352,8 @@ if (_stateLooksFresh) {
         migrated.meta.saveCount = Math.max(Number(migrated.meta.saveCount || 0), 100);
         s = migrated;
         ensureMeta();
+        /* Fix period dates to Sun-Sat before saving */
+        fixPeriodEndDays();
         const json = JSON.stringify(s);
         try { localStorage.setItem(STORAGE, json); } catch(e) {}
         try { idbSave(s); } catch(e) {}
@@ -18379,6 +18382,8 @@ if (_stateLooksFresh) {
 }
 
 function finishBoot() {
+/* Fix period dates on every boot (covers localStorage path) */
+fixPeriodEndDays();
 sessionUser = loadSession();
 if (!sessionUser) {
   const dur = loadDurableSession();
