@@ -4874,7 +4874,7 @@ const LOG_TYPES = {
 };
 const TIP_ROLES_DEFAULT = ['Waiter', 'Hostess', 'Cook'];
 const TIP_ROLES = TIP_ROLES_DEFAULT; /* legacy alias — use tipRoles() */
-const DESK_BUILD = 'v72';
+const DESK_BUILD = 'v73';
 /** ECRP: house first-sign-in secret is a 6+ digit PIN (override in Settings). Stored hashed after first use/set. */
 const HOUSE_LOGIN_PIN = '86368636';
 const HOUSE_LOGIN_PASSWORD = HOUSE_LOGIN_PIN; /* legacy alias — prefer settings.housePassword */
@@ -21441,7 +21441,15 @@ function renderChatThread(threadId) {
   if (threadId.startsWith('ch_')) {
     const ch = s.channels.find(c => c.id === threadId);
     title = ch ? '#' + ch.name : threadId;
-    memberCount = activeEmployees().length;
+    if (threadId === 'ch_management') {
+      memberCount = activeEmployees().filter(e => isMgmtUser(e)).length;
+    } else if (threadId === 'ch_kitchen-team') {
+      memberCount = activeEmployees().filter(e => ['Cook', 'Chef'].includes(e.role)).length;
+    } else if (ch && ch.members && Array.isArray(ch.members) && !ch.members.includes('all')) {
+      memberCount = ch.members.length;
+    } else {
+      memberCount = activeEmployees().length;
+    }
   } else if (threadId.startsWith('dm_')) {
     const ids = threadId.replace('dm_', '').split('_');
     const myEmpId = sessionUser ? sessionUser.empId : null;
