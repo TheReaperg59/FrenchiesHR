@@ -5402,8 +5402,99 @@ function loadState() {
     return migrated;
   }
 
-  /* Priority 3: seedState (truly first run) */
+  /* Priority 3: Supabase cloud (pulled async after DOM loads) */
+  /* Falls through to seedState here — cloud recovery happens in attemptCloudRecovery() */
+
+  /* Priority 4: seedState (truly first run) */
   return seedState();
+}
+
+/* =========================================================
+   SUPABASE CLOUD SYNC — THE ULTIMATE PERMANENT FIX
+   Pushes state to Supabase on every save.
+   Pulls from Supabase on fresh load when localStorage is empty.
+   Works from ANY origin, ANY URL, ANY device.
+   ========================================================= */
+const CLOUD_SUPABASE_URL = 'https://lvrdxsjnthlyshdidvyy.supabase.co';
+const CLOUD_ANON_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Imx2cmR4c2pudGhseXNoZGlkdnl5Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODU0Njk1NDgsImV4cCI6MjEwMTA0NTU0OH0.jz15CSidyp-BQ14kSb7jQt2G6ExJyNxNvKqB0prxMDA';
+
+function cloudHeaders() {
+  const key = (s && s.settings && s.settings.supabaseAnonKey) || CLOUD_ANON_KEY;
+  return {
+    'apikey': key,
+    'Authorization': 'Bearer ' + key,
+    'Content-Type': 'application/json',
+    'Prefer': 'resolution=merge-duplicates'
+  };
+}
+
+function cloudUrl() {
+  return ((s && s.settings && s.settings.supabaseUrl) || CLOUD_SUPABASE_URL).replace(/\/+$/, '');
+}
+
+function cloudPushState() {
+  const url = cloudUrl();
+  const key = (s && s.settings && s.settings.supabaseAnonKey) || CLOUD_ANON_KEY;
+  if (!url || !key) return;
+  const rev = (s.meta && s.meta.rev) || 0;
+  fetch(url + '/rest/v1/desk_state', {
+    method: 'POST',
+    headers: cloudHeaders(),
+    body: JSON.stringify({
+      id: 'main',
+      data: s,
+      rev: rev,
+      updated_at: new Date().toISOString()
+    })
+  }).then(r => {
+    if (r.ok) console.log('[FrenchiesHR] Cloud sync pushed rev', rev);
+    else console.warn('[FrenchiesHR] Cloud push failed:', r.status);
+  }).catch(err => {
+    console.warn('[FrenchiesHR] Cloud push error:', err);
+  });
+}
+
+function attemptCloudRecovery() {
+  const url = cloudUrl();
+  const key = (s && s.settings && s.settings.supabaseAnonKey) || CLOUD_ANON_KEY;
+  if (!url || !key) return;
+
+  /* Only attempt if current state looks like a fresh seed */
+  const isFresh = !s.meta || Number(s.meta.saveCount || 0) <= 1;
+  if (!isFresh) return;
+
+  fetch(url + '/rest/v1/desk_state?id=eq.main&select=data,rev', {
+    headers: {
+      'apikey': key,
+      'Authorization': 'Bearer ' + key
+    }
+  })
+  .then(r => r.json())
+  .then(rows => {
+    if (!rows || !rows.length || !rows[0].data) return;
+    const cloudData = rows[0].data;
+    if (!cloudData.employees || !Array.isArray(cloudData.employees) || cloudData.employees.length === 0) return;
+    const cloudRev = rows[0].rev || 0;
+    const localRev = (s.meta && s.meta.rev) || 0;
+    if (cloudRev <= localRev && !isFresh) return;
+
+    console.log('[FrenchiesHR] ☁️ Recovering from Supabase cloud — rev', cloudRev);
+    const migrated = migrate(cloudData);
+    migrated.activity = migrated.activity || [];
+    migrated.activity.unshift({
+      text: '☁️ Office auto-recovered from Supabase cloud (rev ' + cloudRev + ') — seamless update',
+      date: today()
+    });
+    s = migrated;
+    ensureMeta();
+    localStorage.setItem(STORAGE, JSON.stringify(s));
+    save({ quiet: true });
+    render();
+    toast('Data recovered from cloud — welcome back!');
+  })
+  .catch(err => {
+    console.warn('[FrenchiesHR] Cloud recovery failed:', err);
+  });
 }
 
 /* Async IDB recovery — runs after page load. If localStorage was
@@ -5476,8 +5567,8 @@ function ensureMeta() {
   if (!('sharedDeskUrl' in s.settings)) s.settings.sharedDeskUrl = '';
   if (!('sharedAutoPull' in s.settings)) s.settings.sharedAutoPull = false;
   if (!('sharedPreferSupabase' in s.settings)) s.settings.sharedPreferSupabase = true;
-  if (!('supabaseUrl' in s.settings)) s.settings.supabaseUrl = '';
-  if (!('supabaseAnonKey' in s.settings)) s.settings.supabaseAnonKey = '';
+  if (!('supabaseUrl' in s.settings)) s.settings.supabaseUrl = 'https://lvrdxsjnthlyshdidvyy.supabase.co';
+  if (!('supabaseAnonKey' in s.settings)) s.settings.supabaseAnonKey = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Imx2cmR4c2pudGhseXNoZGlkdnl5Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODU0Njk1NDgsImV4cCI6MjEwMTA0NTU0OH0.jz15CSidyp-BQ14kSb7jQt2G6ExJyNxNvKqB0prxMDA';
   if (!('registerAutoPull' in s.settings)) s.settings.registerAutoPull = true;
   if (!('handbookUrl' in s.settings)) s.settings.handbookUrl = '';
   if (!(s.settings.handbookUrl || '').trim()) s.settings.handbookUrl = LINK_HANDBOOK;
@@ -5748,6 +5839,8 @@ function save(opts) {
     try { idbSave(s); } catch (idbErr) {}
     /* Companion state file — survives URL/origin changes */
     try { writeCompanionStateFile(json); } catch (cfErr) {}
+    /* Supabase cloud push — survives everything */
+    try { cloudPushState(); } catch (cloudErr) {}
     /* Light integrity mirror — not a second full copy */
     try {
       localStorage.setItem(STORAGE_MIRROR, JSON.stringify({
@@ -20647,6 +20740,8 @@ document.addEventListener('click', function(e) {
 try { idbSave(s); } catch (e) {}
 /* If localStorage was empty, try recovering from IDB */
 attemptIDBRecovery();
+/* If still fresh, try recovering from Supabase cloud */
+attemptCloudRecovery();
 
 /* ---------- Auto-export backup (silent download) ---------- */
 function autoExportBackup(reason) {
