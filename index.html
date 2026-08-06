@@ -21756,15 +21756,15 @@ function printCurrentPaystub() {
             </div>
           </div>
           <div class="row"><span>Regular Hours (${dec(reg)}h @ ${money(rate)})</span><span>${money(reg * rate)}</span></div>
-          ${ot > 0 ? \`<div class="row"><span>Overtime (${dec(ot)}h @ ${money(rate * 1.5)})</span><span>${money(ot * rate * 1.5)}</span></div>\` : ''}
-          ${tips > 0 ? \`<div class="row"><span>Tips Earned</span><span>${money(tips)}</span></div>\` : ''}
-          ${bonus > 0 ? \`<div class="row"><span>Bonus</span><span>${money(bonus)}</span></div>\` : ''}
+          ${ot > 0 ? '<div class="row"><span>Overtime (' + dec(ot) + 'h @ ' + money(rate * 1.5) + ')</span><span>' + money(ot * rate * 1.5) + '</span></div>' : ''}
+          ${tips > 0 ? '<div class="row"><span>Tips Earned</span><span>' + money(tips) + '</span></div>' : ''}
+          ${bonus > 0 ? '<div class="row"><span>Bonus</span><span>' + money(bonus) + '</span></div>' : ''}
           <div class="row total"><span>ESTIMATED GROSS PAY</span><span>${money(gross)}</span></div>
           <div style="margin-top:20px;font-size:.8rem;color:#64748b;text-align:center">
             Payday: Sunday &middot; Frenchie's HR System &middot; Build ${DESK_BUILD}
           </div>
         </div>
-        <script>window.print();</script>
+        <script>window.print();<\/script>
       </body>
     </html>
   `;
