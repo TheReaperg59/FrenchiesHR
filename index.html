@@ -4874,7 +4874,7 @@ const LOG_TYPES = {
 };
 const TIP_ROLES_DEFAULT = ['Waiter', 'Hostess', 'Cook'];
 const TIP_ROLES = TIP_ROLES_DEFAULT; /* legacy alias — use tipRoles() */
-const DESK_BUILD = 'v74';
+const DESK_BUILD = 'v75';
 /** ECRP: house first-sign-in secret is a 6+ digit PIN (override in Settings). Stored hashed after first use/set. */
 const HOUSE_LOGIN_PIN = '86368636';
 const HOUSE_LOGIN_PASSWORD = HOUSE_LOGIN_PIN; /* legacy alias — prefer settings.housePassword */
@@ -5400,8 +5400,27 @@ function migrate(raw) {
   out.disputes = Array.isArray(raw.disputes) ? raw.disputes : [];
   out.timeOff = Array.isArray(raw.timeOff) ? raw.timeOff : [];
   out.clockLog = Array.isArray(raw.clockLog) ? raw.clockLog : [];
-  out.messages = Array.isArray(raw.messages) ? raw.messages : [];
-  out.channels = Array.isArray(raw.channels) ? raw.channels : [];
+  // Smart message merging to prevent losing local messages during cloud recovery
+  const existingMsgs = (typeof s !== 'undefined' && s && Array.isArray(s.messages)) ? s.messages : [];
+  const incomingMsgs = Array.isArray(raw.messages) ? raw.messages : [];
+  
+  const msgMap = new Map();
+  existingMsgs.forEach(m => { if (m && m.id) msgMap.set(m.id, { ...m }); });
+  incomingMsgs.forEach(m => {
+    if (!m || !m.id) return;
+    if (msgMap.has(m.id)) {
+      const existing = msgMap.get(m.id);
+      msgMap.set(m.id, {
+        ...m,
+        readBy: Object.assign({}, existing.readBy || {}, m.readBy || {}),
+        reactions: Object.assign({}, existing.reactions || {}, m.reactions || {})
+      });
+    } else {
+      msgMap.set(m.id, { ...m });
+    }
+  });
+  out.messages = Array.from(msgMap.values());
+  out.channels = Array.isArray(raw.channels) ? raw.channels : ((typeof s !== 'undefined' && s && Array.isArray(s.channels)) ? s.channels : []);
   out.nextDisputeId = Number(raw.nextDisputeId || 1);
   out.nextTimeOffId = Number(raw.nextTimeOffId || 1);
   out.nextClockId = Number(raw.nextClockId || 1);
@@ -20395,6 +20414,15 @@ function applySharedDesk(migrated, labelText, opts) {
   pushSnapshot('pre-pull');
   const localBefore = s;
   migrated = mergeLocalSecretsIntoShared(migrated, localBefore);
+  // Preserve local messages not yet in incoming migrated state
+  if (localBefore && Array.isArray(localBefore.messages) && migrated && Array.isArray(migrated.messages)) {
+    const remoteIds = new Set(migrated.messages.map(m => m.id));
+    localBefore.messages.forEach(m => {
+      if (m && m.id && !remoteIds.has(m.id)) {
+        migrated.messages.push(m);
+      }
+    });
+  }
   s = migrated;
   ensureMeta();
   fixPeriodEndDays(); /* Always enforce Sun-Sat periods on incoming shared data */
@@ -21577,6 +21605,8 @@ function sendChatMessage() {
   input.value = '';
   
   save({ quiet: true });
+  try { cloudPushState(); } catch (e) {}
+  try { if (typeof autoShareOfficePush === 'function') autoShareOfficePush(); } catch (e) {}
   renderChatThread(activeChatThreadId);
   playMsgChime();
   toast('Message sent');
@@ -21597,6 +21627,8 @@ function toggleMessageReaction(msgId, emoji) {
   }
   
   save({ quiet: true });
+  try { cloudPushState(); } catch (e) {}
+  try { if (typeof autoShareOfficePush === 'function') autoShareOfficePush(); } catch (e) {}
   renderChatThread(activeChatThreadId);
 }
 
