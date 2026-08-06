@@ -21531,7 +21531,7 @@ function renderChatThread(threadId) {
     
     msgHtml += `
       <div class="${rowClass}">
-        <div style="display:flex;flex-direction:column;max-width:100%;${isSent ? 'align-items:flex-end' : 'align-items:flex-start'};">
+        <div style="display:flex;flex-direction:column;width:100%;${isSent ? 'align-items:flex-end' : 'align-items:flex-start'};">
           ${!isSent ? `<div class="chat-meta" style="margin-bottom:4px;margin-top:0;">${esc(name)}</div>` : ''}
           <div class="${bubClass}" ondblclick="toggleMessageReaction('${m.id}', '👍')">
             ${esc(m.body)}
