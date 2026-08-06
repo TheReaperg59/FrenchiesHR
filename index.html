@@ -2498,6 +2498,11 @@ body.dark .dropdown-item:hover { background: oklch(28% .01 240); }
       <div class="actions">
         <button type="submit" class="btn primary" id="loginSubmit">Sign in</button>
       </div>
+      <div id="loginRestorePanel" style="margin-top:18px;padding-top:16px;border-top:1px solid var(--line);display:none">
+        <p style="font-size:.82rem;color:var(--muted);margin:0 0 10px">⚠️ <b>Updated the app?</b> Import your backup to restore all data.</p>
+        <input type="file" id="loginImportFile" accept="application/json,.json" style="font-size:.8rem;margin-bottom:8px">
+        <button type="button" class="btn soft" id="loginImportBtn" style="width:100%">Restore from backup file</button>
+      </div>
     </form>
     <form class="login-panel" id="loginSetupPanel" autocomplete="off">
       <div class="brand">Create your PIN</div>
@@ -14495,6 +14500,7 @@ function closePeriodAndRoll(p, opts) {
   render();
   toast('Period closed — next week opened');
   maybeBackupNudge('close-period');
+  autoExportBackup('period-close');
   return true;
 }
 
@@ -20527,6 +20533,70 @@ document.addEventListener('click', function(e) {
 try { idbSave(s); } catch (e) {}
 /* If localStorage was empty, try recovering from IDB */
 attemptIDBRecovery();
+
+/* ---------- Auto-export backup (silent download) ---------- */
+function autoExportBackup(reason) {
+  try {
+    ensureMeta();
+    const blob = new Blob([JSON.stringify(s, null, 2)], { type: 'application/json' });
+    const a = document.createElement('a');
+    a.href = URL.createObjectURL(blob);
+    a.download = 'frenchies-hr-backup-' + today() + '-r' + (s.meta.rev || 0) + '.json';
+    a.click();
+    URL.revokeObjectURL(a.href);
+    s.meta.lastExport = new Date().toISOString();
+    save({ quiet: true, skipSnapshot: true });
+  } catch (err) {
+    console.warn('[FrenchiesHR] Auto-export failed:', err);
+  }
+}
+
+/* ---------- Login screen: restore from backup ---------- */
+function detectFreshState() {
+  /* Show restore panel if state looks like a fresh seed */
+  const isFresh = !s.meta || Number(s.meta.saveCount || 0) <= 1;
+  const panel = document.getElementById('loginRestorePanel');
+  if (panel && isFresh) panel.style.display = '';
+}
+detectFreshState();
+
+if (document.getElementById('loginImportBtn')) {
+  document.getElementById('loginImportBtn').onclick = function() {
+    const fileInput = document.getElementById('loginImportFile');
+    if (!fileInput || !fileInput.files || !fileInput.files[0]) {
+      alert('Select a backup JSON file first.');
+      return;
+    }
+    const reader = new FileReader();
+    reader.onload = function(e) {
+      try {
+        const data = JSON.parse(e.target.result);
+        if (!data || !Array.isArray(data.employees)) {
+          alert('Invalid backup file — missing employee data.');
+          return;
+        }
+        const migrated = migrate(data);
+        migrated.activity = migrated.activity || [];
+        migrated.activity.unshift({
+          text: '📦 Office restored from backup file on login screen',
+          date: today()
+        });
+        s = migrated;
+        ensureMeta();
+        localStorage.setItem(STORAGE, JSON.stringify(s));
+        save({ quiet: true });
+        toast('Data restored! Sign in now.');
+        const panel = document.getElementById('loginRestorePanel');
+        if (panel) panel.style.display = 'none';
+        /* Re-render login with restored employee list */
+        applySessionChrome();
+      } catch (err) {
+        alert('Could not read backup: ' + (err.message || err));
+      }
+    };
+    reader.readAsText(fileInput.files[0]);
+  };
+}
 
 /* Debug / test hooks (same-origin desk) */
 window.__desk = {
