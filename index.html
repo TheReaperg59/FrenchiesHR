@@ -4591,7 +4591,7 @@ const LOG_TYPES = {
 };
 const TIP_ROLES_DEFAULT = ['Waiter', 'Hostess', 'Cook'];
 const TIP_ROLES = TIP_ROLES_DEFAULT; /* legacy alias — use tipRoles() */
-const DESK_BUILD = 'v55';
+const DESK_BUILD = 'v56';
 /** ECRP: house first-sign-in secret is a 6+ digit PIN (override in Settings). Stored hashed after first use/set. */
 const HOUSE_LOGIN_PIN = '86368636';
 const HOUSE_LOGIN_PASSWORD = HOUSE_LOGIN_PIN; /* legacy alias — prefer settings.housePassword */
@@ -5346,31 +5346,9 @@ async function pickCompanionFile() {
 }
 
 async function writeCompanionStateFile(json) {
-  if (!window.showSaveFilePicker) return; /* API not supported */
+  if (!window.showSaveFilePicker) return;
   let handle = await initCompanionFileHandle();
-  if (!handle) {
-    /* First time — need user gesture. Queue it for next explicit save action */
-    if (!_companionWriteQueued) {
-      _companionWriteQueued = true;
-      /* Show a one-time prompt to set up auto-save */
-      setTimeout(() => {
-        if (_companionFileHandle) return; /* already set up */
-        const banner = document.createElement('div');
-        banner.id = 'companionSetupBanner';
-        banner.innerHTML = '<div style="position:fixed;bottom:20px;left:50%;transform:translateX(-50%);background:var(--ink,#1a1a2e);color:#fff;padding:14px 20px;border-radius:12px;box-shadow:0 8px 32px rgba(0,0,0,.3);z-index:10000;font-size:.85rem;display:flex;align-items:center;gap:12px;max-width:500px"><div><b>Set up auto-save?</b><br>Save your data to a file so it survives app updates automatically.</div><button id="companionSetupBtn" style="background:#4ade80;color:#000;border:none;padding:8px 16px;border-radius:8px;font-weight:600;cursor:pointer;white-space:nowrap">Set up</button><button onclick="this.parentElement.parentElement.remove()" style="background:none;border:none;color:#888;cursor:pointer;font-size:1.1rem">\u2715</button></div>';
-        document.body.appendChild(banner);
-        document.getElementById('companionSetupBtn').onclick = async () => {
-          const h = await pickCompanionFile();
-          banner.remove();
-          if (h) {
-            await doWriteCompanion(h, JSON.stringify(s));
-            toast('Auto-save file linked — data will persist across updates!');
-          }
-        };
-      }, 3000);
-    }
-    return;
-  }
+  if (!handle) return; /* No handle — silently skip, never prompt */
   await doWriteCompanion(handle, json);
 }
 
@@ -18340,6 +18318,57 @@ ensureMeta();
 });
 save({ skipRevBump: true, silentBroadcast: true, skipSnapshot: true, skipRevCheck: true });
 initRealtimeSync();
+
+/* ===== CLOUD-FIRST BOOT: check Supabase BEFORE showing login ===== */
+/* Show loading overlay while we check cloud */
+const _cloudOverlay = document.createElement('div');
+_cloudOverlay.id = 'cloudBootOverlay';
+_cloudOverlay.style.cssText = 'position:fixed;inset:0;background:var(--bg,#fff);z-index:99999;display:flex;align-items:center;justify-content:center;flex-direction:column;gap:12px';
+_cloudOverlay.innerHTML = '<div style="font-size:1.1rem;font-weight:600;color:var(--ink,#1a1a2e)">Loading your data...</div><div style="font-size:.8rem;color:var(--muted,#888)">Checking cloud backup</div>';
+
+/* Only show overlay if state looks fresh (no localStorage data) */
+const _stateLooksFresh = !s.meta || Number(s.meta.saveCount || 0) <= 1;
+if (_stateLooksFresh) {
+  document.body.appendChild(_cloudOverlay);
+  /* Attempt cloud recovery synchronously-ish — fetch with timeout */
+  (async function cloudBootRecover() {
+    try {
+      const url = (CLOUD_SUPABASE_URL || '').replace(/\/+$/, '');
+      const key = CLOUD_ANON_KEY;
+      if (!url || !key) throw new Error('no cloud config');
+      const ctrl = new AbortController();
+      const timer = setTimeout(() => ctrl.abort(), 5000); /* 5s max */
+      const resp = await fetch(url + '/rest/v1/desk_state?id=eq.main&select=data,rev', {
+        headers: { 'apikey': key, 'Authorization': 'Bearer ' + key },
+        signal: ctrl.signal
+      });
+      clearTimeout(timer);
+      const rows = await resp.json();
+      if (rows && rows.length && rows[0].data && Array.isArray(rows[0].data.employees) && rows[0].data.employees.length > 0) {
+        const cloudRev = rows[0].rev || 0;
+        console.log('[FrenchiesHR] Cloud boot recovery — rev', cloudRev, 'with', rows[0].data.employees.length, 'employees');
+        const migrated = migrate(rows[0].data);
+        migrated.activity = migrated.activity || [];
+        migrated.activity.unshift({ text: 'Cloud auto-recovery on boot (rev ' + cloudRev + ')', date: today() });
+        s = migrated;
+        ensureMeta();
+        try { localStorage.setItem(STORAGE, JSON.stringify(s)); } catch(e) {}
+        try { idbSave(s); } catch(e) {}
+      }
+    } catch (err) {
+      console.warn('[FrenchiesHR] Cloud boot check:', err.message || err);
+    }
+    /* Remove overlay and continue boot */
+    const ov = document.getElementById('cloudBootOverlay');
+    if (ov) ov.remove();
+    /* Now do session/login */
+    finishBoot();
+  })();
+} else {
+  finishBoot();
+}
+
+function finishBoot() {
 sessionUser = loadSession();
 if (!sessionUser) {
   const dur = loadDurableSession();
@@ -18495,7 +18524,7 @@ if ($('ovTipMode')) $('ovTipMode').value = (s.settings && s.settings.tipMode) ||
 document.querySelectorAll('#view-hiring details.fold').forEach(fold => {
   fold.addEventListener('toggle', () => { fold.dataset.userToggle = '1'; });
 });
-
+} /* end finishBoot */
 
 /* =====================================================
    ROADMAP v18–v25 FEATURES (full implementations)
