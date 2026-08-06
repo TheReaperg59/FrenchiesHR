@@ -3435,7 +3435,7 @@ body.dark .dropdown-item:hover { background: oklch(28% .01 240); }
     <div class="actions" style="flex-wrap:wrap;gap:6px">
       <select id="reportYear" style="border:1px solid var(--line);border-radius:7px;padding:8px 10px;background:var(--paper);font-size:.78rem"></select>
       <div style="position:relative;display:inline-block">
-        <button class="btn primary" id="reportDownloadBtn" onclick="document.getElementById('reportDropdown').classList.toggle('show')">Download Reports ▾</button>
+        <button class="btn primary" id="reportDownloadBtn">Download Reports ▾</button>
         <div id="reportDropdown" class="dropdown-menu" style="display:none;position:absolute;right:0;top:100%;margin-top:4px;background:var(--paper);border:1px solid var(--line);border-radius:8px;box-shadow:0 8px 24px rgba(0,0,0,.12);z-index:100;min-width:220px;padding:6px 0">
           <div style="padding:6px 14px;font-size:.7rem;font-weight:600;color:var(--muted);text-transform:uppercase;letter-spacing:.05em">PDF Reports</div>
           <button class="dropdown-item" id="printPnlReportBtn">P&amp;L Statement</button>
@@ -16332,7 +16332,7 @@ window.addEventListener('hashchange', () => {
 });
 
 $('period').onchange = () => { flushPeriodNotes(); notesDirty = false; notesPeriodIndex = selectedPeriodIndex(); syncStubToOverview(); render(); };
-if ($('reportYear')) $('reportYear').onchange = () => renderMonthly();
+if ($('reportYear')) $('reportYear').onchange = () => { renderMonthly(); if (activeReportTab === 'expenses') renderReportExpenses(); if (activeReportTab === 'income') renderReportIncome(); };
 
 $('todoAddBtn').onclick = () => {
   addManualTodo(
