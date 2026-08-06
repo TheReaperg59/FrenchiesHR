@@ -21325,7 +21325,7 @@ if (document.getElementById('loginImportBtn')) {
 }
 
 /* ---- Chat & Messaging System ---- */
-let activeChatThreadId = 'ch_announcements';
+let activeChatThreadId = (typeof sessionStorage !== 'undefined' && sessionStorage.getItem('frenchies_active_chat_thread')) || 'ch_announcements';
 
 function ensureDefaultChannels(state = s) {
   if (!state.channels) state.channels = [];
@@ -21496,8 +21496,19 @@ function renderChatThread(threadId) {
   if (!msgContainer) return;
   
   const msgs = (s.messages || []).filter(m => {
+    if (!m) return false;
     if (threadId.startsWith('ch_')) return m.channelId === threadId;
-    if (threadId.startsWith('dm_')) return m.channelId === threadId || (m.to && m.from && ((String(m.to) === String(sessionUser.empId) && m.from == threadId.split('_')[1]) || (String(m.from) === String(sessionUser.empId) && m.to == threadId.split('_')[1])));
+    if (threadId.startsWith('dm_')) {
+      if (m.channelId === threadId) return true;
+      const parts = threadId.replace('dm_', '').split('_');
+      if (parts.length >= 2) {
+        const idA = String(parts[0]);
+        const idB = String(parts[1]);
+        const mFrom = String(m.from || '');
+        const mTo = String(m.to || '');
+        return (mFrom === idA && mTo === idB) || (mFrom === idB && mTo === idA);
+      }
+    }
     return false;
   });
   
@@ -21568,6 +21579,7 @@ function formatMsgTime(dStr) {
 
 function switchChatThread(threadId) {
   activeChatThreadId = threadId;
+  try { sessionStorage.setItem('frenchies_active_chat_thread', threadId); } catch(e){}
   save({ quiet: true });
   renderMessagesView();
 }
@@ -21585,8 +21597,10 @@ function sendChatMessage() {
   
   let to = null;
   if (activeChatThreadId.startsWith('dm_')) {
-    const ids = activeChatThreadId.replace('dm_', '').split('_');
-    to = parseInt(ids[0] == sessionUser.empId ? ids[1] : ids[0], 10);
+    const parts = activeChatThreadId.replace('dm_', '').split('_');
+    const myEmpId = sessionUser ? String(sessionUser.empId) : '';
+    const otherId = parts[0] === myEmpId ? parts[1] : parts[0];
+    to = parseInt(otherId, 10);
   }
   
   const msg = {
