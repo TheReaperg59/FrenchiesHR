@@ -2477,6 +2477,33 @@ body.dark .dropdown-item:hover { background: oklch(28% .01 240); }
 /* Metrics dense helper */
 .metrics-dense .metric strong { font-size: .95rem; }
 
+/* ---- Chat System ---- */
+.chat-layout { display: flex; height: calc(100vh - 140px); min-height: 550px; border-radius: 12px; border: 1px solid var(--card-border, oklch(90% .01 240)); overflow: hidden; }
+.chat-sidebar { width: 280px; background: oklch(22% .03 160); color: #fff; display: flex; flex-direction: column; overflow-y: auto; }
+.chat-sidebar-section { padding: 12px 14px 4px; font-size: .75rem; text-transform: uppercase; letter-spacing: .05em; opacity: .7; display: flex; justify-content: space-between; align-items: center; }
+.chat-sidebar-list { flex: 1; padding: 8px; display: flex; flex-direction: column; gap: 4px; }
+.chat-sidebar-item { padding: 8px 12px; border-radius: 6px; cursor: pointer; display: flex; align-items: center; gap: 8px; opacity: .85; transition: background .15s; font-size: .9rem; }
+.chat-sidebar-item:hover { background: rgba(255,255,255,.08); opacity: 1; }
+.chat-sidebar-item.active { background: oklch(45% .15 155); opacity: 1; font-weight: 500; }
+.chat-status-dot { width: 8px; height: 8px; border-radius: 50%; background: #666; display: inline-block; flex-shrink: 0; }
+.chat-status-dot.online { background: #4ade80; box-shadow: 0 0 6px rgba(74,222,128,.4); }
+.chat-thread { flex: 1; display: flex; flex-direction: column; background: var(--card-bg, #fff); min-width: 0; }
+.chat-thread-head { padding: 14px 20px; border-bottom: 1px solid var(--card-border, oklch(90% .01 240)); display: flex; align-items: center; justify-content: space-between; }
+.chat-thread-messages { flex: 1; padding: 20px; overflow-y: auto; display: flex; flex-direction: column; gap: 12px; }
+.chat-bubble-row { display: flex; gap: 10px; align-items: flex-end; }
+.chat-bubble-row.sent { flex-direction: row-reverse; }
+.chat-bubble { max-width: 70%; padding: 10px 14px; border-radius: 16px; font-size: .88rem; line-height: 1.45; position: relative; }
+.chat-bubble.sent { background: oklch(45% .15 155); color: #fff; border-bottom-right-radius: 4px; }
+.chat-bubble.received { background: oklch(96% .005 240); color: var(--ink, #1a1a2e); border-bottom-left-radius: 4px; border: 1px solid oklch(92% .005 240); }
+.chat-bubble.announcement { max-width: 100%; background: linear-gradient(135deg, oklch(96% .03 155), oklch(98% .01 220)); border: 1px solid oklch(85% .08 155); color: var(--ink); }
+.chat-meta { font-size: .7rem; opacity: .75; margin-top: 4px; display: flex; gap: 6px; align-items: center; }
+.chat-reactions { display: flex; gap: 4px; flex-wrap: wrap; margin-top: 4px; }
+.chat-reaction-pill { padding: 2px 6px; border-radius: 12px; font-size: .72rem; background: oklch(94% .005 240); border: 1px solid oklch(88% .01 240); cursor: pointer; display: flex; gap: 4px; align-items: center; color: var(--ink); }
+.chat-reaction-pill.active { background: oklch(90% .05 155); border-color: oklch(70% .12 155); }
+.chat-input-area { padding: 14px 20px; border-top: 1px solid var(--card-border, oklch(90% .01 240)); display: flex; gap: 10px; align-items: center; background: var(--card-bg, #fff); position: relative; }
+.chat-input { flex: 1; padding: 10px 14px; border-radius: 20px; border: 1px solid oklch(88% .02 240); font-size: .88rem; outline: none; background: transparent; color: var(--ink); }
+.chat-emoji-toolbar { position: absolute; bottom: 100%; right: 20px; background: #fff; border: 1px solid var(--card-border, oklch(90% .01 240)); border-radius: 8px; padding: 6px; display: flex; gap: 6px; box-shadow: 0 4px 16px rgba(0,0,0,.15); z-index: 10; }
+
 /* ---- Portal Redesign ---- */
 .portal-hero {
   background: linear-gradient(135deg, oklch(28% .06 155), oklch(22% .04 160));
@@ -2702,6 +2729,7 @@ body.dark .dropdown-item:hover { background: oklch(28% .01 240); }
     <div class="side-label" id="navLabelPeople">People</div>
     <div class="nav">
       <button type="button" data-view="portal" data-label="My Portal" data-keys="p"><span class="nav-label">My Portal</span><span class="nav-hint" aria-hidden="true">P</span></button>
+      <button type="button" data-view="messages" data-label="Messages" data-keys="m"><span class="nav-label">Messages<span class="nav-badge pill primary" id="navMsgBadge" style="display:none;margin-left:6px">0</span></span><span class="nav-hint" aria-hidden="true">M</span></button>
       <button type="button" data-view="hiring" data-label="Hiring" data-keys="6 h"><span class="nav-label">Hiring</span><span class="nav-hint" aria-hidden="true">6</span></button>
       <button type="button" data-view="employees" data-label="Employees" data-keys="7 m"><span class="nav-label">Employees</span><span class="nav-hint" aria-hidden="true">7</span></button>
       <button type="button" data-view="relations" data-label="Relations" data-keys="8 l"><span class="nav-label">Relations</span><span class="nav-hint" aria-hidden="true">8</span></button>
@@ -3133,6 +3161,51 @@ body.dark .dropdown-item:hover { background: oklch(28% .01 240); }
         <summary>Recent activity</summary>
         <div class="fold-body"><div class="log" id="activity"></div></div>
       </details>
+    </div>
+  </div>
+</section>
+
+<!-- MESSAGES -->
+<section class="view" id="view-messages" role="region" aria-labelledby="title-messages" tabindex="-1">
+  <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:16px;">
+    <h2 id="title-messages">Messages &amp; Channels</h2>
+    <button type="button" class="btn primary" onclick="openNewChatModal()">+ New Chat / Channel</button>
+  </div>
+  
+  <div class="chat-layout">
+    <div class="chat-sidebar">
+      <div style="padding: 12px;">
+        <input type="search" class="input full" placeholder="Filter..." style="background:rgba(255,255,255,.1);border:none;color:#fff;" oninput="renderMessagesView(this.value)" />
+      </div>
+      <div class="chat-sidebar-section">
+        <span>Channels</span>
+      </div>
+      <div class="chat-sidebar-list" id="chatSidebarChannels"></div>
+      
+      <div class="chat-sidebar-section">
+        <span>Direct Messages</span>
+      </div>
+      <div class="chat-sidebar-list" id="chatSidebarDMs"></div>
+    </div>
+    <div class="chat-thread">
+      <div class="chat-thread-head">
+        <div>
+          <strong id="chatThreadTitle" style="font-size:1.1rem;">Chat</strong>
+          <div id="chatThreadMembers" class="chat-meta">0 members</div>
+        </div>
+      </div>
+      <div class="chat-thread-messages" id="chatThreadMessages"></div>
+      <div class="chat-input-area">
+        <div id="chatEmojiToolbar" class="chat-emoji-toolbar">
+          <span style="cursor:pointer" onclick="$('chatInput').value += '👍'; $('chatEmojiToolbar').classList.remove('show');">👍</span>
+          <span style="cursor:pointer" onclick="$('chatInput').value += '🔥'; $('chatEmojiToolbar').classList.remove('show');">🔥</span>
+          <span style="cursor:pointer" onclick="$('chatInput').value += '🎉'; $('chatEmojiToolbar').classList.remove('show');">🎉</span>
+          <span style="cursor:pointer" onclick="$('chatInput').value += '😂'; $('chatEmojiToolbar').classList.remove('show');">😂</span>
+        </div>
+        <button type="button" class="btn" style="padding:6px 10px; border-radius:50%;" onclick="$('chatEmojiToolbar').classList.toggle('show')">😀</button>
+        <input type="text" id="chatInput" class="chat-input" placeholder="Type a message..." onkeydown="if(event.key === 'Enter') sendChatMessage()" />
+        <button type="button" id="chatSendBtn" class="btn primary" style="border-radius:20px; padding:6px 16px;" onclick="sendChatMessage()">Send</button>
+      </div>
     </div>
   </div>
 </section>
@@ -4754,7 +4827,7 @@ const LOG_TYPES = {
 };
 const TIP_ROLES_DEFAULT = ['Waiter', 'Hostess', 'Cook'];
 const TIP_ROLES = TIP_ROLES_DEFAULT; /* legacy alias — use tipRoles() */
-const DESK_BUILD = 'v67';
+const DESK_BUILD = 'v68';
 /** ECRP: house first-sign-in secret is a 6+ digit PIN (override in Settings). Stored hashed after first use/set. */
 const HOUSE_LOGIN_PIN = '86368636';
 const HOUSE_LOGIN_PASSWORD = HOUSE_LOGIN_PIN; /* legacy alias — prefer settings.housePassword */
@@ -4771,8 +4844,8 @@ const STAFF_ROLES = ['Cook', 'Waiter', 'Hostess', 'New Hire'];
 const ROLE_VIEWS = {
   owner: '*',
   mgmt: '*',
-  lead: ['overview', 'portal', 'periods', 'events', 'paystubs', 'employees', 'shifts', 'compliance'],
-  staff: ['overview', 'portal', 'paystubs', 'shifts', 'compliance']
+  lead: ['overview', 'portal', 'messages', 'periods', 'events', 'paystubs', 'employees', 'shifts', 'compliance'],
+  staff: ['overview', 'portal', 'messages', 'paystubs', 'shifts', 'compliance']
 };
 let sessionUser = null;
 let pendingPasswordEmpId = null;
@@ -9558,6 +9631,12 @@ function render() {
   renderPortal();
   updateSaveBadge();
   try { syncHandbookLinks(); } catch (hbErr) {}
+  
+  if (document.querySelector('.nav button[data-view="messages"]') && document.querySelector('.nav button[data-view="messages"]').classList.contains('active')) {
+    ensureDefaultChannels();
+    renderMessagesView();
+  }
+  updateNavMsgBadges();
 
   if ($('activitySearch') && $('activitySearch').value.trim()) filterActivityLog($('activitySearch').value);
   else {
@@ -21154,6 +21233,263 @@ if (document.getElementById('loginImportBtn')) {
     };
     reader.readAsText(fileInput.files[0]);
   };
+}
+
+/* ---- Chat & Messaging System ---- */
+let activeChatThreadId = 'ch_announcements';
+
+function ensureDefaultChannels() {
+  if (!s.channels) s.channels = [];
+  if (!s.messages) s.messages = [];
+  
+  const defaults = [
+    {id: 'ch_announcements', name: 'announcements', type: 'channel'},
+    {id: 'ch_general-staff', name: 'general-staff', type: 'channel'},
+    {id: 'ch_kitchen-team', name: 'kitchen-team', type: 'channel'},
+    {id: 'ch_management', name: 'management', type: 'channel'}
+  ];
+  
+  defaults.forEach(d => {
+    if (!s.channels.find(c => c.id === d.id)) {
+      s.channels.push(d);
+    }
+  });
+}
+
+function playMsgChime() {
+  try {
+    const ctx = new (window.AudioContext || window.webkitAudioContext)();
+    const osc = ctx.createOscillator();
+    const gain = ctx.createGain();
+    osc.connect(gain);
+    gain.connect(ctx.destination);
+    osc.type = 'sine';
+    osc.frequency.setValueAtTime(587.33, ctx.currentTime);
+    osc.frequency.exponentialRampToValueAtTime(880.00, ctx.currentTime + 0.1);
+    gain.gain.setValueAtTime(0, ctx.currentTime);
+    gain.gain.linearRampToValueAtTime(0.5, ctx.currentTime + 0.05);
+    gain.gain.exponentialRampToValueAtTime(0.01, ctx.currentTime + 0.5);
+    osc.start();
+    osc.stop(ctx.currentTime + 0.5);
+  } catch (e) {}
+}
+
+function updateNavMsgBadges() {
+  if (!sessionUser) return;
+  if (!s.messages) return;
+  
+  let unread = 0;
+  s.messages.forEach(m => {
+    if (m.from === sessionUser.id) return;
+    if (m.channelId.startsWith('ch_')) {
+      // For channels, maybe only count mentions if we want, or count all. The spec says "unread DMs/mentions".
+      // We'll count all unread channel messages just so they see something, or strictly mentions.
+      // We'll do strictly mentions to match Slack:
+      if (m.body.includes('@' + sessionUser.name) && (!m.readBy || !m.readBy[sessionUser.id])) {
+        unread++;
+      }
+    } else {
+      // DM
+      if (m.to === sessionUser.id && (!m.readBy || !m.readBy[sessionUser.id])) {
+        unread++;
+      }
+    }
+  });
+  
+  const badge = $('navMsgBadge');
+  if (badge) {
+    if (unread > 0) {
+      badge.style.display = 'inline-block';
+      badge.textContent = unread > 9 ? '9+' : unread;
+    } else {
+      badge.style.display = 'none';
+    }
+  }
+}
+
+function renderMessagesView(filterStr = '') {
+  const v = $('view-messages');
+  if (!v || !sessionUser) return;
+  
+  const f = filterStr.toLowerCase();
+  
+  let channelsHtml = '';
+  s.channels.forEach(c => {
+    if (f && !c.name.toLowerCase().includes(f)) return;
+    const active = activeChatThreadId === c.id ? 'active' : '';
+    channelsHtml += `<div class="chat-sidebar-item ${active}" onclick="switchChatThread('${c.id}')"><span class="chat-status-dot"></span> # ${esc(c.name)}</div>`;
+  });
+  
+  let dmsHtml = '';
+  const emps = activeEmployees();
+  emps.forEach(e => {
+    if (e.id === sessionUser.id) return;
+    if (f && !e.name.toLowerCase().includes(f)) return;
+    const dmId = 'dm_' + Math.min(e.id, sessionUser.id) + '_' + Math.max(e.id, sessionUser.id);
+    const active = activeChatThreadId === dmId ? 'active' : '';
+    const isOnline = (e.status === 'active' && Math.random() > 0.5) ? 'online' : ''; // Mock online status
+    dmsHtml += `<div class="chat-sidebar-item ${active}" onclick="switchChatThread('${dmId}')"><span class="chat-status-dot ${isOnline}"></span> ${esc(e.name)}</div>`;
+  });
+  
+  if ($('chatSidebarChannels')) $('chatSidebarChannels').innerHTML = channelsHtml;
+  if ($('chatSidebarDMs')) $('chatSidebarDMs').innerHTML = dmsHtml;
+  
+  renderChatThread(activeChatThreadId);
+}
+
+function renderChatThread(threadId) {
+  if (!sessionUser) return;
+  let title = 'Chat';
+  let memberCount = 0;
+  if (threadId.startsWith('ch_')) {
+    const ch = s.channels.find(c => c.id === threadId);
+    title = ch ? '#' + ch.name : threadId;
+    memberCount = activeEmployees().length;
+  } else if (threadId.startsWith('dm_')) {
+    const ids = threadId.replace('dm_', '').split('_');
+    const otherId = parseInt(ids[0] == sessionUser.id ? ids[1] : ids[0], 10);
+    const other = s.employees.find(e => e.id === otherId);
+    title = other ? other.name : 'Unknown';
+    memberCount = 2;
+  }
+  
+  if ($('chatThreadTitle')) $('chatThreadTitle').textContent = title;
+  if ($('chatThreadMembers')) $('chatThreadMembers').textContent = memberCount + ' members';
+  
+  const msgContainer = $('chatThreadMessages');
+  if (!msgContainer) return;
+  
+  const msgs = (s.messages || []).filter(m => {
+    if (threadId.startsWith('ch_')) return m.channelId === threadId;
+    if (threadId.startsWith('dm_')) return m.channelId === threadId || (m.to && m.from && ((m.to == sessionUser.id && m.from == threadId.split('_')[1]) || (m.from == sessionUser.id && m.to == threadId.split('_')[1])));
+    return false;
+  });
+  
+  let msgHtml = '';
+  let dirtyRead = false;
+  
+  msgs.forEach(m => {
+    const isSent = m.from === sessionUser.id;
+    const rowClass = isSent ? 'chat-bubble-row sent' : 'chat-bubble-row';
+    const bubClass = threadId === 'ch_announcements' && m.from === 1 ? 'chat-bubble announcement' : isSent ? 'chat-bubble sent' : 'chat-bubble received';
+    
+    let reactionsHtml = '';
+    if (m.reactions) {
+      for (let emoji in m.reactions) {
+        const arr = m.reactions[emoji];
+        if (arr.length > 0) {
+          const isActive = arr.includes(sessionUser.id) ? 'active' : '';
+          reactionsHtml += `<div class="chat-reaction-pill ${isActive}" onclick="toggleMessageReaction('${m.id}', '${emoji}')">${emoji} ${arr.length}</div>`;
+        }
+      }
+    }
+    
+    const emp = s.employees.find(e => e.id === m.from);
+    const name = emp ? emp.name : 'Unknown';
+    
+    msgHtml += `
+      <div class="${rowClass}">
+        <div style="display:flex;flex-direction:column;${isSent ? 'align-items:flex-end' : 'align-items:flex-start'};">
+          ${!isSent ? `<div class="chat-meta" style="margin-bottom:4px;margin-top:0;">${esc(name)}</div>` : ''}
+          <div class="${bubClass}" ondblclick="toggleMessageReaction('${m.id}', '👍')">
+            ${esc(m.body)}
+            <div class="chat-reactions">${reactionsHtml}</div>
+          </div>
+          <div class="chat-meta">${formatMsgTime(m.sentAt)}</div>
+        </div>
+      </div>
+    `;
+    
+    if (!isSent) {
+      if (!m.readBy) m.readBy = {};
+      if (!m.readBy[sessionUser.id]) {
+        m.readBy[sessionUser.id] = true;
+        dirtyRead = true;
+      }
+    }
+  });
+  
+  msgContainer.innerHTML = msgHtml || '<div style="opacity:0.5;text-align:center;margin-top:40px;">No messages yet. Say hi!</div>';
+  msgContainer.scrollTop = msgContainer.scrollHeight;
+  
+  if (dirtyRead) {
+    save({ quiet: true });
+    updateNavMsgBadges();
+  }
+}
+
+function formatMsgTime(dStr) {
+  try {
+    const d = new Date(dStr);
+    return d.toLocaleTimeString([], {hour: '2-digit', minute:'2-digit'});
+  } catch (e) {
+    return '';
+  }
+}
+
+function switchChatThread(threadId) {
+  activeChatThreadId = threadId;
+  save({ quiet: true });
+  renderMessagesView();
+}
+
+function sendChatMessage() {
+  const input = $('chatInput');
+  const txt = input.value.trim();
+  if (!txt) return;
+  
+  if (!s.messages) s.messages = [];
+  
+  let to = null;
+  if (activeChatThreadId.startsWith('dm_')) {
+    const ids = activeChatThreadId.replace('dm_', '').split('_');
+    to = parseInt(ids[0] == sessionUser.id ? ids[1] : ids[0], 10);
+  }
+  
+  const msg = {
+    id: 'msg_' + Date.now() + '_' + Math.random().toString(36).substring(2, 8),
+    channelId: activeChatThreadId,
+    from: sessionUser.id,
+    to: to,
+    body: txt,
+    sentAt: new Date().toISOString(),
+    readBy: {},
+    reactions: {}
+  };
+  msg.readBy[sessionUser.id] = true;
+  
+  s.messages.push(msg);
+  input.value = '';
+  
+  save({ quiet: true });
+  renderChatThread(activeChatThreadId);
+  playMsgChime();
+  toast('Message sent');
+}
+
+function toggleMessageReaction(msgId, emoji) {
+  const msg = s.messages.find(m => m.id === msgId);
+  if (!msg) return;
+  if (!msg.reactions) msg.reactions = {};
+  if (!msg.reactions[emoji]) msg.reactions[emoji] = [];
+  
+  const arr = msg.reactions[emoji];
+  const idx = arr.indexOf(sessionUser.id);
+  if (idx === -1) {
+    arr.push(sessionUser.id);
+  } else {
+    arr.splice(idx, 1);
+  }
+  
+  save({ quiet: true });
+  renderChatThread(activeChatThreadId);
+}
+
+function openNewChatModal() {
+  const val = prompt('Enter Employee Name or Channel to start chat:');
+  if (val) {
+    toast('New Chat starting with: ' + val);
+  }
 }
 
 /* Debug / test hooks (same-origin desk) */
