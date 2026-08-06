@@ -4588,7 +4588,7 @@ const LOG_TYPES = {
 };
 const TIP_ROLES_DEFAULT = ['Waiter', 'Hostess', 'Cook'];
 const TIP_ROLES = TIP_ROLES_DEFAULT; /* legacy alias — use tipRoles() */
-const DESK_BUILD = 'v59';
+const DESK_BUILD = 'v60';
 /** ECRP: house first-sign-in secret is a 6+ digit PIN (override in Settings). Stored hashed after first use/set. */
 const HOUSE_LOGIN_PIN = '86368636';
 const HOUSE_LOGIN_PASSWORD = HOUSE_LOGIN_PIN; /* legacy alias — prefer settings.housePassword */
@@ -7436,12 +7436,7 @@ function loadSession() {
     if (!data || !data.empId) return null;
     const e = empById(data.empId);
     if (!e || !empHasLoginAccess(e)) return null;
-    /* No personal secret, or legacy non-PIN staff password → force PIN setup */
-    if (!empHasOwnPassword(e) || empNeedsPinMigration(e)) {
-      pendingPasswordEmpId = e.id;
-      try { sessionStorage.removeItem(SESSION_KEY); } catch (err) {}
-      return null;
-    }
+    /* Allow login even without personal PIN — no forced PIN setup */
     return {
       empId: e.id,
       name: e.name,
@@ -7565,14 +7560,7 @@ async function loginAsEmployee(username, password) {
       return { ok: false, msg: empMayUseMasterPassword(e) ? 'Wrong PIN or master password' : 'Wrong PIN' };
     }
     clearLoginFails();
-    /* Legacy text passwords → force PIN setup (Owner may keep master) */
-    if (empNeedsPinMigration(e)) {
-      sessionUser = null;
-      persistSession(null);
-      pendingPasswordEmpId = e.id;
-      applySessionChrome();
-      return { ok: true, emp: e, needPassword: true, migratePin: true };
-    }
+    /* Skip legacy PIN migration — just log in */
     if (empNeedsHashUpgrade(e)) {
       try {
         e.loginPassword = await storeSecretHashed(p);
@@ -20097,14 +20085,6 @@ function applySharedDesk(migrated, labelText, opts) {
     if (!e || !empHasLoginAccess(e) || e.status === 'terminated' || e.status === 'suspended') {
       logoutDesk();
       toast('Session ended — employee missing or closed after load');
-    } else if (!empHasOwnPassword(e) || empNeedsPinMigration(e)) {
-      clearDurableSession();
-      persistSession(null);
-      pendingPasswordEmpId = e.id;
-      sessionUser = null;
-      applySessionChrome();
-      setLoginGateMode('setup');
-      toast('Re-set your personal PIN after loading the shared office');
     } else {
       setSharedDeskLiveStatus('Loaded rev ' + (s.meta.rev || 0) + ' · local PINs kept');
       startSupabaseSharedRealtime();
@@ -20294,11 +20274,7 @@ function loadDurableSession() {
       clearDurableSession();
       return null;
     }
-    if (!empHasOwnPassword(e) || empNeedsPinMigration(e)) {
-      clearDurableSession();
-      if (empNeedsPinMigration(e) || !empHasOwnPassword(e)) pendingPasswordEmpId = e.id;
-      return null;
-    }
+    /* Allow login even without personal PIN */
     if (Number(data.epoch || 1) !== Number(e.loginSessionEpoch || 1)) {
       clearDurableSession();
       return null;
