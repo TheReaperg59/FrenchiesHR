@@ -2729,7 +2729,6 @@ body.dark .dropdown-item:hover { background: oklch(28% .01 240); }
     <div class="side-label" id="navLabelPeople">People</div>
     <div class="nav">
       <button type="button" data-view="portal" data-label="My Portal" data-keys="p"><span class="nav-label">My Portal</span><span class="nav-hint" aria-hidden="true">P</span></button>
-      <button type="button" data-view="messages" data-label="Messages" data-keys="m"><span class="nav-label">Messages<span class="nav-badge pill primary" id="navMsgBadge" style="display:none;margin-left:6px">0</span></span><span class="nav-hint" aria-hidden="true">M</span></button>
       <button type="button" data-view="hiring" data-label="Hiring" data-keys="6 h"><span class="nav-label">Hiring</span><span class="nav-hint" aria-hidden="true">6</span></button>
       <button type="button" data-view="employees" data-label="Employees" data-keys="7 m"><span class="nav-label">Employees</span><span class="nav-hint" aria-hidden="true">7</span></button>
       <button type="button" data-view="relations" data-label="Relations" data-keys="8 l"><span class="nav-label">Relations</span><span class="nav-hint" aria-hidden="true">8</span></button>
@@ -2897,19 +2896,47 @@ body.dark .dropdown-item:hover { background: oklch(28% .01 240); }
       </div>
 
       <!-- Messages -->
-      <div class="portal-card" style="margin-top:20px">
+      <div class="portal-card" style="margin-top:20px; flex: 1; display: flex; flex-direction: column;">
         <div class="portal-card-head">
-          <span>Messages</span>
-          <span class="pill primary" id="portalUnreadBadge" style="display:none;margin-left:4px">0</span>
-          <button type="button" class="btn primary tiny" id="portalComposeBtn" style="margin-left:auto">Compose</button>
+          <span>Team Chat & Messages</span>
+          <button type="button" class="btn primary tiny" onclick="openNewChatModal()" style="margin-left:auto">+ New Chat / Channel</button>
         </div>
-        <div class="portal-card-body">
-          <div style="display:flex;gap:8px;margin-bottom:12px">
-            <button class="btn tiny primary" id="portalInboxTab" onclick="switchMsgTab('inbox')">Inbox</button>
-            <button class="btn tiny soft" id="portalSentTab" onclick="switchMsgTab('sent')">Sent</button>
-          </div>
-          <div id="portalMessagesList" class="scroll-list" style="max-height:260px;overflow-y:auto">
-            <div class="mini-note">No messages.</div>
+        <div class="portal-card-body" style="padding:0; flex: 1; display: flex; flex-direction: column; min-height: 400px;">
+          <div class="chat-layout" style="height: 100%; border-radius: 0 0 12px 12px; border: none; margin: 0;">
+            <div class="chat-sidebar">
+              <div style="padding: 12px;">
+                <input type="search" class="input full" placeholder="Filter..." style="background:rgba(255,255,255,.1);border:none;color:#fff;" oninput="renderMessagesView(this.value)" />
+              </div>
+              <div class="chat-sidebar-section">
+                <span>Channels</span>
+              </div>
+              <div class="chat-sidebar-list" id="chatSidebarChannels"></div>
+              
+              <div class="chat-sidebar-section">
+                <span>Direct Messages</span>
+              </div>
+              <div class="chat-sidebar-list" id="chatSidebarDMs"></div>
+            </div>
+            <div class="chat-thread">
+              <div class="chat-thread-head">
+                <div>
+                  <strong id="chatThreadTitle" style="font-size:1.1rem;">Chat</strong>
+                  <div id="chatThreadMembers" class="chat-meta">0 members</div>
+                </div>
+              </div>
+              <div class="chat-thread-messages" id="chatThreadMessages"></div>
+              <div class="chat-input-area">
+                <div id="chatEmojiToolbar" class="chat-emoji-toolbar">
+                  <span style="cursor:pointer" onclick="$('chatInput').value += '👍'; $('chatEmojiToolbar').classList.remove('show');">👍</span>
+                  <span style="cursor:pointer" onclick="$('chatInput').value += '🔥'; $('chatEmojiToolbar').classList.remove('show');">🔥</span>
+                  <span style="cursor:pointer" onclick="$('chatInput').value += '🎉'; $('chatEmojiToolbar').classList.remove('show');">🎉</span>
+                  <span style="cursor:pointer" onclick="$('chatInput').value += '😂'; $('chatEmojiToolbar').classList.remove('show');">😂</span>
+                </div>
+                <button type="button" class="btn" style="padding:6px 10px; border-radius:50%;" onclick="$('chatEmojiToolbar').classList.toggle('show')">😀</button>
+                <input type="text" id="chatInput" class="chat-input" placeholder="Type a message..." onkeydown="if(event.key === 'Enter') sendChatMessage()" />
+                <button type="button" id="chatSendBtn" class="btn primary" style="border-radius:20px; padding:6px 16px;" onclick="sendChatMessage()">Send</button>
+              </div>
+            </div>
           </div>
         </div>
       </div>
@@ -3165,50 +3192,7 @@ body.dark .dropdown-item:hover { background: oklch(28% .01 240); }
   </div>
 </section>
 
-<!-- MESSAGES -->
-<section class="view" id="view-messages" role="region" aria-labelledby="title-messages" tabindex="-1">
-  <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:16px;">
-    <h2 id="title-messages">Messages &amp; Channels</h2>
-    <button type="button" class="btn primary" onclick="openNewChatModal()">+ New Chat / Channel</button>
-  </div>
-  
-  <div class="chat-layout">
-    <div class="chat-sidebar">
-      <div style="padding: 12px;">
-        <input type="search" class="input full" placeholder="Filter..." style="background:rgba(255,255,255,.1);border:none;color:#fff;" oninput="renderMessagesView(this.value)" />
-      </div>
-      <div class="chat-sidebar-section">
-        <span>Channels</span>
-      </div>
-      <div class="chat-sidebar-list" id="chatSidebarChannels"></div>
-      
-      <div class="chat-sidebar-section">
-        <span>Direct Messages</span>
-      </div>
-      <div class="chat-sidebar-list" id="chatSidebarDMs"></div>
-    </div>
-    <div class="chat-thread">
-      <div class="chat-thread-head">
-        <div>
-          <strong id="chatThreadTitle" style="font-size:1.1rem;">Chat</strong>
-          <div id="chatThreadMembers" class="chat-meta">0 members</div>
-        </div>
-      </div>
-      <div class="chat-thread-messages" id="chatThreadMessages"></div>
-      <div class="chat-input-area">
-        <div id="chatEmojiToolbar" class="chat-emoji-toolbar">
-          <span style="cursor:pointer" onclick="$('chatInput').value += '👍'; $('chatEmojiToolbar').classList.remove('show');">👍</span>
-          <span style="cursor:pointer" onclick="$('chatInput').value += '🔥'; $('chatEmojiToolbar').classList.remove('show');">🔥</span>
-          <span style="cursor:pointer" onclick="$('chatInput').value += '🎉'; $('chatEmojiToolbar').classList.remove('show');">🎉</span>
-          <span style="cursor:pointer" onclick="$('chatInput').value += '😂'; $('chatEmojiToolbar').classList.remove('show');">😂</span>
-        </div>
-        <button type="button" class="btn" style="padding:6px 10px; border-radius:50%;" onclick="$('chatEmojiToolbar').classList.toggle('show')">😀</button>
-        <input type="text" id="chatInput" class="chat-input" placeholder="Type a message..." onkeydown="if(event.key === 'Enter') sendChatMessage()" />
-        <button type="button" id="chatSendBtn" class="btn primary" style="border-radius:20px; padding:6px 16px;" onclick="sendChatMessage()">Send</button>
-      </div>
-    </div>
-  </div>
-</section>
+<!-- MESSAGES MOVED TO PORTAL -->
 
 <!-- HIRING -->
 <section class="view" id="view-hiring" role="region" aria-labelledby="title-hiring" tabindex="-1">
@@ -4827,7 +4811,7 @@ const LOG_TYPES = {
 };
 const TIP_ROLES_DEFAULT = ['Waiter', 'Hostess', 'Cook'];
 const TIP_ROLES = TIP_ROLES_DEFAULT; /* legacy alias — use tipRoles() */
-const DESK_BUILD = 'v68';
+const DESK_BUILD = 'v69';
 /** ECRP: house first-sign-in secret is a 6+ digit PIN (override in Settings). Stored hashed after first use/set. */
 const HOUSE_LOGIN_PIN = '86368636';
 const HOUSE_LOGIN_PASSWORD = HOUSE_LOGIN_PIN; /* legacy alias — prefer settings.housePassword */
@@ -4844,8 +4828,8 @@ const STAFF_ROLES = ['Cook', 'Waiter', 'Hostess', 'New Hire'];
 const ROLE_VIEWS = {
   owner: '*',
   mgmt: '*',
-  lead: ['overview', 'portal', 'messages', 'periods', 'events', 'paystubs', 'employees', 'shifts', 'compliance'],
-  staff: ['overview', 'portal', 'messages', 'paystubs', 'shifts', 'compliance']
+  lead: ['overview', 'portal', 'periods', 'events', 'paystubs', 'employees', 'shifts', 'compliance'],
+  staff: ['overview', 'portal', 'paystubs', 'shifts', 'compliance']
 };
 let sessionUser = null;
 let pendingPasswordEmpId = null;
@@ -20622,12 +20606,13 @@ function renderPortal() {
   const e = sessionEmp();
   if (!e) return;
   
+  renderMessagesView();
+
   // Button handlers
   if ($('portalClockBtn')) $('portalClockBtn').onclick = () => openClockModal();
   if ($('portalDisputeBtn')) $('portalDisputeBtn').onclick = () => openDisputeModal();
   if ($('portalTimeOffBtn')) $('portalTimeOffBtn').onclick = () => openTimeOffModal();
   if ($('portalProfileBtn')) $('portalProfileBtn').onclick = () => openMyFile();
-  if ($('portalComposeBtn')) $('portalComposeBtn').onclick = () => openComposeModal();
   
   // Hero Section
   if ($('portalAvatar')) $('portalAvatar').textContent = (e.name || '?')[0].toUpperCase();
@@ -21307,14 +21292,25 @@ function updateNavMsgBadges() {
   }
 }
 
+function isMgmtUser(emp) {
+  if (!emp) return false;
+  const mgmtRoles = ['Owner', 'HR Director', 'Operations Manager', 'Manager', 'Chef'];
+  return mgmtRoles.includes(emp.role) || !['Cook', 'Waiter', 'Hostess', 'New Hire'].includes(emp.role);
+}
+
 function renderMessagesView(filterStr = '') {
-  const v = $('view-messages');
-  if (!v || !sessionUser) return;
+  if (!sessionUser) return;
+  const sessionUserEmp = sessionEmp();
   
   const f = filterStr.toLowerCase();
   
+  if (activeChatThreadId === 'ch_management' && !isMgmtUser(sessionUserEmp)) {
+    activeChatThreadId = 'ch_announcements';
+  }
+  
   let channelsHtml = '';
   s.channels.forEach(c => {
+    if (c.id === 'ch_management' && !isMgmtUser(sessionUserEmp)) return;
     if (f && !c.name.toLowerCase().includes(f)) return;
     const active = activeChatThreadId === c.id ? 'active' : '';
     channelsHtml += `<div class="chat-sidebar-item ${active}" onclick="switchChatThread('${c.id}')"><span class="chat-status-dot"></span> # ${esc(c.name)}</div>`;
@@ -21339,6 +21335,10 @@ function renderMessagesView(filterStr = '') {
 
 function renderChatThread(threadId) {
   if (!sessionUser) return;
+  if (threadId === 'ch_management' && !isMgmtUser(sessionEmp())) {
+    switchChatThread('ch_announcements');
+    return;
+  }
   let title = 'Chat';
   let memberCount = 0;
   if (threadId.startsWith('ch_')) {
@@ -21434,6 +21434,10 @@ function switchChatThread(threadId) {
 }
 
 function sendChatMessage() {
+  if (activeChatThreadId === 'ch_management' && !isMgmtUser(sessionEmp())) {
+    switchChatThread('ch_announcements');
+    return;
+  }
   const input = $('chatInput');
   const txt = input.value.trim();
   if (!txt) return;
