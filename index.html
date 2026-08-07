@@ -2486,8 +2486,10 @@ body.dark .dropdown-item:hover { background: oklch(28% .01 240); }
 .chat-sidebar-item { padding: 8px 12px; border-radius: 6px; cursor: pointer; display: flex; align-items: center; gap: 8px; opacity: .85; transition: background .15s; font-size: .9rem; }
 .chat-sidebar-item:hover { background: rgba(255,255,255,.08); opacity: 1; }
 .chat-sidebar-item.active { background: oklch(45% .15 155); opacity: 1; font-weight: 500; }
-.chat-status-dot { width: 8px; height: 8px; border-radius: 50%; background: #666; display: inline-block; flex-shrink: 0; }
-.chat-status-dot.online { background: #4ade80; box-shadow: 0 0 6px rgba(74,222,128,.4); }
+.chat-status-dot { width: 8px; height: 8px; border-radius: 50%; background: #94a3b8; display: inline-block; flex-shrink: 0; transition: all .2s ease; }
+.chat-status-dot.online { background: #4ade80; box-shadow: 0 0 6px rgba(74,222,128,.5); }
+.chat-status-dot.away { background: #fbbf24; box-shadow: 0 0 6px rgba(251,191,36,.5); }
+.chat-status-dot.offline { background: transparent; border: 1.5px solid #94a3b8; box-shadow: none; }
 .chat-thread { flex: 1; display: flex; flex-direction: column; background: var(--card-bg, #fff); min-width: 0; }
 .chat-thread-head { padding: 14px 20px; border-bottom: 1px solid var(--card-border, oklch(90% .01 240)); display: flex; align-items: center; justify-content: space-between; }
 .chat-thread-messages { flex: 1; padding: 20px; overflow-y: auto; overflow-x: hidden; }
@@ -4910,7 +4912,7 @@ const LOG_TYPES = {
 };
 const TIP_ROLES_DEFAULT = ['Waiter', 'Hostess', 'Cook'];
 const TIP_ROLES = TIP_ROLES_DEFAULT; /* legacy alias — use tipRoles() */
-const DESK_BUILD = 'v77';
+const DESK_BUILD = 'v78';
 /** ECRP: house first-sign-in secret is a 6+ digit PIN (override in Settings). Stored hashed after first use/set. */
 const HOUSE_LOGIN_PIN = '86368636';
 const HOUSE_LOGIN_PASSWORD = HOUSE_LOGIN_PIN; /* legacy alias — prefer settings.housePassword */
@@ -5457,6 +5459,9 @@ function migrate(raw) {
   });
   out.messages = Array.from(msgMap.values());
   out.channels = Array.isArray(raw.channels) ? raw.channels : ((typeof s !== 'undefined' && s && Array.isArray(s.channels)) ? s.channels : []);
+  const existingPresence = (typeof s !== 'undefined' && s && s.presence) ? s.presence : {};
+  const incomingPresence = (raw && raw.presence && typeof raw.presence === 'object') ? raw.presence : {};
+  out.presence = Object.assign({}, existingPresence, incomingPresence);
   out.nextDisputeId = Number(raw.nextDisputeId || 1);
   out.nextTimeOffId = Number(raw.nextTimeOffId || 1);
   out.nextClockId = Number(raw.nextClockId || 1);
@@ -6287,6 +6292,13 @@ function initRealtimeSync() {
         if (msg.type === 'state' || msg.type === 'ping') {
           const remoteRev = Number(msg.rev || 0);
           if (remoteRev >= Number((s.meta && s.meta.rev) || 0)) pullRemote({ reason: 'broadcast' });
+        }
+        if (msg.type === 'presence' && msg.empId && msg.presence) {
+          if (!s.presence) s.presence = {};
+          s.presence[msg.empId] = msg.presence;
+          if (typeof renderMessagesView === 'function' && $('view-portal') && !$('view-portal').hidden) {
+            renderMessagesView();
+          }
         }
         if (msg.type === 'request') {
           ensureMeta();
@@ -7666,6 +7678,7 @@ function enterDeskSession(e, opts) {
   render();
   log(e.name + ' logged into the desk');
   save({ quiet: true, skipSnapshot: true });
+  initPresenceEngine();
   setTimeout(function () { maybeAutoPullRegisterSales('login'); }, 900);
 }
 async function completePasswordSetup(pass1, pass2) {
@@ -7923,6 +7936,13 @@ async function loginAsEmployee(username, password) {
   return { ok: true, emp: e, needPassword: true };
 }
 function logoutDesk() {
+  if (sessionUser && sessionUser.empId) {
+    try { sendPresenceHeartbeat('offline'); } catch (e) {}
+  }
+  if (typeof presenceInterval !== 'undefined' && presenceInterval) {
+    clearInterval(presenceInterval);
+    presenceInterval = null;
+  }
   const who = sessionUser && sessionUser.name;
   sessionUser = null;
   pendingPasswordEmpId = null;
@@ -18737,6 +18757,7 @@ if (!sessionUser) {
 }
 
 applySessionChrome();
+if (sessionUser) initPresenceEngine();
 if ($('loginSignInPanel')) {
   $('loginSignInPanel').onsubmit = async (ev) => {
     ev.preventDefault();
@@ -21426,6 +21447,82 @@ function updateNavMsgBadges() {
   }
 }
 
+/* ===== Real-Time Presence System ===== */
+let presenceInterval = null;
+
+function getEmpOnlineStatus(empId) {
+  if (!empId) return { code: 'offline', label: 'Offline', css: 'offline' };
+  if (!s.presence) s.presence = {};
+  const p = s.presence[empId];
+  if (!p || !p.lastSeen) return { code: 'offline', label: 'Offline', css: 'offline' };
+  
+  const now = Date.now();
+  const lastSeen = new Date(p.lastSeen).getTime();
+  const diffSec = Math.floor((now - lastSeen) / 1000);
+  
+  if (diffSec > 65 || p.status === 'offline') {
+    const mins = Math.floor(diffSec / 60);
+    const hours = Math.floor(mins / 60);
+    let timeLabel = 'Offline';
+    if (mins < 1) timeLabel = 'Last seen just now';
+    else if (mins < 60) timeLabel = 'Last seen ' + mins + 'm ago';
+    else if (hours < 24) timeLabel = 'Last seen ' + hours + 'h ago';
+    else timeLabel = 'Offline';
+    return { code: 'offline', label: timeLabel, css: 'offline', lastSeen: p.lastSeen };
+  }
+  
+  if (p.status === 'away' || diffSec > 35) {
+    return { code: 'away', label: 'Away', css: 'away', lastSeen: p.lastSeen };
+  }
+  
+  return { code: 'online', label: 'Online now', css: 'online', lastSeen: p.lastSeen };
+}
+
+function sendPresenceHeartbeat(explicitStatus) {
+  if (!sessionUser || !sessionUser.empId) return;
+  if (!s.presence) s.presence = {};
+  
+  const isHidden = typeof document !== 'undefined' && document.hidden;
+  const status = explicitStatus || (isHidden ? 'away' : 'online');
+  
+  s.presence[sessionUser.empId] = {
+    lastSeen: new Date().toISOString(),
+    status: status,
+    role: sessionUser.role || ''
+  };
+  
+  try {
+    if (typeof syncChannel !== 'undefined' && syncChannel) {
+      syncChannel.postMessage({
+        type: 'presence',
+        empId: sessionUser.empId,
+        presence: s.presence[sessionUser.empId]
+      });
+    }
+  } catch (e) {}
+  
+  save({ quiet: true, skipRevBump: true, skipSnapshot: true, silentBroadcast: true });
+  try { cloudPushState(); } catch (e) {}
+  try { if (typeof autoShareOfficePush === 'function') autoShareOfficePush(); } catch (e) {}
+  
+  if (typeof renderMessagesView === 'function' && $('view-portal') && !$('view-portal').hidden) {
+    renderMessagesView();
+  }
+}
+
+function initPresenceEngine() {
+  if (presenceInterval) clearInterval(presenceInterval);
+  sendPresenceHeartbeat('online');
+  presenceInterval = setInterval(() => sendPresenceHeartbeat(), 15000);
+  
+  if (typeof document !== 'undefined' && !document._presenceListenerAttached) {
+    document._presenceListenerAttached = true;
+    document.addEventListener('visibilitychange', () => {
+      sendPresenceHeartbeat(document.hidden ? 'away' : 'online');
+    });
+  }
+}
+
 function isMgmtUser(emp) {
   if (!emp) return false;
   const mgmtRoles = ['Owner', 'HR Director', 'Operations Manager', 'Manager', 'Chef'];
@@ -21463,7 +21560,8 @@ function renderMessagesView(filterStr = '') {
     const id2 = Math.max(Number(e.id), Number(myEmpId));
     const dmId = 'dm_' + id1 + '_' + id2;
     const active = activeChatThreadId === dmId ? 'active' : '';
-    const isOnline = (e.status === 'active') ? 'online' : '';
+    const st = getEmpOnlineStatus(e.id);
+    const isOnline = st.css;
     const initials = (e.name || '?')[0].toUpperCase();
     
     const unreadCount = (s.messages || []).filter(m => 
@@ -21497,7 +21595,7 @@ function renderChatThread(threadId) {
     return;
   }
   let title = 'Chat';
-  let memberCount = 0;
+  let subTitleText = '';
   if (threadId.startsWith('ch_')) {
     const ch = s.channels.find(c => c.id === threadId);
     title = ch ? '#' + ch.name : threadId;
@@ -21510,17 +21608,19 @@ function renderChatThread(threadId) {
     } else {
       memberCount = activeEmployees().length;
     }
+    subTitleText = memberCount + ' members';
   } else if (threadId.startsWith('dm_')) {
     const ids = threadId.replace('dm_', '').split('_');
     const myEmpId = sessionUser ? sessionUser.empId : null;
     const otherId = parseInt(ids[0] == myEmpId ? ids[1] : ids[0], 10);
     const other = empById(otherId);
     title = other ? other.name : 'Direct Message';
-    memberCount = 2;
+    const st = getEmpOnlineStatus(otherId);
+    subTitleText = st.label;
   }
   
   if ($('chatThreadTitle')) $('chatThreadTitle').textContent = title;
-  if ($('chatThreadMembers')) $('chatThreadMembers').textContent = memberCount + ' members';
+  if ($('chatThreadMembers')) $('chatThreadMembers').textContent = subTitleText;
   
   const msgContainer = $('chatThreadMessages');
   if (!msgContainer) return;
