@@ -2778,6 +2778,27 @@ body.dark .dropdown-item:hover { background: oklch(28% .01 240); }
 .chat-emoji-toolbar.show {
   display: flex !important;
 }
+
+/* Sleek custom sliders for chat containers */
+.chat-thread-messages::-webkit-scrollbar,
+.chat-sidebar::-webkit-scrollbar {
+  width: 6px;
+}
+.chat-thread-messages::-webkit-scrollbar-track,
+.chat-sidebar::-webkit-scrollbar-track {
+  background: transparent;
+}
+.chat-thread-messages::-webkit-scrollbar-thumb {
+  background: oklch(85% .02 240);
+  border-radius: 4px;
+}
+.chat-sidebar::-webkit-scrollbar-thumb {
+  background: rgba(255,255,255,.2);
+  border-radius: 4px;
+}
+.chat-thread-messages::-webkit-scrollbar-thumb:hover {
+  background: oklch(70% .05 155);
+}
 </style>
 </head>
 <script src="frenchies-state.js" onerror="/* no state file yet — normal on first run */"></script>
@@ -3048,13 +3069,13 @@ body.dark .dropdown-item:hover { background: oklch(28% .01 240); }
       </div>
 
       <!-- Messages -->
-      <div class="portal-card" style="margin-top:20px; flex: 1; display: flex; flex-direction: column;">
-        <div class="portal-card-head">
+      <div class="portal-card" id="portalChatCard" style="margin-top:20px; height: 540px; display: flex; flex-direction: column; overflow: hidden;">
+        <div class="portal-card-head" style="flex-shrink: 0;">
           <span>Team Chat & Messages</span>
           <button type="button" class="btn primary tiny" onclick="openNewChatModal()" style="margin-left:auto">+ New Chat / Channel</button>
         </div>
-        <div class="portal-card-body" style="padding:0; flex: 1; display: flex; flex-direction: column; min-height: 400px;">
-          <div class="chat-layout" style="height: 100%; border-radius: 0 0 12px 12px; border: none; margin: 0;">
+        <div class="portal-card-body" style="padding:0; flex: 1; min-height: 0; display: flex; flex-direction: column; overflow: hidden;">
+          <div class="chat-layout" style="height: 100%; border-radius: 0 0 12px 12px; border: none; margin: 0; overflow: hidden;">
             <div class="chat-sidebar">
               <div style="padding: 12px;">
                 <input type="search" class="input full" placeholder="Filter..." style="background:rgba(255,255,255,.1);border:none;color:#fff;" oninput="renderMessagesView(this.value)" />
@@ -4974,7 +4995,7 @@ const LOG_TYPES = {
 };
 const TIP_ROLES_DEFAULT = ['Waiter', 'Hostess', 'Cook'];
 const TIP_ROLES = TIP_ROLES_DEFAULT; /* legacy alias — use tipRoles() */
-const DESK_BUILD = 'v82';
+const DESK_BUILD = 'v83';
 /** ECRP: house first-sign-in secret is a 6+ digit PIN (override in Settings). Stored hashed after first use/set. */
 const HOUSE_LOGIN_PIN = '86368636';
 const HOUSE_LOGIN_PASSWORD = HOUSE_LOGIN_PIN; /* legacy alias — prefer settings.housePassword */
@@ -21662,6 +21683,12 @@ let presenceInterval = null;
 
 function getEmpOnlineStatus(empId) {
   if (!empId) return { code: 'offline', label: 'Offline', css: 'offline' };
+  
+  /* Current active session user is ALWAYS Online on their own client */
+  if (sessionUser && String(empId) === String(sessionUser.empId)) {
+    return { code: 'online', label: 'Online now', css: 'online', lastSeen: new Date().toISOString() };
+  }
+
   if (!s.presence) s.presence = {};
   const p = s.presence[empId];
   if (!p || !p.lastSeen) return { code: 'offline', label: 'Offline', css: 'offline' };
@@ -21670,7 +21697,7 @@ function getEmpOnlineStatus(empId) {
   const lastSeen = new Date(p.lastSeen).getTime();
   const diffSec = Math.floor((now - lastSeen) / 1000);
   
-  if (diffSec > 65 || p.status === 'offline') {
+  if (diffSec > 75 || p.status === 'offline') {
     const mins = Math.floor(diffSec / 60);
     const hours = Math.floor(mins / 60);
     let timeLabel = 'Offline';
@@ -21681,7 +21708,7 @@ function getEmpOnlineStatus(empId) {
     return { code: 'offline', label: timeLabel, css: 'offline', lastSeen: p.lastSeen };
   }
   
-  if (p.status === 'away' || diffSec > 35) {
+  if (p.status === 'away' || diffSec > 45) {
     return { code: 'away', label: 'Away', css: 'away', lastSeen: p.lastSeen };
   }
   
@@ -21720,9 +21747,26 @@ function sendPresenceHeartbeat(explicitStatus) {
   }
 }
 
+function attachUserActivityListeners() {
+  if (typeof window === 'undefined' || window._presenceActivityAttached) return;
+  window._presenceActivityAttached = true;
+  let lastPulse = 0;
+  const onUserActive = () => {
+    const now = Date.now();
+    if (now - lastPulse > 10000 && sessionUser) {
+      lastPulse = now;
+      sendPresenceHeartbeat('online');
+    }
+  };
+  ['mousemove', 'keydown', 'click', 'focus', 'scroll'].forEach(evt => {
+    window.addEventListener(evt, onUserActive, { passive: true });
+  });
+}
+
 function initPresenceEngine() {
   if (presenceInterval) clearInterval(presenceInterval);
   sendPresenceHeartbeat('online');
+  attachUserActivityListeners();
   presenceInterval = setInterval(() => sendPresenceHeartbeat(), 15000);
   
   if (typeof document !== 'undefined' && !document._presenceListenerAttached) {
