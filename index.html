@@ -2729,6 +2729,28 @@ body.dark .dropdown-item:hover { background: oklch(28% .01 240); }
   font-size: .72rem; padding: 3px 8px; border-radius: 6px; border: 1px solid oklch(88% .02 240);
   background: var(--card-bg, #fff); cursor: pointer; transition: background .15s; margin-left: 6px;
 }
+.new-chat-emp-list {
+  max-height: 220px; overflow-y: auto; border: 1.5px solid oklch(90% .01 240);
+  border-radius: 10px; padding: 6px; background: oklch(98% .005 240); margin-top: 6px;
+}
+.new-chat-emp-item {
+  display: flex; align-items: center; gap: 10px; padding: 8px 12px; border-radius: 8px;
+  background: var(--card-bg, #fff); border: 1px solid oklch(94% .005 240); margin-bottom: 6px;
+  cursor: pointer; transition: all .15s ease; text-transform: none !important; font-weight: normal !important;
+}
+.new-chat-emp-item:hover {
+  background: oklch(96% .01 155); border-color: oklch(80% .08 155);
+}
+.new-chat-emp-item input[type="checkbox"] {
+  width: 18px; height: 18px; accent-color: oklch(45% .15 155); cursor: pointer; flex-shrink: 0; margin: 0;
+}
+.new-chat-emp-avatar {
+  width: 32px; height: 32px; border-radius: 50%; background: oklch(55% .16 155); color: #fff;
+  display: flex; align-items: center; justify-content: center; font-size: .8rem; font-weight: 700; flex-shrink: 0;
+}
+.new-chat-emp-details { flex: 1; min-width: 0; }
+.new-chat-emp-name { font-weight: 600; font-size: .85rem; color: var(--ink, #1a1a2e); text-transform: none !important; }
+.new-chat-emp-role { font-size: .72rem; color: var(--muted, #888); text-transform: none !important; display: flex; align-items: center; gap: 6px; margin-top: 2px; }
 .portal-shortcut-btn:hover { background: oklch(96% .01 155); border-color: var(--green); }
 .chat-sidebar-item.active {
   background: oklch(45% .15 155) !important;
@@ -4912,7 +4934,7 @@ const LOG_TYPES = {
 };
 const TIP_ROLES_DEFAULT = ['Waiter', 'Hostess', 'Cook'];
 const TIP_ROLES = TIP_ROLES_DEFAULT; /* legacy alias — use tipRoles() */
-const DESK_BUILD = 'v79';
+const DESK_BUILD = 'v80';
 /** ECRP: house first-sign-in secret is a 6+ digit PIN (override in Settings). Stored hashed after first use/set. */
 const HOUSE_LOGIN_PIN = '86368636';
 const HOUSE_LOGIN_PASSWORD = HOUSE_LOGIN_PIN; /* legacy alias — prefer settings.housePassword */
@@ -21081,17 +21103,21 @@ function renderPortalMessages() {
   }).join('');
 }
 
-function showDynamicModal(title, contentHtml, onConfirm) {
+function showDynamicModal(title, contentHtml, onConfirm, opts) {
+  opts = opts || {};
   const m = document.createElement('div');
   m.className = 'modal open';
   m.style.zIndex = '9999';
-  m.innerHTML = '<div class="dialog"><h2>' + esc(title) + '</h2><div style="margin:16px 0">' + contentHtml + '</div>' +
+  const actionsHtml = opts.noActions ? '' : (
     '<div class="actions"><button class="btn primary" id="dynOk">OK</button>' +
-    (onConfirm ? '<button class="btn soft" id="dynCancel">Cancel</button>' : '') + '</div></div>';
+    (onConfirm ? '<button class="btn soft" id="dynCancel">Cancel</button>' : '') + 'div>'
+  );
+  m.innerHTML = '<div class="dialog"><h2>' + esc(title) + '</h2><div style="margin:16px 0">' + contentHtml + '</div>' + actionsHtml + '</div>';
   document.body.appendChild(m);
   const close = () => { if (m.parentNode) document.body.removeChild(m); };
-  m.querySelector('#dynOk').onclick = () => { if (onConfirm) { const r = onConfirm(); if (r === false) return; } close(); };
-  if (onConfirm) m.querySelector('#dynCancel').onclick = close;
+  const okBtn = m.querySelector('#dynOk');
+  if (okBtn) okBtn.onclick = () => { if (onConfirm) { const r = onConfirm(); if (r === false) return; } close(); };
+  if (onConfirm && m.querySelector('#dynCancel')) m.querySelector('#dynCancel').onclick = close;
   m.addEventListener('click', (ev) => { if (ev.target === m) close(); });
 }
 
@@ -21795,7 +21821,7 @@ function openNewChatModal() {
   renderNewChatModalContent();
 }
 
-function renderNewChatModalContent(searchQuery = '') {
+function renderNewChatModalContent(searchQuery = '', chSearchQuery = '') {
   const isMgmt = sessionEmp() && isMgmtUser(sessionEmp());
   
   const modalHtml = `
@@ -21806,11 +21832,9 @@ function renderNewChatModalContent(searchQuery = '') {
     <div id="newChatTabBody"></div>
   `;
 
-  // Existing modal check or open new dynamic modal
   let existingModal = document.getElementById('newChatModalWrapper');
   if (!existingModal) {
-    showDynamicModal('Start New Conversation', modalHtml, null);
-    // Find the modal dialog and give wrapper ID
+    showDynamicModal('Start New Conversation', modalHtml, null, { noActions: true });
     const modals = document.querySelectorAll('.modal');
     if (modals.length) {
       existingModal = modals[modals.length - 1];
@@ -21821,7 +21845,6 @@ function renderNewChatModalContent(searchQuery = '') {
     if (dialogBody) dialogBody.innerHTML = modalHtml;
   }
 
-  // Populate active tab content
   const tabBody = document.getElementById('newChatTabBody');
   if (!tabBody) return;
 
@@ -21829,7 +21852,6 @@ function renderNewChatModalContent(searchQuery = '') {
     const q = searchQuery.toLowerCase();
     const emps = activeEmployees().filter(e => e.id !== (sessionUser ? sessionUser.empId : null));
     
-    // Group employees by department
     const groups = {
       'Management': emps.filter(e => isMgmtUser(e)),
       'Waitstaff & Front of House': emps.filter(e => ['Waiter', 'Hostess'].includes(e.role)),
@@ -21838,7 +21860,7 @@ function renderNewChatModalContent(searchQuery = '') {
     };
 
     let html = `<div style="margin-bottom:12px">
-      <input type="search" class="input full" placeholder="Search employee name or role..." value="${esc(searchQuery)}" oninput="renderNewChatModalContent(this.value)" id="newChatSearchInput">
+      <input type="search" class="input full" placeholder="Search employee name or role..." value="${esc(searchQuery)}" oninput="renderNewChatModalContent(this.value, '')" id="newChatSearchInput">
     </div><div style="max-height:350px;overflow-y:auto">`;
 
     let hasAny = false;
@@ -21849,12 +21871,13 @@ function renderNewChatModalContent(searchQuery = '') {
         html += `<div class="dept-header">${esc(dept)}</div>`;
         filtered.forEach(e => {
           const initials = (e.name || '?')[0].toUpperCase();
+          const st = getEmpOnlineStatus(e.id);
           html += `
             <div class="emp-select-card" onclick="selectDirectMessage(${e.id})">
               <div class="emp-avatar-circle">${esc(initials)}</div>
               <div class="emp-info">
                 <div class="emp-name">${esc(e.name)}</div>
-                <div class="emp-role-sub">${esc(e.role)} &middot; ${esc(e.status)}</div>
+                <div class="emp-role-sub" style="display:flex;align-items:center;gap:6px">${esc(e.role)} &middot; <span class="chat-status-dot ${st.css}"></span> ${esc(st.label)}</div>
               </div>
               <button class="btn tiny primary">Chat</button>
             </div>
@@ -21869,7 +21892,6 @@ function renderNewChatModalContent(searchQuery = '') {
     html += `</div>`;
     tabBody.innerHTML = html;
     
-    // Auto-focus search input if typed
     if (searchQuery && document.getElementById('newChatSearchInput')) {
       const inp = document.getElementById('newChatSearchInput');
       inp.focus();
@@ -21877,7 +21899,10 @@ function renderNewChatModalContent(searchQuery = '') {
     }
 
   } else {
-    // Channel / Group creation tab
+    const chQ = chSearchQuery.toLowerCase();
+    const allStaff = activeEmployees().filter(e => e.id !== (sessionUser ? sessionUser.empId : null));
+    const filteredStaff = allStaff.filter(e => !chQ || e.name.toLowerCase().includes(chQ) || (e.role || '').toLowerCase().includes(chQ));
+
     let html = `
       <div class="field">
         <label>Channel or Group Name</label>
@@ -21893,17 +21918,35 @@ function renderNewChatModalContent(searchQuery = '') {
       </div>
       <div class="field" style="margin-top:12px">
         <label>Select Members (Optional for Group DMs)</label>
-        <div style="max-height:160px;overflow-y:auto;border:1px solid oklch(90% .01 240);border-radius:8px;padding:8px">
-          ${activeEmployees().filter(e => e.id !== (sessionUser ? sessionUser.empId : null)).map(e => `
-            <label style="display:flex;align-items:center;gap:8px;padding:4px 0;font-size:.85rem;cursor:pointer">
-              <input type="checkbox" class="new-ch-emp-check" value="${e.id}"> ${esc(e.name)} <span class="muted">(${esc(e.role)})</span>
-            </label>
-          `).join('')}
+        <div style="margin-bottom:6px">
+          <input type="search" class="input full" placeholder="Search staff to add..." value="${esc(chSearchQuery)}" oninput="renderNewChatModalContent('', this.value)" id="newChMemberSearch">
+        </div>
+        <div class="new-chat-emp-list">
+          ${filteredStaff.length ? filteredStaff.map(e => {
+            const initials = (e.name || '?')[0].toUpperCase();
+            const st = getEmpOnlineStatus(e.id);
+            return `
+              <label class="new-chat-emp-item">
+                <input type="checkbox" class="new-ch-emp-check" value="${e.id}">
+                <div class="new-chat-emp-avatar">${esc(initials)}</div>
+                <div class="new-chat-emp-details">
+                  <div class="new-chat-emp-name">${esc(e.name)}</div>
+                  <div class="new-chat-emp-role">${esc(e.role)} &middot; <span class="chat-status-dot ${st.css}"></span> ${esc(st.label)}</div>
+                </div>
+              </label>
+            `;
+          }).join('') : '<div class="mini-note" style="padding:12px;text-align:center">No staff matching filter.</div>'}
         </div>
       </div>
       <button class="btn primary full" style="margin-top:16px" onclick="createNewChannelGroup()">Create Channel / Group</button>
     `;
     tabBody.innerHTML = html;
+    
+    if (chSearchQuery && document.getElementById('newChMemberSearch')) {
+      const inp = document.getElementById('newChMemberSearch');
+      inp.focus();
+      inp.selectionStart = inp.selectionEnd = chSearchQuery.length;
+    }
   }
 }
 
