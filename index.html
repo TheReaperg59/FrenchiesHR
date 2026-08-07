@@ -2891,7 +2891,7 @@ body.dark .dropdown-item:hover { background: oklch(28% .01 240); }
         <button type="button" class="top-account-item danger" id="logoutBtn" role="menuitem">Sign out</button>
         <button type="button" class="top-account-item" id="logoutAllBtn" role="menuitem">Sign out all remembered</button>
         <div class="top-account-foot">
-          <span class="build-chip" id="deskBuildChip" title="Desk build">v53</span>
+          <span class="build-chip" id="deskBuildChip" title="Desk build">v79</span>
           <label class="top-jump-label" for="quickJump">Jump to</label>
           <select class="top-jump" id="quickJump" title="Jump to any tab">
             <option value="overview">Overview</option>
@@ -3978,7 +3978,7 @@ body.dark .dropdown-item:hover { background: oklch(28% .01 240); }
       <button class="btn" id="importJson">Import JSON</button>
     </div></div>
   </div>
-  <div class="card mgmt-only" style="margin-top:12px" data-mgmt-only><div class="card-head"><b>Live office</b><span class="pill gray" id="sharedDeskBuildPill">v53</span></div>
+  <div class="card mgmt-only" style="margin-top:12px" data-mgmt-only><div class="card-head"><b>Live office</b><span class="pill gray" id="sharedDeskBuildPill">v79</span></div>
     <div class="card-body">
       <p class="ui-hint"><b>Automatic:</b> Every save quietly updates other open desks. No Share button — just work. Staff stay signed in. Personal PINs and Discord channel links stay private on each browser. Owner connects cloud office under Settings.</p>
       <div class="field" data-mgmt-only><label>Host file link (recovery fallback — Owner &amp; HR Director)</label><input id="sharedDeskUrlSetting" placeholder="https://yourdomain/…/frenchies-shared-desk.json"></div>
@@ -4912,7 +4912,7 @@ const LOG_TYPES = {
 };
 const TIP_ROLES_DEFAULT = ['Waiter', 'Hostess', 'Cook'];
 const TIP_ROLES = TIP_ROLES_DEFAULT; /* legacy alias — use tipRoles() */
-const DESK_BUILD = 'v78';
+const DESK_BUILD = 'v79';
 /** ECRP: house first-sign-in secret is a 6+ digit PIN (override in Settings). Stored hashed after first use/set. */
 const HOUSE_LOGIN_PIN = '86368636';
 const HOUSE_LOGIN_PASSWORD = HOUSE_LOGIN_PIN; /* legacy alias — prefer settings.housePassword */
@@ -6204,6 +6204,7 @@ function save(opts) {
     if (!opts.skipSnapshot && (s.meta.saveCount === 1 || s.meta.saveCount % SNAPSHOT_EVERY_N_SAVES === 0)) pushSnapshot('auto');
     updateSaveBadge();
     setSyncChip('live');
+    syncBuildBadges();
     try { maybeWarnStorageQuota(); } catch (quotaErr) {}
     if (!opts.silentBroadcast) {
       broadcastSync({ type: 'state', rev: s.meta.rev, clientId: CLIENT_ID, at: s.meta.updatedAt });
@@ -7835,6 +7836,7 @@ function applySessionChrome() {
   const uname = sessionUser.username || sessionUser.name || 'Staff';
   const initial = (sessionUser.name || uname || '?').trim().charAt(0) || '?';
   setAccount(uname, sessionUser.role || 'Staff', sessionUser.name || uname, initial, (sessionUser.name || uname) + ' logged in');
+  syncBuildBadges();
   document.querySelectorAll('.nav button[data-view]').forEach(btn => {
     const view = btn.getAttribute('data-view');
     let ok = canAccessView(view);
@@ -21006,13 +21008,35 @@ function renderPortal() {
   renderPortalMessages();
 }
 
+function isMsgUnread(m, empId) {
+  if (!m || !empId) return false;
+  const idStr = String(empId);
+  if (String(m.from) === idStr) return false;
+  if (m.readBy && m.readBy[idStr]) return false;
+  if (m.readAt) return false;
+  if (m.channelId && m.channelId.startsWith('dm_')) {
+    const parts = m.channelId.replace('dm_', '').split('_');
+    if (!parts.includes(idStr)) return false;
+    return true;
+  }
+  if (m.to && String(m.to) !== idStr) return false;
+  return true;
+}
+
 function renderPortalMessages() {
   if (!s.messages) s.messages = [];
   if (!sessionUser) return;
   const myId = String(sessionUser.empId);
-  const inbox = s.messages.filter(m => !m.to || String(m.to) === myId);
+  const inbox = s.messages.filter(m => {
+    if (String(m.from) === myId) return false;
+    if (m.channelId && m.channelId.startsWith('dm_')) {
+      const parts = m.channelId.replace('dm_', '').split('_');
+      return parts.includes(myId);
+    }
+    return !m.to || String(m.to) === myId;
+  });
   const sent = s.messages.filter(m => String(m.from) === myId);
-  const unread = inbox.filter(m => !m.readAt).length;
+  const unread = s.messages.filter(m => isMsgUnread(m, sessionUser.empId)).length;
   
   if ($('portalUnreadBadge')) {
     $('portalUnreadBadge').style.display = unread ? '' : 'none';
@@ -21414,27 +21438,18 @@ function playMsgChime() {
   } catch (e) {}
 }
 
+function syncBuildBadges() {
+  const b = typeof DESK_BUILD !== 'undefined' ? DESK_BUILD : 'v79';
+  document.querySelectorAll('.build-chip, #deskBuildChip, #sharedDeskBuildPill, #buildBadge').forEach(el => {
+    if (el) el.textContent = b;
+  });
+}
+
 function updateNavMsgBadges() {
   if (!sessionUser) return;
   if (!s.messages) return;
   
-  let unread = 0;
-  s.messages.forEach(m => {
-    if (String(m.from) === String(sessionUser.empId)) return;
-    if (m.channelId.startsWith('ch_')) {
-      // For channels, maybe only count mentions if we want, or count all. The spec says "unread DMs/mentions".
-      // We'll count all unread channel messages just so they see something, or strictly mentions.
-      // We'll do strictly mentions to match Slack:
-      if (m.body.includes('@' + sessionUser.name) && (!m.readBy || !m.readBy[sessionUser.empId])) {
-        unread++;
-      }
-    } else {
-      // DM
-      if (String(m.to) === String(sessionUser.empId) && (!m.readBy || !m.readBy[sessionUser.empId])) {
-        unread++;
-      }
-    }
-  });
+  const unread = s.messages.filter(m => isMsgUnread(m, sessionUser.empId)).length;
   
   const badge = $('navMsgBadge');
   if (badge) {
@@ -21445,6 +21460,7 @@ function updateNavMsgBadges() {
       badge.style.display = 'none';
     }
   }
+  syncBuildBadges();
 }
 
 /* ===== Real-Time Presence System ===== */
@@ -21674,8 +21690,9 @@ function renderChatThread(threadId) {
     
     if (!isSent) {
       if (!m.readBy) m.readBy = {};
-      if (!m.readBy[sessionUser.empId]) {
+      if (!m.readBy[sessionUser.empId] || !m.readAt) {
         m.readBy[sessionUser.empId] = true;
+        m.readAt = new Date().toISOString();
         dirtyRead = true;
       }
     }
@@ -21687,8 +21704,9 @@ function renderChatThread(threadId) {
   }, 30);
   
   if (dirtyRead) {
-    save({ quiet: true });
+    save({ quiet: true, skipSnapshot: true });
     updateNavMsgBadges();
+    if (typeof renderPortalMessages === 'function') renderPortalMessages();
   }
 }
 
