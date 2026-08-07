@@ -2995,7 +2995,7 @@ body.dark .dropdown-item:hover { background: oklch(28% .01 240); }
       <div class="metrics" id="portalQuickStats" style="margin-top:20px">
         <div class="metric"><label>Hours Worked</label><strong id="portalHours">—</strong></div>
         <div class="metric"><label>Available PTO</label><strong id="portalPtoQuick" class="mono">0.0 hrs</strong></div>
-        <div class="metric"><label>Unread</label><strong id="portalUnreadCount">0</strong></div>
+        <div class="metric" onclick="scrollToChatOrOpenUnread()" style="cursor:pointer" title="Click to view unread messages"><label>Unread</label><strong id="portalUnreadCount">0</strong></div>
       </div>
 
       <!-- PTO Accrual & Balance Card -->
@@ -4974,7 +4974,7 @@ const LOG_TYPES = {
 };
 const TIP_ROLES_DEFAULT = ['Waiter', 'Hostess', 'Cook'];
 const TIP_ROLES = TIP_ROLES_DEFAULT; /* legacy alias — use tipRoles() */
-const DESK_BUILD = 'v81';
+const DESK_BUILD = 'v82';
 /** ECRP: house first-sign-in secret is a 6+ digit PIN (override in Settings). Stored hashed after first use/set. */
 const HOUSE_LOGIN_PIN = '86368636';
 const HOUSE_LOGIN_PASSWORD = HOUSE_LOGIN_PIN; /* legacy alias — prefer settings.housePassword */
@@ -21069,7 +21069,7 @@ function renderPortal() {
   }
   
   // Unread count
-  const unreadCount = (s.messages || []).filter(m => (!m.to || String(m.to) === String(e.id)) && !m.readAt).length;
+  const unreadCount = (s.messages || []).filter(m => isMsgUnread(m, e.id)).length;
   if ($('portalUnreadCount')) $('portalUnreadCount').textContent = unreadCount;
   if ($('portalUnreadBadge')) {
     $('portalUnreadBadge').textContent = unreadCount;
@@ -21187,6 +21187,31 @@ function isMsgUnread(m, empId) {
   if (m.to && String(m.to) !== idStr) return false;
   return true;
 }
+
+function scrollToChatOrOpenUnread() {
+  if (!sessionUser) return;
+  const unreadMsg = (s.messages || []).find(m => isMsgUnread(m, sessionUser.empId));
+  if (unreadMsg) {
+    if (unreadMsg.channelId) {
+      switchChatThread(unreadMsg.channelId);
+    } else if (unreadMsg.from) {
+      const myId = sessionUser.empId;
+      const otherId = unreadMsg.from;
+      const dmId = 'dm_' + Math.min(otherId, myId) + '_' + Math.max(otherId, myId);
+      switchChatThread(dmId);
+    }
+  }
+  
+  const chatCard = document.getElementById('portalChatCard') || document.querySelector('.chat-layout') || document.getElementById('chatThreadMessages');
+  if (chatCard) {
+    chatCard.scrollIntoView({ behavior: 'smooth', block: 'center' });
+    setTimeout(() => {
+      const inp = document.getElementById('chatInput');
+      if (inp) inp.focus();
+    }, 400);
+  }
+}
+window.scrollToChatOrOpenUnread = scrollToChatOrOpenUnread;
 
 function renderPortalMessages() {
   if (!s.messages) s.messages = [];
