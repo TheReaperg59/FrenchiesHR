@@ -2993,9 +2993,38 @@ body.dark .dropdown-item:hover { background: oklch(28% .01 240); }
 
       <!-- Quick Stats -->
       <div class="metrics" id="portalQuickStats" style="margin-top:20px">
-        <div class="metric"><label>Hours</label><strong id="portalHours">—</strong></div>
-        <div class="metric"><label>PTO Balance</label><strong id="portalPtoBalance" class="mono muted">0.0 hrs</strong></div>
+        <div class="metric"><label>Hours Worked</label><strong id="portalHours">—</strong></div>
+        <div class="metric"><label>Available PTO</label><strong id="portalPtoQuick" class="mono">0.0 hrs</strong></div>
         <div class="metric"><label>Unread</label><strong id="portalUnreadCount">0</strong></div>
+      </div>
+
+      <!-- PTO Accrual & Balance Card -->
+      <div class="portal-card" style="margin-top:20px" id="portalPtoCard">
+        <div class="portal-card-head">
+          <span>Paid Time Off (PTO)</span>
+          <span class="pill green" id="portalPtoDaysBadge" style="margin-left:auto">0.0 Days Available</span>
+        </div>
+        <div class="portal-card-body">
+          <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:10px">
+            <div>
+              <div style="font-size:1.5rem;font-weight:800;color:oklch(45% .15 155)" id="portalPtoBalanceText">0.0 hrs</div>
+              <div style="font-size:.75rem;color:var(--muted)">Accrual Rate: 20 hrs worked = 1 PTO Day (8h)</div>
+            </div>
+            <button class="btn primary tiny" onclick="openTimeOffModal('pto')">🌴 Request PTO</button>
+          </div>
+          <div style="font-size:.78rem;color:var(--muted);margin-top:8px" id="portalPtoSub">
+            Total Earned: <b id="portalPtoTotalEarned">0.0 hrs</b> &middot; Approved Used: <b id="portalPtoTotalUsed">0.0 hrs</b>
+          </div>
+          <div style="margin-top:10px">
+            <div style="display:flex;justify-content:space-between;font-size:.72rem;color:var(--muted);margin-bottom:4px">
+              <span>Progress to next 8h PTO day</span>
+              <span id="portalPtoNextDayHours">0 / 20 hrs worked</span>
+            </div>
+            <div class="portal-progress" style="height:6px">
+              <div class="portal-progress-bar" id="portalPtoProgressBar" style="width:0%;background:oklch(55% .16 155)"></div>
+            </div>
+          </div>
+        </div>
       </div>
 
       <!-- Pay History -->
@@ -4306,18 +4335,29 @@ body.dark .dropdown-item:hover { background: oklch(28% .01 240); }
 
 <!-- Call-off / time-off modal -->
 <div class="modal" id="timeOffModal" role="dialog" aria-modal="true" hidden><div class="dialog" role="document" tabindex="-1">
-  <h2>Call-off / time-off</h2>
+  <h2>Call-off / time-off &amp; PTO</h2>
   <div class="dialog-scroll">
+    <div id="timeOffPtoBanner" style="display:none;padding:10px 14px;border-radius:8px;background:oklch(96% .02 155);border:1px solid oklch(88% .06 155);margin-bottom:12px;font-size:.85rem"></div>
     <div class="field-row">
-      <div class="field"><label>Type</label><select id="toType"><option value="calloff">Call-off</option><option value="timeoff">Time-off</option></select></div>
+      <div class="field"><label>Type</label><select id="toType" onchange="togglePtoFields()"><option value="calloff">Call-off</option><option value="timeoff">Unpaid Time-off</option><option value="pto">Paid Time Off (PTO)</option></select></div>
       <div class="field"><label>Start date</label><input id="toStart" type="date"></div>
     </div>
+    <div class="field" id="ptoHoursField" style="display:none">
+      <label>PTO Hours Requested</label>
+      <select id="toPtoHours">
+        <option value="8">8.0 hrs (1 Full Day)</option>
+        <option value="4">4.0 hrs (Half Day)</option>
+        <option value="16">16.0 hrs (2 Days)</option>
+        <option value="24">24.0 hrs (3 Days)</option>
+        <option value="40">40.0 hrs (Full Week)</option>
+      </select>
+    </div>
     <div class="field"><label>End date (optional)</label><input id="toEnd" type="date"></div>
-    <div class="field"><label>Reason</label><textarea id="toReason" rows="3" placeholder="Why you need the day"></textarea></div>
+    <div class="field"><label>Reason</label><textarea id="toReason" rows="3" placeholder="Why you need the time off"></textarea></div>
     <div id="timeOffMyStatus" class="roadmap-panel" style="margin-top:12px"></div>
     <div id="timeOffInbox" class="roadmap-panel" style="display:none;margin-top:12px"><h3>Pending requests</h3><div id="timeOffList"></div></div>
   </div>
-  <div class="dialog-foot"><button class="btn" id="cancelTimeOff">Cancel</button><button class="btn primary" id="saveTimeOff">Submit</button></div>
+  <div class="dialog-foot"><button class="btn" id="cancelTimeOff">Cancel</button><button class="btn primary" id="saveTimeOff">Submit request</button></div>
 </div></div>
 
 <!-- Clock / radio log modal -->
@@ -4934,7 +4974,7 @@ const LOG_TYPES = {
 };
 const TIP_ROLES_DEFAULT = ['Waiter', 'Hostess', 'Cook'];
 const TIP_ROLES = TIP_ROLES_DEFAULT; /* legacy alias — use tipRoles() */
-const DESK_BUILD = 'v80';
+const DESK_BUILD = 'v81';
 /** ECRP: house first-sign-in secret is a 6+ digit PIN (override in Settings). Stored hashed after first use/set. */
 const HOUSE_LOGIN_PIN = '86368636';
 const HOUSE_LOGIN_PASSWORD = HOUSE_LOGIN_PIN; /* legacy alias — prefer settings.housePassword */
@@ -19307,12 +19347,81 @@ function denyDisputeFromPanel() {
   resolveDispute(id, false);
 }
 
-function openTimeOffModal() {
+/* ===== PTO Accrual Engine ===== */
+function calculateEmpPto(empId) {
+  if (!empId) return { accrued: 0, used: 0, balance: 0, days: 0, totalHoursWorked: 0, hrsIntoCycle: 0, nextDayProgress: 0 };
+  const e = empById(empId);
+  if (!e) return { accrued: 0, used: 0, balance: 0, days: 0, totalHoursWorked: 0, hrsIntoCycle: 0, nextDayProgress: 0 };
+  
+  ensureMeta();
+  let totalHours = 0;
+  
+  (s.periods || []).forEach(p => {
+    if (p && p.entries && p.entries[empId]) {
+      const hrs = Number(p.entries[empId].hours || 0);
+      if (hrs > 0) totalHours += hrs;
+    }
+  });
+  
+  /* 20 hours worked = 8 PTO hours (ratio of 0.4 PTO hrs per 1 hr worked) */
+  const accrued = Math.round((totalHours * 0.4) * 100) / 100;
+  
+  let used = 0;
+  (s.timeOff || []).forEach(t => {
+    if (String(t.empId) === String(empId) && t.status === 'approved' && (t.type === 'pto' || t.type === 'timeoff')) {
+      used += Number(t.hours || 8.0);
+    }
+  });
+  used = Math.round(used * 100) / 100;
+  
+  let adj = Number(e.ptoAdjustment || 0);
+  if (Array.isArray(e.ptoAdjustments)) {
+    e.ptoAdjustments.forEach(a => { adj += Number(a.amount || 0); });
+  }
+  
+  const balance = Math.max(0, Math.round((accrued - used + adj) * 100) / 100);
+  const days = Math.round((balance / 8.0) * 10) / 10;
+  
+  const hrsIntoCycle = totalHours % 20;
+  const nextDayProgress = Math.min(100, Math.round((hrsIntoCycle / 20) * 100));
+  
+  return {
+    totalHoursWorked: Math.round(totalHours * 10) / 10,
+    accrued,
+    used,
+    adj,
+    balance,
+    days,
+    hrsIntoCycle: Math.round(hrsIntoCycle * 10) / 10,
+    nextDayProgress
+  };
+}
+
+function togglePtoFields() {
+  const type = ($('toType') && $('toType').value) || 'calloff';
+  const ptoField = $('ptoHoursField');
+  const banner = $('timeOffPtoBanner');
+  const e = sessionEmp();
+  if (type === 'pto' && e) {
+    if (ptoField) ptoField.style.display = '';
+    if (banner) {
+      const ptoData = calculateEmpPto(e.id);
+      banner.style.display = '';
+      banner.innerHTML = '🌴 <b>Available PTO Balance: ' + dec(ptoData.balance) + ' hrs (' + ptoData.days + ' Days)</b><div style="font-size:.75rem;color:var(--muted);margin-top:2px">Accrued: ' + dec(ptoData.accrued) + ' hrs from ' + dec(ptoData.totalHoursWorked) + ' total hours worked</div>';
+    }
+  } else {
+    if (ptoField) ptoField.style.display = 'none';
+    if (banner) banner.style.display = 'none';
+  }
+}
+
+function openTimeOffModal(defaultType) {
   if (!sessionUser) return toast('Sign in first');
   if ($('toStart')) $('toStart').value = today();
   if ($('toEnd')) $('toEnd').value = '';
   if ($('toReason')) $('toReason').value = '';
-  if ($('toType')) $('toType').value = 'calloff';
+  if ($('toType')) $('toType').value = defaultType || 'calloff';
+  togglePtoFields();
   renderTimeOffPanels();
   $('timeOffModal').classList.add('open');
   $('timeOffModal').removeAttribute('hidden');
@@ -19324,10 +19433,11 @@ function renderTimeOffPanels() {
   const e = sessionEmp();
   if (mine && e) {
     const rows = (s.timeOff || []).filter(t => String(t.empId) === String(e.id)).slice(0, 8);
-    mine.innerHTML = '<h3>Your requests</h3>' + (rows.length ? rows.map(t =>
-      '<div class="co-row"><div><b>' + esc(t.type === 'calloff' ? 'Call-off' : 'Time-off') + ' · ' + esc(t.status) + '</b>' +
-      '<div class="history">' + esc(t.start) + (t.end && t.end !== t.start ? ' → ' + esc(t.end) : '') + ' — ' + esc(t.reason || '') + '</div></div></div>'
-    ).join('') : '<div class="mini-note">No call-off or time-off requests yet.</div>');
+    mine.innerHTML = '<h3>Your requests</h3>' + (rows.length ? rows.map(t => {
+      const typeLabel = t.type === 'pto' ? '🌴 PTO (' + (t.hours || 8) + 'h)' : (t.type === 'calloff' ? 'Call-off' : 'Time-off');
+      return '<div class="co-row"><div><b>' + esc(typeLabel) + ' · ' + esc(t.status) + '</b>' +
+      '<div class="history">' + esc(t.start) + (t.end && t.end !== t.start ? ' → ' + esc(t.end) : '') + ' — ' + esc(t.reason || '') + '</div></div></div>';
+    }).join('') : '<div class="mini-note">No call-off or time-off requests yet.</div>');
   }
   const inbox = $('timeOffInbox');
   const list = $('timeOffList');
@@ -19338,7 +19448,9 @@ function renderTimeOffPanels() {
       const pending = (s.timeOff || []).filter(t => t.status === 'pending');
       list.innerHTML = pending.length ? pending.map(t => {
         const emp = empById(t.empId);
-        return '<div class="co-row"><div><b>' + esc((emp && emp.name) || t.name) + '</b> · ' + esc(t.type) +
+        const typeLabel = t.type === 'pto' ? '🌴 PTO Request (' + (t.hours || 8) + ' hrs)' : (t.type === 'calloff' ? 'Call-off' : 'Time-off');
+        const ptoInfo = t.type === 'pto' && emp ? (' &middot; Available: ' + dec(calculateEmpPto(emp.id).balance) + ' hrs') : '';
+        return '<div class="co-row"><div><b>' + esc((emp && emp.name) || t.name) + '</b> · ' + esc(typeLabel) + ptoInfo +
           '<div class="history">' + esc(t.start) + (t.end && t.end !== t.start ? ' → ' + esc(t.end) : '') +
           ' — ' + esc(t.reason || '') + '</div></div>' +
           '<div><button class="btn tiny primary" onclick="resolveTimeOff(' + t.id + ',true)">Approve</button> ' +
@@ -19358,15 +19470,27 @@ function submitTimeOff() {
   const type = ($('toType') && $('toType').value) || 'calloff';
   if (!reason) return toast('Add a reason');
   if (end < start) return toast('End date is before start');
+  
+  let hours = 0;
+  if (type === 'pto') {
+    hours = Number(($('toPtoHours') && $('toPtoHours').value) || 8);
+    const ptoData = calculateEmpPto(e.id);
+    if (hours > ptoData.balance && !canEditHours()) {
+      return toast('PTO request exceeds your available balance (' + dec(ptoData.balance) + ' hrs available)');
+    }
+  }
+  
   s.timeOff.unshift({
-    id: s.nextTimeOffId++, empId: e.id, name: e.name, type, start, end, reason,
+    id: s.nextTimeOffId++, empId: e.id, name: e.name, type, start, end, reason, hours,
     status: 'pending', created: today()
   });
-  pushEmpLog(e, { type: 'note', summary: (type === 'calloff' ? 'Call-off' : 'Time-off') + ' requested', detail: start + (end !== start ? ' → ' + end : '') + ' — ' + reason });
-  log((type === 'calloff' ? 'Call-off' : 'Time-off') + ' request from ' + e.name);
+  
+  const typeLabel = type === 'pto' ? 'PTO (' + hours + 'h)' : (type === 'calloff' ? 'Call-off' : 'Time-off');
+  pushEmpLog(e, { type: 'note', summary: typeLabel + ' requested', detail: start + (end !== start ? ' → ' + end : '') + ' — ' + reason });
+  log(typeLabel + ' request from ' + e.name);
   save();
   renderTimeOffPanels();
-  toast('Request submitted');
+  toast(typeLabel + ' request submitted');
   render();
 }
 
@@ -19401,10 +19525,11 @@ window.resolveTimeOff = function (id, ok) {
   t.resolvedBy = sessionUser ? sessionUser.name : '';
   const e = empById(t.empId);
   if (e) {
-    pushEmpLog(e, { type: 'note', summary: (t.type === 'calloff' ? 'Call-off' : 'Time-off') + ' ' + t.status, detail: t.start + ' — ' + (t.reason || '') });
+    const typeLabel = t.type === 'pto' ? 'PTO (' + (t.hours || 8) + 'h)' : (t.type === 'calloff' ? 'Call-off' : 'Time-off');
+    pushEmpLog(e, { type: 'note', summary: typeLabel + ' ' + t.status, detail: t.start + ' — ' + (t.reason || '') });
   }
   if (ok && e) {
-    const chip = t.type === 'calloff' ? 'Off' : 'Off';
+    const chip = t.type === 'calloff' ? 'Off' : (t.type === 'pto' ? 'PTO' : 'Off');
     markTimeOffOnBoard(e.id, t.start, t.end || t.start, chip);
     if (t.type === 'calloff') {
       const card = coverageDiscordCard(e, t);
@@ -19412,15 +19537,29 @@ window.resolveTimeOff = function (id, ok) {
         postDiscord('coverage', card, { label: 'Coverage · ' + e.name }).then(r => {
           if (r && r.ok) toast('Approved · board Off · NEED COVERAGE posted');
         });
-      } else toast('Approved · board marked Off');
-    } else {
-      toast('Approved · board marked Off');
+      }
     }
-  } else {
-    toast(ok ? 'Approved · board marked Off' : 'Denied');
   }
   save();
   renderTimeOffPanels();
+  toast('Request ' + (ok ? 'approved' : 'denied'));
+  render();
+};
+
+window.adjustEmpPto = function (empId, amount, reason) {
+  if (!canMutateDesk()) return toast('Management only');
+  const e = empById(empId);
+  if (!e) return;
+  if (!Array.isArray(e.ptoAdjustments)) e.ptoAdjustments = [];
+  e.ptoAdjustments.push({
+    amount: Number(amount || 0),
+    reason: reason || 'Manager adjustment',
+    date: today(),
+    by: sessionUser ? sessionUser.name : 'Manager'
+  });
+  pushEmpLog(e, { type: 'status', summary: 'PTO Balance Adjusted', detail: (amount >= 0 ? '+' : '') + amount + ' hrs — ' + (reason || 'Manager adjustment') });
+  save();
+  toast('PTO adjustment recorded for ' + e.name);
   render();
 };
 
@@ -20824,13 +20963,17 @@ function renderPortal() {
     $('portalProgressBar').style.width = pct.toFixed(0) + '%';
   }
   
-  // Quick Stats
+  // Quick Stats & PTO
   if ($('portalHours')) $('portalHours').textContent = dec(myHours);
-  if ($('portalPtoBalance')) {
-    const pto = Number(e.ptoBalance || 0);
-    $('portalPtoBalance').innerHTML = dec(pto) + ' hrs <button class="portal-shortcut-btn" onclick="openTimeOffModal()">+ Request PTO</button>';
-    $('portalPtoBalance').className = pto > 0 ? 'mono' : 'mono muted';
-  }
+  
+  const ptoData = calculateEmpPto(e.id);
+  if ($('portalPtoQuick')) $('portalPtoQuick').textContent = dec(ptoData.balance) + ' hrs';
+  if ($('portalPtoDaysBadge')) $('portalPtoDaysBadge').textContent = ptoData.days + ' Days Available';
+  if ($('portalPtoBalanceText')) $('portalPtoBalanceText').textContent = dec(ptoData.balance) + ' hrs';
+  if ($('portalPtoTotalEarned')) $('portalPtoTotalEarned').textContent = dec(ptoData.accrued) + ' hrs';
+  if ($('portalPtoTotalUsed')) $('portalPtoTotalUsed').textContent = dec(ptoData.used) + ' hrs';
+  if ($('portalPtoNextDayHours')) $('portalPtoNextDayHours').textContent = dec(ptoData.hrsIntoCycle) + ' / 20 hrs worked';
+  if ($('portalPtoProgressBar')) $('portalPtoProgressBar').style.width = ptoData.nextDayProgress + '%';
   
   // Current Paystub Detail
   if ($('portalPayPeriodBadge')) {
