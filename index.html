@@ -3040,6 +3040,9 @@ body.dark .dropdown-item:hover { background: oklch(28% .01 240); }
           <div style="font-size:.78rem;color:var(--muted);margin-top:8px" id="portalPtoSub">
             Total Earned: <b id="portalPtoTotalEarned">0.0 hrs</b> &middot; Approved Used: <b id="portalPtoTotalUsed">0.0 hrs</b>
           </div>
+          <div style="font-size:.75rem;color:var(--muted);margin-top:4px" id="portalPtoTierText">
+            Tier: <b>Casual</b> &middot; Max LOA Spend: <b>5.0 hrs/wk</b>
+          </div>
           <div style="margin-top:10px">
             <div style="display:flex;justify-content:space-between;font-size:.72rem;color:var(--muted);margin-bottom:4px">
               <span id="portalPtoProgressLabel">Progress to next 8h PTO day</span>
@@ -3550,7 +3553,7 @@ body.dark .dropdown-item:hover { background: oklch(28% .01 240); }
 <section class="view" id="view-periods" role="region" aria-labelledby="title-periods" tabindex="-1">
   <div class="header">
     <div><div class="eyebrow">Payroll</div><h1 class="title" id="title-periods">Time &amp; Pay</h1><div class="subtitle">Weekly periods — hours, tips, bonuses, and who has been paid.</div></div>
-    <div class="actions"><button class="btn soft" id="pdfPeriods">Export periods PDF</button><button class="btn primary" id="newPeriod2">Create next period</button></div>
+    <div class="actions"><button class="btn soft" id="pdfPeriods">Export periods PDF</button><button class="btn soft" onclick="processPtoYearEndCashout()" title="Process annual PTO cashout bonus">🎁 PTO End-of-Year Bonus</button><button class="btn primary" id="newPeriod2">Create next period</button></div>
   </div>
   <div class="card"><div class="card-head"><b>Open &amp; recent periods</b></div>
     <div class="table-scroll"><table><thead><tr><th>Period</th><th>Status</th><th class="r">Staff</th><th class="r">Hours</th><th class="r">Tips</th><th class="r">Gross</th><th class="r">Unpaid</th><th class="r">Action</th></tr></thead><tbody id="periods"></tbody></table></div>
@@ -5003,7 +5006,7 @@ const LOG_TYPES = {
 };
 const TIP_ROLES_DEFAULT = ['Waiter', 'Hostess', 'Cook'];
 const TIP_ROLES = TIP_ROLES_DEFAULT; /* legacy alias — use tipRoles() */
-const DESK_BUILD = 'v84';
+const DESK_BUILD = 'v85';
 /** ECRP: house first-sign-in secret is a 6+ digit PIN (override in Settings). Stored hashed after first use/set. */
 const HOUSE_LOGIN_PIN = '86368636';
 const HOUSE_LOGIN_PASSWORD = HOUSE_LOGIN_PIN; /* legacy alias — prefer settings.housePassword */
@@ -19389,7 +19392,7 @@ function denyDisputeFromPanel() {
   resolveDispute(id, false);
 }
 
-/* ===== PTO Accrual & Cap Engine ===== */
+/* ===== PTO Accrual, Spending Brackets & Cap Engine ===== */
 function getEmpPtoCap(emp) {
   if (!emp) return 80;
   if (emp.customPtoCap !== undefined && emp.customPtoCap !== null && emp.customPtoCap !== '') {
@@ -19400,6 +19403,34 @@ function getEmpPtoCap(emp) {
   if (band === 'owner') return 160; /* 4 Weeks (20 Days / 160 Hours) */
   if (band === 'mgmt' || band === 'lead') return 120; /* 3 Weeks (15 Days / 120 Hours) */
   return 80; /* 2 Weeks (10 Days / 80 Hours) for Staff */
+}
+
+function getEmpPtoBracket(empId) {
+  if (!empId) return { bracket: 'Casual', maxWeeklyHours: 5, avgHours: 0, label: 'Casual (under 5 avg hrs/wk)', icon: '🥉' };
+  
+  ensureMeta();
+  const periods = (s.periods || []).slice(0, 4);
+  let totalHrs = 0;
+  let count = 0;
+  periods.forEach(p => {
+    if (p && p.entries && p.entries[empId]) {
+      totalHrs += Number(p.entries[empId].hours || 0);
+      count++;
+    }
+  });
+  
+  const avg = count > 0 ? (totalHrs / count) : 0;
+  const roundedAvg = Math.round(avg * 10) / 10;
+  
+  if (roundedAvg >= 20) {
+    return { bracket: 'Grinder', maxWeeklyHours: 25, avgHours: roundedAvg, label: 'Grinder (20+ avg hrs/wk)', icon: '💎' };
+  } else if (roundedAvg >= 10) {
+    return { bracket: 'Active', maxWeeklyHours: 15, avgHours: roundedAvg, label: 'Active (10-19 avg hrs/wk)', icon: '🥇' };
+  } else if (roundedAvg >= 5) {
+    return { bracket: 'Standard', maxWeeklyHours: 10, avgHours: roundedAvg, label: 'Standard (5-9 avg hrs/wk)', icon: '🥈' };
+  } else {
+    return { bracket: 'Casual', maxWeeklyHours: 5, avgHours: roundedAvg, label: 'Casual (under 5 avg hrs/wk)', icon: '🥉' };
+  }
 }
 
 function calculateEmpPto(empId) {
@@ -19471,8 +19502,11 @@ function togglePtoFields() {
     if (ptoField) ptoField.style.display = '';
     if (banner) {
       const ptoData = calculateEmpPto(e.id);
+      const bracket = getEmpPtoBracket(e.id);
       banner.style.display = '';
-      banner.innerHTML = '🌴 <b>Available PTO Balance: ' + dec(ptoData.balance) + ' hrs (' + ptoData.days + ' Days)</b><div style="font-size:.75rem;color:var(--muted);margin-top:2px">Accrued: ' + dec(ptoData.accrued) + ' hrs from ' + dec(ptoData.totalHoursWorked) + ' total hours worked</div>';
+      banner.innerHTML = '🌴 <b>Available Bank: ' + dec(ptoData.balance) + ' hrs (' + ptoData.days + ' Days)</b>' +
+        '<div style="font-size:.78rem;margin-top:4px;color:oklch(35% .12 155)">' + bracket.icon + ' <b>Activity Tier: ' + bracket.label + '</b></div>' +
+        '<div style="font-size:.72rem;color:var(--muted);margin-top:2px">4-Week Average: <b>' + dec(bracket.avgHours) + ' hrs/wk</b> &middot; Max LOA Weekly Payout: <b>' + dec(bracket.maxWeeklyHours) + ' hrs/wk</b> (Max 2 weeks LOA)</div>';
     }
   } else {
     if (ptoField) ptoField.style.display = 'none';
@@ -19513,8 +19547,9 @@ function renderTimeOffPanels() {
       const pending = (s.timeOff || []).filter(t => t.status === 'pending');
       list.innerHTML = pending.length ? pending.map(t => {
         const emp = empById(t.empId);
+        const bracket = emp ? getEmpPtoBracket(emp.id) : null;
         const typeLabel = t.type === 'pto' ? '🌴 PTO Request (' + (t.hours || 8) + ' hrs)' : (t.type === 'calloff' ? 'Call-off' : 'Time-off');
-        const ptoInfo = t.type === 'pto' && emp ? (' &middot; Available: ' + dec(calculateEmpPto(emp.id).balance) + ' hrs') : '';
+        const ptoInfo = t.type === 'pto' && emp ? (' &middot; Bank: ' + dec(calculateEmpPto(emp.id).balance) + ' hrs &middot; Tier: ' + bracket.bracket + ' [' + bracket.maxWeeklyHours + 'h/wk max]') : '';
         return '<div class="co-row"><div><b>' + esc((emp && emp.name) || t.name) + '</b> · ' + esc(typeLabel) + ptoInfo +
           '<div class="history">' + esc(t.start) + (t.end && t.end !== t.start ? ' → ' + esc(t.end) : '') +
           ' — ' + esc(t.reason || '') + '</div></div>' +
@@ -19536,12 +19571,29 @@ function submitTimeOff() {
   if (!reason) return toast('Add a reason');
   if (end < start) return toast('End date is before start');
   
+  const startDate = new Date(start + 'T00:00:00');
+  const endDate = new Date(end + 'T00:00:00');
+  const diffDays = Math.max(1, Math.round((endDate - startDate) / 86400000) + 1);
+  const weeksRequested = diffDays > 7 ? 2 : 1;
+  
+  if (type === 'pto' && diffDays > 14) {
+    return toast('Server LOA rules cap PTO/LOA requests at 2 weeks maximum');
+  }
+  
   let hours = 0;
   if (type === 'pto') {
-    hours = Number(($('toPtoHours') && $('toPtoHours').value) || 8);
+    const bracket = getEmpPtoBracket(e.id);
+    const maxAllowedHours = bracket.maxWeeklyHours * weeksRequested;
+    const requestedHours = Number(($('toPtoHours') && $('toPtoHours').value) || (weeksRequested * 8));
+    
+    if (requestedHours > maxAllowedHours && !canEditHours()) {
+      return toast('Based on your ' + bracket.bracket + ' tier (' + dec(bracket.avgHours) + 'h/wk avg), your max allowable PTO payout is ' + dec(maxAllowedHours) + ' hrs for ' + weeksRequested + ' week(s)');
+    }
+    hours = Math.min(requestedHours, maxAllowedHours);
+    
     const ptoData = calculateEmpPto(e.id);
     if (hours > ptoData.balance && !canEditHours()) {
-      return toast('PTO request exceeds your available balance (' + dec(ptoData.balance) + ' hrs available)');
+      return toast('PTO request exceeds your available banked balance (' + dec(ptoData.balance) + ' hrs available)');
     }
   }
   
@@ -19550,7 +19602,7 @@ function submitTimeOff() {
     status: 'pending', created: today()
   });
   
-  const typeLabel = type === 'pto' ? 'PTO (' + hours + 'h)' : (type === 'calloff' ? 'Call-off' : 'Time-off');
+  const typeLabel = type === 'pto' ? 'PTO (' + hours + 'h LOA)' : (type === 'calloff' ? 'Call-off' : 'Time-off');
   pushEmpLog(e, { type: 'note', summary: typeLabel + ' requested', detail: start + (end !== start ? ' → ' + end : '') + ' — ' + reason });
   log(typeLabel + ' request from ' + e.name);
   save();
@@ -19626,6 +19678,65 @@ window.adjustEmpPto = function (empId, amount, reason) {
   save();
   toast('PTO adjustment recorded for ' + e.name);
   render();
+};
+
+window.processPtoYearEndCashout = function () {
+  if (!requireMgmt('End-of-Year PTO Cashout')) return;
+  
+  ensureMeta();
+  const activeEmps = s.employees.filter(e => e.status === 'active' || e.status === 'probation');
+  let cashoutCount = 0;
+  let totalBonusValue = 0;
+  const currPeriod = current();
+  if (!currPeriod) return toast('No active pay period found');
+  if (!currPeriod.entries) currPeriod.entries = {};
+  
+  const summaryLines = [];
+  
+  activeEmps.forEach(e => {
+    const ptoData = calculateEmpPto(e.id);
+    if (ptoData.balance > 0) {
+      const rate = Number(e.rate || e.wage || 0);
+      const bonusValue = Math.round((ptoData.balance * rate) * 100) / 100;
+      
+      if (!currPeriod.entries[e.id]) {
+        currPeriod.entries[e.id] = { hours: 0, tips: 0, bonus: 0, paidOut: false };
+      }
+      currPeriod.entries[e.id].bonus = Math.round(((Number(currPeriod.entries[e.id].bonus || 0)) + bonusValue) * 100) / 100;
+      
+      if (!Array.isArray(e.ptoAdjustments)) e.ptoAdjustments = [];
+      e.ptoAdjustments.push({
+        amount: -ptoData.balance,
+        reason: 'End-of-Year PTO Cashout Bonus',
+        date: today(),
+        by: sessionUser ? sessionUser.name : 'Management'
+      });
+      
+      pushEmpLog(e, {
+        type: 'status',
+        summary: '🎁 End-of-Year PTO Cashout Bonus',
+        detail: 'Cashed out ' + dec(ptoData.balance) + ' hrs PTO balance → $' + money(bonusValue) + ' bonus added to paystub'
+      });
+      
+      summaryLines.push(esc(e.name) + ': ' + dec(ptoData.balance) + ' hrs → ' + money(bonusValue));
+      cashoutCount++;
+      totalBonusValue += bonusValue;
+    }
+  });
+  
+  if (cashoutCount === 0) {
+    return toast('No active employees with unused PTO balances found');
+  }
+  
+  log('Processed End-of-Year PTO Cashout for ' + cashoutCount + ' staff (Total: ' + money(totalBonusValue) + ')');
+  save();
+  render();
+  
+  const modalContent = '<div style="font-size:.88rem;line-height:1.5"><p>Processed <b>' + cashoutCount + '</b> PTO balance cashouts totaling <b>' + money(totalBonusValue) + '</b> bonus payout!</p>' +
+    '<div class="scroll-list" style="max-height:220px;overflow-y:auto;margin-top:10px;padding:8px;background:oklch(97% .005 155);border-radius:8px">' +
+    summaryLines.map(l => '<div class="log-row">' + l + '</div>').join('') +
+    '</div></div>';
+  showDynamicModal('🎁 End-of-Year PTO Cashout Summary', modalContent, null, { noActions: true });
 };
 
 function coverageDiscordDays(e, t) {
@@ -21032,12 +21143,14 @@ function renderPortal() {
   if ($('portalHours')) $('portalHours').textContent = dec(myHours);
   
   const ptoData = calculateEmpPto(e.id);
+  const bracket = getEmpPtoBracket(e.id);
   if ($('portalPtoQuick')) $('portalPtoQuick').textContent = dec(ptoData.balance) + ' hrs';
   if ($('portalPtoDaysBadge')) $('portalPtoDaysBadge').textContent = ptoData.days + ' Days Available';
-  if ($('portalPtoCapBadge')) $('portalPtoCapBadge').textContent = 'Cap: ' + dec(ptoData.cap) + ' hrs (' + (ptoData.cap / 40) + 'w)';
+  if ($('portalPtoCapBadge')) $('portalPtoCapBadge').textContent = 'Bank Cap: ' + dec(ptoData.cap) + ' hrs (' + (ptoData.cap / 40) + 'w)';
   if ($('portalPtoBalanceText')) $('portalPtoBalanceText').textContent = dec(ptoData.balance) + ' hrs';
   if ($('portalPtoTotalEarned')) $('portalPtoTotalEarned').textContent = dec(ptoData.accrued) + ' hrs';
   if ($('portalPtoTotalUsed')) $('portalPtoTotalUsed').textContent = dec(ptoData.used) + ' hrs';
+  if ($('portalPtoTierText')) $('portalPtoTierText').innerHTML = bracket.icon + ' Tier: <b>' + bracket.bracket + '</b> (' + dec(bracket.avgHours) + 'h/wk avg) &middot; Max LOA Spend: <b>' + dec(bracket.maxWeeklyHours) + 'h/wk</b>';
   
   if ($('portalPtoCapAlert')) {
     $('portalPtoCapAlert').style.display = ptoData.isCapped ? 'block' : 'none';
