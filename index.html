@@ -3841,6 +3841,9 @@ body.dark .dropdown-item:hover { background: oklch(28% .01 240); }
         <h4>Payday</h4>
         <p>Payroll runs Sunday at 12:00 AM (midnight). Come by Frenchie's for pay. Hours are logged by HR through the week &mdash;
         if your hours look wrong, raise it before Sunday, not after.</p>
+
+        <h4>Paid Time Off (PTO) &amp; Benefits</h4>
+        <p>Staff accrue Paid Time Off (PTO) at 8 hours per 20 hours worked (0.4 ratio). Banked PTO caps by rank: Staff (80.0 hrs / 10 days), Management &amp; Leads (120.0 hrs / 15 days), Owner/Execs (160.0 hrs / 20 days). LOA requests are capped at 2 weeks max per server rules, with PTO weekly payouts determined by your 4-week average activity tier (Casual 5h/wk, Standard 10h/wk, Active 15h/wk, Grinder 25h/wk max). Any unused banked PTO at year-end is cashed out as an End-of-Year Bonus on your paycheck.</p>
       </div>
     </details>
     <div>
@@ -5006,7 +5009,7 @@ const LOG_TYPES = {
 };
 const TIP_ROLES_DEFAULT = ['Waiter', 'Hostess', 'Cook'];
 const TIP_ROLES = TIP_ROLES_DEFAULT; /* legacy alias — use tipRoles() */
-const DESK_BUILD = 'v85';
+const DESK_BUILD = 'v86';
 /** ECRP: house first-sign-in secret is a 6+ digit PIN (override in Settings). Stored hashed after first use/set. */
 const HOUSE_LOGIN_PIN = '86368636';
 const HOUSE_LOGIN_PASSWORD = HOUSE_LOGIN_PIN; /* legacy alias — prefer settings.housePassword */
@@ -13280,10 +13283,13 @@ function letterOffer(c) {
     '<p>On behalf of Frenchie\'s Restaurant, I am pleased to <b>offer</b> you the position of ' + esc(c.role) + '. This letter is the offer only. The Contract of Employment is a separate document and will be issued for signature once you accept.</p>' +
     ff('Position offered', c.role) +
     ff('Rate of pay', money(c.rate) + ' per hour') +
+    ff('Paid Time Off (PTO)', 'Accrues 8h per 20h worked (0.4 ratio). Banked caps: Staff 80h (2w), Mgmt/Leads 120h (3w), Owner 160h (4w). LOA payouts based on 4-wk activity tier.') +
     ff('Start date', c.hire) +
     ff('Probation', 'Seven days from start, ending ' + c.probationEnd) +
     ff('Reports to', c.supervisor) +
     ff('Payday', 'Sunday, 12:00 AM (midnight), paid at Frenchie\'s') +
+    '<h4>Paid Time Off (PTO) &amp; Benefits</h4>' +
+    '<p>As a team member at Frenchie\'s, you accrue Paid Time Off (PTO) at a rate of <b>8 PTO hours for every 20 hours worked</b>. Your PTO is banked up to your rank cap and can be requested for Leave of Absence (LOA) up to 2 weeks per request, paid out based on your 4-week average activity tier. Any unused PTO at the end of the year is paid out as an <b>End-of-Year Bonus</b> on your paycheck!</p>' +
     '<h4>Probation</h4>' +
     '<p>During probation you are shadowed on shift, trained on a station, and reviewed by HR at the end of the week. Pass and you move onto the ladder proper and become eligible for promotion consideration. Fall short and we part ways without prejudice.</p>' +
     '<h4>What we expect</h4>' +
@@ -13308,16 +13314,18 @@ function letterContract(c) {
     '<p>The Employee serves a seven-day probation beginning ' + esc(c.hire) + ' and ending ' + esc(c.probationEnd) + '. During probation the Employee is shadowed, trained on a station, and reviewed by HR. Employment may be ended by either party during probation without penalty.</p>' +
     '<h4>3. Chain of command</h4>' +
     '<p>Owner &rarr; Operations Manager and HR Director &rarr; Shift Lead &rarr; Cook, Waiter, Hostess &rarr; New Hire. The Employee reports directly to ' + esc(c.supervisor) + '. Matters are raised one rung at a time; skipping the ladder without cause is itself a conduct issue.</p>' +
-    '<h4>4. Conduct and the three-strike system</h4>' +
+    '<h4>4. Paid Time Off (PTO) &amp; Benefits</h4>' +
+    '<p>The Employee accrues Paid Time Off (PTO) at the rate of <b>8 hours per 20 hours worked</b> (0.4 ratio). Banked PTO caps by rank are: Staff (80.0 hrs / 10 days), Leads &amp; Management (120.0 hrs / 15 days), and Owner/Execs (160.0 hrs / 20 days). Accrual automatically pauses at cap. Leave of Absence (LOA) PTO payouts are capped at 2 consecutive weeks per request and paid according to the Employee\'s 4-week average activity tier (Casual 5h/wk, Standard 10h/wk, Active 15h/wk, Grinder 25h/wk max). Any unused banked PTO at year-end is cashed out as an End-of-Year Bonus.</p>' +
+    '<h4>5. Conduct and the three-strike system</h4>' +
     '<ul><li><b>Strike one</b> — verbal warning, noted in the employee file.</li>' +
     '<li><b>Strike two</b> — written warning with a follow-up review date.</li>' +
     '<li><b>Strike three</b> — termination.</li></ul>' +
     '<p>Suspension may be issued at any point while a matter is under review. Theft from the register, violence toward guests or staff, and reporting to a shift unfit to work are immediate escalations.</p>' +
-    '<h4>5. Shifts and radio procedure</h4>' +
+    '<h4>6. Shifts and radio procedure</h4>' +
     '<p>The Employee clocks in on radio with 10-1 and out with 10-2. 10-4 acknowledges an order, 10-20 gives a location, and 10-99 calls all hands. Shifts are posted on the weekly board by the Shift Lead before open.</p>' +
-    '<h4>6. Place of work</h4>' +
+    '<h4>7. Place of work</h4>' +
     '<p>8 Elgin Ave, Legion Square. The Employee may be asked to cover raffle nights, catered functions, or off-site events as licences allow.</p>' +
-    '<h4>7. Acknowledgement</h4>' +
+    '<h4>8. Acknowledgement</h4>' +
     '<p>The Employee confirms they have read this Contract and the employee handbook, and accept the terms above in full.</p>' +
     signGrid('Employee — ' + (c.name || ''), '', 'Date', '') +
     signGrid('For Frenchie\'s', (c.houseSign && c.houseSign.name) || 'Kenzie Long, HR Director · 636', 'Date', (c.houseSign && c.houseSign.date) || '');
@@ -13329,6 +13337,7 @@ function letterPacket(c) {
     '<p>Welcome to the family, ' + esc(c.name) + '. This is your <b>New-hire packet</b> — a week-one orientation sheet for the floor. It is <b>not</b> your Contract and <b>not</b> your Offer letter.</p>' +
     ff('Position', c.role) +
     ff('Rate', money(c.rate) + ' per hour') +
+    ff('Paid Time Off (PTO)', 'Accrues 8h per 20h worked (0.4 ratio). Banked caps: Staff 80h, Mgmt 120h. Year-end bonus cashout.') +
     ff('Start date', c.hire) +
     ff('Probation ends', c.probationEnd) +
     ff('Supervisor', c.supervisor) +
@@ -13346,7 +13355,7 @@ function letterPacket(c) {
     '<h4>Radio cheat sheet</h4>' +
     '<ul><li><b>10-1</b> — clocking in</li><li><b>10-2</b> — clocking out</li><li><b>10-4</b> — understood</li><li><b>10-20</b> — your location</li><li><b>10-99</b> — emergency, all hands</li></ul>' +
     '<h4>House notes for week one</h4>' +
-    '<p>Your rate is ' + esc(money(c.rate)) + ' per hour. Hours are logged by HR through the week and payday is Sunday at 12:00 AM (midnight), paid at Frenchie\'s. Raise any problem with your hours before Sunday, not after. The bar register runs a flat $1,000 rate per the handbook — that is the counter price a guest pays, not your wage.</p>' +
+    '<p>Your rate is ' + esc(money(c.rate)) + ' per hour. You accrue 8 hours of PTO for every 20 hours worked, banked up to your rank cap (Staff 80h, Mgmt 120h). Unused PTO at year-end is cashed out as a bonus. Hours are logged by HR through the week and payday is Sunday at 12:00 AM (midnight), paid at Frenchie\'s. Raise any problem with your hours before Sunday, not after. The bar register runs a flat $1,000 rate per the handbook — that is the counter price a guest pays, not your wage.</p>' +
     '<div class="letter-note">Full handbook: ' + esc(handbookUrl()) + '</div>' +
     signGrid('Received by ' + (c.name || ''), '', 'Date', '');
   return wrapLetter('New-hire packet', body, (c.name || 'New hire') + ' · ' + c.role + ' · ' + today());
@@ -19022,6 +19031,7 @@ document.querySelectorAll('#view-hiring details.fold').forEach(fold => {
 ===================================================== */
 const HANDBOOK_EXCERPTS = [
   { id: 'payday', title: 'Payday', tags: 'pay sunday cash tips', body: 'Payday is Sunday at 12:00 AM (midnight) at Frenchie\'s. Confirm hours and tip pool before the run. Mark stubs paid after cash is handed out.' },
+  { id: 'pto', title: 'Paid Time Off (PTO) & Benefits', tags: 'pto paid time off benefits loa leave vacation bonus', body: 'Accrue 8 hours of PTO for every 20 hours worked (0.4 ratio). Banked PTO caps by rank: Staff 80h (2w), Mgmt/Leads 120h (3w), Owner 160h (4w). LOA requests cap at 2 weeks max, with weekly payouts determined by your 4-week average activity tier (Casual 5h, Standard 10h, Active 15h, Grinder 25h max/wk). Unused PTO at year-end is cashed out as an End-of-Year Bonus.' },
   { id: 'tips', title: 'Tip pool', tags: 'tips bar floor host cook equal hours', body: 'Tip-eligible roles share the pool. Split is equal share or weighted by hours (Settings). Paid stubs lock their tip line; unpaid lines recompute when the pool changes.' },
   { id: 'hours', title: 'Hours & disputes', tags: 'hours radio clock dispute', body: 'Staff log 10-1/10-2 on the clock. Leads use Apply since payday to push pairs into the open period, then fix stragglers in Set hours. If your hours look wrong, file an Hours dispute from the account menu — do not edit the payroll yourself.' },
   { id: 'calloff', title: 'Call-offs', tags: 'call-off time-off sick', body: 'Same-day or next-shift absences are Call-offs. Future ranges are Time-off. Submit from the account menu; leads approve and mark the shift board Off.' },
