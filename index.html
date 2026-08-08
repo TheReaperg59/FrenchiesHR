@@ -5009,7 +5009,7 @@ const LOG_TYPES = {
 };
 const TIP_ROLES_DEFAULT = ['Waiter', 'Hostess', 'Cook'];
 const TIP_ROLES = TIP_ROLES_DEFAULT; /* legacy alias — use tipRoles() */
-const DESK_BUILD = 'v86';
+const DESK_BUILD = 'v87';
 /** ECRP: house first-sign-in secret is a 6+ digit PIN (override in Settings). Stored hashed after first use/set. */
 const HOUSE_LOGIN_PIN = '86368636';
 const HOUSE_LOGIN_PASSWORD = HOUSE_LOGIN_PIN; /* legacy alias — prefer settings.housePassword */
@@ -13415,7 +13415,11 @@ function setPaper(a, kind, html, patch) {
     title: (PAPER_KINDS[kind] || {}).title || kind,
     html: '', updated: '', sendStatus: 'draft', sentAt: '', returnedAt: '', packetId: null, reply: null
   }, a.paperwork[kind] || {});
-  if (html) rec.html = html;
+  if (html) {
+    rec.html = html;
+  } else if (!rec.html || ((kind === 'offer' || kind === 'contract' || kind === 'packet') && !rec.html.includes('Paid Time Off'))) {
+    rec.html = buildPaperHtml(a, kind);
+  }
   rec.title = (PAPER_KINDS[kind] || {}).title || rec.title;
   rec.updated = today();
   if (patch) Object.assign(rec, patch);
@@ -14241,16 +14245,20 @@ function packetBody(a, kind, c) {
   }
 
   if (kind === 'offer') {
-    return '<p>Dear ' + esc(c.name || 'applicant') + ',</p>' +
-      '<p>On behalf of Frenchie\'s Restaurant, I am pleased to <b>offer</b> you the position of ' + esc(c.role) + '. This letter is the offer — not the contract. If you accept, we will issue the Contract separately for signature before your first shift.</p>' +
+    return '<p>Dear <b>' + esc(c.name || 'Applicant') + '</b>,</p>' +
+      '<p>On behalf of Frenchie\'s Restaurant, I am pleased to offer you the position of <b>' + esc(c.role) + '</b>. This letter is the offer only. The Contract of Employment follows separately once you accept.</p>' +
+      '<h2>Offer summary &amp; Benefits</h2>' +
       pkTerms([
         ['Position offered', c.role],
         ['Rate of pay', money(c.rate) + ' per hour'],
-        ['Proposed start', c.hire],
+        ['Paid Time Off (PTO)', 'Accrues 8h per 20h worked (0.4 ratio). Banked caps: Staff 80h (2w), Mgmt/Leads 120h (3w), Owner 160h (4w). LOA payouts based on 4-wk activity tier.'],
+        ['Start date', c.hire],
         ['Probation', 'Seven days from start, ending ' + c.probationEnd],
         ['Reports to', c.supervisor],
         ['Payday', 'Sunday, 12:00 AM (midnight), paid at Frenchie\'s']
       ]) +
+      '<h2>Paid Time Off (PTO) &amp; Benefits</h2>' +
+      '<p>As a team member at Frenchie\'s, you accrue Paid Time Off (PTO) at a rate of <b>8 PTO hours for every 20 hours worked</b>. Your PTO is banked up to your rank cap and can be requested for Leave of Absence (LOA) up to 2 weeks per request, paid out based on your 4-week average activity tier. Any unused PTO at the end of the year is paid out as an <b>End-of-Year Bonus</b> on your paycheck!</p>' +
       '<h2>What this offer means</h2>' +
       '<p>During probation you are shadowed on shift, trained on a station, and reviewed by HR at the end of the week. Pass and you move onto the ladder proper. Fall short and we part ways without prejudice.</p>' +
       '<p>Show up in uniform, on time, and ready to look after the guests. Clock in on radio with 10-1 and out with 10-2. Anything you cannot solve on the floor goes to a Shift Lead, then Operations or HR — one rung at a time.</p>' +
@@ -14279,22 +14287,24 @@ function packetBody(a, kind, c) {
       '<h2>3. Chain of command</h2>' +
       '<p>Owner &rarr; Operations Manager and HR Director &rarr; Shift Lead &rarr; Cook, Waiter, Hostess &rarr; New Hire.</p>' +
       '<p>The Employee reports directly to <b>' + esc(c.supervisor) + '</b>. Matters are raised one rung at a time; skipping the ladder without cause is itself a conduct issue.</p>' +
-      '<h2>4. Conduct — three-strike system</h2>' +
+      '<h2>4. Paid Time Off (PTO) &amp; Benefits</h2>' +
+      '<p>The Employee accrues Paid Time Off (PTO) at the rate of <b>8 hours per 20 hours worked</b> (0.4 ratio). Banked PTO caps by rank are: Staff (80.0 hrs / 10 days), Leads &amp; Management (120.0 hrs / 15 days), and Owner/Execs (160.0 hrs / 20 days). Accrual automatically pauses at cap. Leave of Absence (LOA) PTO payouts are capped at 2 consecutive weeks per request and paid according to the Employee\'s 4-week average activity tier (Casual 5h/wk, Standard 10h/wk, Active 15h/wk, Grinder 25h/wk max). Any unused banked PTO at year-end is cashed out as an End-of-Year Bonus.</p>' +
+      '<h2>5. Conduct — three-strike system</h2>' +
       pkTerms([
         ['Strike one', 'Verbal warning, noted in the employee file'],
         ['Strike two', 'Written warning with a follow-up review date'],
         ['Strike three', 'Termination']
       ]) +
       '<p>Suspension may be issued at any point while a matter is under review. Theft from the register, violence toward guests or staff, and reporting to a shift unfit to work are immediate escalations.</p>' +
-      '<h2>5. Shifts and radio</h2>' +
+      '<h2>6. Shifts and radio</h2>' +
       '<p>Clock in with <b>10-1</b> and out with <b>10-2</b>. 10-4 acknowledges an order, 10-20 gives a location, and 10-99 calls all hands. Shifts are posted on the weekly board by the Shift Lead before open.</p>' +
-      '<h2>6. Place of work</h2>' +
+      '<h2>7. Place of work</h2>' +
       '<p>8 Elgin Ave, Legion Square. The Employee may be asked to cover raffle nights, catered functions, or off-site events as licences allow.</p>' +
-      '<h2>7. Acknowledgements *</h2>' +
-      '<p class="pk-hint">Tick every box before you sign:</p>' +
+      '<h2>8. Acknowledgements *</h2>' +
       pkBoxes('contractAck', [
         'I have read this Contract of Employment in full',
         'I accept the position, rate, and payday terms above',
+        'I accept the Paid Time Off (PTO) & Benefits terms (8h accrued per 20h worked)',
         'I accept the seven-day probation and the three-strike conduct system',
         'I have been given (or will receive) the employee handbook and will follow house rules'
       ], true, true) +
